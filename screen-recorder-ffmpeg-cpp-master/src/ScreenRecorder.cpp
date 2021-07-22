@@ -111,7 +111,9 @@ cin>>no_frames;
 	if( ii++ == no_frames )break;
 		if(pAVPacket->stream_index == VideoStreamIndx)
 		{
-			value = avcodec_decode_video2( pAVCodecContext , pAVFrame , &frameFinished , pAVPacket );
+			// value = avcodec_decode_video2( pAVCodecContext , pAVFrame , &frameFinished , pAVPacket );
+			value = decode_packet(pAVPacket, pAVCodecContext, &frameFinished, pAVFrame);
+
 			if( value < 0)
 			{
 				cout<<"unable to decode video";
@@ -124,7 +126,32 @@ cin>>no_frames;
 				outPacket.data = NULL;    // packet data will be allocated by the encoder
 				outPacket.size = 0;
 
-				avcodec_encode_video2(outAVCodecContext , &outPacket ,outFrame , &got_picture);
+				// avcodec_encode_video2(outAVCodecContext , &outPacket ,outFrame , &got_picture);
+
+				/*
+				value = avcodec_send_frame(outAVCodecContext, outframe);
+				if (value < 0) {
+    				fprintf(stderr, "Error sending a frame for encoding\n");
+    				exit(1);
+				}
+				while (value >= 0) {
+    				value = avcodec_receive_packet(outAVCodecContext, &outPacket);
+    				if (value == AVERROR(EAGAIN) || value == AVERROR_EOF){
+        				return (value==AVERROR(EAGAIN)) ? 0:1;
+     				}
+    				else if (value < 0) {
+        				fprintf(stderr, "Error during encoding\n");
+        				exit(1);
+    				}
+    				value = write_frame(outAVFormatContext, &outAVCodecContext->time_base, ost->st, &outPacket);
+    				if (value < 0) {
+       				fprintf(stderr, "Error while writing video frame: %s\n", av_err2str(value));
+       				exit(1);
+    				}
+    				av_packet_unref(&pkt);
+				}
+				return (frame) ? 0 : 1;
+				*/
 
 				if(got_picture)
 				{
