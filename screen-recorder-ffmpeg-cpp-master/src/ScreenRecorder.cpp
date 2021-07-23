@@ -58,7 +58,14 @@ int ScreenRecorder::CaptureVideoFrames()
 	 cout<<"\nunable to release the avframe resources";
 	 exit(1);
 	}
-
+	
+	/*
+	 * Since we're planning to output PPM files, which are stored in 24-bit RGB,
+	 * we're going to have to convert our frame from its native format to RGB.
+	 * ffmpeg will do these conversions for us. For most projects (including ours)
+	 * we're going to want to convert our initial frame to a specific format.
+	 * Let's allocate a frame for the converted frame now.
+	 */
 	outFrame = av_frame_alloc();//Allocate an AVFrame and set its fields to default values.
 	if( !outFrame )
 	{
@@ -121,6 +128,7 @@ cin>>no_frames;
 
 			if(frameFinished)// Frame successfully decoded :)
 			{
+				// Convert the image from input (set in openCamera) to output format (set in init_outputfile)
 				sws_scale(swsCtx_, pAVFrame->data, pAVFrame->linesize,0, pAVCodecContext->height, outFrame->data,outFrame->linesize);
 				av_init_packet(&outPacket);
 				outPacket.data = NULL;    // packet data will be allocated by the encoder
@@ -128,8 +136,8 @@ cin>>no_frames;
 
 				// avcodec_encode_video2(outAVCodecContext , &outPacket ,outFrame , &got_picture);
 
-				/*
-				value = avcodec_send_frame(outAVCodecContext, outframe);
+				// we send a fram to the encoder
+				value = avcodec_send_frame(outAVCodecContext, outFrame);
 				if (value < 0) {
     				fprintf(stderr, "Error sending a frame for encoding\n");
     				exit(1);
@@ -143,32 +151,33 @@ cin>>no_frames;
         				fprintf(stderr, "Error during encoding\n");
         				exit(1);
     				}
-    				value = write_frame(outAVFormatContext, &outAVCodecContext->time_base, ost->st, &outPacket);
-    				if (value < 0) {
-       				fprintf(stderr, "Error while writing video frame: %s\n", av_err2str(value));
-       				exit(1);
-    				}
-    				av_packet_unref(&pkt);
-				}
-				return (frame) ? 0 : 1;
-				*/
+    				// value = write_frame(outAVFormatContext, &outAVCodecContext->time_base, ost->st, &outPacket);
+    				// if (value < 0) {
+       				// fprintf(stderr, "Error while writing video frame: %s\n", av_err2str(value));
+       				// exit(1);
+    				// }
+    				//av_packet_unref(&outPacket);
 
-				if(got_picture)
-				{
-					if(outPacket.pts != AV_NOPTS_VALUE)
-						outPacket.pts = av_rescale_q(outPacket.pts, video_st->codec->time_base, video_st->time_base);
-					if(outPacket.dts != AV_NOPTS_VALUE)
-						outPacket.dts = av_rescale_q(outPacket.dts, video_st->codec->time_base, video_st->time_base);
-				
-					printf("Write frame %3d (size= %2d)\n", j++, outPacket.size/1000);
-					if(av_write_frame(outAVFormatContext , &outPacket) != 0)
+					if(outPacket.size>0)
 					{
-						cout<<"\nerror in writing video frame";
-					}
+						if(outPacket.pts != AV_NOPTS_VALUE)
+							outPacket.pts = av_rescale_q(outPacket.pts, video_st->codec->time_base, video_st->time_base);
+						if(outPacket.dts != AV_NOPTS_VALUE)
+							outPacket.dts = av_rescale_q(outPacket.dts, video_st->codec->time_base, video_st->time_base);
 
-				av_packet_unref(&outPacket);
-				} // got_picture
+						printf("Write frame %3d (size= %2d)\n", j++, outPacket.size/1000);
+						if(av_write_frame(outAVFormatContext , &outPacket) != 0)
+						{
+							cout<<"\nerror in writing video frame";
+						}
 
+						av_packet_unref(&outPacket);
+					} // got_picture
+
+				}
+				// return (frame) ? 0 : 1;
+
+			// TO-DO: check if this is required	
 			av_packet_unref(&outPacket);
 			} // frameFinished
 
@@ -206,6 +215,12 @@ refer : https://www.ffmpeg.org/ffmpeg-devices.html#x11grab
 */
 	/* current below is for screen recording. to connect with camera use v4l2 as a input parameter for av_find_input_format */ 
 	pAVInputFormat = av_find_input_format("x11grab");
+	//viene generato uno stream di pacchetti
+	/*
+	Apriamo il file e leggiamo il suo header e rimpiamo AVFormatContext con le informazioni sul formato.
+	se viene passato NULL in "AVInputFormat" ffmpeg indovina il formato
+	per quanto riguarda linux il formato di input è "x11grab" permette la cattura di una regione di un x11 display"
+	*/
   	value = avformat_open_input(&pAVFormatContext, ":0.0+10,250", pAVInputFormat, NULL);
 	if(value != 0)
 	{
@@ -214,6 +229,9 @@ refer : https://www.ffmpeg.org/ffmpeg-devices.html#x11grab
 	}
 
 	/* set frame per second */
+	/*
+	settiamo il dizionario che sono le opzioni del demuxer
+	*/
 	value = av_dict_set( &options,"framerate","30",0 );
 	if(value < 0)
 	{
@@ -256,14 +274,14 @@ refer : https://www.ffmpeg.org/ffmpeg-devices.html#x11grab
 
 	// assign pAVFormatContext to VideoStreamIndx
 	pAVCodecContext = pAVFormatContext->streams[VideoStreamIndx]->codec;
-
+	//finde decoder for the codec
 	pAVCodec = avcodec_find_decoder(pAVCodecContext->codec_id);
 	if( pAVCodec == NULL )
 	{
 	  cout<<"\nunable to find the decoder";
 	  exit(1);
 	}
-
+	//once we filled the codec context, we need to open the codec
 	value = avcodec_open2(pAVCodecContext , pAVCodec , NULL);//Initialize the AVCodecContext to use the given AVCodec.
 	if( value < 0 )
 	{
