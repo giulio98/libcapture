@@ -20,7 +20,7 @@ extern "C"
 #include "libavdevice/avdevice.h"
 
 #include "libavfilter/avfilter.h"
-#include "libavfilter/avfiltergraph.h"
+// #include "libavfilter/avfiltergraph.h"
 #include "libavfilter/buffersink.h"
 #include "libavfilter/buffersrc.h"
 
@@ -55,6 +55,7 @@ private:
 	AVOutputFormat *output_format;
 
 	AVCodecContext *pAVCodecContext;
+	AVCodecParameters *pAVCodecParameters;
 
 	AVFormatContext *pAVFormatContext;
 

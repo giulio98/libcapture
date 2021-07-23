@@ -6,8 +6,8 @@ using namespace std;
 ScreenRecorder::ScreenRecorder()
 {
 
-	av_register_all();
-	avcodec_register_all();
+	// av_register_all();
+	// avcodec_register_all();
 	avdevice_register_all();
 	cout<<"\nall required functions are registered successfully";
 }
@@ -119,12 +119,26 @@ cin>>no_frames;
 		if(pAVPacket->stream_index == VideoStreamIndx)
 		{
 			// value = avcodec_decode_video2( pAVCodecContext , pAVFrame , &frameFinished , pAVPacket );
-			value = decode_packet(pAVPacket, pAVCodecContext, &frameFinished, pAVFrame);
+			
+			value = avcodec_send_packet(pAVCodecContext, pAVPacket);
+    		if (value < 0) {
+    		    fprintf(stderr, "Error sending a packet for decoding\n");
+    		    exit(1);
+    		}
 
-			if( value < 0)
-			{
-				cout<<"unable to decode video";
-			}
+			/*
+			 * We only call 'receive_frame' once because we're working with videos
+			 * and so we have not a single packet spanning multiple frames
+			 */
+    		value = avcodec_receive_frame(pAVCodecContext, pAVFrame);
+			if (value == 0)
+				frameFinished = 1;
+    		else if (value == AVERROR(EAGAIN) || value == AVERROR_EOF)
+    		    frameFinished = 0;
+    		else if (value < 0) {
+    		    fprintf(stderr, "Error during decoding\n");
+    		    exit(1);
+    		}
 
 			if(frameFinished)// Frame successfully decoded :)
 			{
@@ -161,9 +175,9 @@ cin>>no_frames;
 					if(outPacket.size>0)
 					{
 						if(outPacket.pts != AV_NOPTS_VALUE)
-							outPacket.pts = av_rescale_q(outPacket.pts, video_st->codec->time_base, video_st->time_base);
+							outPacket.pts = av_rescale_q(outPacket.pts, outAVCodecContext->time_base, video_st->time_base);
 						if(outPacket.dts != AV_NOPTS_VALUE)
-							outPacket.dts = av_rescale_q(outPacket.dts, video_st->codec->time_base, video_st->time_base);
+							outPacket.dts = av_rescale_q(outPacket.dts, outAVCodecContext->time_base, video_st->time_base);
 
 						printf("Write frame %3d (size= %2d)\n", j++, outPacket.size/1000);
 						if(av_write_frame(outAVFormatContext , &outPacket) != 0)
@@ -214,7 +228,7 @@ This device allows one to capture a region of an X11 display.
 refer : https://www.ffmpeg.org/ffmpeg-devices.html#x11grab
 */
 	/* current below is for screen recording. to connect with camera use v4l2 as a input parameter for av_find_input_format */ 
-	pAVInputFormat = av_find_input_format("x11grab");
+	pAVInputFormat =const_cast<AVInputFormat*>( av_find_input_format("x11grab"));
 	//viene generato uno stream di pacchetti
 	/*
 	Apriamo il file e leggiamo il suo header e rimpiamo AVFormatContext con le informazioni sul formato.
@@ -272,15 +286,31 @@ refer : https://www.ffmpeg.org/ffmpeg-devices.html#x11grab
 	  exit(1);
 	}
 
-	// assign pAVFormatContext to VideoStreamIndx
-	pAVCodecContext = pAVFormatContext->streams[VideoStreamIndx]->codec;
-	//finde decoder for the codec
-	pAVCodec = avcodec_find_decoder(pAVCodecContext->codec_id);
+	// assign pAVFormatParameters to VideoStreamIndx
+	pAVCodecParameters = pAVFormatContext->streams[VideoStreamIndx]->codecpar;
+	//find decoder for the codec
+	pAVCodec = const_cast<AVCodec*>(avcodec_find_decoder(pAVCodecParameters->codec_id));
 	if( pAVCodec == NULL )
 	{
 	  cout<<"\nunable to find the decoder";
 	  exit(1);
 	}
+
+	pAVCodecContext = avcodec_alloc_context3(pAVCodec);
+  	if (!pAVCodecContext)
+  	{
+  		cout<<"\nfailed to allocated memory for AVCodecContext";
+  		return -1;
+  	}
+
+  	// Fill the codec context based on the values from the supplied codec parameters
+  	// https://ffmpeg.org/doxygen/trunk/group__lavc__core.html#gac7b282f51540ca7a99416a3ba6ee0d16
+  	if (avcodec_parameters_to_context(pAVCodecContext, pAVCodecParameters) < 0)
+  	{
+  		cout<<"\nfailed to copy codec params to codec context";
+  		return -1;
+  	}
+
 	//once we filled the codec context, we need to open the codec
 	value = avcodec_open2(pAVCodecContext , pAVCodec , NULL);//Initialize the AVCodecContext to use the given AVCodec.
 	if( value < 0 )
@@ -305,7 +335,7 @@ int ScreenRecorder::init_outputfile()
 	}
 
 /* Returns the output format in the list of registered output formats which best matches the provided parameters, or returns NULL if there is no match. */
-	output_format = av_guess_format(NULL, output_file ,NULL);
+	output_format = const_cast<AVOutputFormat*>(av_guess_format(NULL, output_file ,NULL));
 	if( !output_format )
 	{
 	 cout<<"\nerror in guessing the video format. try with correct format";
@@ -327,7 +357,7 @@ int ScreenRecorder::init_outputfile()
 	}
 
 	/* set property of the video file */
-	outAVCodecContext = video_st->codec;
+	outAVCodecContext = avcodec_alloc_context3(avcodec_find_decoder(video_st->codecpar->codec_id));
 	outAVCodecContext->codec_id = AV_CODEC_ID_MPEG4;// AV_CODEC_ID_MPEG4; // AV_CODEC_ID_H264 // AV_CODEC_ID_MPEG1VIDEO
 	outAVCodecContext->codec_type = AVMEDIA_TYPE_VIDEO;
 	outAVCodecContext->pix_fmt  = AV_PIX_FMT_YUV420P;
@@ -344,7 +374,7 @@ int ScreenRecorder::init_outputfile()
 	 av_opt_set(outAVCodecContext->priv_data, "preset", "slow", 0);
 	}
 
-	outAVCodec = avcodec_find_encoder(AV_CODEC_ID_MPEG4);
+	outAVCodec = const_cast<AVCodec*>(avcodec_find_encoder(AV_CODEC_ID_MPEG4));
 	if( !outAVCodec )
 	{
 	 cout<<"\nerror in finding the av codecs. try again with correct codec";
