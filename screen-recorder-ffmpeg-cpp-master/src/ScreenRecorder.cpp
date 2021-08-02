@@ -149,6 +149,10 @@ cin>>no_frames;
 				outPacket.size = 0;
 
 				// avcodec_encode_video2(outAVCodecContext , &outPacket ,outFrame , &got_picture);
+				
+				outFrame->format = outAVCodecContext->pix_fmt;
+				outFrame->width = outAVCodecContext->width;
+				outFrame->height = outAVCodecContext->height;
 
 				// we send a fram to the encoder
 				value = avcodec_send_frame(outAVCodecContext, outFrame);
@@ -158,7 +162,7 @@ cin>>no_frames;
 				}
 				while (value >= 0) {
     				value = avcodec_receive_packet(outAVCodecContext, &outPacket);
-    				if (value == AVERROR(EAGAIN) || value == AVERROR_EOF){
+					if (value == AVERROR(EAGAIN) || value == AVERROR_EOF){
         				return (value==AVERROR(EAGAIN)) ? 0:1;
      				}
     				else if (value < 0) {
@@ -208,7 +212,7 @@ cin>>no_frames;
 
 //THIS WAS ADDED LATER
 av_free(video_outbuf);
-
+avio_close(outAVFormatContext->pb);
 }
 
 /* establishing the connection between camera or screen through its respective folder */
@@ -325,7 +329,8 @@ int ScreenRecorder::init_outputfile()
 {
 	outAVFormatContext = NULL;
 	value = 0;
-	output_file = "../media/output.mp4";
+	output_file = "./media/output.mp4";
+	// options=NULL;
 
 	avformat_alloc_output_context2(&outAVFormatContext, NULL, NULL, output_file);
 	if (!outAVFormatContext)
@@ -335,29 +340,83 @@ int ScreenRecorder::init_outputfile()
 	}
 
 /* Returns the output format in the list of registered output formats which best matches the provided parameters, or returns NULL if there is no match. */
-	output_format = const_cast<AVOutputFormat*>(av_guess_format(NULL, output_file ,NULL));
+	/*output_format = const_cast<AVOutputFormat*>(av_guess_format(NULL, output_file ,NULL));
 	if( !output_format )
 	{
 	 cout<<"\nerror in guessing the video format. try with correct format";
 	 exit(1);
-	}
+	}*/
 
+	// int number_of_streams = pAVFormatContext->nb_streams;
+	// int *streams_list = (int*)av_mallocz_array(number_of_streams, sizeof(*streams_list));
+	// if(!streams_list) {
+	// 	cout << "Error in allocating streams_list";
+	// 	exit(1);
+	// }
+
+	// for (int i = 0; i < pAVFormatContext->nb_streams; i++) {
+	// 	AVStream *out_stream;
+    // 	AVStream *in_stream = pAVFormatContext->streams[i];
+	// 	AVCodecParameters *in_codecpar = in_stream->codecpar;
+    // 	if (in_codecpar->codec_type != AVMEDIA_TYPE_AUDIO &&
+    // 	    in_codecpar->codec_type != AVMEDIA_TYPE_VIDEO &&
+    // 	    in_codecpar->codec_type != AVMEDIA_TYPE_SUBTITLE) {
+    // 	  streams_list[i] = -1;
+    // 	  continue;
+    // }
+	// }
+
+	
+
+	// value = avcodec_parameters_copy(video_st->codecpar, pAVFormatContext->streams[VideoStreamIndx]->codecpar);
+	// if (value < 0) {
+	// 	cout << "\nerror copying parameters";
+	// 	exit(1);
+	// }
+
+	av_dump_format(outAVFormatContext, 0, output_file, 1);
+
+	/* create empty video file */
+	if ( !(outAVFormatContext->flags & AVFMT_NOFILE) )
+	{
+	 if( avio_open2(&outAVFormatContext->pb , output_file , AVIO_FLAG_WRITE ,NULL, NULL) < 0 )
+	 {
+	  cout<<"\nerror in creating the video file";
+	  exit(1);
+	 }
+	}
 	video_st = avformat_new_stream(outAVFormatContext ,NULL);
 	if( !video_st )
 	{
 		cout<<"\nerror in creating a av format new stream";
 		exit(1);
 	}
+	video_st->codecpar->codec_id = AV_CODEC_ID_MPEG4;// AV_CODEC_ID_MPEG4; // AV_CODEC_ID_H264 // AV_CODEC_ID_MPEG1VIDEO
+	video_st->codecpar->codec_type = AVMEDIA_TYPE_VIDEO;
+	// video_st->codecpar->pix_fmt  = AV_PIX_FMT_YUV420P;
+	video_st->codecpar->bit_rate = 400000; // 2500000
+	video_st->codecpar->width = 1920;
+	video_st->codecpar->height = 1080;
+	// video_st->codecpar->gop_size = 3;
+	// video_st->codecpar->max_b_frames = 2;
+	// video_st->codecpar->time_base.num = 1;
+	// video_st->codecpar->time_base.den = 30; // 15fps
 
-	outAVCodecContext = avcodec_alloc_context3(outAVCodec);
-	if( !outAVCodecContext )
+	/* TO-DO: remove */
+	// outAVCodecContext = avcodec_alloc_context3(outAVCodec);
+	// if( !outAVCodecContext )
+	// {
+	//   	cout<<"\nerror in allocating the codec contexts";
+	// 	exit(1);
+	// }
+	outAVCodec = const_cast<AVCodec*>(avcodec_find_encoder(AV_CODEC_ID_MPEG4));
+	if( !outAVCodec )
 	{
-	  	cout<<"\nerror in allocating the codec contexts";
-		exit(1);
+	 cout<<"\nerror in finding the av codecs. try again with correct codec";
+	exit(1);
 	}
-
 	/* set property of the video file */
-	outAVCodecContext = avcodec_alloc_context3(avcodec_find_decoder(video_st->codecpar->codec_id));
+	outAVCodecContext = avcodec_alloc_context3(outAVCodec);
 	outAVCodecContext->codec_id = AV_CODEC_ID_MPEG4;// AV_CODEC_ID_MPEG4; // AV_CODEC_ID_H264 // AV_CODEC_ID_MPEG1VIDEO
 	outAVCodecContext->codec_type = AVMEDIA_TYPE_VIDEO;
 	outAVCodecContext->pix_fmt  = AV_PIX_FMT_YUV420P;
@@ -374,13 +433,6 @@ int ScreenRecorder::init_outputfile()
 	 av_opt_set(outAVCodecContext->priv_data, "preset", "slow", 0);
 	}
 
-	outAVCodec = const_cast<AVCodec*>(avcodec_find_encoder(AV_CODEC_ID_MPEG4));
-	if( !outAVCodec )
-	{
-	 cout<<"\nerror in finding the av codecs. try again with correct codec";
-	exit(1);
-	}
-
 	/* Some container formats (like MP4) require global headers to be present
 	   Mark the encoder so that it behaves accordingly. */
 
@@ -394,16 +446,6 @@ int ScreenRecorder::init_outputfile()
 	{
 		cout<<"\nerror in opening the avcodec";
 		exit(1);
-	}
-
-	/* create empty video file */
-	if ( !(outAVFormatContext->flags & AVFMT_NOFILE) )
-	{
-	 if( avio_open2(&outAVFormatContext->pb , output_file , AVIO_FLAG_WRITE ,NULL, NULL) < 0 )
-	 {
-	  cout<<"\nerror in creating the video file";
-	  exit(1);
-	 }
 	}
 
 	if(!outAVFormatContext->nb_streams)
