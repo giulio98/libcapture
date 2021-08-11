@@ -51,30 +51,46 @@ extern "C"
 class ScreenRecorder
 {
 private:
-	AVInputFormat *pAVInputFormat;
-	AVOutputFormat *output_format;
+    /* Input format */
+    AVInputFormat *pAVInputFormat;
+    /* Output format */
+    AVOutputFormat *output_format;
 
-	AVCodecContext *pAVCodecContext;
-	AVCodecParameters *pAVCodecParameters;
+    /* Properties of the codec used by a stream */
+    AVCodecParameters *pAVCodecParameters;
 
-	AVFormatContext *pAVFormatContext;
+    /* Context for the decode/encode operations (input) */
+    AVCodecContext *pAVCodecContext;
+    /* Context for the decode/encode operations (output) */
+    AVCodecContext *outAVCodecContext;
 
-	AVFrame *pAVFrame;
-	AVFrame *outFrame;
+    /* Information about the input format (container) */
+    AVFormatContext *pAVFormatContext;
+    /* Information about the output format (container) */
+    AVFormatContext *outAVFormatContext;
 
-	AVCodec *pAVCodec;
-	AVCodec *outAVCodec;
+    /* Component used to encode/decode the streams (input) */
+    AVCodec *pAVCodec;
+    /* Component used to encode/decode the streams (output) */
+    AVCodec *outAVCodec;
 
-	AVPacket *pAVPacket;
+    /* Compressed (encoded) video data */
+    AVPacket *pAVPacket;
 
-	AVDictionary *options;
+    /* Decoded video data (input) */
+    AVFrame *pAVFrame;
+    /* Decoded video data (output) */
+    AVFrame *outFrame;
 
-	AVOutputFormat *outAVOutputFormat;
-	AVFormatContext *outAVFormatContext;
-	AVCodecContext *outAVCodecContext;
+    /* Additional options for the muxer */
+    AVDictionary *options;
 
-	AVStream *video_st;
-	AVFrame *outAVFrame;
+    AVOutputFormat *outAVOutputFormat;
+
+	/* Output video stream */
+    AVStream *video_st;
+
+    AVFrame *outAVFrame;
 
 	const char *dev_name;
 	const char *output_file;
