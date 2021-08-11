@@ -331,7 +331,7 @@ int ScreenRecorder::init_outputfile()
 {
 	outAVFormatContext = NULL;
 	value = 0;
-	output_file = "./media/output.mp4";
+	output_file = "../media/output.mp4";
 	// options=NULL;
 
 	avformat_alloc_output_context2(&outAVFormatContext, NULL, NULL, output_file);
