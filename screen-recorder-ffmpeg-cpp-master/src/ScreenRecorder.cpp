@@ -154,7 +154,7 @@ cin>>no_frames;
 				outFrame->width = outAVCodecContext->width;
 				outFrame->height = outAVCodecContext->height;
 
-				// we send a fram to the encoder
+				// we send a frame to the encoder
 				value = avcodec_send_frame(outAVCodecContext, outFrame);
 				if (value < 0) {
     				fprintf(stderr, "Error sending a frame for encoding\n");
