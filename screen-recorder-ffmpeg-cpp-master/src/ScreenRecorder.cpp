@@ -215,6 +215,8 @@ cin>>no_frames;
 //THIS WAS ADDED LATER
 av_free(video_outbuf);
 avio_close(outAVFormatContext->pb);
+
+	return 0;
 }
 
 /* establishing the connection between camera or screen through its respective folder */
@@ -324,6 +326,8 @@ refer : https://www.ffmpeg.org/ffmpeg-devices.html#x11grab
 	  cout<<"\nunable to open the av codec";
 	  exit(1);
 	}
+
+	return 0;
 }
 
 /* initialize the video output file and its properties  */
@@ -469,6 +473,6 @@ int ScreenRecorder::init_outputfile()
 	cout<<"\n\nOutput file information :\n\n";
 	av_dump_format(outAVFormatContext , 0 ,output_file ,1);
 	*/
+
+	return 0;
 }
-
-
