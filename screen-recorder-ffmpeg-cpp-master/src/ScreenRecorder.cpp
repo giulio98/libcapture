@@ -162,8 +162,10 @@ cin>>no_frames;
 				}
 				while (value >= 0) {
     				value = avcodec_receive_packet(outAVCodecContext, &outPacket);
-					if (value == AVERROR(EAGAIN) || value == AVERROR_EOF){
-        				return (value==AVERROR(EAGAIN)) ? 0:1;
+					if (value == AVERROR(EAGAIN)) {
+						break;
+					} else if (value == AVERROR_EOF) {
+        				return 0;
      				}
     				else if (value < 0) {
         				fprintf(stderr, "Error during encoding\n");
