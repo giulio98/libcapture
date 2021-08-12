@@ -31,13 +31,15 @@ ScreenRecorder::~ScreenRecorder() {
 
 /* function to capture and store data in frames by allocating required memory and auto deallocating the memory.   */
 int ScreenRecorder::CaptureVideoFrames() {
-    int flag;
-    int frameFinished;  // when you decode a single packet, you still don't have information enough to have a frame
-                        // [depending on the type of codec, some of them //you do], when you decode a GROUP of packets
-                        // that represents a frame, then you have a picture! that's why frameFinished will let //you
-                        // know you decoded enough to have a frame.
-
+    /*
+     * When you decode a single packet, you still don't have information enough to have a frame
+     * [depending on the type of codec, some of them you do], when you decode a GROUP of packets
+     * that represents a frame, then you have a picture! that's why frameFinished
+     * will let you know you decoded enough to have a frame.
+     */
+    int frameFinished;
     int frame_index = 0;
+    int flag;
     value = 0;
 
     pAVPacket = (AVPacket *)av_malloc(sizeof(AVPacket));
@@ -96,12 +98,9 @@ int ScreenRecorder::CaptureVideoFrames() {
     AVPacket outPacket;
     int j = 0;
 
-    int got_picture;
-
     while (av_read_frame(pAVFormatContext, pAVPacket) >= 0) {
         if (ii++ == no_frames) break;
         if (pAVPacket->stream_index == VideoStreamIndx) {
-            // value = avcodec_decode_video2( pAVCodecContext , pAVFrame , &frameFinished , pAVPacket );
 
             value = avcodec_send_packet(pAVCodecContext, pAVPacket);
             if (value < 0) {
@@ -132,8 +131,6 @@ int ScreenRecorder::CaptureVideoFrames() {
                 outPacket.data = NULL;  // packet data will be allocated by the encoder
                 outPacket.size = 0;
 
-                // avcodec_encode_video2(outAVCodecContext , &outPacket ,outFrame , &got_picture);
-
                 outFrame->format = outAVCodecContext->pix_fmt;
                 outFrame->width = outAVCodecContext->width;
                 outFrame->height = outAVCodecContext->height;
@@ -154,12 +151,6 @@ int ScreenRecorder::CaptureVideoFrames() {
                         fprintf(stderr, "Error during encoding\n");
                         exit(1);
                     }
-                    // value = write_frame(outAVFormatContext, &outAVCodecContext->time_base, ost->st, &outPacket);
-                    // if (value < 0) {
-                    // fprintf(stderr, "Error while writing video frame: %s\n", av_err2str(value));
-                    // exit(1);
-                    // }
-                    // av_packet_unref(&outPacket);
 
                     if (outPacket.size > 0) {
                         if (outPacket.pts != AV_NOPTS_VALUE)
@@ -175,9 +166,8 @@ int ScreenRecorder::CaptureVideoFrames() {
                         }
 
                         av_packet_unref(&outPacket);
-                    }  // got_picture
+                    }
                 }
-                // return (frame) ? 0 : 1;
 
                 // TO-DO: check if this is required
                 av_packet_unref(&outPacket);
