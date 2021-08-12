@@ -94,6 +94,11 @@ private:
     int value;
     int VideoStreamIndx;
 
+    int offsetX;
+    int offsetY;
+    int width;
+    int height;
+
 public:
     ScreenRecorder();
     ~ScreenRecorder();
@@ -101,6 +106,7 @@ public:
     /* function to initiate communication with display library */
     int openCamera();
     int init_outputfile();
+    int selectArea();
     int CaptureVideoFrames();
 };
 

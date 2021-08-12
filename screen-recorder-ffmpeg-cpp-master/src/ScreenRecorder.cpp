@@ -1,5 +1,10 @@
 #include "../include/ScreenRecorder.h"
 
+#include <X11/Xlib.h>
+#include <X11/cursorfont.h>
+#include <stdio.h>
+#include <stdlib.h>
+
 using namespace std;
 
 /* initialize the resources*/
@@ -101,29 +106,21 @@ int ScreenRecorder::CaptureVideoFrames() {
     while (av_read_frame(pAVFormatContext, pAVPacket) >= 0) {
         if (ii++ == no_frames) break;
         if (pAVPacket->stream_index == VideoStreamIndx) {
-
             value = avcodec_send_packet(pAVCodecContext, pAVPacket);
             if (value < 0) {
                 fprintf(stderr, "Error sending a packet for decoding\n");
                 exit(1);
             }
 
-            /*
-             * We only call 'receive_frame' once because we're working with videos
-             * and so we have not a single packet spanning multiple frames
-             */
-            value = avcodec_receive_frame(pAVCodecContext, pAVFrame);
-            if (value == 0)
-                frameFinished = 1;
-            else if (value == AVERROR(EAGAIN) || value == AVERROR_EOF)
-                frameFinished = 0;
-            else if (value < 0) {
-                fprintf(stderr, "Error during decoding\n");
-                exit(1);
-            }
+            while (true) {
+                value = avcodec_receive_frame(pAVCodecContext, pAVFrame);
+                if (value == AVERROR(EAGAIN) || value == AVERROR_EOF) {
+                    break;
+                } else if (value < 0) {
+                    fprintf(stderr, "Error during decoding\n");
+                    exit(1);
+                }
 
-            if (frameFinished)  // Frame successfully decoded :)
-            {
                 // Convert the image from input (set in openCamera) to output format (set in init_outputfile)
                 sws_scale(swsCtx_, pAVFrame->data, pAVFrame->linesize, 0, pAVCodecContext->height, outFrame->data,
                           outFrame->linesize);
@@ -193,51 +190,66 @@ int ScreenRecorder::openCamera() {
     value = 0;
     options = NULL;
     pAVFormatContext = NULL;
+    char str[20];
 
     pAVFormatContext = avformat_alloc_context();  // Allocate an AVFormatContext.
-    /*
 
-    X11 video input device.
-    To enable this input device during configuration you need libxcb installed on your system. It will be automatically
-    detected during configuration. This device allows one to capture a region of an X11 display. refer :
-    https://www.ffmpeg.org/ffmpeg-devices.html#x11grab
-    */
-    /* current below is for screen recording. to connect with camera use v4l2 as a input parameter for
-     * av_find_input_format */
+    /*
+     * X11 video input device.
+     * To enable this input device during configuration you need libxcb installed on your system. It will be
+     * automatically detected during configuration. This device allows one to capture a region of an X11 display. refer
+     * : https://www.ffmpeg.org/ffmpeg-devices.html#x11grab Current below is for screen recording. to connect with
+     * camera use v4l2 as a input parameter for av_find_input_format
+     */
     pAVInputFormat = const_cast<AVInputFormat *>(av_find_input_format("x11grab"));
-    // viene generato uno stream di pacchetti
-    /*
-    Apriamo il file e leggiamo il suo header e rimpiamo AVFormatContext con le informazioni sul formato.
-    se viene passato NULL in "AVInputFormat" ffmpeg indovina il formato
-    per quanto riguarda linux il formato di input è "x11grab" permette la cattura di una regione di un x11 display"
-    */
-    value = avformat_open_input(&pAVFormatContext, ":0.0+10,250", pAVInputFormat, NULL);
-    if (value != 0) {
-        cout << "\nerror in opening input device";
-        exit(1);
-    }
 
-    /* set frame per second */
-    /*
-    settiamo il dizionario che sono le opzioni del demuxer
-    */
-    value = av_dict_set(&options, "framerate", "30", 0);
+    /* Set the dictionary */
+
+    // value = av_dict_set(&options, "framerate", "30", 0);
+    // if (value < 0) {
+    //     cout << "\nerror in setting dictionary value";
+    //     exit(1);
+    // }
+
+    // value = av_dict_set(&options, "preset", "high", 0);
+    // if (value < 0) {
+    //     cout << "\nerror in setting preset values";
+    //     exit(1);
+    // }
+
+    value = av_dict_set(&options, "show_region", "1", 0);
     if (value < 0) {
         cout << "\nerror in setting dictionary value";
         exit(1);
     }
 
-    value = av_dict_set(&options, "preset", "medium", 0);
+    sprintf(str, "%dx%d", width, height);
+    value = av_dict_set(&options, "video_size", str, 0);
     if (value < 0) {
-        cout << "\nerror in setting preset values";
+        cout << "\nerror in setting dictionary value";
         exit(1);
     }
 
-    //	value = avformat_find_stream_info(pAVFormatContext,NULL);
-    if (value < 0) {
-        cout << "\nunable to find the stream information";
+    /*
+    Apriamo il file e leggiamo il suo header e rimpiamo AVFormatContext con le informazioni sul formato.
+    se viene passato NULL in "AVInputFormat" ffmpeg indovina il formato
+    per quanto riguarda linux il formato di input è "x11grab" permette la cattura di una regione di un x11 display"
+    */
+    sprintf(str, ":0.0+%d,%d", offsetX, offsetY);
+    cout << "\nSize: " << width << "x" << height << endl;
+    cout << "\nOffset: " << offsetX << " " << offsetY << endl;
+    value = avformat_open_input(&pAVFormatContext, str, pAVInputFormat, &options);
+    if (value != 0) {
+        cout << "\nerror in opening input device";
         exit(1);
     }
+
+    // TO-DO: remove
+    //	value = avformat_find_stream_info(pAVFormatContext,NULL);
+    // if (value < 0) {
+    //     cout << "\nunable to find the stream information";
+    //     exit(1);
+    // }
 
     VideoStreamIndx = -1;
 
@@ -323,8 +335,8 @@ int ScreenRecorder::init_outputfile() {
     outAVCodecContext->codec_type = AVMEDIA_TYPE_VIDEO;
     outAVCodecContext->pix_fmt = AV_PIX_FMT_YUV420P;
     outAVCodecContext->bit_rate = 400000;  // 2500000
-    outAVCodecContext->width = 1920;
-    outAVCodecContext->height = 1080;
+    outAVCodecContext->width = width;
+    outAVCodecContext->height = height;
     outAVCodecContext->gop_size = 3;
     outAVCodecContext->max_b_frames = 2;
     outAVCodecContext->time_base.num = 1;
@@ -375,4 +387,120 @@ int ScreenRecorder::init_outputfile() {
     // av_dump_format(outAVFormatContext , 0 ,output_file ,1);
 
     return 0;
+}
+
+int ScreenRecorder::selectArea() {
+    XEvent ev;
+    Display *disp = NULL;
+    Screen *scr = NULL;
+    Window root = 0;
+    Cursor cursor, cursor2;
+    XGCValues gcval;
+    GC gc;
+    int rx = 0, ry = 0, rw = 0, rh = 0;
+    int rect_x = 0, rect_y = 0, rect_w = 0, rect_h = 0;
+    int btn_pressed = 0, done = 0;
+    int threshold = 10;
+
+    disp = XOpenDisplay(NULL);
+    if (!disp) return EXIT_FAILURE;
+
+    scr = ScreenOfDisplay(disp, DefaultScreen(disp));
+
+    root = RootWindow(disp, XScreenNumberOfScreen(scr));
+
+    cursor = XCreateFontCursor(disp, XC_left_ptr);
+    cursor2 = XCreateFontCursor(disp, XC_lr_angle);
+
+    gcval.foreground = XWhitePixel(disp, 0);
+    gcval.function = GXxor;
+    gcval.background = XBlackPixel(disp, 0);
+    gcval.plane_mask = gcval.background ^ gcval.foreground;
+    gcval.subwindow_mode = IncludeInferiors;
+
+    gc = XCreateGC(disp, root, GCFunction | GCForeground | GCBackground | GCSubwindowMode, &gcval);
+
+    /* this XGrab* stuff makes XPending true ? */
+    if ((XGrabPointer(disp, root, False, ButtonMotionMask | ButtonPressMask | ButtonReleaseMask, GrabModeAsync,
+                      GrabModeAsync, root, cursor, CurrentTime) != GrabSuccess))
+        printf("couldn't grab pointer:");
+
+    if ((XGrabKeyboard(disp, root, False, GrabModeAsync, GrabModeAsync, CurrentTime) != GrabSuccess))
+        printf("couldn't grab keyboard:");
+
+    while (!done) {
+        while (!done && XPending(disp)) {
+            XNextEvent(disp, &ev);
+            switch (ev.type) {
+                case MotionNotify:
+                    /* this case is purely for drawing rect on screen */
+                    if (btn_pressed) {
+                        if (rect_w) {
+                            /* re-draw the last rect to clear it */
+                            // XDrawRectangle(disp, root, gc, rect_x, rect_y, rect_w, rect_h);
+                        } else {
+                            /* Change the cursor to show we're selecting a region */
+                            XChangeActivePointerGrab(disp, ButtonMotionMask | ButtonReleaseMask, cursor2, CurrentTime);
+                        }
+                        rect_x = rx;
+                        rect_y = ry;
+                        rect_w = ev.xmotion.x - rect_x;
+                        rect_h = ev.xmotion.y - rect_y;
+
+                        if (rect_w < 0) {
+                            rect_x += rect_w;
+                            rect_w = 0 - rect_w;
+                        }
+                        if (rect_h < 0) {
+                            rect_y += rect_h;
+                            rect_h = 0 - rect_h;
+                        }
+                        /* draw rectangle */
+                        // XDrawRectangle(disp, root, gc, rect_x, rect_y, rect_w, rect_h);
+                        XFlush(disp);
+                    }
+                    break;
+                case ButtonPress:
+                    btn_pressed = 1;
+                    rx = ev.xbutton.x;
+                    ry = ev.xbutton.y;
+                    break;
+                case ButtonRelease:
+                    done = 1;
+                    break;
+            }
+        }
+    }
+    /* clear the drawn rectangle */
+    if (rect_w) {
+        // XDrawRectangle(disp, root, gc, rect_x, rect_y, rect_w, rect_h);
+        XFlush(disp);
+    }
+    rw = ev.xbutton.x - rx;
+    rh = ev.xbutton.y - ry;
+    /* cursor moves backwards */
+    if (rw < 0) {
+        rx += rw;
+        rw = 0 - rw;
+    }
+    if (rh < 0) {
+        ry += rh;
+        rh = 0 - rh;
+    }
+
+    if (rw < threshold || rh < threshold) {
+        width = scr->width;
+        height = scr->height;
+        offsetX = 0;
+        offsetY = 0;
+    } else {
+        width = rw;
+        height = rh;
+        offsetX = rx;
+        offsetY = ry;
+    }
+
+    XCloseDisplay(disp);
+
+    return EXIT_SUCCESS;
 }
