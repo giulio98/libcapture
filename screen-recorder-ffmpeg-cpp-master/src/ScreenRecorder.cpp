@@ -310,25 +310,16 @@ int ScreenRecorder::init_outputfile() {
         exit(1);
     }
 
-    /* create empty video file */
-    if (!(outAVFormatContext->flags & AVFMT_NOFILE)) {
-        if (avio_open2(&outAVFormatContext->pb, output_file, AVIO_FLAG_WRITE, NULL, NULL) < 0) {
-            cout << "\nerror in creating the video file";
-            exit(1);
-        }
-    }
-
     video_st = avformat_new_stream(outAVFormatContext, NULL);
     if (!video_st) {
         cout << "\nerror in creating a av format new stream";
         exit(1);
     }
 
-    video_st->codecpar->codec_id = AV_CODEC_ID_MPEG4;
-    video_st->codecpar->codec_type = AVMEDIA_TYPE_VIDEO;
-    video_st->codecpar->bit_rate = 400000;  // 2500000
-    video_st->codecpar->width = 1920;
-    video_st->codecpar->height = 1080;
+    if (!outAVFormatContext->nb_streams) {
+        cout << "\noutput file dose not contain any stream";
+        exit(1);
+    }
 
     outAVCodec = const_cast<AVCodec *>(avcodec_find_encoder(AV_CODEC_ID_MPEG4));
     if (!outAVCodec) {
@@ -347,7 +338,7 @@ int ScreenRecorder::init_outputfile() {
     outAVCodecContext->gop_size = 3;
     outAVCodecContext->max_b_frames = 2;
     outAVCodecContext->time_base.num = 1;
-    outAVCodecContext->time_base.den = 30;  // 15fps
+    outAVCodecContext->time_base.den = 30;
 
     if (codec_id == AV_CODEC_ID_H264) {
         av_opt_set(outAVCodecContext->priv_data, "preset", "slow", 0);
@@ -367,9 +358,19 @@ int ScreenRecorder::init_outputfile() {
         exit(1);
     }
 
-    if (!outAVFormatContext->nb_streams) {
-        cout << "\noutput file dose not contain any stream";
+    value = avcodec_parameters_from_context(video_st->codecpar, outAVCodecContext);
+    if (value < 0) {
+        cout << "\nerror in writing video stream parameters";
         exit(1);
+    }
+    video_st->time_base = outAVCodecContext->time_base;
+
+    /* create empty video file */
+    if (!(outAVFormatContext->flags & AVFMT_NOFILE)) {
+        if (avio_open(&outAVFormatContext->pb, output_file, AVIO_FLAG_WRITE) < 0) {
+            cout << "\nerror in creating the video file";
+            exit(1);
+        }
     }
 
     /* imp: mp4 container or some advanced container file required header information */
