@@ -8,9 +8,9 @@ using namespace std;
 int main() {
     ScreenRecorder screen_record;
 
-    screen_record.selectArea();
-    screen_record.openCamera();
-    screen_record.init_outputfile();
+    screen_record.SelectArea();
+    screen_record.OpenCamera();
+    screen_record.InitOutputFile();
     screen_record.CaptureVideoFrames();
 
     cout << "\nprogram executed successfully\n";

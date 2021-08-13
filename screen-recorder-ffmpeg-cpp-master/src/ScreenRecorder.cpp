@@ -121,7 +121,7 @@ int ScreenRecorder::CaptureVideoFrames() {
                     exit(1);
                 }
 
-                // Convert the image from input (set in openCamera) to output format (set in init_outputfile)
+                // Convert the image from input (set in OpenCamera) to output format (set in InitOutputFile)
                 sws_scale(swsCtx_, pAVFrame->data, pAVFrame->linesize, 0, pAVCodecContext->height, outFrame->data,
                           outFrame->linesize);
                 av_init_packet(&outPacket);
@@ -186,7 +186,7 @@ int ScreenRecorder::CaptureVideoFrames() {
 }
 
 /* establishing the connection between camera or screen through its respective folder */
-int ScreenRecorder::openCamera() {
+int ScreenRecorder::OpenCamera() {
     value = 0;
     options = NULL;
     pAVFormatContext = NULL;
@@ -300,7 +300,7 @@ int ScreenRecorder::openCamera() {
 }
 
 /* initialize the video output file and its properties  */
-int ScreenRecorder::init_outputfile() {
+int ScreenRecorder::InitOutputFile() {
     outAVFormatContext = NULL;
     value = 0;
     output_file = "../media/output.mp4";
@@ -389,7 +389,7 @@ int ScreenRecorder::init_outputfile() {
     return 0;
 }
 
-int ScreenRecorder::selectArea() {
+int ScreenRecorder::SelectArea() {
     XEvent ev;
     Display *disp = NULL;
     Screen *scr = NULL;
