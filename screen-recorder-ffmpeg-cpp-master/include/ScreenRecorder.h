@@ -43,9 +43,6 @@ extern "C" {
 
 class ScreenRecorder {
 private:
-    /* Properties of the codec used by a stream */
-    AVCodecParameters *pAVCodecParameters;
-
     /* Context for the decode/encode operations (input) */
     AVCodecContext *pAVCodecContext;
     /* Context for the decode/encode operations (output) */
@@ -66,8 +63,6 @@ private:
 
     /* Output video stream */
     AVStream *videoStream;
-
-    AVFrame *outAVFrame;
 
     const char *outputFile;
 

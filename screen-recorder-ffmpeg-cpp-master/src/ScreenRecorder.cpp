@@ -199,6 +199,7 @@ int ScreenRecorder::OpenCamera() {
     pAVFormatContext = NULL;
     char str[20];
     AVInputFormat *inputFormat;
+    AVCodecParameters *codecParams;
 
     pAVFormatContext = avformat_alloc_context();  // Allocate an AVFormatContext.
 
@@ -276,9 +277,9 @@ int ScreenRecorder::OpenCamera() {
     }
 
     // assign pAVFormatParameters to videoStreamIdx
-    pAVCodecParameters = pAVFormatContext->streams[videoStreamIdx]->codecpar;
+    codecParams = pAVFormatContext->streams[videoStreamIdx]->codecpar;
     // find decoder for the codec
-    pAVCodec = const_cast<AVCodec *>(avcodec_find_decoder(pAVCodecParameters->codec_id));
+    pAVCodec = const_cast<AVCodec *>(avcodec_find_decoder(codecParams->codec_id));
     if (pAVCodec == NULL) {
         cout << "\nunable to find the decoder";
         exit(1);
@@ -292,7 +293,7 @@ int ScreenRecorder::OpenCamera() {
 
     // Fill the codec context based on the values from the supplied codec parameters
     // https://ffmpeg.org/doxygen/trunk/group__lavc__core.html#gac7b282f51540ca7a99416a3ba6ee0d16
-    if (avcodec_parameters_to_context(pAVCodecContext, pAVCodecParameters) < 0) {
+    if (avcodec_parameters_to_context(pAVCodecContext, codecParams) < 0) {
         cout << "\nfailed to copy codec params to codec context";
         return -1;
     }
