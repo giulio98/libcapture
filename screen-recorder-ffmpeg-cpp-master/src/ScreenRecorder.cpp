@@ -211,7 +211,7 @@ int ScreenRecorder::OpenCamera() {
      * : https://www.ffmpeg.org/ffmpeg-devices.html#x11grab Current below is for screen recording. to connect with
      * camera use v4l2 as a input parameter for av_find_input_format
      */
-    inputFormat = const_cast<AVInputFormat *>(av_find_input_format("x11grab"));
+    inputFormat = av_find_input_format("x11grab");
 
     /* Set the dictionary */
 
@@ -269,7 +269,7 @@ int ScreenRecorder::OpenCamera() {
     // assign pAVFormatParameters to videoStreamIdx
     codecParams = inFormatContext->streams[videoStreamIdx]->codecpar;
     // find decoder for the codec
-    inCodec = const_cast<AVCodec *>(avcodec_find_decoder(codecParams->codec_id));
+    inCodec = avcodec_find_decoder(codecParams->codec_id);
     if (inCodec == NULL) {
         cout << "\nunable to find the decoder";
         exit(1);
@@ -322,7 +322,7 @@ int ScreenRecorder::InitOutputFile() {
         exit(1);
     }
 
-    outCodec = const_cast<AVCodec *>(avcodec_find_encoder(AV_CODEC_ID_MPEG4));
+    outCodec = avcodec_find_encoder(AV_CODEC_ID_MPEG4);
     if (!outCodec) {
         cout << "\nerror in finding the av codecs. try again with correct codec";
         exit(1);
