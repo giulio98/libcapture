@@ -45,8 +45,6 @@ class ScreenRecorder {
 private:
     /* Input format */
     AVInputFormat *pAVInputFormat;
-    /* Output format */
-    AVOutputFormat *output_format;
 
     /* Properties of the codec used by a stream */
     AVCodecParameters *pAVCodecParameters;
@@ -77,19 +75,13 @@ private:
     /* Additional options for the muxer */
     AVDictionary *options;
 
-    AVOutputFormat *outAVOutputFormat;
-
     /* Output video stream */
     AVStream *video_st;
 
     AVFrame *outAVFrame;
 
-    const char *dev_name;
     const char *output_file;
 
-    double video_pts;
-
-    int out_size;
     int codec_id;
     int value;
     int VideoStreamIndx;
