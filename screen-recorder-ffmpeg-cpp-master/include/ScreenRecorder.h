@@ -80,11 +80,10 @@ private:
 
     AVFrame *outAVFrame;
 
-    const char *output_file;
+    const char *outputFile;
 
-    int codec_id;
-    int value;
-    int VideoStreamIndx;
+    int codecId;
+    int VideoStreamIdx;
 
     int offsetX;
     int offsetY;
