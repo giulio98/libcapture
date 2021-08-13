@@ -43,9 +43,6 @@ extern "C" {
 
 class ScreenRecorder {
 private:
-    /* Input format */
-    AVInputFormat *pAVInputFormat;
-
     /* Properties of the codec used by a stream */
     AVCodecParameters *pAVCodecParameters;
 
@@ -64,26 +61,18 @@ private:
     /* Component used to encode/decode the streams (output) */
     AVCodec *outAVCodec;
 
-    /* Compressed (encoded) video data */
-    AVPacket *pAVPacket;
-
-    /* Decoded video data (input) */
-    AVFrame *pAVFrame;
-    /* Decoded video data (output) */
-    AVFrame *outFrame;
-
     /* Additional options for the muxer */
     AVDictionary *options;
 
     /* Output video stream */
-    AVStream *video_st;
+    AVStream *videoStream;
 
     AVFrame *outAVFrame;
 
     const char *outputFile;
 
     int codecId;
-    int VideoStreamIdx;
+    int videoStreamIdx;
 
     int offsetX;
     int offsetY;
