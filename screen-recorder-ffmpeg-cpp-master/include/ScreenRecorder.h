@@ -43,20 +43,20 @@ extern "C" {
 
 class ScreenRecorder {
 private:
-    /* Context for the decode/encode operations (input) */
-    AVCodecContext *pAVCodecContext;
-    /* Context for the decode/encode operations (output) */
-    AVCodecContext *outAVCodecContext;
-
     /* Information about the input format (container) */
-    AVFormatContext *pAVFormatContext;
+    AVFormatContext *inFormatContext;
     /* Information about the output format (container) */
-    AVFormatContext *outAVFormatContext;
+    AVFormatContext *outFormatContext;
+
+    /* Context for the decode/encode operations (input) */
+    AVCodecContext *inCodecContext;
+    /* Context for the decode/encode operations (output) */
+    AVCodecContext *outCodecContext;
 
     /* Component used to encode/decode the streams (input) */
-    AVCodec *pAVCodec;
+    AVCodec *inCodec;
     /* Component used to encode/decode the streams (output) */
-    AVCodec *outAVCodec;
+    AVCodec *outCodec;
 
     /* Additional options for the muxer */
     AVDictionary *options;
