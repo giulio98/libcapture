@@ -9,7 +9,7 @@ using namespace std;
 
 /* initialize the resources*/
 ScreenRecorder::ScreenRecorder() {
-    // av_register_all();
+    av_register_all();
     // avcodec_register_all();
     avdevice_register_all();
     cout << "\nall required functions are registered successfully";
@@ -202,7 +202,6 @@ int ScreenRecorder::openCamera() {
      * camera use v4l2 as a input parameter for av_find_input_format
      */
     pAVInputFormat = const_cast<AVInputFormat *>(av_find_input_format("x11grab"));
-
     /* Set the dictionary */
 
     // value = av_dict_set(&options, "framerate", "30", 0);
@@ -275,6 +274,7 @@ int ScreenRecorder::openCamera() {
         cout << "\nunable to find the decoder";
         exit(1);
     }
+
 
     pAVCodecContext = avcodec_alloc_context3(pAVCodec);
     if (!pAVCodecContext) {
@@ -437,7 +437,7 @@ int ScreenRecorder::selectArea() {
                     if (btn_pressed) {
                         if (rect_w) {
                             /* re-draw the last rect to clear it */
-                            // XDrawRectangle(disp, root, gc, rect_x, rect_y, rect_w, rect_h);
+                             XDrawRectangle(disp, root, gc, rect_x, rect_y, rect_w, rect_h);
                         } else {
                             /* Change the cursor to show we're selecting a region */
                             XChangeActivePointerGrab(disp, ButtonMotionMask | ButtonReleaseMask, cursor2, CurrentTime);
@@ -456,7 +456,7 @@ int ScreenRecorder::selectArea() {
                             rect_h = 0 - rect_h;
                         }
                         /* draw rectangle */
-                        // XDrawRectangle(disp, root, gc, rect_x, rect_y, rect_w, rect_h);
+                         XDrawRectangle(disp, root, gc, rect_x, rect_y, rect_w, rect_h);
                         XFlush(disp);
                     }
                     break;
@@ -473,7 +473,7 @@ int ScreenRecorder::selectArea() {
     }
     /* clear the drawn rectangle */
     if (rect_w) {
-        // XDrawRectangle(disp, root, gc, rect_x, rect_y, rect_w, rect_h);
+         XDrawRectangle(disp, root, gc, rect_x, rect_y, rect_w, rect_h);
         XFlush(disp);
     }
     rw = ev.xbutton.x - rx;
