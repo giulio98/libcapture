@@ -53,21 +53,30 @@ private:
     /* Context for the decode/encode operations (output) */
     AVCodecContext *outCodecContext;
 
+    /* Information about the audio format (container) */
+    AVFormatContext *audioFormatContext;
+
+    /* Context for the decode/encode operations (input) */
+    AVCodecContext *audioCodecContext;
+
     /* Component used to encode/decode the streams (input) */
     AVCodec *inCodec;
     /* Component used to encode/decode the streams (output) */
     AVCodec *outCodec;
 
+    AVCodec *audioCodec;
+
     /* Additional options for the muxer */
     AVDictionary *options;
 
     /* Output video stream */
-    AVStream *videoStream;
+    AVStream *outVideoStream;
 
     const char *outputFile;
 
     int codecId;
     int videoStreamIdx;
+    int audioStreamIdx;
 
     int offsetX;
     int offsetY;
@@ -80,6 +89,7 @@ public:
 
     /* function to initiate communication with display library */
     int OpenCamera();
+    int OpenMic();
     int InitOutputFile();
     int SelectArea();
     int CaptureVideoFrames();

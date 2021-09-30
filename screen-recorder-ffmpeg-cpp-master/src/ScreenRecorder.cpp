@@ -42,9 +42,7 @@ int ScreenRecorder::CaptureVideoFrames() {
      * that represents a frame, then you have a picture! that's why frameFinished
      * will let you know you decoded enough to have a frame.
      */
-    int frameFinished;
-    int frameIdx = 0;
-    int flag;
+    // int frameFinished;
     int ret;
 
     /* Compressed (encoded) video data */
@@ -76,7 +74,6 @@ int ScreenRecorder::CaptureVideoFrames() {
         exit(1);
     }
 
-    int video_outbuf_size;
     int nbytes =
         av_image_get_buffer_size(outCodecContext->pix_fmt, outCodecContext->width, outCodecContext->height, 32);
     uint8_t *video_outbuf = (uint8_t *)av_malloc(nbytes);
@@ -160,10 +157,10 @@ int ScreenRecorder::CaptureVideoFrames() {
                     if (outPacket.size > 0) {
                         if (outPacket.pts != AV_NOPTS_VALUE)
                             outPacket.pts =
-                                av_rescale_q(outPacket.pts, outCodecContext->time_base, videoStream->time_base);
+                                av_rescale_q(outPacket.pts, outCodecContext->time_base, outVideoStream->time_base);
                         if (outPacket.dts != AV_NOPTS_VALUE)
                             outPacket.dts =
-                                av_rescale_q(outPacket.dts, outCodecContext->time_base, videoStream->time_base);
+                                av_rescale_q(outPacket.dts, outCodecContext->time_base, outVideoStream->time_base);
 
                         printf("Write frame %3d (size= %2d)\n", j++, outPacket.size / 1000);
                         if (av_write_frame(outFormatContext, &outPacket) != 0) {
@@ -196,8 +193,6 @@ int ScreenRecorder::CaptureVideoFrames() {
 /* establishing the connection between camera or screen through its respective folder */
 int ScreenRecorder::OpenCamera() {
     int ret;
-    options = NULL;
-    inFormatContext = NULL;
     char str[20];
     AVInputFormat *inputFormat;
     AVCodecParameters *codecParams;
@@ -215,11 +210,13 @@ int ScreenRecorder::OpenCamera() {
 
     /* Set the dictionary */
 
-    // ret = av_dict_set(&options, "framerate", "30", 0);
-    // if (ret < 0) {
-    //     cout << "\nerror in setting dictionary value";
-    //     exit(1);
-    // }
+    options = NULL;
+
+    ret = av_dict_set(&options, "framerate", "30", 0);
+    if (ret < 0) {
+        cout << "\nerror in setting dictionary value";
+        exit(1);
+    }
 
     ret = av_dict_set(&options, "show_region", "1", 0);
     if (ret < 0) {
@@ -233,9 +230,6 @@ int ScreenRecorder::OpenCamera() {
         cout << "\nerror in setting dictionary value";
         exit(1);
     }
-
-    cout << "\nSize: " << width << "x" << height << endl;
-    cout << "\nOffset: " << offsetX << " " << offsetY << endl;
 
     sprintf(str, ":0.0+%d,%d", offsetX, offsetY);
     ret = avformat_open_input(&inFormatContext, str, inputFormat, &options);
@@ -266,8 +260,8 @@ int ScreenRecorder::OpenCamera() {
         exit(1);
     }
 
-    // assign pAVFormatParameters to videoStreamIdx
     codecParams = inFormatContext->streams[videoStreamIdx]->codecpar;
+
     // find decoder for the codec
     inCodec = avcodec_find_decoder(codecParams->codec_id);
     if (inCodec == NULL) {
@@ -298,6 +292,76 @@ int ScreenRecorder::OpenCamera() {
     return 0;
 }
 
+int ScreenRecorder::OpenMic() {
+    int ret;
+    char str[20];
+    AVInputFormat *inputFormat;
+    AVCodecParameters *codecParams;
+
+    audioFormatContext = avformat_alloc_context();  // Allocate an AVFormatContext.
+
+    inputFormat = av_find_input_format("alsa");
+
+    ret = avformat_open_input(&inFormatContext, "hw:0,0", inputFormat, &options);
+    if (ret != 0) {
+        cout << "\nerror in opening input device";
+        exit(1);
+    }
+
+    // TO-DO: check if needed
+    // ret = avformat_find_stream_info(inFormatContext,NULL);
+    // if (ret < 0) {
+    //     cout << "\nunable to find the stream information";
+    //     exit(1);
+    // }
+
+    audioStreamIdx = -1;
+
+    /* find the first video stream index . Also there is an API available to do the below operations */
+    for (int i = 0; i < inFormatContext->nb_streams; i++) {
+        if (inFormatContext->streams[i]->codecpar->codec_type == AVMEDIA_TYPE_AUDIO) {
+            audioStreamIdx = i;
+            break;
+        }
+    }
+
+    if (audioStreamIdx == -1) {
+        cout << "\nunable to find the audio stream index. (-1)";
+        exit(1);
+    }
+
+    codecParams = audioFormatContext->streams[audioStreamIdx]->codecpar;
+
+    // find decoder for the codec
+    audioCodec = avcodec_find_decoder(codecParams->codec_id);
+    if (audioCodec == NULL) {
+        cout << "\nunable to find the decoder";
+        exit(1);
+    }
+
+    audioCodecContext = avcodec_alloc_context3(audioCodec);
+    if (!audioCodecContext) {
+        cout << "\nfailed to allocated memory for AVCodecContext";
+        return -1;
+    }
+
+    // Fill the codec context based on the values from the supplied codec parameters
+    // https://ffmpeg.org/doxygen/trunk/group__lavc__core.html#gac7b282f51540ca7a99416a3ba6ee0d16
+    if (avcodec_parameters_to_context(audioCodecContext, codecParams) < 0) {
+        cout << "\nfailed to copy codec params to codec context";
+        return -1;
+    }
+
+    // once we filled the codec context, we need to open the codec
+    ret = avcodec_open2(audioCodecContext, audioCodec, NULL);  // Initialize the AVCodecContext to use the given AVCodec.
+    if (ret < 0) {
+        cout << "\nunable to open the av codec";
+        exit(1);
+    }
+
+    return 0;
+}
+
 /* initialize the video output file and its properties  */
 int ScreenRecorder::InitOutputFile() {
     outFormatContext = NULL;
@@ -311,8 +375,8 @@ int ScreenRecorder::InitOutputFile() {
         exit(1);
     }
 
-    videoStream = avformat_new_stream(outFormatContext, NULL);
-    if (!videoStream) {
+    outVideoStream = avformat_new_stream(outFormatContext, NULL);
+    if (!outVideoStream) {
         cout << "\nerror in creating a av format new stream";
         exit(1);
     }
@@ -359,12 +423,12 @@ int ScreenRecorder::InitOutputFile() {
         exit(1);
     }
 
-    ret = avcodec_parameters_from_context(videoStream->codecpar, outCodecContext);
+    ret = avcodec_parameters_from_context(outVideoStream->codecpar, outCodecContext);
     if (ret < 0) {
         cout << "\nerror in writing video stream parameters";
         exit(1);
     }
-    videoStream->time_base = outCodecContext->time_base;
+    outVideoStream->time_base = outCodecContext->time_base;
 
     /* create empty video file */
     if (!(outFormatContext->flags & AVFMT_NOFILE)) {
@@ -500,6 +564,9 @@ int ScreenRecorder::SelectArea() {
     }
 
     XCloseDisplay(disp);
+
+    cout << "\nSize: " << width << "x" << height << endl;
+    cout << "\nOffset (x,y): " << offsetX << "," << offsetY << endl;
 
     return EXIT_SUCCESS;
 }
