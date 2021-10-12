@@ -48,26 +48,22 @@ private:
     /* Output container */
     AVFormatContext *outFormatContext;
 
-    /* Context for the decode/encode operations (input) */
-    AVCodecContext *inCodecContext;
-    /* Context for the decode/encode operations (output) */
+    /* Context for the input decode/encode operations (video) */
+    AVCodecContext *videoCodecContext;
+    /* Context for the input decode/encode operations (audio) */
+    AVCodecContext *audioCodecContext;
+    /* Context for the output decode/encode operations */
     AVCodecContext *outCodecContext;
 
-    /* Information about the audio format (container) */
-    AVFormatContext *audioFormatContext;
-
-    /* Context for the decode/encode operations (input) */
-    AVCodecContext *audioCodecContext;
-
     /* Component used to encode/decode the streams (input) */
-    AVCodec *inCodec;
+    AVCodec *videoCodec;
+    /* Component used to encode/decode the streams (input) */
+    AVCodec *audioCodec;
     /* Component used to encode/decode the streams (output) */
     AVCodec *outCodec;
 
-    AVCodec *audioCodec;
-
     /* Additional options for the muxer */
-    AVDictionary *options;
+    AVDictionary *videoOptions;
 
     /* Output video stream */
     AVStream *outVideoStream;
@@ -88,8 +84,7 @@ public:
     ~ScreenRecorder();
 
     /* function to initiate communication with display library */
-    int OpenCamera();
-    int OpenMic();
+    int OpenDevices();
     int InitOutputFile();
     int SelectArea();
     int CaptureVideoFrames();

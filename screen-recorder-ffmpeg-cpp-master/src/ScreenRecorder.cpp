@@ -7,7 +7,8 @@
 
 using namespace std;
 
-static void video_dict_set(AVDictionary **options, const string &framerate, const string &show_region, int width, int height) {
+static void video_dict_set(AVDictionary **options, const string &framerate, const string &show_region, int width,
+                           int height) {
     int ret;
     char str[20];
 
@@ -119,9 +120,9 @@ int ScreenRecorder::CaptureVideoFrames() {
     // Allocate and return swsContext.
     // a pointer to an allocated context, or NULL in case of error
     // Deprecated : Use sws_getCachedContext() instead.
-    swsCtx_ =
-        sws_getContext(inCodecContext->width, inCodecContext->height, inCodecContext->pix_fmt, outCodecContext->width,
-                       outCodecContext->height, outCodecContext->pix_fmt, SWS_BICUBIC, NULL, NULL, NULL);
+    swsCtx_ = sws_getContext(videoCodecContext->width, videoCodecContext->height, videoCodecContext->pix_fmt,
+                             outCodecContext->width, outCodecContext->height, outCodecContext->pix_fmt, SWS_BICUBIC,
+                             NULL, NULL, NULL);
 
     int ii = 0;
     int no_frames = 100;
@@ -134,14 +135,14 @@ int ScreenRecorder::CaptureVideoFrames() {
     while (av_read_frame(inFormatContext, packet) >= 0) {
         if (ii++ == no_frames) break;
         if (packet->stream_index == videoStreamIdx) {
-            ret = avcodec_send_packet(inCodecContext, packet);
+            ret = avcodec_send_packet(videoCodecContext, packet);
             if (ret < 0) {
                 fprintf(stderr, "Error sending a packet for decoding\n");
                 exit(1);
             }
 
             while (true) {
-                ret = avcodec_receive_frame(inCodecContext, inFrame);
+                ret = avcodec_receive_frame(videoCodecContext, inFrame);
                 if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) {
                     break;
                 } else if (ret < 0) {
@@ -149,8 +150,8 @@ int ScreenRecorder::CaptureVideoFrames() {
                     exit(1);
                 }
 
-                // Convert the image from input (set in OpenCamera) to output format (set in InitOutputFile)
-                sws_scale(swsCtx_, inFrame->data, inFrame->linesize, 0, inCodecContext->height, outFrame->data,
+                // Convert the image from input (set in OpenDevices) to output format (set in InitOutputFile)
+                sws_scale(swsCtx_, inFrame->data, inFrame->linesize, 0, videoCodecContext->height, outFrame->data,
                           outFrame->linesize);
                 av_init_packet(&outPacket);
                 outPacket.data = NULL;  // packet data will be allocated by the encoder
@@ -215,11 +216,13 @@ int ScreenRecorder::CaptureVideoFrames() {
 }
 
 /* establishing the connection between camera or screen through its respective folder */
-int ScreenRecorder::OpenCamera() {
+int ScreenRecorder::OpenDevices() {
     int ret;
     char str[20];
-    AVInputFormat *inputFormat;
-    AVCodecParameters *codecParams;
+    AVInputFormat *inVideoFormat;
+    AVInputFormat *inAudioFormat;
+    AVCodecParameters *videoCodecParams;
+    AVCodecParameters *audioCodecParams;
 
     inFormatContext = avformat_alloc_context();  // Allocate an AVFormatContext.
 
@@ -230,34 +233,40 @@ int ScreenRecorder::OpenCamera() {
      * : https://www.ffmpeg.org/ffmpeg-devices.html#x11grab Current below is for screen recording. to connect with
      * camera use v4l2 as a input parameter for av_find_input_format
      */
-    inputFormat = av_find_input_format("x11grab");
+    inVideoFormat = av_find_input_format("x11grab");
+    inAudioFormat = av_find_input_format("alsa");
 
     /* Set the dictionary */
-    options = NULL;
-    video_dict_set(&options, "30", "1", width, height);
+    videoOptions = NULL;
+    video_dict_set(&videoOptions, "30", "1", width, height);
 
-    sprintf(str, ":0.0+%d,%d", offsetX, offsetY);
-    ret = avformat_open_input(&inFormatContext, str, inputFormat, &options);
+    sprintf(str, ":1.0+%d,%d", offsetX, offsetY);
+    ret = avformat_open_input(&inFormatContext, str, inVideoFormat, &videoOptions);
     if (ret != 0) {
-        cout << "\nerror in opening input device";
+        cout << "\nerror in opening input video device";
         exit(1);
     }
 
-    // TO-DO: check if needed
-    // ret = avformat_find_stream_info(inFormatContext,NULL);
-    // if (ret < 0) {
-    //     cout << "\nunable to find the stream information";
-    //     exit(1);
-    // }
+    ret = avformat_open_input(&inFormatContext, "hw:0,0", inAudioFormat, NULL);
+    if (ret != 0) {
+        cout << "\nerror in opening input audio device";
+        exit(1);
+    }
+
+    ret = avformat_find_stream_info(inFormatContext, NULL);
+    if (ret < 0) {
+        cout << "\nunable to find the stream information";
+        exit(1);
+    }
 
     videoStreamIdx = -1;
+    audioStreamIdx = -1;
 
     /* find the first video stream index . Also there is an API available to do the below operations */
     for (int i = 0; i < inFormatContext->nb_streams; i++) {
-        if (inFormatContext->streams[i]->codecpar->codec_type == AVMEDIA_TYPE_VIDEO) {
-            videoStreamIdx = i;
-            break;
-        }
+        if (inFormatContext->streams[i]->codecpar->codec_type == AVMEDIA_TYPE_VIDEO) videoStreamIdx = i;
+        if (inFormatContext->streams[i]->codecpar->codec_type == AVMEDIA_TYPE_AUDIO) audioStreamIdx = i;
+        if (videoStreamIdx != -1 && audioStreamIdx != -1) break;
     }
 
     if (videoStreamIdx == -1) {
@@ -265,101 +274,59 @@ int ScreenRecorder::OpenCamera() {
         exit(1);
     }
 
-    codecParams = inFormatContext->streams[videoStreamIdx]->codecpar;
-
-    // find decoder for the codec
-    inCodec = avcodec_find_decoder(codecParams->codec_id);
-    if (inCodec == NULL) {
-        cout << "\nunable to find the decoder";
-        exit(1);
-    }
-
-    inCodecContext = avcodec_alloc_context3(inCodec);
-    if (!inCodecContext) {
-        cout << "\nfailed to allocated memory for AVCodecContext";
-        return -1;
-    }
-
-    // Fill the codec context based on the values from the supplied codec parameters
-    // https://ffmpeg.org/doxygen/trunk/group__lavc__core.html#gac7b282f51540ca7a99416a3ba6ee0d16
-    if (avcodec_parameters_to_context(inCodecContext, codecParams) < 0) {
-        cout << "\nfailed to copy codec params to codec context";
-        return -1;
-    }
-
-    // once we filled the codec context, we need to open the codec
-    ret = avcodec_open2(inCodecContext, inCodec, NULL);  // Initialize the AVCodecContext to use the given AVCodec.
-    if (ret < 0) {
-        cout << "\nunable to open the av codec";
-        exit(1);
-    }
-
-    return 0;
-}
-
-int ScreenRecorder::OpenMic() {
-    int ret;
-    char str[20];
-    AVInputFormat *inputFormat;
-    AVCodecParameters *codecParams;
-
-    audioFormatContext = avformat_alloc_context();  // Allocate an AVFormatContext.
-
-    inputFormat = av_find_input_format("alsa");
-
-    ret = avformat_open_input(&inFormatContext, "hw:0,0", inputFormat, &options);
-    if (ret != 0) {
-        cout << "\nerror in opening input device";
-        exit(1);
-    }
-
-    // TO-DO: check if needed
-    // ret = avformat_find_stream_info(inFormatContext,NULL);
-    // if (ret < 0) {
-    //     cout << "\nunable to find the stream information";
-    //     exit(1);
-    // }
-
-    audioStreamIdx = -1;
-
-    /* find the first video stream index . Also there is an API available to do the below operations */
-    for (int i = 0; i < inFormatContext->nb_streams; i++) {
-        if (inFormatContext->streams[i]->codecpar->codec_type == AVMEDIA_TYPE_AUDIO) {
-            audioStreamIdx = i;
-            break;
-        }
-    }
-
     if (audioStreamIdx == -1) {
         cout << "\nunable to find the audio stream index. (-1)";
         exit(1);
     }
 
-    codecParams = audioFormatContext->streams[audioStreamIdx]->codecpar;
+    videoCodecParams = inFormatContext->streams[videoStreamIdx]->codecpar;
+    audioCodecParams = inFormatContext->streams[audioStreamIdx]->codecpar;
 
     // find decoder for the codec
-    audioCodec = avcodec_find_decoder(codecParams->codec_id);
-    if (audioCodec == NULL) {
-        cout << "\nunable to find the decoder";
+    videoCodec = avcodec_find_decoder(videoCodecParams->codec_id);
+    if (videoCodec == NULL) {
+        cout << "\nunable to find the decoder for video";
         exit(1);
+    }
+
+    audioCodec = avcodec_find_decoder(audioCodecParams->codec_id);
+    if (audioCodec == NULL) {
+        cout << "\nunable to find the decoder for audio";
+        exit(1);
+    }
+
+    videoCodecContext = avcodec_alloc_context3(videoCodec);
+    if (!videoCodecContext) {
+        cout << "\nfailed to allocated memory for videoCodecContext";
+        return -1;
     }
 
     audioCodecContext = avcodec_alloc_context3(audioCodec);
     if (!audioCodecContext) {
-        cout << "\nfailed to allocated memory for AVCodecContext";
+        cout << "\nfailed to allocated memory for audioCodecContext";
         return -1;
     }
 
     // Fill the codec context based on the values from the supplied codec parameters
     // https://ffmpeg.org/doxygen/trunk/group__lavc__core.html#gac7b282f51540ca7a99416a3ba6ee0d16
-    if (avcodec_parameters_to_context(audioCodecContext, codecParams) < 0) {
+    if (avcodec_parameters_to_context(videoCodecContext, videoCodecParams) < 0) {
+        cout << "\nfailed to copy codec params to codec context";
+        return -1;
+    }
+
+    if (avcodec_parameters_to_context(audioCodecContext, audioCodecParams) < 0) {
         cout << "\nfailed to copy codec params to codec context";
         return -1;
     }
 
     // once we filled the codec context, we need to open the codec
-    ret =
-        avcodec_open2(audioCodecContext, audioCodec, NULL);  // Initialize the AVCodecContext to use the given AVCodec.
+    ret = avcodec_open2(videoCodecContext, videoCodec, NULL);
+    if (ret < 0) {
+        cout << "\nunable to open the av codec";
+        exit(1);
+    }
+
+    ret = avcodec_open2(audioCodecContext, audioCodec, NULL);
     if (ret < 0) {
         cout << "\nunable to open the av codec";
         exit(1);
@@ -445,7 +412,7 @@ int ScreenRecorder::InitOutputFile() {
     }
 
     /* imp: mp4 container or some advanced container file required header information */
-    ret = avformat_write_header(outFormatContext, &options);
+    ret = avformat_write_header(outFormatContext, &videoOptions);
     if (ret < 0) {
         cout << "\nerror in writing the header context";
         exit(1);
