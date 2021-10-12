@@ -7,6 +7,30 @@
 
 using namespace std;
 
+static void video_dict_set(AVDictionary **options, const string &framerate, const string &show_region, int width, int height) {
+    int ret;
+    char str[20];
+
+    ret = av_dict_set(options, "framerate", framerate.c_str(), 0);
+    if (ret < 0) {
+        cout << "\nerror in setting dictionary value";
+        exit(1);
+    }
+
+    ret = av_dict_set(options, "show_region", show_region.c_str(), 0);
+    if (ret < 0) {
+        cout << "\nerror in setting dictionary value";
+        exit(1);
+    }
+
+    sprintf(str, "%dx%d", width, height);
+    ret = av_dict_set(options, "video_size", str, 0);
+    if (ret < 0) {
+        cout << "\nerror in setting dictionary value";
+        exit(1);
+    }
+}
+
 /* initialize the resources*/
 ScreenRecorder::ScreenRecorder() {
     // av_register_all();
@@ -209,27 +233,8 @@ int ScreenRecorder::OpenCamera() {
     inputFormat = av_find_input_format("x11grab");
 
     /* Set the dictionary */
-
     options = NULL;
-
-    ret = av_dict_set(&options, "framerate", "30", 0);
-    if (ret < 0) {
-        cout << "\nerror in setting dictionary value";
-        exit(1);
-    }
-
-    ret = av_dict_set(&options, "show_region", "1", 0);
-    if (ret < 0) {
-        cout << "\nerror in setting dictionary value";
-        exit(1);
-    }
-
-    sprintf(str, "%dx%d", width, height);
-    ret = av_dict_set(&options, "video_size", str, 0);
-    if (ret < 0) {
-        cout << "\nerror in setting dictionary value";
-        exit(1);
-    }
+    video_dict_set(&options, "30", "1", width, height);
 
     sprintf(str, ":0.0+%d,%d", offsetX, offsetY);
     ret = avformat_open_input(&inFormatContext, str, inputFormat, &options);
@@ -353,7 +358,8 @@ int ScreenRecorder::OpenMic() {
     }
 
     // once we filled the codec context, we need to open the codec
-    ret = avcodec_open2(audioCodecContext, audioCodec, NULL);  // Initialize the AVCodecContext to use the given AVCodec.
+    ret =
+        avcodec_open2(audioCodecContext, audioCodec, NULL);  // Initialize the AVCodecContext to use the given AVCodec.
     if (ret < 0) {
         cout << "\nunable to open the av codec";
         exit(1);
