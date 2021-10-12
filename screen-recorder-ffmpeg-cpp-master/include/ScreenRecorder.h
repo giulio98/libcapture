@@ -43,9 +43,9 @@ extern "C" {
 
 class ScreenRecorder {
 private:
-    /* Information about the input format (container) */
+    /* Input container */
     AVFormatContext *inFormatContext;
-    /* Information about the output format (container) */
+    /* Output container */
     AVFormatContext *outFormatContext;
 
     /* Context for the decode/encode operations (input) */
