@@ -43,30 +43,39 @@ extern "C" {
 
 class ScreenRecorder {
 private:
-    /* Input container */
-    AVFormatContext *inFormatContext;
+    /* Input video container */
+    AVFormatContext *inVideoFormatContext;
+    /* Input audio container */
+    AVFormatContext *inAudioFormatContext;
     /* Output container */
     AVFormatContext *outFormatContext;
 
     /* Context for the input decode/encode operations (video) */
-    AVCodecContext *videoCodecContext;
+    AVCodecContext *inVideoCodecContext;
     /* Context for the input decode/encode operations (audio) */
-    AVCodecContext *audioCodecContext;
-    /* Context for the output decode/encode operations */
-    AVCodecContext *outCodecContext;
+    AVCodecContext *inAudioCodecContext;
+    /* Context for the output decode/encode operations (video) */
+    AVCodecContext *outVideoCodecContext;
+    /* Context for the input decode/encode operations (audio) */
+    AVCodecContext *outAudioCodecContext;
 
     /* Component used to encode/decode the streams (input) */
-    AVCodec *videoCodec;
+    AVCodec *inVideoCodec;
     /* Component used to encode/decode the streams (input) */
-    AVCodec *audioCodec;
+    AVCodec *inAudioCodec;
     /* Component used to encode/decode the streams (output) */
-    AVCodec *outCodec;
+    AVCodec *outVideoCodec;
+    /* Component used to encode/decode the streams (output) */
+    AVCodec *outAudioCodec;
 
     /* Additional options for the muxer */
     AVDictionary *videoOptions;
+    AVDictionary *audioOptions;
 
     /* Output video stream */
     AVStream *outVideoStream;
+    /* Output audio stream */
+    AVStream *outAudioStream;
 
     const char *outputFile;
 
@@ -79,15 +88,20 @@ private:
     int width;
     int height;
 
+    int PrepareVideoEncoder();
+    int PrepareAudioEncoder();
+
 public:
     ScreenRecorder();
     ~ScreenRecorder();
 
     /* function to initiate communication with display library */
-    int OpenDevices();
+    int OpenCamera();
+    int OpenMic();
     int InitOutputFile();
     int SelectArea();
     int CaptureVideoFrames();
+    int CaptureAudioFrames();
 };
 
 #endif
