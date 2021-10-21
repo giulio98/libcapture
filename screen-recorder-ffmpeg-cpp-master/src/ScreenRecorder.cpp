@@ -63,7 +63,7 @@ static void audio_dict_set(AVDictionary **options, int sample_rate, int channels
     }
 }
 
-static void terminate_context(AVFormatContext **avfc) {
+static void cleanupContext(AVFormatContext **avfc) {
     avformat_close_input(avfc);
     if (!*avfc) {
         cout << "\nfile closed sucessfully";
@@ -514,8 +514,8 @@ ScreenRecorder::ScreenRecorder() {
 
 /* uninitialize the resources */
 ScreenRecorder::~ScreenRecorder() {
-    terminate_context(&inVideoFormatContext);
-    terminate_context(&inAudioFormatContext);
+    cleanupContext(&inVideoFormatContext);
+    cleanupContext(&inAudioFormatContext);
 }
 
 /* function to capture and store data in frames by allocating required memory and auto deallocating the memory.   */
