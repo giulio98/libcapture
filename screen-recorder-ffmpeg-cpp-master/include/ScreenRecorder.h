@@ -23,6 +23,7 @@ extern "C" {
 #include "libavfilter/buffersrc.h"
 #include "libavformat/avformat.h"
 #include "libavformat/avio.h"
+#include "libavutil/audio_fifo.h"
 
 // libav resample
 
@@ -39,6 +40,7 @@ extern "C" {
 // lib swresample
 
 #include "libswscale/swscale.h"
+#include "libswresample/swresample.h"
 }
 
 class ScreenRecorder {
@@ -79,6 +81,9 @@ private:
 
     const char *outputFile;
 
+    SwrContext *audioResampleContext;
+    AVAudioFifo *audioFifoBuffer;
+
     int codecId;
     int videoStreamIdx;
     int audioStreamIdx;
@@ -90,6 +95,8 @@ private:
 
     int PrepareVideoEncoder();
     int PrepareAudioEncoder();
+    int PrepareAudioResampler();
+    int PrepareAudioFifo();
 
 public:
     ScreenRecorder();
