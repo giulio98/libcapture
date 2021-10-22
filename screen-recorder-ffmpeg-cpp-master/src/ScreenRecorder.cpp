@@ -5,9 +5,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define ALSA_BUFFER_SIZE_MAX 132768
-#define DBG 0
-
 using namespace std;
 
 static int64_t pts = 0;
