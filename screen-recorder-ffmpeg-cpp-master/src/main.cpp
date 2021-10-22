@@ -12,8 +12,7 @@ int main() {
     screen_record.OpenCamera();
     screen_record.OpenMic();
     screen_record.InitOutputFile();
-    // screen_record.CaptureVideoFrames();
-    screen_record.CaptureAudioFrames();
+    screen_record.CaptureFrames();
 
     cout << "\nprogram executed successfully\n";
 

@@ -39,8 +39,8 @@ extern "C" {
 
 // lib swresample
 
-#include "libswscale/swscale.h"
 #include "libswresample/swresample.h"
+#include "libswscale/swscale.h"
 }
 
 class ScreenRecorder {
@@ -97,6 +97,10 @@ private:
     int PrepareAudioEncoder();
     int PrepareAudioResampler();
     int PrepareAudioFifo();
+    int readDecodeConvertStore(AVPacket *inPacket, int *finished);
+    int decodeAudioFrame(AVPacket *inPacket, AVFrame *inFrame, int *data_present, int *finished);
+    int CaptureVideoFrame(AVPacket *inPacket);
+    int CaptureAudioFrame(AVPacket *inPacket);
 
 public:
     ScreenRecorder();
@@ -107,8 +111,7 @@ public:
     int OpenMic();
     int InitOutputFile();
     int SelectArea();
-    int CaptureVideoFrames();
-    int CaptureAudioFrames();
+    int CaptureFrames();
 };
 
 #endif

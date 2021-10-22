@@ -148,17 +148,14 @@ static int init_output_frame(AVFrame **frame, AVCodecContext *output_codec_conte
     return 0;
 }
 
-static int decode_audio_frame(AVFrame *frame, AVFormatContext *input_format_context,
-                              AVCodecContext *input_codec_context, int *data_present, int *finished) {
+// static int decode_audio_frame(AVFrame *frame, AVFormatContext *input_format_context,
+//                               AVCodecContext *input_codec_context, int *data_present, int *finished) {
+int ScreenRecorder::decodeAudioFrame(AVPacket *inPacket, AVFrame *inFrame, int *data_present, int *finished) {
     /* Packet used for temporary storage. */
-    AVPacket *input_packet;
     int error;
 
-    error = init_packet(&input_packet);
-    if (error < 0) return error;
-
     /* Read one audio frame from the input file into a temporary packet. */
-    if ((error = av_read_frame(input_format_context, input_packet)) < 0) {
+    if ((error = av_read_frame(inAudioFormatContext, inPacket)) < 0) {
         /* If we are at the end of the file, flush the decoder below. */
         if (error == AVERROR_EOF)
             *finished = 1;
@@ -170,13 +167,13 @@ static int decode_audio_frame(AVFrame *frame, AVFormatContext *input_format_cont
 
     /* Send the audio frame stored in the temporary packet to the decoder.
      * The input audio stream decoder is used to do this. */
-    if ((error = avcodec_send_packet(input_codec_context, input_packet)) < 0) {
+    if ((error = avcodec_send_packet(inAudioCodecContext, inPacket)) < 0) {
         fprintf(stderr, "Could not send packet for decoding (error '%d')\n", error);
         goto cleanup;
     }
 
     /* Receive one frame from the decoder. */
-    error = avcodec_receive_frame(input_codec_context, frame);
+    error = avcodec_receive_frame(inAudioCodecContext, inFrame);
     /* If the decoder asks for more data to be able to decode a frame,
      * return indicating that no data is present. */
     if (error == AVERROR(EAGAIN)) {
@@ -197,7 +194,7 @@ static int decode_audio_frame(AVFrame *frame, AVFormatContext *input_format_cont
     }
 
 cleanup:
-    av_packet_free(&input_packet);
+    // av_packet_free(&inPacket);
     return error;
 }
 
@@ -258,9 +255,10 @@ static int init_converted_samples(uint8_t ***converted_input_samples, AVCodecCon
     return 0;
 }
 
-static int read_decode_convert_and_store(AVAudioFifo *fifo, AVFormatContext *input_format_context,
-                                         AVCodecContext *input_codec_context, AVCodecContext *output_codec_context,
-                                         SwrContext *resampler_context, int *finished) {
+// static int read_decode_convert_and_store(AVAudioFifo *fifo, AVFormatContext *input_format_context,
+//                                          AVCodecContext *input_codec_context, AVCodecContext *output_codec_context,
+//                                          SwrContext *resampler_context, int *finished) {
+int ScreenRecorder::readDecodeConvertStore(AVPacket *inPacket, int *finished) {
     /* Temporary storage of the input samples of the frame read from the file. */
     AVFrame *input_frame = NULL;
     /* Temporary storage for the converted input samples. */
@@ -271,8 +269,8 @@ static int read_decode_convert_and_store(AVAudioFifo *fifo, AVFormatContext *inp
     /* Initialize temporary storage for one input frame. */
     if (init_input_frame(&input_frame)) goto cleanup;
     /* Decode one frame worth of audio samples. */
-    if (decode_audio_frame(input_frame, input_format_context, input_codec_context, &data_present, finished))
-        goto cleanup;
+    // if (decode_audio_frame(input_frame, inAudioFormatContext, inAudioCodecContext, &data_present, finished))
+    if (decodeAudioFrame(inPacket, input_frame, &data_present, finished)) goto cleanup;
     /* If we are at the end of the file and there are no more samples
      * in the decoder which are delayed, we are actually finished.
      * This must not be treated as an error. */
@@ -283,17 +281,17 @@ static int read_decode_convert_and_store(AVAudioFifo *fifo, AVFormatContext *inp
     /* If there is decoded data, convert and store it. */
     if (data_present) {
         /* Initialize the temporary storage for the converted input samples. */
-        if (init_converted_samples(&converted_input_samples, output_codec_context, input_frame->nb_samples))
+        if (init_converted_samples(&converted_input_samples, outAudioCodecContext, input_frame->nb_samples))
             goto cleanup;
 
         /* Convert the input samples to the desired output sample format.
          * This requires a temporary storage provided by converted_input_samples. */
         if (convert_samples((const uint8_t **)input_frame->extended_data, converted_input_samples,
-                            input_frame->nb_samples, resampler_context))
+                            input_frame->nb_samples, audioResampleContext))
             goto cleanup;
 
         /* Add the converted input samples to the FIFO buffer for later processing. */
-        if (add_samples_to_fifo(fifo, converted_input_samples, input_frame->nb_samples)) goto cleanup;
+        if (add_samples_to_fifo(audioFifoBuffer, converted_input_samples, input_frame->nb_samples)) goto cleanup;
         ret = 0;
     }
     ret = 0;
@@ -307,6 +305,7 @@ cleanup:
 
     return ret;
 }
+
 static int encode_audio_frame(AVFrame *frame, AVFormatContext *output_format_context,
                               AVCodecContext *output_codec_context, int *data_present) {
     /* Packet used for temporary storage. */
@@ -352,6 +351,9 @@ static int encode_audio_frame(AVFrame *frame, AVFormatContext *output_format_con
     } else {
         *data_present = 1;
     }
+
+    // Very ugly, improve this!
+    output_packet->stream_index = 1;
 
     /* Write one audio frame from the temporary packet to the output file. */
     if (*data_present && (error = av_write_frame(output_format_context, output_packet)) < 0) {
@@ -516,7 +518,7 @@ ScreenRecorder::~ScreenRecorder() {
 }
 
 /* function to capture and store data in frames by allocating required memory and auto deallocating the memory.   */
-int ScreenRecorder::CaptureVideoFrames() {
+int ScreenRecorder::CaptureVideoFrame(AVPacket *inPacket) {
     /*
      * When you decode a single packet, you still don't have information enough to have a frame
      * [depending on the type of codec, some of them you do], when you decode a GROUP of packets
@@ -527,7 +529,7 @@ int ScreenRecorder::CaptureVideoFrames() {
     int ret;
 
     /* Compressed (encoded) video data */
-    AVPacket *inPacket;
+    // AVPacket *inPacket;
     /* Decoded video data (input) */
     AVFrame *inFrame;
     /* Decoded video data (output) */
@@ -537,11 +539,11 @@ int ScreenRecorder::CaptureVideoFrames() {
     // packet = (AVPacket *)av_malloc(sizeof(AVPacket));
     // av_init_packet(packet);
     //
-    inPacket = av_packet_alloc();
-    if (!inPacket) {
-        cerr << "\nunable to allocate packet";
-        exit(1);
-    }
+    // inPacket = av_packet_alloc();
+    // if (!inPacket) {
+    //     cerr << "\nunable to allocate packet";
+    //     exit(1);
+    // }
 
     inFrame = av_frame_alloc();
     if (!inFrame) {
@@ -587,16 +589,16 @@ int ScreenRecorder::CaptureVideoFrames() {
                              outVideoCodecContext->width, outVideoCodecContext->height, outVideoCodecContext->pix_fmt,
                              SWS_BICUBIC, NULL, NULL, NULL);
 
-    int ii = 0;
-    int no_frames = 100;
-    cout << "\nenter No. of frames to capture : ";
-    cin >> no_frames;
+    // int ii = 0;
+    // int no_frames = 100;
+    // cout << "\nenter No. of frames to capture : ";
+    // cin >> no_frames;
 
     AVPacket *outPacket;
     int j = 0;
 
-    while (av_read_frame(inVideoFormatContext, inPacket) >= 0) {
-        if (ii++ == no_frames) break;
+    // while (av_read_frame(inVideoFormatContext, inPacket) >= 0) {
+        // if (ii++ == no_frames) break;
         if (inPacket->stream_index == videoStreamIdx) {
             ret = avcodec_send_packet(inVideoCodecContext, inPacket);
             if (ret < 0) {
@@ -664,17 +666,17 @@ int ScreenRecorder::CaptureVideoFrames() {
                 av_packet_unref(outPacket);
             }  // frameFinished
         }
-    }  // End of while-loop
+    // }  // End of while-loop
 
-    ret = av_write_trailer(outFormatContext);
-    if (ret < 0) {
-        cout << "\nerror in writing av trailer";
-        exit(1);
-    }
+    // ret = av_write_trailer(outFormatContext);
+    // if (ret < 0) {
+    //     cout << "\nerror in writing av trailer";
+    //     exit(1);
+    // }
 
-    // THIS WAS ADDED LATER
-    av_free(video_outbuf);
-    avio_close(outFormatContext->pb);
+    // // THIS WAS ADDED LATER
+    // av_free(video_outbuf);
+    // avio_close(outFormatContext->pb);
 
     return 0;
 }
@@ -727,15 +729,13 @@ int ScreenRecorder::PrepareAudioFifo() {
     return 0;
 }
 
-int ScreenRecorder::CaptureAudioFrames() {
+int ScreenRecorder::CaptureAudioFrame(AVPacket *inPacket) {
     int ret;
     int no_frames = 0;
     int max_frames = 100;
 
-    PrepareAudioResampler();
-    PrepareAudioFifo();
+    // while (++no_frames < max_frames) {
 
-    while (++no_frames < max_frames) {
         /* Use the encoder's desired frame size for processing. */
         const int output_frame_size = outAudioCodecContext->frame_size;
         int finished = 0;
@@ -748,9 +748,10 @@ int ScreenRecorder::CaptureAudioFrames() {
         while (av_audio_fifo_size(audioFifoBuffer) < output_frame_size) {
             /* Decode one frame worth of audio samples, convert it to the
              * output sample format and put it into the FIFO buffer. */
-            if (read_decode_convert_and_store(audioFifoBuffer, inAudioFormatContext, inAudioCodecContext,
-                                              outAudioCodecContext, audioResampleContext, &finished))
-                goto cleanup;
+            // if (read_decode_convert_and_store(audioFifoBuffer, inAudioFormatContext, inAudioCodecContext,
+            //                                   outAudioCodecContext, audioResampleContext, &finished))
+            //     goto cleanup;
+            if (readDecodeConvertStore(inPacket, &finished)) goto cleanup;
 
             /* If we are at the end of the input file, we continue
              * encoding the remaining audio samples to the output file. */
@@ -775,26 +776,67 @@ int ScreenRecorder::CaptureAudioFrames() {
                 data_written = 0;
                 if (encode_audio_frame(NULL, outFormatContext, outAudioCodecContext, &data_written)) goto cleanup;
             } while (data_written);
-            break;
+            // break;
         }
-    }
+    // }
 
     /* Write the trailer of the output file container. */
-    if (write_output_file_trailer(outFormatContext)) goto cleanup;
+    // if (write_output_file_trailer(outFormatContext)) goto cleanup;
     ret = 0;
 
 cleanup:
-    if (audioFifoBuffer) av_audio_fifo_free(audioFifoBuffer);
-    swr_free(&audioResampleContext);
-    if (outAudioCodecContext) avcodec_free_context(&outAudioCodecContext);
-    if (outFormatContext) {
-        avio_closep(&outFormatContext->pb);
-        avformat_free_context(outFormatContext);
-    }
-    if (inAudioCodecContext) avcodec_free_context(&inAudioCodecContext);
-    if (inAudioFormatContext) avformat_close_input(&inAudioFormatContext);
+    // if (audioFifoBuffer) av_audio_fifo_free(audioFifoBuffer);
+    // swr_free(&audioResampleContext);
+    // if (outAudioCodecContext) avcodec_free_context(&outAudioCodecContext);
+    // if (outFormatContext) {
+    //     avio_closep(&outFormatContext->pb);
+    //     avformat_free_context(outFormatContext);
+    // }
+    // if (inAudioCodecContext) avcodec_free_context(&inAudioCodecContext);
+    // if (inAudioFormatContext) avformat_close_input(&inAudioFormatContext);
 
     return ret;
+}
+
+int ScreenRecorder::CaptureFrames() {
+    int ret;
+    int no_frames = 0;
+    int max_frames = 200;
+
+    /* Compressed (encoded) video data */
+    AVPacket *inVideoPacket;
+    AVPacket *inAudioPacket;
+
+    inVideoPacket = av_packet_alloc();
+    if (!inVideoPacket) {
+        cerr << "\nunable to allocate packet";
+        exit(1);
+    }
+
+    inAudioPacket = av_packet_alloc();
+    if (!inAudioPacket) {
+        cerr << "\nunable to allocate packet";
+        exit(1);
+    }
+
+    PrepareAudioResampler();
+    PrepareAudioFifo();
+
+    while (++no_frames < max_frames) {
+        av_read_frame(inVideoFormatContext, inVideoPacket);
+        av_read_frame(inAudioFormatContext, inAudioPacket);
+
+        CaptureVideoFrame(inVideoPacket);
+        CaptureAudioFrame(inAudioPacket);
+    }
+
+    ret = write_output_file_trailer(outFormatContext);
+    if (ret) {
+        cerr << "Error wriding output file trailer";
+        return 1;
+    }
+
+    return 0;
 }
 
 /* establishing the connection between camera or screen through its respective folder */
@@ -919,9 +961,9 @@ int ScreenRecorder::InitOutputFile() {
         exit(1);
     }
 
-    // if (PrepareVideoEncoder()) {
-    //     exit(1);
-    // }
+    if (PrepareVideoEncoder()) {
+        exit(1);
+    }
 
     if (PrepareAudioEncoder()) {
         exit(1);
