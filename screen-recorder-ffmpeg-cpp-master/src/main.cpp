@@ -1,4 +1,4 @@
-#include <bits/stdc++.h>
+// #include <bits/stdc++.h> // TO-DO: remove
 
 #include "../include/ScreenRecorder.h"
 
