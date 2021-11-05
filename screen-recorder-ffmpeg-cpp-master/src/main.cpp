@@ -8,7 +8,7 @@ using namespace std;
 int main() {
     ScreenRecorder screen_record;
 
-    screen_record.SelectArea();
+    // screen_record.SelectArea();
     screen_record.OpenCamera();
     screen_record.OpenMic();
     screen_record.InitOutputFile();
