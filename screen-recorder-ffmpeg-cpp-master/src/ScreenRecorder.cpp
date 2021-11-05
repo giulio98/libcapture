@@ -1,7 +1,10 @@
 #include "../include/ScreenRecorder.h"
 
+#ifdef LINUX
 #include <X11/Xlib.h>
 #include <X11/cursorfont.h>
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -1005,6 +1008,8 @@ int ScreenRecorder::InitOutputFile() {
     return 0;
 }
 
+#ifdef LINUX
+
 int ScreenRecorder::SelectArea() {
     XEvent ev;
     Display *disp = NULL;
@@ -1123,3 +1128,5 @@ int ScreenRecorder::SelectArea() {
 
     return EXIT_SUCCESS;
 }
+
+#endif

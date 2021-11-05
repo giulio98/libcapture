@@ -1,6 +1,9 @@
 #ifndef SCREENRECORDER_H
 #define SCREENRECORDER_H
 
+/* LINUX, MACOS or WINDOWS */
+#define MACOS
+
 #include <math.h>
 #include <string.h>
 
@@ -110,8 +113,11 @@ public:
     int OpenCamera();
     int OpenMic();
     int InitOutputFile();
-    int SelectArea();
     int CaptureFrames();
+
+    #ifdef LINUX
+    int SelectArea();
+    #endif
 };
 
 #endif
