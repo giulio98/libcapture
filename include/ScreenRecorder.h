@@ -43,56 +43,31 @@ extern "C" {
 
 class ScreenRecorder {
 private:
-    /* Input format */
-    AVInputFormat *pAVInputFormat;
-    /* Output format */
-    AVOutputFormat *output_format;
-
-    /* Properties of the codec used by a stream */
-    AVCodecParameters *pAVCodecParameters;
+    /* Information about the input format (container) */
+    AVFormatContext *inFormatContext;
+    /* Information about the output format (container) */
+    AVFormatContext *outFormatContext;
 
     /* Context for the decode/encode operations (input) */
-    AVCodecContext *pAVCodecContext;
+    AVCodecContext *inCodecContext;
     /* Context for the decode/encode operations (output) */
-    AVCodecContext *outAVCodecContext;
-
-    /* Information about the input format (container) */
-    AVFormatContext *pAVFormatContext;
-    /* Information about the output format (container) */
-    AVFormatContext *outAVFormatContext;
+    AVCodecContext *outCodecContext;
 
     /* Component used to encode/decode the streams (input) */
-    AVCodec *pAVCodec;
+    AVCodec *inCodec;
     /* Component used to encode/decode the streams (output) */
-    AVCodec *outAVCodec;
-
-    /* Compressed (encoded) video data */
-    AVPacket *pAVPacket;
-
-    /* Decoded video data (input) */
-    AVFrame *pAVFrame;
-    /* Decoded video data (output) */
-    AVFrame *outFrame;
+    AVCodec *outCodec;
 
     /* Additional options for the muxer */
     AVDictionary *options;
 
-    AVOutputFormat *outAVOutputFormat;
-
     /* Output video stream */
-    AVStream *video_st;
+    AVStream *videoStream;
 
-    AVFrame *outAVFrame;
+    const char *outputFile;
 
-    const char *dev_name;
-    const char *output_file;
-
-    double video_pts;
-
-    int out_size;
-    int codec_id;
-    int value;
-    int VideoStreamIndx;
+    int codecId;
+    int videoStreamIdx;
 
     int offsetX;
     int offsetY;
@@ -104,11 +79,9 @@ public:
     ~ScreenRecorder();
 
     /* function to initiate communication with display library */
-    int openCamera();
-    int init_outputfile();
-#ifdef __linux__
-    int selectArea();
-#endif
+    int OpenCamera();
+    int InitOutputFile();
+    int SelectArea();
     int CaptureVideoFrames();
 };
 
