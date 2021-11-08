@@ -1,9 +1,6 @@
 #ifndef SCREENRECORDER_H
 #define SCREENRECORDER_H
 
-/* LINUX, MACOS or WINDOWS */
-#define MACOS
-
 #include <math.h>
 #include <string.h>
 
@@ -26,7 +23,6 @@ extern "C" {
 #include "libavfilter/buffersrc.h"
 #include "libavformat/avformat.h"
 #include "libavformat/avio.h"
-#include "libavutil/audio_fifo.h"
 
 // libav resample
 
@@ -42,82 +38,78 @@ extern "C" {
 
 // lib swresample
 
-#include "libswresample/swresample.h"
 #include "libswscale/swscale.h"
 }
 
 class ScreenRecorder {
 private:
-    /* Input video container */
-    AVFormatContext *inVideoFormatContext;
-    /* Input audio container */
-    AVFormatContext *inAudioFormatContext;
-    /* Output container */
-    AVFormatContext *outFormatContext;
+    /* Input format */
+    AVInputFormat *pAVInputFormat;
+    /* Output format */
+    AVOutputFormat *output_format;
 
-    /* Context for the input decode/encode operations (video) */
-    AVCodecContext *inVideoCodecContext;
-    /* Context for the input decode/encode operations (audio) */
-    AVCodecContext *inAudioCodecContext;
-    /* Context for the output decode/encode operations (video) */
-    AVCodecContext *outVideoCodecContext;
-    /* Context for the input decode/encode operations (audio) */
-    AVCodecContext *outAudioCodecContext;
+    /* Properties of the codec used by a stream */
+    AVCodecParameters *pAVCodecParameters;
+
+    /* Context for the decode/encode operations (input) */
+    AVCodecContext *pAVCodecContext;
+    /* Context for the decode/encode operations (output) */
+    AVCodecContext *outAVCodecContext;
+
+    /* Information about the input format (container) */
+    AVFormatContext *pAVFormatContext;
+    /* Information about the output format (container) */
+    AVFormatContext *outAVFormatContext;
 
     /* Component used to encode/decode the streams (input) */
-    AVCodec *inVideoCodec;
-    /* Component used to encode/decode the streams (input) */
-    AVCodec *inAudioCodec;
+    AVCodec *pAVCodec;
     /* Component used to encode/decode the streams (output) */
-    AVCodec *outVideoCodec;
-    /* Component used to encode/decode the streams (output) */
-    AVCodec *outAudioCodec;
+    AVCodec *outAVCodec;
+
+    /* Compressed (encoded) video data */
+    AVPacket *pAVPacket;
+
+    /* Decoded video data (input) */
+    AVFrame *pAVFrame;
+    /* Decoded video data (output) */
+    AVFrame *outFrame;
 
     /* Additional options for the muxer */
-    AVDictionary *videoOptions;
-    AVDictionary *audioOptions;
+    AVDictionary *options;
+
+    AVOutputFormat *outAVOutputFormat;
 
     /* Output video stream */
-    AVStream *outVideoStream;
-    /* Output audio stream */
-    AVStream *outAudioStream;
+    AVStream *video_st;
 
-    const char *outputFile;
+    AVFrame *outAVFrame;
 
-    SwrContext *audioResampleContext;
-    AVAudioFifo *audioFifoBuffer;
+    const char *dev_name;
+    const char *output_file;
 
-    int codecId;
-    int videoStreamIdx;
-    int audioStreamIdx;
+    double video_pts;
+
+    int out_size;
+    int codec_id;
+    int value;
+    int VideoStreamIndx;
 
     int offsetX;
     int offsetY;
     int width;
     int height;
 
-    int PrepareVideoEncoder();
-    int PrepareAudioEncoder();
-    int PrepareAudioResampler();
-    int PrepareAudioFifo();
-    int readDecodeConvertStore(AVPacket *inPacket, int *finished);
-    int decodeAudioFrame(AVPacket *inPacket, AVFrame *inFrame, int *data_present, int *finished);
-    int CaptureVideoFrame(AVPacket *inPacket);
-    int CaptureAudioFrame(AVPacket *inPacket);
-
 public:
     ScreenRecorder();
     ~ScreenRecorder();
 
     /* function to initiate communication with display library */
-    int OpenCamera();
-    int OpenMic();
-    int InitOutputFile();
-    int CaptureFrames();
-
-    #ifdef LINUX
-    int SelectArea();
-    #endif
+    int openCamera();
+    int init_outputfile();
+#ifdef __linux__
+    int selectArea();
+#endif
+    int CaptureVideoFrames();
 };
 
 #endif
