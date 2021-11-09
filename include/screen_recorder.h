@@ -83,8 +83,8 @@ private:
     int audio_samplerate_;
 
     int codec_id_;
-    int video_stream_idx_;
-    int audio_stream_idx_;
+    int in_video_stream_idx_;
+    int in_audio_stream_idx_;
 
     int offset_x_;
     int offset_y_;
