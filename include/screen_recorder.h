@@ -100,6 +100,9 @@ private:
     int InitVideoEncoder();
     int InitAudioEncoder();
 
+    int ConvertEncodeStoreVideoPkt(AVPacket *in_packet);
+    int ConvertEncodeStoreAudioPkt(AVPacket *in_packet);
+
 public:
     ScreenRecorder();
     ~ScreenRecorder();
