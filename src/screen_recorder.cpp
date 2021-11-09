@@ -42,7 +42,7 @@ static int InitCodecCtx(AVCodecContext *&codec_ctx, AVCodec *&codec, AVCodecPara
 
 /* initialize the resources*/
 ScreenRecorder::ScreenRecorder()
-    : in_video_stream_idx_(-1), in_audio_stream_idx_(-1), video_framerate_(60), audio_samplerate_(48000) {
+    : in_video_stream_idx_(-1), in_audio_stream_idx_(-1), video_framerate_(60) {
     // av_register_all();
     // avcodec_register_all();
     avdevice_register_all();
