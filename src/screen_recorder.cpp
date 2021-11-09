@@ -574,7 +574,7 @@ int ScreenRecorder::CaptureFrames() {
     AVPacket *in_packet;
     int64_t start_time;
     int64_t current_time;
-    int64_t duration = (5 * 1000 * 1000);  // 10 seconds
+    int64_t duration = (10 * 1000 * 1000);  // 10 seconds
 
     if (InitVideoConverter()) exit(1);
     if (InitAudioConverter()) exit(1);
