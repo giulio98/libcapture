@@ -9,7 +9,7 @@
 
 using namespace std;
 
-static int PrepareCodecCtx(AVCodec *&codec, AVCodecContext *&codec_ctx, AVCodecParameters *codec_params) {
+static int InitCodecCtx(AVCodecContext *&codec_ctx, AVCodec *&codec, AVCodecParameters *codec_params) {
     int ret;
 
     codec = avcodec_find_decoder(codec_params->codec_id);
@@ -68,7 +68,119 @@ ScreenRecorder::~ScreenRecorder() {
     }
 }
 
-int ScreenRecorder::PrepareVideoEncoder() {
+int ScreenRecorder::SetVideoOptions() {
+    char str[20];
+    int ret;
+
+    sprintf(str, "%d", video_framerate_);
+    ret = av_dict_set(&video_options_, "framerate", str, 0);
+    if (ret < 0) {
+        cout << "\nerror in setting framerate";
+        return -1;
+    }
+
+    ret = av_dict_set(&video_options_, "show_region", "1", 0);
+    if (ret < 0) {
+        cout << "\nerror in setting show_region";
+        return -1;
+    }
+
+    sprintf(str, "%dx%d", width_, height_);
+    ret = av_dict_set(&video_options_, "video_size", str, 0);
+    if (ret < 0) {
+        cout << "\nerror in setting video_size";
+        return -1;
+    }
+
+    return 0;
+}
+
+int ScreenRecorder::InitVideoConverter() {
+    video_converter_ctx_ =
+        sws_getContext(in_video_codec_ctx_->width, in_video_codec_ctx_->height, in_video_codec_ctx_->pix_fmt,
+                       out_video_codec_ctx_->width, out_video_codec_ctx_->height, out_video_codec_ctx_->pix_fmt,
+                       SWS_BICUBIC, NULL, NULL, NULL);
+
+    if (!video_converter_ctx_) {
+        cerr << "Cannot allocate video_converter_ctx_";
+        return -1;
+    }
+
+    return 0;
+}
+
+int ScreenRecorder::InitAudioConverter() { return 0; }
+
+/* establishing the connection between camera or screen through its respective folder */
+int ScreenRecorder::OpenInputDevices() {
+    int ret;
+    video_options_ = NULL;
+    in_fmt_ctx_ = NULL;
+    char str[20];
+    char device_name[20];
+    AVInputFormat *in_fmt;
+    AVCodecParameters *video_codec_params;
+    AVCodecParameters *audio_codec_params;
+
+#ifdef __linux__
+    in_fmt = av_find_input_format("x11grab");
+    sprintf(device_name, ":0.0+%d,%d", offset_x_, offset_y_);
+#else  // macOS
+    in_fmt = av_find_input_format("avfoundation");
+    sprintf(device_name, "1:0");
+#endif
+
+    if (SetVideoOptions()) {
+        cerr << "Error in etting video options" << endl;
+        exit(1);
+    };
+
+    ret = avformat_open_input(&in_fmt_ctx_, device_name, in_fmt, &video_options_);
+    if (ret != 0) {
+        cerr << "\nerror in opening input device";
+        exit(1);
+    }
+
+    ret = avformat_find_stream_info(in_fmt_ctx_, NULL);
+    if (ret < 0) {
+        cerr << "\nunable to find the stream information";
+        exit(1);
+    }
+
+    /* find the first video stream index . Also there is an API available to do the below operations */
+    for (int i = 0; i < in_fmt_ctx_->nb_streams; i++) {
+        AVStream *stream = in_fmt_ctx_->streams[i];
+        if (stream->codecpar->codec_type == AVMEDIA_TYPE_VIDEO) {
+            video_stream_idx_ = i;
+            if (InitCodecCtx(in_video_codec_ctx_, in_video_codec_, stream->codecpar)) {
+                cerr << "Cannot Initialize in_video_codec_ctx";
+                exit(1);
+            }
+        } else if (stream->codecpar->codec_type == AVMEDIA_TYPE_AUDIO) {
+            audio_stream_idx_ = i;
+            if (InitCodecCtx(in_audio_codec_ctx_, in_audio_codec_, stream->codecpar)) {
+                cerr << "Cannot Initialize in_audio_codec_ctx";
+                exit(1);
+            }
+        }
+    }
+
+    if (video_stream_idx_ == -1) {
+        cout << "\nunable to find the video stream index. (-1)";
+        exit(1);
+    }
+
+    if (audio_stream_idx_ == -1) {
+        cout << "\nunable to find the audio stream index. (-1)";
+        exit(1);
+    }
+
+    av_dump_format(in_fmt_ctx_, 0, device_name, 0);
+
+    return 0;
+}
+
+int ScreenRecorder::InitVideoEncoder() {
     int ret;
 
     out_video_stream_ = avformat_new_stream(out_fmt_ctx_, NULL);
@@ -122,7 +234,7 @@ int ScreenRecorder::PrepareVideoEncoder() {
     return 0;
 }
 
-int ScreenRecorder::PrepareAudioEncoder() {
+int ScreenRecorder::InitAudioEncoder() {
     int ret;
     AVStream *in_stream = in_fmt_ctx_->streams[audio_stream_idx_];
     int channels;
@@ -181,97 +293,6 @@ int ScreenRecorder::PrepareAudioEncoder() {
     return 0;
 }
 
-/* establishing the connection between camera or screen through its respective folder */
-int ScreenRecorder::OpenInputDevices() {
-    int ret;
-    video_options_ = NULL;
-    in_fmt_ctx_ = NULL;
-    char str[20];
-    char device_name[20];
-    AVInputFormat *in_fmt;
-    AVCodecParameters *video_codec_params;
-    AVCodecParameters *audio_codec_params;
-
-#ifdef __linux__
-    in_fmt = av_find_input_format("x11grab");
-    sprintf(device_name, ":0.0+%d,%d", offset_x_, offset_y_);
-#else  // macOS
-    in_fmt = av_find_input_format("avfoundation");
-    sprintf(device_name, "2:0");
-#endif
-
-    sprintf(str, "%d", video_framerate_);
-    ret = av_dict_set(&video_options_, "framerate", str, 0);
-    if (ret < 0) {
-        cout << "\nerror in setting dictionary value";
-        exit(1);
-    }
-
-    ret = av_dict_set(&video_options_, "show_region", "1", 0);
-    if (ret < 0) {
-        cout << "\nerror in setting dictionary value";
-        exit(1);
-    }
-
-    sprintf(str, "%dx%d", width_, height_);
-    ret = av_dict_set(&video_options_, "video_size", str, 0);
-    if (ret < 0) {
-        cout << "\nerror in setting dictionary value";
-        exit(1);
-    }
-
-    cout << "\nSize: " << width_ << "x" << height_ << endl;
-    cout << "\nOffset: " << offset_x_ << " " << offset_y_ << endl;
-
-    ret = avformat_open_input(&in_fmt_ctx_, device_name, in_fmt, &video_options_);
-    if (ret != 0) {
-        cerr << "\nerror in opening input device";
-        exit(1);
-    }
-
-    ret = avformat_find_stream_info(in_fmt_ctx_, NULL);
-    if (ret < 0) {
-        cerr << "\nunable to find the stream information";
-        exit(1);
-    }
-
-    /* find the first video stream index . Also there is an API available to do the below operations */
-    for (int i = 0; i < in_fmt_ctx_->nb_streams; i++) {
-        if (in_fmt_ctx_->streams[i]->codecpar->codec_type == AVMEDIA_TYPE_VIDEO) {
-            video_stream_idx_ = i;
-        } else if (in_fmt_ctx_->streams[i]->codecpar->codec_type == AVMEDIA_TYPE_AUDIO) {
-            audio_stream_idx_ = i;
-        }
-    }
-
-    if (video_stream_idx_ == -1) {
-        cout << "\nunable to find the video stream index. (-1)";
-        exit(1);
-    }
-
-    if (audio_stream_idx_ == -1) {
-        cout << "\nunable to find the audio stream index. (-1)";
-        exit(1);
-    }
-
-    video_codec_params = in_fmt_ctx_->streams[video_stream_idx_]->codecpar;
-    audio_codec_params = in_fmt_ctx_->streams[audio_stream_idx_]->codecpar;
-
-    ret = PrepareCodecCtx(in_video_codec_, in_video_codec_ctx_, video_codec_params);
-    if (ret < 0) {
-        exit(1);
-    }
-
-    ret = PrepareCodecCtx(in_audio_codec_, in_audio_codec_ctx_, audio_codec_params);
-    if (ret < 0) {
-        exit(1);
-    }
-
-    av_dump_format(in_fmt_ctx_, 0, device_name, 0);
-
-    return 0;
-}
-
 /* initialize the video output file and its properties  */
 int ScreenRecorder::InitOutputFile() {
     out_fmt_ctx_ = NULL;
@@ -285,8 +306,8 @@ int ScreenRecorder::InitOutputFile() {
         exit(1);
     }
 
-    PrepareVideoEncoder();
-    PrepareAudioEncoder();
+    InitVideoEncoder();
+    InitAudioEncoder();
 
     /* create empty video file */
     if (!(out_fmt_ctx_->flags & AVFMT_NOFILE)) {
@@ -317,7 +338,6 @@ int ScreenRecorder::CaptureFrames() {
      * that represents a frame, then you have a picture! that's why frame_finished
      * will let you know you decoded enough to have a frame.
      */
-    bool frame_finished;
     int ret;
     int in_frame_number = 0;
     int out_frame_number = 0;
@@ -327,7 +347,10 @@ int ScreenRecorder::CaptureFrames() {
     AVFrame *out_frame;
     int64_t start_time;
     int64_t current_time;
-    int64_t duration = 10000000;    // 10 seconds
+    int64_t duration = (10 * 1000 * 1000);  // 10 seconds
+
+    if (InitVideoConverter()) exit(1);
+    if (InitAudioConverter()) exit(1);
 
     in_packet = av_packet_alloc();
     if (!in_packet) {
@@ -353,31 +376,16 @@ int ScreenRecorder::CaptureFrames() {
         exit(1);
     }
 
-    int video_outbuf_size;
-    int nbytes = av_image_get_buffer_size(out_video_codec_ctx_->pix_fmt, out_video_codec_ctx_->width,
-                                          out_video_codec_ctx_->height, 32);
-    uint8_t *video_outbuf = (uint8_t *)av_malloc(nbytes);
-    if (video_outbuf == NULL) {
-        cout << "\nunable to allocate memory";
+    out_frame->format = out_video_codec_ctx_->pix_fmt;
+    out_frame->width = out_video_codec_ctx_->width;
+    out_frame->height = out_video_codec_ctx_->height;
+
+    ret = av_image_alloc(out_frame->data, out_frame->linesize, out_frame->width, out_frame->height,
+                         out_video_codec_ctx_->pix_fmt, 1);
+    if (ret < 0) {
+        cerr << "Failed to allocate out_frame data";
         exit(1);
     }
-
-    // Setup the data pointers and linesizes based on the specified image parameters and the provided array.
-    ret = av_image_fill_arrays(out_frame->data, out_frame->linesize, video_outbuf, out_video_codec_ctx_->pix_fmt,
-                               out_video_codec_ctx_->width, out_video_codec_ctx_->height,
-                               1);  // returns : the size in bytes required for src
-    if (ret < 0) {
-        cout << "\nerror in filling image array";
-    }
-
-    SwsContext *swsCtx_;
-
-    // Allocate and return swsContext.
-    // a pointer to an allocated context, or NULL in case of error
-    // Deprecated : Use sws_getCachedContext() instead.
-    swsCtx_ = sws_getContext(in_video_codec_ctx_->width, in_video_codec_ctx_->height, in_video_codec_ctx_->pix_fmt,
-                             out_video_codec_ctx_->width, out_video_codec_ctx_->height, out_video_codec_ctx_->pix_fmt,
-                             SWS_BICUBIC, NULL, NULL, NULL);
 
     start_time = av_gettime();
 
@@ -392,7 +400,8 @@ int ScreenRecorder::CaptureFrames() {
             exit(1);
         }
 
-        cout << "Read packet " << in_frame_number++ << endl;
+        cout << "Read packet " << in_frame_number << endl;
+        in_frame_number++;
 
         if (in_packet->stream_index == video_stream_idx_) {
             ret = avcodec_send_packet(in_video_codec_ctx_, in_packet);
@@ -403,22 +412,15 @@ int ScreenRecorder::CaptureFrames() {
 
             while (true) {
                 ret = avcodec_receive_frame(in_video_codec_ctx_, in_frame);
-                if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) {
-                    break;
-                } else if (ret < 0) {
+                if (ret < 0) {
+                    if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) break;
                     fprintf(stderr, "Error during decoding\n");
                     exit(1);
                 }
 
-                // Convert the image from input (set in OpenInputDevices) to output format (set in OpenOutputFile)
-                sws_scale(swsCtx_, in_frame->data, in_frame->linesize, 0, in_video_codec_ctx_->height, out_frame->data,
-                          out_frame->linesize);
-                out_packet->data = NULL;  // packet data will be allocated by the encoder
-                out_packet->size = 0;
-
-                out_frame->format = out_video_codec_ctx_->pix_fmt;
-                out_frame->width = out_video_codec_ctx_->width;
-                out_frame->height = out_video_codec_ctx_->height;
+                /* Convert the image from input (set in OpenInputDevices) to output format (set in OpenOutputFile) */
+                sws_scale(video_converter_ctx_, in_frame->data, in_frame->linesize, 0, out_frame->height,
+                          out_frame->data, out_frame->linesize);
 
                 ret = avcodec_send_frame(out_video_codec_ctx_, out_frame);
                 if (ret < 0) {
@@ -438,16 +440,16 @@ int ScreenRecorder::CaptureFrames() {
                         exit(1);
                     }
 
-                    if (out_packet->size > 0) {
+                    if (out_packet->size) {
                         if (out_packet->pts != AV_NOPTS_VALUE)
                             out_packet->pts = av_rescale_q(out_packet->pts, out_video_codec_ctx_->time_base,
-                                                         out_video_stream_->time_base);
+                                                           out_video_stream_->time_base);
                         if (out_packet->dts != AV_NOPTS_VALUE)
                             out_packet->dts = av_rescale_q(out_packet->dts, out_video_codec_ctx_->time_base,
-                                                         out_video_stream_->time_base);
+                                                           out_video_stream_->time_base);
 
                         printf("Write frame %3d (size= %2d)\n", out_frame_number++, out_packet->size / 1000);
-                        if (av_write_frame(out_fmt_ctx_, out_packet) != 0) {
+                        if (av_interleaved_write_frame(out_fmt_ctx_, out_packet) != 0) {
                             cout << "\nerror in writing video frame";
                         }
 
@@ -468,7 +470,6 @@ int ScreenRecorder::CaptureFrames() {
     }
 
     // THIS WAS ADDED LATER
-    av_free(video_outbuf);
     avio_close(out_fmt_ctx_->pb);
 
     return 0;
@@ -588,12 +589,14 @@ int ScreenRecorder::SelectArea() {
 
     XCloseDisplay(disp);
 
-    return EXIT_SUCCESS;
 #else
     width_ = 1920;
     height_ = 1080;
     offset_x_ = offset_y_ = 0;
+#endif
+
+    cout << "\nSize: " << width_ << "x" << height_ << endl;
+    cout << "\nOffset: " << offset_x_ << " " << offset_y_ << endl;
 
     return 0;
-#endif
 }

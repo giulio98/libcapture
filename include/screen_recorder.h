@@ -74,6 +74,9 @@ private:
     /* Output audio stream */
     AVStream *out_audio_stream_;
 
+    SwsContext *video_converter_ctx_;
+    SwsContext *audio_converter_ctx_;
+
     int video_framerate_;
     int audio_samplerate_;
 
@@ -88,8 +91,13 @@ private:
 
     const char *output_file_;
 
-    int PrepareVideoEncoder();
-    int PrepareAudioEncoder();
+    int SetVideoOptions();
+
+    int InitVideoConverter();
+    int InitAudioConverter();
+
+    int InitVideoEncoder();
+    int InitAudioEncoder();
 
 public:
     ScreenRecorder();
