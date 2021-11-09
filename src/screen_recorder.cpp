@@ -532,7 +532,7 @@ int ScreenRecorder::ConvertEncodeStoreAudioPkt(AVPacket *in_packet) {
         ret = av_audio_fifo_read(audio_fifo_buf_, (void **)out_frame->data, out_audio_codec_ctx_->frame_size);
         assert(ret >= 0);
 
-        out_frame->pts = audio_frames_count_++ * out_audio_codec_ctx_->frame_size;
+        out_frame->pts = out_frame->nb_samples * audio_frames_counter_++;
 
         ret = avcodec_send_frame(out_audio_codec_ctx_, out_frame);
         if (ret < 0) {
@@ -577,7 +577,7 @@ int ScreenRecorder::CaptureFrames() {
     if (InitVideoConverter()) exit(1);
     if (InitAudioConverter()) exit(1);
 
-    audio_frames_count_ = 0;
+    audio_frames_counter_ = 0;
 
     in_packet = av_packet_alloc();
     if (!in_packet) {
