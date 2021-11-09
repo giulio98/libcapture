@@ -124,7 +124,7 @@ int ScreenRecorder::OpenInputDevices() {
 
 #ifdef __linux__
     in_fmt = av_find_input_format("x11grab");
-    sprintf(device_name, ":0.0+%d,%d", offset_x_, offset_y_);
+    sprintf(device_name, ":1.0+%d,%d", offset_x_, offset_y_);
 #else  // macOS
     in_fmt = av_find_input_format("avfoundation");
     sprintf(device_name, "1:0");
