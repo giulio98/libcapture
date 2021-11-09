@@ -446,10 +446,6 @@ int ScreenRecorder::ConvertEncodeStoreVideoPkt(AVPacket *in_packet) {
                     out_packet->dts =
                         av_rescale_q(out_packet->dts, out_video_codec_ctx_->time_base, out_video_stream_->time_base);
 
-                printf("Writing video frame (size = %2d)\n", out_packet->size / 1000);
-
-                cout << "PTS: " << out_packet->pts << endl;
-
                 if (av_interleaved_write_frame(out_fmt_ctx_, out_packet) != 0) {
                     cout << "\nerror in writing video frame";
                 }
