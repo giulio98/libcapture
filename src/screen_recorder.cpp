@@ -109,7 +109,37 @@ int ScreenRecorder::InitVideoConverter() {
     return 0;
 }
 
-int ScreenRecorder::InitAudioConverter() { return 0; }
+int ScreenRecorder::InitAudioConverter() {
+    int ret;
+    AVStream *in_stream = in_fmt_ctx_->streams[audio_stream_idx_];
+
+    audio_converter_ctx_ = swr_alloc_set_opts(
+        nullptr, av_get_default_channel_layout(in_audio_codec_ctx_->channels),
+        AV_SAMPLE_FMT_FLTP,  // aac encoder only receive this format
+        in_audio_codec_ctx_->sample_rate, av_get_default_channel_layout(in_audio_codec_ctx_->channels),
+        (AVSampleFormat)in_stream->codecpar->format, in_stream->codecpar->sample_rate, 0, nullptr);
+
+    if (!audio_converter_ctx_) {
+        cerr << "Error allocating audio converter";
+        return -1;
+    }
+
+    ret = swr_init(audio_converter_ctx_);
+    if (ret < 0) {
+        cerr << "Error initializing audio FIFO buffer";
+        return -1;
+    }
+
+    audio_fifo_buf_ =
+        av_audio_fifo_alloc(AV_SAMPLE_FMT_FLTP, in_audio_codec_ctx_->channels, in_audio_codec_ctx_->sample_rate * 2);
+
+    if (!audio_converter_ctx_) {
+        cerr << "Error allocating audio converter";
+        return -1;
+    }
+
+    return 0;
+}
 
 /* establishing the connection between camera or screen through its respective folder */
 int ScreenRecorder::OpenInputDevices() {
