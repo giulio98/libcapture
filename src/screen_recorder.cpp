@@ -521,7 +521,6 @@ int ScreenRecorder::ConvertEncodeStoreAudioPkt(AVPacket *in_packet) {
     av_freep(&samples_buf[0]);
 
     while (av_audio_fifo_size(audio_fifo_buf_) >= out_audio_codec_ctx_->frame_size) {
-        // AVFrame *out_frame = av_frame_alloc();
         out_frame->nb_samples = out_audio_codec_ctx_->frame_size;
         out_frame->channels = in_audio_codec_ctx_->channels;
         out_frame->channel_layout = av_get_default_channel_layout(in_audio_codec_ctx_->channels);
