@@ -18,7 +18,6 @@ extern "C" {
 #include "libavcodec/avfft.h"
 #include "libavdevice/avdevice.h"
 #include "libavfilter/avfilter.h"
-// #include "libavfilter/avfiltergraph.h"
 #include "libavfilter/buffersink.h"
 #include "libavfilter/buffersrc.h"
 #include "libavformat/avformat.h"
@@ -35,10 +34,12 @@ extern "C" {
 #include "libavutil/pixdesc.h"
 #include "libavutil/samplefmt.h"
 #include "libavutil/time.h"
+#include "libavutil/audio_fifo.h"
 
 // lib swresample
 
 #include "libswscale/swscale.h"
+#include "libswresample/swresample.h"
 }
 
 class ScreenRecorder {
