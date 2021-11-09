@@ -79,6 +79,8 @@ private:
     SwrContext *audio_converter_ctx_;
     AVAudioFifo *audio_fifo_buf_;
 
+    unsigned int audio_frames_count_;
+
     int video_framerate_;
     int audio_samplerate_;
 
