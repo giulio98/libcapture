@@ -75,7 +75,7 @@ private:
     AVStream *out_audio_stream_;
 
     SwsContext *video_converter_ctx_;
-    SwsContext *audio_converter_ctx_;
+    SwrContext *audio_converter_ctx_;
 
     int video_framerate_;
     int audio_samplerate_;
