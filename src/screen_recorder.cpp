@@ -364,29 +364,102 @@ int ScreenRecorder::InitOutputFile() {
     return 0;
 }
 
-AVFrame *ScreenRecorder::AllocOutVideoFrame() {
+int ScreenRecorder::ConvertEncodeStoreVideoPkt(AVPacket *in_packet) {
     int ret;
-    AVFrame *frame;
+    AVPacket *out_packet;
+    AVFrame *in_frame;
+    AVFrame *out_frame;
 
-    frame = av_frame_alloc();
-    if (!frame) {
-        cout << "\nunable to release the avframe resources for outframe";
-        return NULL;
+    out_packet = av_packet_alloc();
+    if (!out_packet) {
+        cerr << "Could not allocate inPacket" << endl;
+        return -1;
     }
 
-    frame->format = out_video_codec_ctx_->pix_fmt;
-    frame->width = out_video_codec_ctx_->width;
-    frame->height = out_video_codec_ctx_->height;
+    in_frame = av_frame_alloc();
+    if (!in_frame) {
+        cerr << "\nunable to release the avframe resources" << endl;
+        return -1;
+    }
 
-    ret = av_image_alloc(frame->data, frame->linesize, frame->width, frame->height,
+    out_frame = av_frame_alloc();
+    if (!out_frame) {
+        cerr << "\nunable to release the avframe resources for outframe";
+        return -1;
+    }
+
+    out_frame->format = out_video_codec_ctx_->pix_fmt;
+    out_frame->width = out_video_codec_ctx_->width;
+    out_frame->height = out_video_codec_ctx_->height;
+
+    ret = av_image_alloc(out_frame->data, out_frame->linesize, out_frame->width, out_frame->height,
                          out_video_codec_ctx_->pix_fmt, 1);
     if (ret < 0) {
-        cerr << "Failed to allocate frame data";
-        av_frame_free(&frame);
-        return NULL;
+        cerr << "Failed to allocate out_frame data";
+        return -1;
     }
 
-    return frame;
+    ret = avcodec_send_packet(in_video_codec_ctx_, in_packet);
+    if (ret < 0) {
+        fprintf(stderr, "Error sending a packet for decoding\n");
+        return -1;
+    }
+
+    while (true) {
+        ret = avcodec_receive_frame(in_video_codec_ctx_, in_frame);
+        if (ret < 0) {
+            if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) break;
+            fprintf(stderr, "Error during decoding\n");
+            exit(1);
+        }
+
+        /* Convert the image from input (set in OpenInputDevices) to output format (set in OpenOutputFile) */
+        sws_scale(video_converter_ctx_, in_frame->data, in_frame->linesize, 0, out_frame->height, out_frame->data,
+                  out_frame->linesize);
+
+        ret = avcodec_send_frame(out_video_codec_ctx_, out_frame);
+        if (ret < 0) {
+            fprintf(stderr, "Error sending a frame for encoding\n");
+            exit(1);
+        }
+
+        while (true) {
+            ret = avcodec_receive_packet(out_video_codec_ctx_, out_packet);
+            if (ret < 0) {
+                if (ret == AVERROR(EAGAIN)) {
+                    break;
+                } else if (ret == AVERROR_EOF) {
+                    return 0;
+                }
+                fprintf(stderr, "Error during encoding\n");
+                exit(1);
+            }
+
+            if (out_packet->size) {
+                if (out_packet->pts != AV_NOPTS_VALUE)
+                    out_packet->pts =
+                        av_rescale_q(out_packet->pts, out_video_codec_ctx_->time_base, out_video_stream_->time_base);
+                if (out_packet->dts != AV_NOPTS_VALUE)
+                    out_packet->dts =
+                        av_rescale_q(out_packet->dts, out_video_codec_ctx_->time_base, out_video_stream_->time_base);
+
+                printf("Writing video frame (size = %2d)\n", out_packet->size / 1000);
+
+                if (av_interleaved_write_frame(out_fmt_ctx_, out_packet) != 0) {
+                    cout << "\nerror in writing video frame";
+                }
+            }
+        }
+    }
+
+    av_packet_free(&out_packet);
+
+    av_frame_free(&in_frame);
+
+    av_freep(&out_frame->data[0]);  // needed beacuse of av_image_alloc() (data is not reference-counted)
+    av_frame_free(&out_frame);
+
+    return 0;
 }
 
 /* function to capture and store data in frames by allocating required memory and auto deallocating the memory.   */
@@ -398,12 +471,8 @@ int ScreenRecorder::CaptureFrames() {
      * will let you know you decoded enough to have a frame.
      */
     int ret;
-    int in_frame_number = 0;
-    int out_frame_number = 0;
+    int in_pkt_number = 0;
     AVPacket *in_packet;
-    AVPacket *out_packet;
-    AVFrame *in_frame;
-    AVFrame *out_video_frame;
     int64_t start_time;
     int64_t current_time;
     int64_t duration = (10 * 1000 * 1000);  // 10 seconds
@@ -413,24 +482,9 @@ int ScreenRecorder::CaptureFrames() {
 
     in_packet = av_packet_alloc();
     if (!in_packet) {
-        cerr << "Could not allocate inPacket";
+        cerr << "Could not allocate in_packet";
         exit(1);
     }
-
-    out_packet = av_packet_alloc();
-    if (!out_packet) {
-        cerr << "Could not allocate inPacket";
-        exit(1);
-    }
-
-    in_frame = av_frame_alloc();
-    if (!in_frame) {
-        cout << "\nunable to release the avframe resources";
-        exit(1);
-    }
-
-    out_video_frame = AllocOutVideoFrame();
-    if (!out_video_frame) exit(1);
 
     start_time = av_gettime();
 
@@ -441,72 +495,26 @@ int ScreenRecorder::CaptureFrames() {
         ret = av_read_frame(in_fmt_ctx_, in_packet);
         if (ret < 0) {
             if (ret == AVERROR(EAGAIN)) continue;
-            cerr << "ERROR: Cannot read frame!" << endl;
+            cerr << "ERROR: Cannot read frame" << endl;
             exit(1);
         }
 
-        cout << "Read packet " << in_frame_number << endl;
-        in_frame_number++;
+        cout << "Read packet " << in_pkt_number << " ";
+        in_pkt_number++;
 
         if (in_packet->stream_index == video_stream_idx_) {
-            ret = avcodec_send_packet(in_video_codec_ctx_, in_packet);
-            if (ret < 0) {
-                fprintf(stderr, "Error sending a packet for decoding\n");
-                exit(1);
-            }
-
-            while (true) {
-                ret = avcodec_receive_frame(in_video_codec_ctx_, in_frame);
-                if (ret < 0) {
-                    if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) break;
-                    fprintf(stderr, "Error during decoding\n");
-                    exit(1);
-                }
-
-                /* Convert the image from input (set in OpenInputDevices) to output format (set in OpenOutputFile) */
-                sws_scale(video_converter_ctx_, in_frame->data, in_frame->linesize, 0, out_video_frame->height,
-                          out_video_frame->data, out_video_frame->linesize);
-
-                ret = avcodec_send_frame(out_video_codec_ctx_, out_video_frame);
-                if (ret < 0) {
-                    fprintf(stderr, "Error sending a frame for encoding\n");
-                    exit(1);
-                }
-
-                while (true) {
-                    ret = avcodec_receive_packet(out_video_codec_ctx_, out_packet);
-                    if (ret < 0) {
-                        if (ret == AVERROR(EAGAIN)) {
-                            break;
-                        } else if (ret == AVERROR_EOF) {
-                            return 0;
-                        }
-                        fprintf(stderr, "Error during encoding\n");
-                        exit(1);
-                    }
-
-                    if (out_packet->size) {
-                        if (out_packet->pts != AV_NOPTS_VALUE)
-                            out_packet->pts = av_rescale_q(out_packet->pts, out_video_codec_ctx_->time_base,
-                                                           out_video_stream_->time_base);
-                        if (out_packet->dts != AV_NOPTS_VALUE)
-                            out_packet->dts = av_rescale_q(out_packet->dts, out_video_codec_ctx_->time_base,
-                                                           out_video_stream_->time_base);
-
-                        printf("Write frame %3d (size= %2d)\n", out_frame_number++, out_packet->size / 1000);
-                        if (av_interleaved_write_frame(out_fmt_ctx_, out_packet) != 0) {
-                            cout << "\nerror in writing video frame";
-                        }
-
-                        av_packet_unref(out_packet);
-                    }
-                }
-
-                // TO-DO: check if this is required
-                av_packet_unref(out_packet);
-            }  // frame_finished
+            cout << "(video)" << endl;
+            if (ConvertEncodeStoreVideoPkt(in_packet)) exit(1);
+        } else if (in_packet->stream_index == audio_stream_idx_) {
+            cout << "(audio)" << endl;
+        } else {
+            cerr << "ERROR: unknown stream, ignoring..." << endl;
         }
-    }  // End of while-loop
+
+        av_packet_unref(in_packet);
+    }
+
+    av_packet_free(&in_packet);
 
     ret = av_write_trailer(out_fmt_ctx_);
     if (ret < 0) {
