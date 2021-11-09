@@ -41,10 +41,13 @@ static int InitCodecCtx(AVCodecContext *&codec_ctx, AVCodec *&codec, AVCodecPara
 }
 
 /* initialize the resources*/
-ScreenRecorder::ScreenRecorder()
-    : in_video_stream_idx_(-1), in_audio_stream_idx_(-1), video_framerate_(60) {
-    // av_register_all();
-    // avcodec_register_all();
+ScreenRecorder::ScreenRecorder() {
+#ifdef __linux__
+    /* x11grab has some issues doing more than 30 fps */
+    video_framerate_ = 30;
+#else
+    video_framerate_ = 60;
+#endif
     avdevice_register_all();
     cout << "\nall required functions are registered successfully";
 }
@@ -178,6 +181,9 @@ int ScreenRecorder::OpenInputDevices() {
         cerr << "\nunable to find the stream information";
         exit(1);
     }
+
+    in_video_stream_idx_ = -1;
+    in_audio_stream_idx_ = -1;
 
     /* find the first video stream index . Also there is an API available to do the below operations */
     for (int i = 0; i < in_fmt_ctx_->nb_streams; i++) {
