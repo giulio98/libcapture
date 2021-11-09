@@ -531,7 +531,7 @@ int ScreenRecorder::ConvertEncodeStoreAudioPkt(AVPacket *in_packet) {
         if (ret < 0) {
             throw std::runtime_error("Fail to send frame in encoding");
         }
-        av_frame_free(&out_frame);
+
         ret = avcodec_receive_packet(out_audio_codec_ctx_, out_packet);
         if (ret == AVERROR(EAGAIN)) {
             continue;
