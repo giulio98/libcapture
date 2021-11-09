@@ -96,6 +96,8 @@ private:
     int InitVideoConverter();
     int InitAudioConverter();
 
+    AVFrame *AllocOutVideoFrame();
+
     int InitVideoEncoder();
     int InitAudioEncoder();
 

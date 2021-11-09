@@ -330,6 +330,31 @@ int ScreenRecorder::InitOutputFile() {
     return 0;
 }
 
+AVFrame *ScreenRecorder::AllocOutVideoFrame() {
+    int ret;
+    AVFrame *frame;
+
+    frame = av_frame_alloc();
+    if (!frame) {
+        cout << "\nunable to release the avframe resources for outframe";
+        return NULL;
+    }
+
+    frame->format = out_video_codec_ctx_->pix_fmt;
+    frame->width = out_video_codec_ctx_->width;
+    frame->height = out_video_codec_ctx_->height;
+
+    ret = av_image_alloc(frame->data, frame->linesize, frame->width, frame->height,
+                         out_video_codec_ctx_->pix_fmt, 1);
+    if (ret < 0) {
+        cerr << "Failed to allocate frame data";
+        av_frame_free(&frame);
+        return NULL;
+    }
+
+    return frame;
+}
+
 /* function to capture and store data in frames by allocating required memory and auto deallocating the memory.   */
 int ScreenRecorder::CaptureFrames() {
     /*
@@ -344,7 +369,7 @@ int ScreenRecorder::CaptureFrames() {
     AVPacket *in_packet;
     AVPacket *out_packet;
     AVFrame *in_frame;
-    AVFrame *out_frame;
+    AVFrame *out_video_frame;
     int64_t start_time;
     int64_t current_time;
     int64_t duration = (10 * 1000 * 1000);  // 10 seconds
@@ -370,22 +395,8 @@ int ScreenRecorder::CaptureFrames() {
         exit(1);
     }
 
-    out_frame = av_frame_alloc();
-    if (!out_frame) {
-        cout << "\nunable to release the avframe resources for outframe";
-        exit(1);
-    }
-
-    out_frame->format = out_video_codec_ctx_->pix_fmt;
-    out_frame->width = out_video_codec_ctx_->width;
-    out_frame->height = out_video_codec_ctx_->height;
-
-    ret = av_image_alloc(out_frame->data, out_frame->linesize, out_frame->width, out_frame->height,
-                         out_video_codec_ctx_->pix_fmt, 1);
-    if (ret < 0) {
-        cerr << "Failed to allocate out_frame data";
-        exit(1);
-    }
+    out_video_frame = AllocOutVideoFrame();
+    if (!out_video_frame) exit(1);
 
     start_time = av_gettime();
 
@@ -419,10 +430,10 @@ int ScreenRecorder::CaptureFrames() {
                 }
 
                 /* Convert the image from input (set in OpenInputDevices) to output format (set in OpenOutputFile) */
-                sws_scale(video_converter_ctx_, in_frame->data, in_frame->linesize, 0, out_frame->height,
-                          out_frame->data, out_frame->linesize);
+                sws_scale(video_converter_ctx_, in_frame->data, in_frame->linesize, 0, out_video_frame->height,
+                          out_video_frame->data, out_video_frame->linesize);
 
-                ret = avcodec_send_frame(out_video_codec_ctx_, out_frame);
+                ret = avcodec_send_frame(out_video_codec_ctx_, out_video_frame);
                 if (ret < 0) {
                     fprintf(stderr, "Error sending a frame for encoding\n");
                     exit(1);
