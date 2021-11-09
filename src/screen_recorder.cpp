@@ -42,7 +42,7 @@ static int InitCodecCtx(AVCodecContext *&codec_ctx, AVCodec *&codec, AVCodecPara
 
 /* initialize the resources*/
 ScreenRecorder::ScreenRecorder()
-    : video_stream_idx_(-1), audio_stream_idx_(-1), video_framerate_(60), audio_samplerate_(48000) {
+    : in_video_stream_idx_(-1), in_audio_stream_idx_(-1), video_framerate_(60), audio_samplerate_(48000) {
     // av_register_all();
     // avcodec_register_all();
     avdevice_register_all();
@@ -66,6 +66,8 @@ ScreenRecorder::~ScreenRecorder() {
         cout << "\nunable to free avformat context";
         exit(1);
     }
+
+    /* TO-DO: free all data structures */
 }
 
 int ScreenRecorder::SetVideoOptions() {
@@ -111,11 +113,12 @@ int ScreenRecorder::InitVideoConverter() {
 
 int ScreenRecorder::InitAudioConverter() {
     int ret;
-    AVStream *in_stream = in_fmt_ctx_->streams[audio_stream_idx_];
+    int fifo_duration = 3; // How many seconds of audio to store in the FIFO buffer
+    AVStream *in_stream = in_fmt_ctx_->streams[in_audio_stream_idx_];
 
     audio_converter_ctx_ = swr_alloc_set_opts(
         nullptr, av_get_default_channel_layout(in_audio_codec_ctx_->channels),
-        AV_SAMPLE_FMT_FLTP,  // aac encoder only receive this format
+        out_audio_codec_ctx_->sample_fmt,
         in_audio_codec_ctx_->sample_rate, av_get_default_channel_layout(in_audio_codec_ctx_->channels),
         (AVSampleFormat)in_stream->codecpar->format, in_stream->codecpar->sample_rate, 0, nullptr);
 
@@ -131,7 +134,7 @@ int ScreenRecorder::InitAudioConverter() {
     }
 
     audio_fifo_buf_ =
-        av_audio_fifo_alloc(AV_SAMPLE_FMT_FLTP, in_audio_codec_ctx_->channels, in_audio_codec_ctx_->sample_rate * 2);
+        av_audio_fifo_alloc(out_audio_codec_ctx_->sample_fmt, in_audio_codec_ctx_->channels, in_audio_codec_ctx_->sample_rate * fifo_duration);
 
     if (!audio_converter_ctx_) {
         cerr << "Error allocating audio converter";
@@ -181,13 +184,13 @@ int ScreenRecorder::OpenInputDevices() {
     for (int i = 0; i < in_fmt_ctx_->nb_streams; i++) {
         AVStream *stream = in_fmt_ctx_->streams[i];
         if (stream->codecpar->codec_type == AVMEDIA_TYPE_VIDEO) {
-            video_stream_idx_ = i;
+            in_video_stream_idx_ = i;
             if (InitCodecCtx(in_video_codec_ctx_, in_video_codec_, stream->codecpar)) {
                 cerr << "Cannot Initialize in_video_codec_ctx";
                 exit(1);
             }
         } else if (stream->codecpar->codec_type == AVMEDIA_TYPE_AUDIO) {
-            audio_stream_idx_ = i;
+            in_audio_stream_idx_ = i;
             if (InitCodecCtx(in_audio_codec_ctx_, in_audio_codec_, stream->codecpar)) {
                 cerr << "Cannot Initialize in_audio_codec_ctx";
                 exit(1);
@@ -195,13 +198,13 @@ int ScreenRecorder::OpenInputDevices() {
         }
     }
 
-    if (video_stream_idx_ == -1) {
+    if (in_video_stream_idx_ == -1) {
         cout << "\nunable to find the video stream index. (-1)";
         exit(1);
     }
 
 #ifndef __linux__
-    if (audio_stream_idx_ == -1) {
+    if (in_audio_stream_idx_ == -1) {
         cout << "\nunable to find the audio stream index. (-1)";
         exit(1);
     }
@@ -268,7 +271,7 @@ int ScreenRecorder::InitVideoEncoder() {
 
 int ScreenRecorder::InitAudioEncoder() {
     int ret;
-    AVStream *in_stream = in_fmt_ctx_->streams[audio_stream_idx_];
+    AVStream *in_stream = in_fmt_ctx_->streams[in_audio_stream_idx_];
     int channels;
 
     out_audio_stream_ = avformat_new_stream(out_fmt_ctx_, NULL);
@@ -295,7 +298,7 @@ int ScreenRecorder::InitAudioEncoder() {
     out_audio_codec_ctx_->channels = channels;
     out_audio_codec_ctx_->channel_layout = av_get_default_channel_layout(channels);
     out_audio_codec_ctx_->sample_rate = in_stream->codecpar->sample_rate;
-    out_audio_codec_ctx_->sample_fmt = out_audio_codec_->sample_fmts[0];  // for aac , there is AV_SAMPLE_FMT_FLTP =8
+    out_audio_codec_ctx_->sample_fmt = out_audio_codec_->sample_fmts[0];  // for aac there is AV_SAMPLE_FMT_FLTP = 8
     out_audio_codec_ctx_->bit_rate = 32000;
     out_audio_codec_ctx_->time_base.num = 1;
     out_audio_codec_ctx_->time_base.den = out_audio_codec_ctx_->sample_rate;
@@ -445,6 +448,8 @@ int ScreenRecorder::ConvertEncodeStoreVideoPkt(AVPacket *in_packet) {
 
                 printf("Writing video frame (size = %2d)\n", out_packet->size / 1000);
 
+                cout << "PTS: " << out_packet->pts << endl;
+
                 if (av_interleaved_write_frame(out_fmt_ctx_, out_packet) != 0) {
                     cout << "\nerror in writing video frame";
                 }
@@ -457,6 +462,103 @@ int ScreenRecorder::ConvertEncodeStoreVideoPkt(AVPacket *in_packet) {
     av_frame_free(&in_frame);
 
     av_freep(&out_frame->data[0]);  // needed beacuse of av_image_alloc() (data is not reference-counted)
+    av_frame_free(&out_frame);
+
+    return 0;
+}
+
+int ScreenRecorder::ConvertEncodeStoreAudioPkt(AVPacket *in_packet) {
+    int ret;
+    AVPacket *out_packet;
+    AVFrame *in_frame;
+    AVFrame *out_frame;
+
+    out_packet = av_packet_alloc();
+    if (!out_packet) {
+        cerr << "Could not allocate inPacket" << endl;
+        return -1;
+    }
+
+    in_frame = av_frame_alloc();
+    if (!in_frame) {
+        cerr << "\nunable to release the avframe resources" << endl;
+        return -1;
+    }
+
+    out_frame = av_frame_alloc();
+    if (!out_frame) {
+        cerr << "\nunable to release the avframe resources for outframe";
+        return -1;
+    }
+
+    ret = avcodec_send_packet(in_audio_codec_ctx_, in_packet);
+    if (ret < 0) {
+        throw std::runtime_error("can not send pkt in decoding");
+    }
+
+    ret = avcodec_receive_frame(in_audio_codec_ctx_, in_frame);
+    if (ret < 0) {
+        throw std::runtime_error("can not receive frame in decoding");
+    }
+
+    uint8_t **samples_buf = nullptr;
+    ret = av_samples_alloc_array_and_samples(&samples_buf, NULL, out_audio_codec_ctx_->channels, in_frame->nb_samples,
+                                             out_audio_codec_ctx_->sample_fmt, 0);
+    if (ret < 0) {
+        throw std::runtime_error("Fail to alloc samples by av_samples_alloc_array_and_samples.");
+    }
+
+    ret = swr_convert(audio_converter_ctx_, samples_buf, in_frame->nb_samples, (const uint8_t **)in_frame->extended_data,
+                      in_frame->nb_samples);
+    if (ret < 0) {
+        throw std::runtime_error("Fail to swr_convert.");
+    }
+    
+    if (av_audio_fifo_space(audio_fifo_buf_) < in_frame->nb_samples)
+        throw std::runtime_error("audio buffer is too small.");
+
+    ret = av_audio_fifo_write(audio_fifo_buf_, (void **)samples_buf, in_frame->nb_samples);
+    if (ret < 0) {
+        throw std::runtime_error("Fail to write fifo");
+    }
+
+    av_freep(&samples_buf[0]);
+
+    while (av_audio_fifo_size(audio_fifo_buf_) >= out_audio_codec_ctx_->frame_size) {
+        // AVFrame *out_frame = av_frame_alloc();
+        out_frame->nb_samples = out_audio_codec_ctx_->frame_size;
+        out_frame->channels = in_audio_codec_ctx_->channels;
+        out_frame->channel_layout = av_get_default_channel_layout(in_audio_codec_ctx_->channels);
+        out_frame->format = out_audio_codec_ctx_->sample_fmt;
+        out_frame->sample_rate = out_audio_codec_ctx_->sample_rate;
+
+        ret = av_frame_get_buffer(out_frame, 0);
+        assert(ret >= 0);
+        ret = av_audio_fifo_read(audio_fifo_buf_, (void **)out_frame->data, out_audio_codec_ctx_->frame_size);
+        assert(ret >= 0);
+
+        out_frame->pts = audio_frames_count_++ * out_audio_codec_ctx_->frame_size;
+
+        ret = avcodec_send_frame(out_audio_codec_ctx_, out_frame);
+        if (ret < 0) {
+            throw std::runtime_error("Fail to send frame in encoding");
+        }
+        av_frame_free(&out_frame);
+        ret = avcodec_receive_packet(out_audio_codec_ctx_, out_packet);
+        if (ret == AVERROR(EAGAIN)) {
+            continue;
+        } else if (ret < 0) {
+            throw std::runtime_error("Fail to receive packet in encoding");
+        }
+
+        out_packet->stream_index = out_audio_stream_->index;
+
+        ret = av_interleaved_write_frame(out_fmt_ctx_, out_packet);
+        av_packet_unref(out_packet);
+    }
+
+    av_packet_free(&out_packet);
+    av_frame_free(&in_frame);
     av_frame_free(&out_frame);
 
     return 0;
@@ -480,6 +582,8 @@ int ScreenRecorder::CaptureFrames() {
     if (InitVideoConverter()) exit(1);
     if (InitAudioConverter()) exit(1);
 
+    audio_frames_count_ = 0;
+
     in_packet = av_packet_alloc();
     if (!in_packet) {
         cerr << "Could not allocate in_packet";
@@ -502,11 +606,12 @@ int ScreenRecorder::CaptureFrames() {
         cout << "Read packet " << in_pkt_number << " ";
         in_pkt_number++;
 
-        if (in_packet->stream_index == video_stream_idx_) {
+        if (in_packet->stream_index == in_video_stream_idx_) {
             cout << "(video)" << endl;
             if (ConvertEncodeStoreVideoPkt(in_packet)) exit(1);
-        } else if (in_packet->stream_index == audio_stream_idx_) {
+        } else if (in_packet->stream_index == in_audio_stream_idx_) {
             cout << "(audio)" << endl;
+            if (ConvertEncodeStoreAudioPkt(in_packet)) exit(1);
         } else {
             cerr << "ERROR: unknown stream, ignoring..." << endl;
         }
