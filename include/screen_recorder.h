@@ -82,6 +82,7 @@ private:
     /* Counter for the audio packets written in the output stream */
     int audio_pkt_counter_;
 
+    AVPixelFormat video_pix_fmt_;
     int video_framerate_;
 
     int in_video_stream_idx_;

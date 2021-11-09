@@ -48,6 +48,7 @@ ScreenRecorder::ScreenRecorder() {
 #else
     video_framerate_ = 60;
 #endif
+    video_pix_fmt_ = AV_PIX_FMT_YUV420P;
     avdevice_register_all();
     cout << "\nall required functions are registered successfully";
 }
@@ -242,7 +243,7 @@ int ScreenRecorder::InitVideoEncoder() {
 
     /* set property of the video file */
     out_video_codec_ctx_ = avcodec_alloc_context3(out_video_codec_);
-    out_video_codec_ctx_->pix_fmt = AV_PIX_FMT_YUV420P;
+    out_video_codec_ctx_->pix_fmt = video_pix_fmt_;
     out_video_codec_ctx_->width = in_video_codec_ctx_->width;
     out_video_codec_ctx_->height = in_video_codec_ctx_->height;
     out_video_codec_ctx_->framerate = (AVRational){video_framerate_, 1};
