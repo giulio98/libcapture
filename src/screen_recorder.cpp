@@ -299,7 +299,7 @@ int ScreenRecorder::InitAudioEncoder() {
     out_audio_codec_ctx_->channel_layout = av_get_default_channel_layout(channels);
     out_audio_codec_ctx_->sample_rate = in_stream->codecpar->sample_rate;
     out_audio_codec_ctx_->sample_fmt = out_audio_codec_->sample_fmts[0];  // for aac there is AV_SAMPLE_FMT_FLTP = 8
-    out_audio_codec_ctx_->bit_rate = 32000;
+    out_audio_codec_ctx_->bit_rate = 96000;
     out_audio_codec_ctx_->time_base.num = 1;
     out_audio_codec_ctx_->time_base.den = out_audio_codec_ctx_->sample_rate;
 
