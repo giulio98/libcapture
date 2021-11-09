@@ -491,6 +491,7 @@ int ScreenRecorder::ConvertEncodeStoreAudioPkt(AVPacket *in_packet) {
     }
 
     uint8_t **samples_buf = nullptr;
+
     ret = av_samples_alloc_array_and_samples(&samples_buf, NULL, out_audio_codec_ctx_->channels, in_frame->nb_samples,
                                              out_audio_codec_ctx_->sample_fmt, 0);
     if (ret < 0) {
@@ -525,8 +526,6 @@ int ScreenRecorder::ConvertEncodeStoreAudioPkt(AVPacket *in_packet) {
         ret = av_audio_fifo_read(audio_fifo_buf_, (void **)out_frame->data, out_audio_codec_ctx_->frame_size);
         assert(ret >= 0);
 
-        out_frame->pts = out_frame->nb_samples * audio_frames_counter_++;
-
         ret = avcodec_send_frame(out_audio_codec_ctx_, out_frame);
         if (ret < 0) {
             throw std::runtime_error("Fail to send frame in encoding");
@@ -539,7 +538,10 @@ int ScreenRecorder::ConvertEncodeStoreAudioPkt(AVPacket *in_packet) {
             throw std::runtime_error("Fail to receive packet in encoding");
         }
 
+        /* dts and duration of out_packet should already be set */
         out_packet->stream_index = out_audio_stream_->index;
+        out_packet->pts = out_audio_codec_ctx_->frame_size * audio_pkt_counter_;
+        audio_pkt_counter_++;
 
         ret = av_interleaved_write_frame(out_fmt_ctx_, out_packet);
         av_packet_unref(out_packet);
@@ -561,16 +563,16 @@ int ScreenRecorder::CaptureFrames() {
      * will let you know you decoded enough to have a frame.
      */
     int ret;
-    int in_pkt_number = 0;
+    int in_pkt_counter = 0;
     AVPacket *in_packet;
     int64_t start_time;
     int64_t current_time;
-    int64_t duration = (10 * 1000 * 1000);  // 10 seconds
+    int64_t duration = (5 * 1000 * 1000);  // 10 seconds
 
     if (InitVideoConverter()) exit(1);
     if (InitAudioConverter()) exit(1);
 
-    audio_frames_counter_ = 0;
+    audio_pkt_counter_ = 0;
 
     in_packet = av_packet_alloc();
     if (!in_packet) {
@@ -591,8 +593,8 @@ int ScreenRecorder::CaptureFrames() {
             exit(1);
         }
 
-        cout << "Read packet " << in_pkt_number << " ";
-        in_pkt_number++;
+        cout << "Read packet " << in_pkt_counter << " ";
+        in_pkt_counter++;
 
         if (in_packet->stream_index == in_video_stream_idx_) {
             cout << "(video)" << endl;

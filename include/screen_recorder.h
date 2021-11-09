@@ -79,8 +79,8 @@ private:
     SwrContext *audio_converter_ctx_;
     AVAudioFifo *audio_fifo_buf_;
 
-    /* Counter for the audio frames pulled from the FIFO buffer */
-    int audio_frames_counter_;
+    /* Counter for the audio packets written in the output stream */
+    int audio_pkt_counter_;
 
     int video_framerate_;
     int audio_samplerate_;
