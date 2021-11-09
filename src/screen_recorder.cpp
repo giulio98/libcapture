@@ -522,9 +522,16 @@ int ScreenRecorder::ConvertEncodeStoreAudioPkt(AVPacket *in_packet) {
         out_frame->sample_rate = out_audio_codec_ctx_->sample_rate;
 
         ret = av_frame_get_buffer(out_frame, 0);
-        assert(ret >= 0);
-        ret = av_audio_fifo_read(audio_fifo_buf_, (void **)out_frame->data, out_audio_codec_ctx_->frame_size);
-        assert(ret >= 0);
+        if (ret < 0) {
+            cerr << "Cannot fill out_frame buffers";
+            return -1;
+        }
+
+        ret = av_audio_fifo_read(audio_fifo_buf_, (void**)out_frame->data, out_audio_codec_ctx_->frame_size);
+        if (ret < 0) {
+            cerr << "Cannot read from audio FIFO";
+            return -1;
+        }
 
         ret = avcodec_send_frame(out_audio_codec_ctx_, out_frame);
         if (ret < 0) {
