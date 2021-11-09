@@ -85,7 +85,6 @@ private:
     int video_framerate_;
     int audio_samplerate_;
 
-    int codec_id_;
     int in_video_stream_idx_;
     int in_audio_stream_idx_;
 
