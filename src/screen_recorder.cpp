@@ -456,6 +456,35 @@ int ScreenRecorder::ConvertEncodeStoreVideoPkt(AVPacket *in_packet) {
     return 0;
 }
 
+int ScreenRecorder::ConvertWriteAudioFifo(AVFrame *in_frame) {
+    int ret;
+    uint8_t **buf = nullptr;
+
+    ret = av_samples_alloc_array_and_samples(&buf, NULL, out_audio_codec_ctx_->channels, in_frame->nb_samples,
+                                             out_audio_codec_ctx_->sample_fmt, 0);
+    if (ret < 0) {
+        throw std::runtime_error("Fail to alloc samples by av_samples_alloc_array_and_samples.");
+    }
+
+    ret = swr_convert(audio_converter_ctx_, buf, in_frame->nb_samples, (const uint8_t**)in_frame->extended_data,
+                      in_frame->nb_samples);
+    if (ret < 0) {
+        throw std::runtime_error("Fail to swr_convert.");
+    }
+
+    if (av_audio_fifo_space(audio_fifo_buf_) < in_frame->nb_samples)
+        throw std::runtime_error("audio buffer is too small.");
+
+    ret = av_audio_fifo_write(audio_fifo_buf_, (void**)buf, in_frame->nb_samples);
+    if (ret < 0) {
+        throw std::runtime_error("Fail to write fifo");
+    }
+
+    av_freep(&buf[0]);
+
+    return 0;
+}
+
 int ScreenRecorder::ConvertEncodeStoreAudioPkt(AVPacket *in_packet) {
     int ret;
     AVPacket *out_packet;
@@ -474,12 +503,6 @@ int ScreenRecorder::ConvertEncodeStoreAudioPkt(AVPacket *in_packet) {
         return -1;
     }
 
-    out_frame = av_frame_alloc();
-    if (!out_frame) {
-        cerr << "\nunable to release the avframe resources for outframe";
-        return -1;
-    }
-
     ret = avcodec_send_packet(in_audio_codec_ctx_, in_packet);
     if (ret < 0) {
         throw std::runtime_error("can not send pkt in decoding");
@@ -490,31 +513,18 @@ int ScreenRecorder::ConvertEncodeStoreAudioPkt(AVPacket *in_packet) {
         throw std::runtime_error("can not receive frame in decoding");
     }
 
-    uint8_t **samples_buf = nullptr;
-
-    ret = av_samples_alloc_array_and_samples(&samples_buf, NULL, out_audio_codec_ctx_->channels, in_frame->nb_samples,
-                                             out_audio_codec_ctx_->sample_fmt, 0);
+    ret = ConvertWriteAudioFifo(in_frame);
     if (ret < 0) {
-        throw std::runtime_error("Fail to alloc samples by av_samples_alloc_array_and_samples.");
+        throw std::runtime_error("can not write in audio FIFO buffer");
     }
-
-    ret = swr_convert(audio_converter_ctx_, samples_buf, in_frame->nb_samples,
-                      (const uint8_t **)in_frame->extended_data, in_frame->nb_samples);
-    if (ret < 0) {
-        throw std::runtime_error("Fail to swr_convert.");
-    }
-
-    if (av_audio_fifo_space(audio_fifo_buf_) < in_frame->nb_samples)
-        throw std::runtime_error("audio buffer is too small.");
-
-    ret = av_audio_fifo_write(audio_fifo_buf_, (void **)samples_buf, in_frame->nb_samples);
-    if (ret < 0) {
-        throw std::runtime_error("Fail to write fifo");
-    }
-
-    av_freep(&samples_buf[0]);
 
     while (av_audio_fifo_size(audio_fifo_buf_) >= out_audio_codec_ctx_->frame_size) {
+        out_frame = av_frame_alloc();
+        if (!out_frame) {
+            cerr << "Could not allocate audio out_frame" << endl;
+            return -1;
+        }
+
         out_frame->nb_samples = out_audio_codec_ctx_->frame_size;
         out_frame->channels = in_audio_codec_ctx_->channels;
         out_frame->channel_layout = av_get_default_channel_layout(in_audio_codec_ctx_->channels);
@@ -538,6 +548,8 @@ int ScreenRecorder::ConvertEncodeStoreAudioPkt(AVPacket *in_packet) {
             throw std::runtime_error("Fail to send frame in encoding");
         }
 
+        av_frame_free(&out_frame);
+
         ret = avcodec_receive_packet(out_audio_codec_ctx_, out_packet);
         if (ret == AVERROR(EAGAIN)) {
             continue;
@@ -556,7 +568,6 @@ int ScreenRecorder::ConvertEncodeStoreAudioPkt(AVPacket *in_packet) {
 
     av_packet_free(&out_packet);
     av_frame_free(&in_frame);
-    av_frame_free(&out_frame);
 
     return 0;
 }

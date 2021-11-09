@@ -105,6 +105,7 @@ private:
 
     int ConvertEncodeStoreVideoPkt(AVPacket *in_packet);
     int ConvertEncodeStoreAudioPkt(AVPacket *in_packet);
+    int ConvertWriteAudioFifo(AVFrame *in_frame);
 
 public:
     ScreenRecorder();
