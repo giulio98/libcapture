@@ -595,7 +595,9 @@ int ScreenRecorder::CaptureFrames() {
     int64_t duration = (10 * 1000 * 1000);  // 10 seconds
 
     if (InitVideoConverter()) exit(1);
+#ifndef __linux__
     if (InitAudioConverter()) exit(1);
+#endif
 
     audio_pkt_counter_ = 0;
 
