@@ -170,10 +170,12 @@ int ScreenRecorder::OpenInputDevices() {
         exit(1);
     }
 
+#ifndef __linux__
     if (audio_stream_idx_ == -1) {
         cout << "\nunable to find the audio stream index. (-1)";
         exit(1);
     }
+#endif
 
     av_dump_format(in_fmt_ctx_, 0, device_name, 0);
 
@@ -307,7 +309,9 @@ int ScreenRecorder::InitOutputFile() {
     }
 
     InitVideoEncoder();
+#ifndef __linux__
     InitAudioEncoder();
+#endif
 
     /* create empty video file */
     if (!(out_fmt_ctx_->flags & AVFMT_NOFILE)) {
@@ -587,13 +591,13 @@ int ScreenRecorder::SelectArea() {
     }
 
     if (rw < threshold || rh < threshold) {
-        width = scr->width;
-        height = scr->height;
+        width_ = scr->width;
+        height_ = scr->height;
         offset_x_ = 0;
         offset_y_ = 0;
     } else {
-        width = rw;
-        height = rh;
+        width_ = rw;
+        height_ = rh;
         offset_x_ = rx;
         offset_y_ = ry;
     }
