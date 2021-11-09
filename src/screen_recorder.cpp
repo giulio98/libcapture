@@ -244,8 +244,6 @@ int ScreenRecorder::InitVideoEncoder() {
     out_video_codec_ctx_->time_base.num = 1;
     out_video_codec_ctx_->time_base.den = video_framerate_;
 
-    out_video_stream_->time_base = out_video_codec_ctx_->time_base;
-
     /*
      * Some container formats (like MP4) require global headers to be present
      * Mark the encoder so that it behaves accordingly.
@@ -302,8 +300,6 @@ int ScreenRecorder::InitAudioEncoder() {
     out_audio_codec_ctx_->bit_rate = 96000;
     out_audio_codec_ctx_->time_base.num = 1;
     out_audio_codec_ctx_->time_base.den = out_audio_codec_ctx_->sample_rate;
-
-    out_audio_stream_->time_base = out_audio_codec_ctx_->time_base;
 
     /*
      * Some container formats (like MP4) require global headers to be present
