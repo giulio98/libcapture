@@ -1,4 +1,4 @@
-#include "../include/ScreenRecorder.h"
+#include "../include/screen_recorder.h"
 
 using namespace std;
 
@@ -7,9 +7,9 @@ int main() {
     ScreenRecorder screen_record;
     cout << "\nSelect the area to record (click to select all the display) " << endl;
     screen_record.SelectArea();
-    screen_record.OpenCamera();
+    screen_record.OpenInputDevices();
     screen_record.InitOutputFile();
-    screen_record.CaptureVideoFrames();
+    screen_record.CaptureFrames();
 
     cout << "\nprogram executed successfully\n";
 

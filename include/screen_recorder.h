@@ -44,45 +44,61 @@ extern "C" {
 class ScreenRecorder {
 private:
     /* Information about the input format (container) */
-    AVFormatContext *inFormatContext;
+    AVFormatContext *in_fmt_ctx_;
     /* Information about the output format (container) */
-    AVFormatContext *outFormatContext;
+    AVFormatContext *out_fmt_ctx_;
 
     /* Context for the decode/encode operations (input) */
-    AVCodecContext *inCodecContext;
+    AVCodecContext *in_video_codec_ctx_;
+    /* Context for the decode/encode operations (input) */
+    AVCodecContext *in_audio_codec_ctx_;
     /* Context for the decode/encode operations (output) */
-    AVCodecContext *outCodecContext;
+    AVCodecContext *out_video_codec_ctx_;
+    /* Context for the decode/encode operations (output) */
+    AVCodecContext *out_audio_codec_ctx_;
 
     /* Component used to encode/decode the streams (input) */
-    AVCodec *inCodec;
+    AVCodec *in_video_codec_;
+    /* Component used to encode/decode the streams (input) */
+    AVCodec *in_audio_codec_;
     /* Component used to encode/decode the streams (output) */
-    AVCodec *outCodec;
+    AVCodec *out_video_codec_;
+    /* Component used to encode/decode the streams (output) */
+    AVCodec *out_audio_codec_;
 
     /* Additional options for the muxer */
-    AVDictionary *options;
+    AVDictionary *video_options_;
 
     /* Output video stream */
-    AVStream *videoStream;
+    AVStream *out_video_stream_;
+    /* Output audio stream */
+    AVStream *out_audio_stream_;
 
-    const char *outputFile;
+    int video_framerate_;
+    int audio_samplerate_;
 
-    int codecId;
-    int videoStreamIdx;
+    int codec_id_;
+    int video_stream_idx_;
+    int audio_stream_idx_;
 
-    int offsetX;
-    int offsetY;
-    int width;
-    int height;
+    int offset_x_;
+    int offset_y_;
+    int width_;
+    int height_;
+
+    const char *output_file_;
+
+    int PrepareVideoEncoder();
+    int PrepareAudioEncoder();
 
 public:
     ScreenRecorder();
     ~ScreenRecorder();
 
-    /* function to initiate communication with display library */
-    int OpenCamera();
+    int OpenInputDevices();
     int InitOutputFile();
+    int CaptureFrames();
     int SelectArea();
-    int CaptureVideoFrames();
 };
 
 #endif

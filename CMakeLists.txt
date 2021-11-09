@@ -21,8 +21,8 @@ pkg_check_modules(LIBAV REQUIRED IMPORTED_TARGET
 
 add_executable(screen-recorder
     src/main.cpp
-    src/ScreenRecorder.cpp
-    include/ScreenRecorder.h
+    src/screen_recorder.cpp
+    include/screen_recorder.h
 )
 
 target_link_libraries(screen-recorder
