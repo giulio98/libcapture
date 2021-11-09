@@ -343,9 +343,9 @@ int ScreenRecorder::InitOutputFile() {
         exit(1);
     }
 
-    InitVideoEncoder();
+    if (InitVideoEncoder()) exit(1);
 #ifndef __linux__
-    InitAudioEncoder();
+    if (InitAudioEncoder()) exit(1);
 #endif
 
     /* create empty video file */
