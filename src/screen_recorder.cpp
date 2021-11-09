@@ -113,12 +113,11 @@ int ScreenRecorder::InitVideoConverter() {
 
 int ScreenRecorder::InitAudioConverter() {
     int ret;
-    int fifo_duration = 3; // How many seconds of audio to store in the FIFO buffer
+    int fifo_duration = 3;  // How many seconds of audio to store in the FIFO buffer
     AVStream *in_stream = in_fmt_ctx_->streams[in_audio_stream_idx_];
 
     audio_converter_ctx_ = swr_alloc_set_opts(
-        nullptr, av_get_default_channel_layout(in_audio_codec_ctx_->channels),
-        out_audio_codec_ctx_->sample_fmt,
+        nullptr, av_get_default_channel_layout(in_audio_codec_ctx_->channels), out_audio_codec_ctx_->sample_fmt,
         in_audio_codec_ctx_->sample_rate, av_get_default_channel_layout(in_audio_codec_ctx_->channels),
         (AVSampleFormat)in_stream->codecpar->format, in_stream->codecpar->sample_rate, 0, nullptr);
 
@@ -133,8 +132,8 @@ int ScreenRecorder::InitAudioConverter() {
         return -1;
     }
 
-    audio_fifo_buf_ =
-        av_audio_fifo_alloc(out_audio_codec_ctx_->sample_fmt, in_audio_codec_ctx_->channels, in_audio_codec_ctx_->sample_rate * fifo_duration);
+    audio_fifo_buf_ = av_audio_fifo_alloc(out_audio_codec_ctx_->sample_fmt, in_audio_codec_ctx_->channels,
+                                          in_audio_codec_ctx_->sample_rate * fifo_duration);
 
     if (!audio_converter_ctx_) {
         cerr << "Error allocating audio converter";
@@ -500,12 +499,12 @@ int ScreenRecorder::ConvertEncodeStoreAudioPkt(AVPacket *in_packet) {
         throw std::runtime_error("Fail to alloc samples by av_samples_alloc_array_and_samples.");
     }
 
-    ret = swr_convert(audio_converter_ctx_, samples_buf, in_frame->nb_samples, (const uint8_t **)in_frame->extended_data,
-                      in_frame->nb_samples);
+    ret = swr_convert(audio_converter_ctx_, samples_buf, in_frame->nb_samples,
+                      (const uint8_t **)in_frame->extended_data, in_frame->nb_samples);
     if (ret < 0) {
         throw std::runtime_error("Fail to swr_convert.");
     }
-    
+
     if (av_audio_fifo_space(audio_fifo_buf_) < in_frame->nb_samples)
         throw std::runtime_error("audio buffer is too small.");
 
