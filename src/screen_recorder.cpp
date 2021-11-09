@@ -197,7 +197,7 @@ int ScreenRecorder::OpenInputDevices() {
     sprintf(device_name, ":0.0+%d,%d", offset_x_, offset_y_);
 #else  // macOS
     in_fmt = av_find_input_format("avfoundation");
-    sprintf(device_name, "1:0");
+    sprintf(device_name, "2:0");
 #endif
 
     sprintf(str, "%d", video_framerate_);
@@ -314,39 +314,41 @@ int ScreenRecorder::CaptureFrames() {
     /*
      * When you decode a single packet, you still don't have information enough to have a frame
      * [depending on the type of codec, some of them you do], when you decode a GROUP of packets
-     * that represents a frame, then you have a picture! that's why frameFinished
+     * that represents a frame, then you have a picture! that's why frame_finished
      * will let you know you decoded enough to have a frame.
      */
-    int frameFinished;
-    int frameIdx = 0;
-    int flag;
+    bool frame_finished;
     int ret;
+    int in_frame_number = 0;
+    int out_frame_number = 0;
+    AVPacket *in_packet;
+    AVPacket *out_packet;
+    AVFrame *in_frame;
+    AVFrame *out_frame;
+    int64_t start_time;
+    int64_t current_time;
+    int64_t duration = 10000000;    // 10 seconds
 
-    /* Compressed (encoded) video data */
-    AVPacket *packet;
-    /* Decoded video data (input) */
-    AVFrame *inFrame;
-    /* Decoded video data (output) */
-    AVFrame *outFrame;
+    in_packet = av_packet_alloc();
+    if (!in_packet) {
+        cerr << "Could not allocate inPacket";
+        exit(1);
+    }
 
-    packet = (AVPacket *)av_malloc(sizeof(AVPacket));
-    av_init_packet(packet);
+    out_packet = av_packet_alloc();
+    if (!out_packet) {
+        cerr << "Could not allocate inPacket";
+        exit(1);
+    }
 
-    inFrame = av_frame_alloc();
-    if (!inFrame) {
+    in_frame = av_frame_alloc();
+    if (!in_frame) {
         cout << "\nunable to release the avframe resources";
         exit(1);
     }
 
-    /*
-     * Since we're planning to output PPM files, which are stored in 24-bit RGB,
-     * we're going to have to convert our frame from its native format to RGB.
-     * ffmpeg will do these conversions for us. For most projects (including ours)
-     * we're going to want to convert our initial frame to a specific format.
-     * Let's allocate a frame for the converted frame now.
-     */
-    outFrame = av_frame_alloc();  // Allocate an AVFrame and set its fields to default values.
-    if (!outFrame) {
+    out_frame = av_frame_alloc();
+    if (!out_frame) {
         cout << "\nunable to release the avframe resources for outframe";
         exit(1);
     }
@@ -361,7 +363,7 @@ int ScreenRecorder::CaptureFrames() {
     }
 
     // Setup the data pointers and linesizes based on the specified image parameters and the provided array.
-    ret = av_image_fill_arrays(outFrame->data, outFrame->linesize, video_outbuf, AV_PIX_FMT_YUV420P,
+    ret = av_image_fill_arrays(out_frame->data, out_frame->linesize, video_outbuf, out_video_codec_ctx_->pix_fmt,
                                out_video_codec_ctx_->width, out_video_codec_ctx_->height,
                                1);  // returns : the size in bytes required for src
     if (ret < 0) {
@@ -377,34 +379,30 @@ int ScreenRecorder::CaptureFrames() {
                              out_video_codec_ctx_->width, out_video_codec_ctx_->height, out_video_codec_ctx_->pix_fmt,
                              SWS_BICUBIC, NULL, NULL, NULL);
 
-    int ii = 0;
-    int no_frames = 500;
-    // cout << "\nenter No. of frames to capture : ";
-    // cin >> no_frames;
+    start_time = av_gettime();
 
-    AVPacket outPacket;
-    int j = 0;
+    while (true) {
+        current_time = av_gettime();
+        if ((current_time - start_time) > duration) break;
 
-    while (ii < no_frames) {
-        ret = av_read_frame(in_fmt_ctx_, packet);
+        ret = av_read_frame(in_fmt_ctx_, in_packet);
         if (ret < 0) {
             if (ret == AVERROR(EAGAIN)) continue;
             cerr << "ERROR: Cannot read frame!" << endl;
             exit(1);
         }
 
-        ii++;
-        cout << "Read packet " << ii << endl;
+        cout << "Read packet " << in_frame_number++ << endl;
 
-        if (packet->stream_index == video_stream_idx_) {
-            ret = avcodec_send_packet(in_video_codec_ctx_, packet);
+        if (in_packet->stream_index == video_stream_idx_) {
+            ret = avcodec_send_packet(in_video_codec_ctx_, in_packet);
             if (ret < 0) {
                 fprintf(stderr, "Error sending a packet for decoding\n");
                 exit(1);
             }
 
             while (true) {
-                ret = avcodec_receive_frame(in_video_codec_ctx_, inFrame);
+                ret = avcodec_receive_frame(in_video_codec_ctx_, in_frame);
                 if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) {
                     break;
                 } else if (ret < 0) {
@@ -413,54 +411,53 @@ int ScreenRecorder::CaptureFrames() {
                 }
 
                 // Convert the image from input (set in OpenInputDevices) to output format (set in OpenOutputFile)
-                sws_scale(swsCtx_, inFrame->data, inFrame->linesize, 0, in_video_codec_ctx_->height, outFrame->data,
-                          outFrame->linesize);
-                av_init_packet(&outPacket);
-                outPacket.data = NULL;  // packet data will be allocated by the encoder
-                outPacket.size = 0;
+                sws_scale(swsCtx_, in_frame->data, in_frame->linesize, 0, in_video_codec_ctx_->height, out_frame->data,
+                          out_frame->linesize);
+                out_packet->data = NULL;  // packet data will be allocated by the encoder
+                out_packet->size = 0;
 
-                outFrame->format = out_video_codec_ctx_->pix_fmt;
-                outFrame->width = out_video_codec_ctx_->width;
-                outFrame->height = out_video_codec_ctx_->height;
+                out_frame->format = out_video_codec_ctx_->pix_fmt;
+                out_frame->width = out_video_codec_ctx_->width;
+                out_frame->height = out_video_codec_ctx_->height;
 
-                // we send a frame to the encoder
-                ret = avcodec_send_frame(out_video_codec_ctx_, outFrame);
+                ret = avcodec_send_frame(out_video_codec_ctx_, out_frame);
                 if (ret < 0) {
                     fprintf(stderr, "Error sending a frame for encoding\n");
                     exit(1);
                 }
 
-                while (ret >= 0) {
-                    ret = avcodec_receive_packet(out_video_codec_ctx_, &outPacket);
-                    if (ret == AVERROR(EAGAIN)) {
-                        break;
-                    } else if (ret == AVERROR_EOF) {
-                        return 0;
-                    } else if (ret < 0) {
+                while (true) {
+                    ret = avcodec_receive_packet(out_video_codec_ctx_, out_packet);
+                    if (ret < 0) {
+                        if (ret == AVERROR(EAGAIN)) {
+                            break;
+                        } else if (ret == AVERROR_EOF) {
+                            return 0;
+                        }
                         fprintf(stderr, "Error during encoding\n");
                         exit(1);
                     }
 
-                    if (outPacket.size > 0) {
-                        if (outPacket.pts != AV_NOPTS_VALUE)
-                            outPacket.pts = av_rescale_q(outPacket.pts, out_video_codec_ctx_->time_base,
+                    if (out_packet->size > 0) {
+                        if (out_packet->pts != AV_NOPTS_VALUE)
+                            out_packet->pts = av_rescale_q(out_packet->pts, out_video_codec_ctx_->time_base,
                                                          out_video_stream_->time_base);
-                        if (outPacket.dts != AV_NOPTS_VALUE)
-                            outPacket.dts = av_rescale_q(outPacket.dts, out_video_codec_ctx_->time_base,
+                        if (out_packet->dts != AV_NOPTS_VALUE)
+                            out_packet->dts = av_rescale_q(out_packet->dts, out_video_codec_ctx_->time_base,
                                                          out_video_stream_->time_base);
 
-                        printf("Write frame %3d (size= %2d)\n", j++, outPacket.size / 1000);
-                        if (av_write_frame(out_fmt_ctx_, &outPacket) != 0) {
+                        printf("Write frame %3d (size= %2d)\n", out_frame_number++, out_packet->size / 1000);
+                        if (av_write_frame(out_fmt_ctx_, out_packet) != 0) {
                             cout << "\nerror in writing video frame";
                         }
 
-                        av_packet_unref(&outPacket);
+                        av_packet_unref(out_packet);
                     }
                 }
 
                 // TO-DO: check if this is required
-                av_packet_unref(&outPacket);
-            }  // frameFinished
+                av_packet_unref(out_packet);
+            }  // frame_finished
         }
     }  // End of while-loop
 
@@ -596,5 +593,7 @@ int ScreenRecorder::SelectArea() {
     width_ = 1920;
     height_ = 1080;
     offset_x_ = offset_y_ = 0;
+
+    return 0;
 #endif
 }
