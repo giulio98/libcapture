@@ -6,7 +6,11 @@ using namespace std;
 int main() {
     ScreenRecorder screen_record;
     screen_record.start();
-    std::this_thread::sleep_for(100000ms);
+    std::this_thread::sleep_for(1000ms);
+    screen_record.pause();
+    std::this_thread::sleep_for(1000ms);
+    screen_record.resume();
+    std::this_thread::sleep_for(1000ms);
     screen_record.stop();
 
     std::cout << "\nprogram executed successfully\n";

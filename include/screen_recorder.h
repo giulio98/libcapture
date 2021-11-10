@@ -3,6 +3,7 @@
 #include <iostream>
 #include <thread>
 #include <mutex>
+#include <condition_variable>
 
 /* FFMPEG LIBRARIES */
 extern "C" {
@@ -109,9 +110,12 @@ class ScreenRecorder {
     int CaptureFrames();
     int SelectArea();
     std::mutex m;
+    std::condition_variable cv;
 
     std::thread tvideo;
     bool stopCapture;
+    bool started;
+    bool paused;
 
 public:
     ScreenRecorder();
@@ -120,7 +124,6 @@ public:
     
     void start();
     void stop();
-    //TODO
-    // void pause()
-    // void resume()
+    void pause();
+    void resume();
 };
