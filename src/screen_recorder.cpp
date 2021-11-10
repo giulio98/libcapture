@@ -435,6 +435,8 @@ int ScreenRecorder::ProcessVideoPkt(AVPacket *in_packet) {
         sws_scale(video_converter_ctx_, in_frame->data, in_frame->linesize, 0, out_frame->height, out_frame->data,
                   out_frame->linesize);
 
+        out_frame->pts = av_rescale_q(video_frame_counter_++, out_video_codec_ctx_->time_base, out_video_stream_->time_base);
+
         ret = avcodec_send_frame(out_video_codec_ctx_, out_frame);
         if (ret < 0) {
             fprintf(stderr, "Error sending a frame for encoding\n");
@@ -453,12 +455,12 @@ int ScreenRecorder::ProcessVideoPkt(AVPacket *in_packet) {
                 exit(1);
             }
 
-            if (out_packet->pts != AV_NOPTS_VALUE)
-                out_packet->pts =
-                    av_rescale_q(out_packet->pts, out_video_codec_ctx_->time_base, out_video_stream_->time_base);
-            if (out_packet->dts != AV_NOPTS_VALUE)
-                out_packet->dts =
-                    av_rescale_q(out_packet->dts, out_video_codec_ctx_->time_base, out_video_stream_->time_base);
+            // if (out_packet->pts != AV_NOPTS_VALUE)
+            //     out_packet->pts =
+            //         av_rescale_q(out_packet->pts, out_video_codec_ctx_->time_base, out_video_stream_->time_base);
+            // if (out_packet->dts != AV_NOPTS_VALUE)
+            //     out_packet->dts =
+            //         av_rescale_q(out_packet->dts, out_video_codec_ctx_->time_base, out_video_stream_->time_base);
 
             if (av_interleaved_write_frame(out_fmt_ctx_, out_packet) != 0) {
                 cout << "\nerror in writing video frame";
@@ -618,7 +620,8 @@ int ScreenRecorder::CaptureFrames() {
     if (InitVideoConverter()) exit(1);
     if (InitAudioConverter()) exit(1);
 
-    /* necessary for audio packets PTS */
+    /* necessary for packets PTS */
+    video_frame_counter_ = 0;
     out_audio_pkt_counter_ = 0;
 
     in_packet = av_packet_alloc();
