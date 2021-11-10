@@ -690,7 +690,6 @@ int ScreenRecorder::CaptureFrames() {
         if (in_packet->stream_index == in_video_stream_idx_) {
             cout << " (video)";
             if (ConvertEncodeStoreVideoPkt(in_packet)) exit(1);
-            process_time = av
         } else if (in_packet->stream_index == in_audio_stream_idx_) {
             cout << " (audio)";
             if (ConvertEncodeStoreAudioPkt(in_packet)) exit(1);
