@@ -603,6 +603,8 @@ int ScreenRecorder::CaptureFrames() {
     AVPacket *in_packet;
 #ifdef __linux__
     AVPacket *in_audio_packet;
+    bool video_data_present;
+    bool audio_data_present;
 #endif
     int64_t start_time;
     int64_t current_time;
@@ -611,6 +613,7 @@ int ScreenRecorder::CaptureFrames() {
     if (InitVideoConverter()) exit(1);
     if (InitAudioConverter()) exit(1);
 
+    /* necessary for audio packets PTS */
     audio_pkt_counter_ = 0;
 
     in_packet = av_packet_alloc();
@@ -633,41 +636,69 @@ int ScreenRecorder::CaptureFrames() {
         current_time = av_gettime();
         if ((current_time - start_time) > duration) break;
 
+#ifdef __linux__
+
         ret = av_read_frame(in_fmt_ctx_, in_packet);
-        if (ret < 0) {
-            if (ret == AVERROR(EAGAIN)) continue;  // TO-DO: change on Linux
+        if (ret == AVERROR(EAGAIN)) {
+            video_data_present = false;
+        } else if (ret < 0) {
+            cerr << "ERROR: Cannot read frame" << endl;
+            exit(1);
+        } else {
+            video_data_present = true;
+            cout << "Packet " << in_pkt_counter << " (video) ";
+            in_pkt_counter++;
+        }
+
+        ret = av_read_frame(in_audio_fmt_ctx_, in_audio_packet);
+        if (ret == AVERROR(EAGAIN)) {
+            audio_data_present = false;
+        } else if (ret < 0) {
+            cerr << "ERROR: Cannot read frame" << endl;
+            exit(1);
+        } else {
+            audio_data_present = true;
+            cout << "Packet " << in_pkt_counter << " (audio) ";
+            in_pkt_counter++;
+        }
+
+        if (video_data_present) {
+            if (ConvertEncodeStoreVideoPkt(in_packet)) exit(1);
+            av_packet_unref(in_packet);
+        }
+
+        if (audio_data_present) {
+            if (ConvertEncodeStoreAudioPkt(in_audio_packet)) exit(1);
+            av_packet_unref(in_audio_packet);
+        }
+
+#else  // macOS
+
+        ret = av_read_frame(in_fmt_ctx_, in_packet);
+        if (ret == AVERROR(EAGAIN)) {
+            continue;
+        } else if (ret < 0) {
             cerr << "ERROR: Cannot read frame" << endl;
             exit(1);
         }
-        cout << "Read packet " << in_pkt_counter << " ";
+
+        cout << "Packet " << in_pkt_counter;
         in_pkt_counter++;
 
-#ifdef __linux__
-        cout << "(video)" << endl;
-        ret = av_read_frame(in_audio_fmt_ctx_, in_audio_packet);
-        if (ret < 0) {
-            if (ret == AVERROR(EAGAIN)) continue;
-            cerr << "ERROR: Cannot read frame" << endl;
-            exit(1);
-        }
-        cout << "Read packet " << in_pkt_counter << " (audio)" << endl;
-        in_pkt_counter++;
-        if (ConvertEncodeStoreVideoPkt(in_packet)) exit(1);
-        if (ConvertEncodeStoreAudioPkt(in_audio_packet)) exit(1);
-        av_packet_unref(in_audio_packet);
-#else
         if (in_packet->stream_index == in_video_stream_idx_) {
-            cout << "(video)" << endl;
+            cout << " (video) ";
             if (ConvertEncodeStoreVideoPkt(in_packet)) exit(1);
+            process_time = av
         } else if (in_packet->stream_index == in_audio_stream_idx_) {
-            cout << "(audio)" << endl;
+            cout << " (audio) ";
             if (ConvertEncodeStoreAudioPkt(in_packet)) exit(1);
         } else {
-            cerr << "ERROR: unknown stream, ignoring..." << endl;
+            cout << " unknown, ignoring..." << endl;
         }
-#endif
 
         av_packet_unref(in_packet);
+
+#endif
     }
 
     av_packet_free(&in_packet);
