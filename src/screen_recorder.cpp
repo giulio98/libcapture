@@ -425,8 +425,9 @@ int ScreenRecorder::ProcessVideoPkt(AVPacket *in_packet) {
 
     while (true) {
         ret = avcodec_receive_frame(in_video_codec_ctx_, in_frame);
-        if (ret < 0) {
-            if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) break;
+        if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) {
+            break;
+        } else if (ret < 0) {
             fprintf(stderr, "Error during decoding\n");
             exit(1);
         }
@@ -435,7 +436,8 @@ int ScreenRecorder::ProcessVideoPkt(AVPacket *in_packet) {
         sws_scale(video_converter_ctx_, in_frame->data, in_frame->linesize, 0, out_frame->height, out_frame->data,
                   out_frame->linesize);
 
-        out_frame->pts = av_rescale_q(video_frame_counter_++, out_video_codec_ctx_->time_base, out_video_stream_->time_base);
+        out_frame->pts =
+            av_rescale_q(video_frame_counter_++, out_video_codec_ctx_->time_base, out_video_stream_->time_base);
 
         ret = avcodec_send_frame(out_video_codec_ctx_, out_frame);
         if (ret < 0) {
@@ -454,13 +456,6 @@ int ScreenRecorder::ProcessVideoPkt(AVPacket *in_packet) {
                 fprintf(stderr, "Error during encoding\n");
                 exit(1);
             }
-
-            // if (out_packet->pts != AV_NOPTS_VALUE)
-            //     out_packet->pts =
-            //         av_rescale_q(out_packet->pts, out_video_codec_ctx_->time_base, out_video_stream_->time_base);
-            // if (out_packet->dts != AV_NOPTS_VALUE)
-            //     out_packet->dts =
-            //         av_rescale_q(out_packet->dts, out_video_codec_ctx_->time_base, out_video_stream_->time_base);
 
             if (av_interleaved_write_frame(out_fmt_ctx_, out_packet) != 0) {
                 cout << "\nerror in writing video frame";
@@ -553,6 +548,8 @@ int ScreenRecorder::ProcessAudioPkt(AVPacket *in_packet) {
         out_frame->channel_layout = av_get_default_channel_layout(in_audio_codec_ctx_->channels);
         out_frame->format = out_audio_codec_ctx_->sample_fmt;
         out_frame->sample_rate = out_audio_codec_ctx_->sample_rate;
+        out_frame->pts = av_rescale_q(out_audio_codec_ctx_->frame_size * audio_frame_counter_++,
+                                      out_audio_codec_ctx_->time_base, out_audio_stream_->time_base);
 
         ret = av_frame_get_buffer(out_frame, 0);
         if (ret < 0) {
@@ -580,11 +577,7 @@ int ScreenRecorder::ProcessAudioPkt(AVPacket *in_packet) {
             throw std::runtime_error("Fail to receive packet in encoding");
         }
 
-        /* dts and duration of out_packet should already be set */
         out_packet->stream_index = out_audio_stream_->index;
-        out_packet->pts = out_audio_codec_ctx_->frame_size * out_audio_pkt_counter_;
-
-        out_audio_pkt_counter_++;
 
         ret = av_interleaved_write_frame(out_fmt_ctx_, out_packet);
         av_packet_unref(out_packet);
@@ -622,7 +615,7 @@ int ScreenRecorder::CaptureFrames() {
 
     /* necessary for packets PTS */
     video_frame_counter_ = 0;
-    out_audio_pkt_counter_ = 0;
+    audio_frame_counter_ = 0;
 
     in_packet = av_packet_alloc();
     if (!in_packet) {
