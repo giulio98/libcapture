@@ -450,8 +450,9 @@ int ScreenRecorder::ProcessVideoPkt(AVPacket *in_packet) {
 
             out_packet->stream_index = out_video_stream_->index;
 
-            if (av_interleaved_write_frame(out_fmt_ctx_, out_packet) != 0) {
+            if (av_interleaved_write_frame(out_fmt_ctx_, out_packet)) {
                 cout << "\nerror in writing video frame";
+                return -1;
             }
         }
     }
@@ -570,7 +571,10 @@ int ScreenRecorder::ProcessAudioPkt(AVPacket *in_packet) {
 
         out_packet->stream_index = out_audio_stream_->index;
 
-        ret = av_interleaved_write_frame(out_fmt_ctx_, out_packet);
+        if (av_interleaved_write_frame(out_fmt_ctx_, out_packet)) {
+            cout << "\nerror in writing audio frame";
+            return -1;
+        }
 
         av_frame_free(&out_frame);
     }
