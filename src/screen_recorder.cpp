@@ -573,7 +573,6 @@ int ScreenRecorder::ProcessAudioPkt(AVPacket *in_packet) {
         out_packet->stream_index = out_audio_stream_->index;
 
         ret = av_interleaved_write_frame(out_fmt_ctx_, out_packet);
-        av_packet_unref(out_packet);
     }
 
     av_packet_free(&out_packet);
