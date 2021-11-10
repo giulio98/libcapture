@@ -204,7 +204,7 @@ int ScreenRecorder::OpenInputDevices() {
     in_audio_stream_idx_ = -1;
 
 #ifdef __linux__
-    OpenInputDevice(in_fmt_ctx_, av_find_input_format("x11grab"), ":1.0", &video_options_);
+    OpenInputDevice(in_fmt_ctx_, av_find_input_format("x11grab"), ":0.0", &video_options_);
     OpenInputDevice(in_audio_fmt_ctx_, av_find_input_format("pulse"), "default", NULL);
 #else
     OpenInputDevice(in_fmt_ctx_, av_find_input_format("avfoundation"), "1:0", &video_options_);
@@ -337,7 +337,7 @@ int ScreenRecorder::InitAudioEncoder() {
 /* initialize the video output file and its properties  */
 int ScreenRecorder::InitOutputFile() {
     out_fmt_ctx_ = NULL;
-    output_file_ = "./media/output.mp4";
+    output_file_ = "../media/output.mp4";
     int ret;
 
     /* allocate out_fmt_ctx_ */
@@ -602,7 +602,7 @@ int ScreenRecorder::CaptureFrames() {
 #endif
     int64_t start_time;
     int64_t current_time;
-    int64_t duration = (10 * 1000 * 1000);  // 10 seconds
+    int64_t duration = (50 * 1000 * 1000);  // 10 seconds
 
     if (InitVideoConverter()) exit(1);
     if (InitAudioConverter()) exit(1);
