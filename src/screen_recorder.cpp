@@ -380,7 +380,7 @@ int ScreenRecorder::InitOutputFile() {
     return 0;
 }
 
-int ScreenRecorder::ConvertEncodeStoreVideoPkt(AVPacket *in_packet) {
+int ScreenRecorder::ProcessVideoPkt(AVPacket *in_packet) {
     int ret;
     AVPacket *out_packet;
     AVFrame *in_frame;
@@ -475,7 +475,7 @@ int ScreenRecorder::ConvertEncodeStoreVideoPkt(AVPacket *in_packet) {
     return 0;
 }
 
-int ScreenRecorder::ConvertWriteAudioFifo(AVFrame *in_frame) {
+int ScreenRecorder::WriteAudioFrameToFifo(AVFrame *in_frame) {
     int ret;
     uint8_t **buf = nullptr;
 
@@ -504,7 +504,7 @@ int ScreenRecorder::ConvertWriteAudioFifo(AVFrame *in_frame) {
     return 0;
 }
 
-int ScreenRecorder::ConvertEncodeStoreAudioPkt(AVPacket *in_packet) {
+int ScreenRecorder::ProcessAudioPkt(AVPacket *in_packet) {
     int ret;
     AVPacket *out_packet;
     AVFrame *in_frame;
@@ -533,7 +533,7 @@ int ScreenRecorder::ConvertEncodeStoreAudioPkt(AVPacket *in_packet) {
         throw std::runtime_error("can not receive frame in decoding");
     }
 
-    ret = ConvertWriteAudioFifo(in_frame);
+    ret = WriteAudioFrameToFifo(in_frame);
     if (ret < 0) {
         throw std::runtime_error("can not write in audio FIFO buffer");
     }
@@ -664,7 +664,7 @@ int ScreenRecorder::CaptureFrames() {
         if (video_data_present) {
             cout << "Packet " << in_pkt_counter;
             in_pkt_counter++;
-            if (ConvertEncodeStoreVideoPkt(in_packet)) exit(1);
+            if (ProcessVideoPkt(in_packet)) exit(1);
             av_packet_unref(in_packet);
         }
         cout << endl;
@@ -672,7 +672,7 @@ int ScreenRecorder::CaptureFrames() {
         if (audio_data_present) {
             cout << "Packet " << in_pkt_counter;
             in_pkt_counter++;
-            if (ConvertEncodeStoreAudioPkt(in_audio_packet)) exit(1);
+            if (ProcessAudioPkt(in_audio_packet)) exit(1);
             av_packet_unref(in_audio_packet);
         }
         cout << endl;
@@ -691,9 +691,9 @@ int ScreenRecorder::CaptureFrames() {
         in_pkt_counter++;
 
         if (in_packet->stream_index == in_video_stream_idx_) {
-            if (ConvertEncodeStoreVideoPkt(in_packet)) exit(1);
+            if (ProcessVideoPkt(in_packet)) exit(1);
         } else if (in_packet->stream_index == in_audio_stream_idx_) {
-            if (ConvertEncodeStoreAudioPkt(in_packet)) exit(1);
+            if (ProcessAudioPkt(in_packet)) exit(1);
         } else {
             cout << " unknown, ignoring...";
         }

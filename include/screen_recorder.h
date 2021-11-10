@@ -110,9 +110,12 @@ private:
     int InitVideoConverter();
     int InitAudioConverter();
 
-    int ConvertEncodeStoreVideoPkt(AVPacket *in_packet);
-    int ConvertEncodeStoreAudioPkt(AVPacket *in_packet);
-    int ConvertWriteAudioFifo(AVFrame *in_frame);
+    /* Convert, encode and write in the output file the video packet */
+    int ProcessVideoPkt(AVPacket *in_packet);
+    /* Convert, encode and write in the output file the audio packet */
+    int ProcessAudioPkt(AVPacket *in_packet);
+    /* Convert the audio frame and write it to the audio FIFO buffer */
+    int WriteAudioFrameToFifo(AVFrame *in_frame);
 
 public:
     ScreenRecorder();
