@@ -641,9 +641,6 @@ int ScreenRecorder::CaptureFrames() {
     bool video_data_present;
     bool audio_data_present;
 #endif
-    int64_t start_time;
-    int64_t current_time;
-    int64_t duration = (50 * 1000 * 1000);  // 10 seconds
 
     if (InitVideoConverter()) exit(1);
     if (InitAudioConverter()) exit(1);
@@ -666,11 +663,7 @@ int ScreenRecorder::CaptureFrames() {
     }
 #endif
 
-    start_time = av_gettime();
-
     while (true) {
-        // current_time = av_gettime();
-        // if ((current_time - start_time) > duration) break;
         std::unique_lock<std::mutex> ul{mutex_};
         cv_.wait(ul, [this]() { return (!paused_ && started_); });
         if (stop_capture_) {
