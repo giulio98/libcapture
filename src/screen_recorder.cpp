@@ -448,6 +448,8 @@ int ScreenRecorder::ProcessVideoPkt(AVPacket *in_packet) {
                 exit(1);
             }
 
+            out_packet->stream_index = out_video_stream_->index;
+
             if (av_interleaved_write_frame(out_fmt_ctx_, out_packet) != 0) {
                 cout << "\nerror in writing video frame";
             }
