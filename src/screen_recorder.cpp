@@ -206,7 +206,7 @@ int ScreenRecorder::OpenInputDevices() {
 
 #ifdef __linux__
     OpenInputDevice(in_fmt_ctx_, av_find_input_format("x11grab"), ":1.0", &video_options_);
-    OpenInputDevice(in_audio_fmt_ctx_, av_find_input_format("alsa"), "hw:0", NULL);
+    OpenInputDevice(in_audio_fmt_ctx_, av_find_input_format("pulse"), "default", NULL);
 #else
     OpenInputDevice(in_fmt_ctx_, av_find_input_format("avfoundation"), "1:0", &video_options_);
 #endif
