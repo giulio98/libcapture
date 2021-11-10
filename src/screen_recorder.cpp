@@ -304,14 +304,6 @@ int ScreenRecorder::InitAudioEncoder() {
         return -1;
     }
 
-    // #ifdef __linux__
-    //     sample_rate = 48000;
-    //     channels = 2;
-    // #else
-    //     sample_rate = in_stream->codecpar->sample_rate;
-    //     channels = in_stream->codecpar->channels;
-    // #endif
-
     out_audio_codec_ctx_ = avcodec_alloc_context3(out_audio_codec_);
     out_audio_codec_ctx_->channels = in_stream->codecpar->channels;
     out_audio_codec_ctx_->channel_layout = av_get_default_channel_layout(in_stream->codecpar->channels);
