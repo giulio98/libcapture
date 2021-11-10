@@ -1,8 +1,9 @@
 #include "../include/screen_recorder.h"
-#include "../include/duration_logger.h"
 
 #include <stdio.h>
 #include <stdlib.h>
+
+#include "../include/duration_logger.h"
 #ifdef __linux__
 #include <X11/Xlib.h>
 #include <X11/cursorfont.h>
@@ -385,7 +386,7 @@ int ScreenRecorder::ProcessVideoPkt(AVPacket *in_packet) {
     AVPacket *out_packet;
     AVFrame *in_frame;
     AVFrame *out_frame;
-    DurationLogger dl(" (video) processed in ");
+    DurationLogger dl(" processed in ");
 
     out_packet = av_packet_alloc();
     if (!out_packet) {
@@ -509,7 +510,7 @@ int ScreenRecorder::ProcessAudioPkt(AVPacket *in_packet) {
     AVPacket *out_packet;
     AVFrame *in_frame;
     AVFrame *out_frame;
-    DurationLogger dl(" (audio) processed in ");
+    DurationLogger dl(" processed in ");
 
     out_packet = av_packet_alloc();
     if (!out_packet) {
@@ -579,9 +580,9 @@ int ScreenRecorder::ProcessAudioPkt(AVPacket *in_packet) {
 
         /* dts and duration of out_packet should already be set */
         out_packet->stream_index = out_audio_stream_->index;
-        out_packet->pts = out_audio_codec_ctx_->frame_size * audio_pkt_counter_;
+        out_packet->pts = out_audio_codec_ctx_->frame_size * out_audio_pkt_counter_;
 
-        audio_pkt_counter_++;
+        out_audio_pkt_counter_++;
 
         ret = av_interleaved_write_frame(out_fmt_ctx_, out_packet);
         av_packet_unref(out_packet);
@@ -602,7 +603,8 @@ int ScreenRecorder::CaptureFrames() {
      * will let you know you decoded enough to have a frame.
      */
     int ret;
-    int in_pkt_counter = 0;
+    int in_video_pkt_counter = 0;
+    int in_audio_pkt_counter = 0;
     AVPacket *in_packet;
 #ifdef __linux__
     AVPacket *in_audio_packet;
@@ -617,7 +619,7 @@ int ScreenRecorder::CaptureFrames() {
     if (InitAudioConverter()) exit(1);
 
     /* necessary for audio packets PTS */
-    audio_pkt_counter_ = 0;
+    out_audio_pkt_counter_ = 0;
 
     in_packet = av_packet_alloc();
     if (!in_packet) {
@@ -662,20 +664,16 @@ int ScreenRecorder::CaptureFrames() {
         }
 
         if (video_data_present) {
-            cout << "Packet " << in_pkt_counter;
-            in_pkt_counter++;
+            cout << endl << "Video packet " << in_video_pkt_counter++;
             if (ProcessVideoPkt(in_packet)) exit(1);
             av_packet_unref(in_packet);
         }
-        cout << endl;
 
         if (audio_data_present) {
-            cout << "Packet " << in_pkt_counter;
-            in_pkt_counter++;
+            cout << endl << "Audio packet " << in_audio_pkt_counter++;
             if (ProcessAudioPkt(in_audio_packet)) exit(1);
             av_packet_unref(in_audio_packet);
         }
-        cout << endl;
 
 #else  // macOS
 
@@ -687,18 +685,16 @@ int ScreenRecorder::CaptureFrames() {
             exit(1);
         }
 
-        cout << "Packet " << in_pkt_counter;
-        in_pkt_counter++;
-
         if (in_packet->stream_index == in_video_stream_idx_) {
+            cout << endl << "Video packet " << in_video_pkt_counter++;
             if (ProcessVideoPkt(in_packet)) exit(1);
         } else if (in_packet->stream_index == in_audio_stream_idx_) {
+            cout << endl << "Audio packet " << in_audio_pkt_counter++;
             if (ProcessAudioPkt(in_packet)) exit(1);
         } else {
-            cout << " unknown, ignoring...";
+            cout << endl << " unknown, ignoring...";
         }
 
-        cout << endl;
         av_packet_unref(in_packet);
 
 #endif

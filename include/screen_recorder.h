@@ -84,7 +84,7 @@ private:
     AVAudioFifo *audio_fifo_buf_;
 
     /* Counter for the audio packets written in the output stream */
-    int audio_pkt_counter_;
+    int out_audio_pkt_counter_;
 
     AVPixelFormat video_pix_fmt_;
     int video_framerate_;
