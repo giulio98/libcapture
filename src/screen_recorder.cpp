@@ -664,13 +664,13 @@ int ScreenRecorder::CaptureFrames() {
         }
 
         if (video_data_present) {
-            cout << endl << "Video packet " << in_video_pkt_counter++;
+            cout << endl << "[V] packet " << in_video_pkt_counter++;
             if (ProcessVideoPkt(in_packet)) exit(1);
             av_packet_unref(in_packet);
         }
 
         if (audio_data_present) {
-            cout << endl << "Audio packet " << in_audio_pkt_counter++;
+            cout << endl << "[A] packet " << in_audio_pkt_counter++;
             if (ProcessAudioPkt(in_audio_packet)) exit(1);
             av_packet_unref(in_audio_packet);
         }
@@ -686,10 +686,10 @@ int ScreenRecorder::CaptureFrames() {
         }
 
         if (in_packet->stream_index == in_video_stream_idx_) {
-            cout << endl << "Video packet " << in_video_pkt_counter++;
+            cout << endl << "[V] packet " << in_video_pkt_counter++;
             if (ProcessVideoPkt(in_packet)) exit(1);
         } else if (in_packet->stream_index == in_audio_stream_idx_) {
-            cout << endl << "Audio packet " << in_audio_pkt_counter++;
+            cout << endl << "[A] packet " << in_audio_pkt_counter++;
             if (ProcessAudioPkt(in_packet)) exit(1);
         } else {
             cout << endl << " unknown, ignoring...";
