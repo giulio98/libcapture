@@ -5,13 +5,13 @@ using namespace std;
 /* driver function to run the application */
 int main() {
     ScreenRecorder screen_record;
-    screen_record.start();
+    screen_record.Start();
     std::this_thread::sleep_for(1000ms);
-    screen_record.pause();
+    screen_record.Pause();
     std::this_thread::sleep_for(1000ms);
-    screen_record.resume();
+    screen_record.Resume();
     std::this_thread::sleep_for(1000ms);
-    screen_record.stop();
+    screen_record.Stop();
 
     std::cout << "\nprogram executed successfully\n";
 

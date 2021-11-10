@@ -1,9 +1,9 @@
 #pragma once
 
-#include <iostream>
-#include <thread>
-#include <mutex>
 #include <condition_variable>
+#include <iostream>
+#include <mutex>
+#include <thread>
 
 /* FFMPEG LIBRARIES */
 extern "C" {
@@ -87,6 +87,14 @@ class ScreenRecorder {
 
     const char *output_file_;
 
+    std::mutex mutex_;
+    std::condition_variable cv_;
+
+    std::thread video_thread_;
+    bool stop_capture_;
+    bool started_;
+    bool paused_;
+
     int SetVideoOptions();
 
     int OpenInputDevice(AVFormatContext *&in_fmt_ctx, AVInputFormat *in_fmt, const char *device_name,
@@ -109,21 +117,13 @@ class ScreenRecorder {
     int InitOutputFile();
     int CaptureFrames();
     int SelectArea();
-    std::mutex m;
-    std::condition_variable cv;
-
-    std::thread tvideo;
-    bool stopCapture;
-    bool started;
-    bool paused;
 
 public:
     ScreenRecorder();
     ~ScreenRecorder();
 
-    
-    void start();
-    void stop();
-    void pause();
-    void resume();
+    void Start();
+    void Stop();
+    void Pause();
+    void Resume();
 };

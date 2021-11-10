@@ -41,7 +41,7 @@ static int InitCodecCtx(AVCodecContext *&codec_ctx, AVCodec *&codec, AVCodecPara
 }
 
 /* initialize the resources*/
-ScreenRecorder::ScreenRecorder() :stopCapture(false), started(true), paused(false){
+ScreenRecorder::ScreenRecorder() : stop_capture_(false), started_(true), paused_(false) {
 #ifdef __linux__
     /* x11grab has some issues doing more than 30 fps */
     video_framerate_ = 60;
@@ -70,50 +70,49 @@ ScreenRecorder::~ScreenRecorder() {
         std::cout << "\nunable to free avformat context";
         exit(1);
     }
-    if(tvideo.joinable()==true){
-        tvideo.join();
+
+    if (video_thread_.joinable() == true) {
+        video_thread_.join();
     }
+
     /* TO-DO: free all data structures */
 }
-void ScreenRecorder::start() {
 
-    auto video_fun = [this]() {
-        this->CaptureFrames();
-    };
+void ScreenRecorder::Start() {
+    auto video_fun = [this]() { this->CaptureFrames(); };
 
     std::cout << "\nSelect the area to record (click to select all the display) " << std::endl;
     this->SelectArea();
     this->OpenInputDevices();
     this->InitOutputFile();
-    
 
-    tvideo = std::thread(video_fun);
+    video_thread_ = std::thread(video_fun);
 }
-void ScreenRecorder::stop() {
+
+void ScreenRecorder::Stop() {
     {
-    std::unique_lock<std::mutex> ul{m};
-    this->stopCapture = true;
-    this->paused = false;
-    cv.notify_all();
+        std::unique_lock<std::mutex> ul{mutex_};
+        this->stop_capture_ = true;
+        this->paused_ = false;
+        cv_.notify_all();
     }
-    if(tvideo.joinable()==true){
-        tvideo.join();
+    if (video_thread_.joinable() == true) {
+        video_thread_.join();
     }
-    
-}
-void ScreenRecorder::pause() {
-    std::unique_lock<std::mutex> ul{m};
-    this->paused=true;
-    std::cout<<"\nsuccesfully paused\n";
-    cv.notify_all();
 }
 
-void ScreenRecorder::resume() {
-    std::unique_lock<std::mutex> ul{m};
-    this->paused=false;
-    std::cout<<"\nsuccesfully resumed\n";
-    cv.notify_all();
+void ScreenRecorder::Pause() {
+    std::unique_lock<std::mutex> ul{mutex_};
+    this->paused_ = true;
+    std::cout << "\nsuccesfully paused\n";
+    cv_.notify_all();
+}
 
+void ScreenRecorder::Resume() {
+    std::unique_lock<std::mutex> ul{mutex_};
+    this->paused_ = false;
+    std::cout << "\nsuccesfully resumed\n";
+    cv_.notify_all();
 }
 
 int ScreenRecorder::SetVideoOptions() {
@@ -670,11 +669,11 @@ int ScreenRecorder::CaptureFrames() {
     start_time = av_gettime();
 
     while (true) {
-        //current_time = av_gettime();
-        //if ((current_time - start_time) > duration) break;
-        std::unique_lock<std::mutex> ul{m};
-        cv.wait(ul,[this](){return (!paused && started);});
-        if (stopCapture) {
+        // current_time = av_gettime();
+        // if ((current_time - start_time) > duration) break;
+        std::unique_lock<std::mutex> ul{mutex_};
+        cv_.wait(ul, [this]() { return (!paused_ && started_); });
+        if (stop_capture_) {
             break;
         }
 
