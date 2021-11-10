@@ -46,6 +46,10 @@ class ScreenRecorder {
 private:
     /* Information about the input format (container) */
     AVFormatContext *in_fmt_ctx_;
+#ifdef __linux__
+    /* Information about the input format (container) */
+    AVFormatContext *in_audio_fmt_ctx_;
+#endif
     /* Information about the output format (container) */
     AVFormatContext *out_fmt_ctx_;
 
@@ -97,11 +101,13 @@ private:
 
     int SetVideoOptions();
 
-    int InitVideoConverter();
-    int InitAudioConverter();
+    int OpenInputDevice(AVFormatContext *&in_fmt_ctx, AVInputFormat *in_fmt, const char *device_name, AVDictionary **options);
 
     int InitVideoEncoder();
     int InitAudioEncoder();
+
+    int InitVideoConverter();
+    int InitAudioConverter();
 
     int ConvertEncodeStoreVideoPkt(AVPacket *in_packet);
     int ConvertEncodeStoreAudioPkt(AVPacket *in_packet);

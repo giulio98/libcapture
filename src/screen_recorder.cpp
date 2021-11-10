@@ -148,47 +148,24 @@ int ScreenRecorder::InitAudioConverter() {
 }
 
 /* establishing the connection between camera or screen through its respective folder */
-int ScreenRecorder::OpenInputDevices() {
+int ScreenRecorder::OpenInputDevice(AVFormatContext *&in_fmt_ctx, AVInputFormat *in_fmt, const char *device_name, AVDictionary **options) {
     int ret;
-    video_options_ = NULL;
-    in_fmt_ctx_ = NULL;
-    char str[20];
-    char device_name[20];
-    AVInputFormat *in_fmt;
-    AVCodecParameters *video_codec_params;
-    AVCodecParameters *audio_codec_params;
+    in_fmt_ctx = NULL;
 
-#ifdef __linux__
-    in_fmt = av_find_input_format("x11grab");
-    sprintf(device_name, ":1.0+%d,%d", offset_x_, offset_y_);
-#else  // macOS
-    in_fmt = av_find_input_format("avfoundation");
-    sprintf(device_name, "1:0");
-#endif
-
-    if (SetVideoOptions()) {
-        cerr << "Error in etting video options" << endl;
-        exit(1);
-    };
-
-    ret = avformat_open_input(&in_fmt_ctx_, device_name, in_fmt, &video_options_);
+    ret = avformat_open_input(&in_fmt_ctx, device_name, in_fmt, options);
     if (ret != 0) {
         cerr << "\nerror in opening input device";
         exit(1);
     }
 
-    ret = avformat_find_stream_info(in_fmt_ctx_, NULL);
+    ret = avformat_find_stream_info(in_fmt_ctx, NULL);
     if (ret < 0) {
         cerr << "\nunable to find the stream information";
         exit(1);
     }
 
-    in_video_stream_idx_ = -1;
-    in_audio_stream_idx_ = -1;
-
-    /* find the first video stream index . Also there is an API available to do the below operations */
-    for (int i = 0; i < in_fmt_ctx_->nb_streams; i++) {
-        AVStream *stream = in_fmt_ctx_->streams[i];
+    for (int i = 0; i < in_fmt_ctx->nb_streams; i++) {
+        AVStream *stream = in_fmt_ctx->streams[i];
         if (stream->codecpar->codec_type == AVMEDIA_TYPE_VIDEO) {
             in_video_stream_idx_ = i;
             if (InitCodecCtx(in_video_codec_ctx_, in_video_codec_, stream->codecpar)) {
@@ -209,14 +186,33 @@ int ScreenRecorder::OpenInputDevices() {
         exit(1);
     }
 
-#ifndef __linux__
     if (in_audio_stream_idx_ == -1) {
         cout << "\nunable to find the audio stream index. (-1)";
         exit(1);
     }
-#endif
 
-    av_dump_format(in_fmt_ctx_, 0, device_name, 0);
+    av_dump_format(in_fmt_ctx, 0, device_name, 0);
+
+    return 0;
+}
+
+int ScreenRecorder::OpenInputDevices() {
+    video_options_ = NULL;
+    if (SetVideoOptions()) {
+        cerr << "Error in etting video options" << endl;
+        exit(1);
+    };
+
+#ifdef __linux__
+    in_video_stream_idx_ = 0;
+    in_audio_stream_idx_ = 0;
+    OpenInputDevice(in_fmt_ctx_, av_find_input_format("x11grab"), ":1.0", &video_options_);
+    OpenInputDevice(in_audio_fmt_ctx_, av_find_input_format("alsa"), "hw:0", NULL);
+#else
+    in_video_stream_idx_ = -1;
+    in_audio_stream_idx_ = -1;
+    OpenInputDevice(in_fmt_ctx_, av_find_input_format("avfoundation"), "1:0", &video_options_);
+#endif
 
     return 0;
 }
