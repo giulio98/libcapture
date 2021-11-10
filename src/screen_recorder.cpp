@@ -447,12 +447,11 @@ int ScreenRecorder::ProcessVideoPkt(AVPacket *in_packet) {
 
         while (true) {
             ret = avcodec_receive_packet(out_video_codec_ctx_, out_packet);
-            if (ret < 0) {
-                if (ret == AVERROR(EAGAIN)) {
-                    break;
-                } else if (ret == AVERROR_EOF) {
-                    return 0;
-                }
+            if (ret == AVERROR(EAGAIN)) {
+                break;
+            } else if (ret == AVERROR_EOF) {
+                return 0;
+            } else if (ret < 0) {
                 fprintf(stderr, "Error during encoding\n");
                 exit(1);
             }
