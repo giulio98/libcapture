@@ -1,4 +1,5 @@
 #include "../include/screen_recorder.h"
+#include "../include/duration_logger.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -384,6 +385,7 @@ int ScreenRecorder::ConvertEncodeStoreVideoPkt(AVPacket *in_packet) {
     AVPacket *out_packet;
     AVFrame *in_frame;
     AVFrame *out_frame;
+    DurationLogger dl(" (video) processed in ");
 
     out_packet = av_packet_alloc();
     if (!out_packet) {
@@ -507,6 +509,7 @@ int ScreenRecorder::ConvertEncodeStoreAudioPkt(AVPacket *in_packet) {
     AVPacket *out_packet;
     AVFrame *in_frame;
     AVFrame *out_frame;
+    DurationLogger dl(" (audio) processed in ");
 
     out_packet = av_packet_alloc();
     if (!out_packet) {
@@ -659,7 +662,7 @@ int ScreenRecorder::CaptureFrames() {
         }
 
         if (video_data_present) {
-            cout << "Packet " << in_pkt_counter << " (video)";
+            cout << "Packet " << in_pkt_counter;
             in_pkt_counter++;
             if (ConvertEncodeStoreVideoPkt(in_packet)) exit(1);
             av_packet_unref(in_packet);
@@ -667,7 +670,7 @@ int ScreenRecorder::CaptureFrames() {
         cout << endl;
 
         if (audio_data_present) {
-            cout << "Packet " << in_pkt_counter << " (audio)";
+            cout << "Packet " << in_pkt_counter;
             in_pkt_counter++;
             if (ConvertEncodeStoreAudioPkt(in_audio_packet)) exit(1);
             av_packet_unref(in_audio_packet);
@@ -688,10 +691,8 @@ int ScreenRecorder::CaptureFrames() {
         in_pkt_counter++;
 
         if (in_packet->stream_index == in_video_stream_idx_) {
-            cout << " (video)";
             if (ConvertEncodeStoreVideoPkt(in_packet)) exit(1);
         } else if (in_packet->stream_index == in_audio_stream_idx_) {
-            cout << " (audio)";
             if (ConvertEncodeStoreAudioPkt(in_packet)) exit(1);
         } else {
             cout << " unknown, ignoring...";
