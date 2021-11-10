@@ -646,8 +646,6 @@ int ScreenRecorder::CaptureFrames() {
             exit(1);
         } else {
             video_data_present = true;
-            cout << "Packet " << in_pkt_counter << " (video) ";
-            in_pkt_counter++;
         }
 
         ret = av_read_frame(in_audio_fmt_ctx_, in_audio_packet);
@@ -658,19 +656,23 @@ int ScreenRecorder::CaptureFrames() {
             exit(1);
         } else {
             audio_data_present = true;
-            cout << "Packet " << in_pkt_counter << " (audio) ";
-            in_pkt_counter++;
         }
 
         if (video_data_present) {
+            cout << "Packet " << in_pkt_counter << " (video)";
+            in_pkt_counter++;
             if (ConvertEncodeStoreVideoPkt(in_packet)) exit(1);
             av_packet_unref(in_packet);
         }
+        cout << endl;
 
         if (audio_data_present) {
+            cout << "Packet " << in_pkt_counter << " (audio)";
+            in_pkt_counter++;
             if (ConvertEncodeStoreAudioPkt(in_audio_packet)) exit(1);
             av_packet_unref(in_audio_packet);
         }
+        cout << endl;
 
 #else  // macOS
 
@@ -686,16 +688,17 @@ int ScreenRecorder::CaptureFrames() {
         in_pkt_counter++;
 
         if (in_packet->stream_index == in_video_stream_idx_) {
-            cout << " (video) ";
+            cout << " (video)";
             if (ConvertEncodeStoreVideoPkt(in_packet)) exit(1);
             process_time = av
         } else if (in_packet->stream_index == in_audio_stream_idx_) {
-            cout << " (audio) ";
+            cout << " (audio)";
             if (ConvertEncodeStoreAudioPkt(in_packet)) exit(1);
         } else {
-            cout << " unknown, ignoring..." << endl;
+            cout << " unknown, ignoring...";
         }
 
+        cout << endl;
         av_packet_unref(in_packet);
 
 #endif
