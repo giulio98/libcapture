@@ -576,7 +576,7 @@ int ScreenRecorder::ConvertEncodeStoreAudioPkt(AVPacket *in_packet) {
 
         /* dts and duration of out_packet should already be set */
         out_packet->stream_index = out_audio_stream_->index;
-        out_packet->pts = out_audio_codec_ctx_->frame_size * audio_pkt_counter_ * 2;
+        out_packet->pts = out_audio_codec_ctx_->frame_size * audio_pkt_counter_;
 
         audio_pkt_counter_++;
 
