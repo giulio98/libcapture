@@ -613,7 +613,7 @@ int ScreenRecorder::CaptureFrames() {
     if (InitVideoConverter()) exit(1);
     if (InitAudioConverter()) exit(1);
 
-    /* necessary for packets PTS */
+    /* start counting for PTS */
     video_frame_counter_ = 0;
     audio_frame_counter_ = 0;
 

@@ -83,8 +83,9 @@ private:
     SwrContext *audio_converter_ctx_;
     AVAudioFifo *audio_fifo_buf_;
 
+    /* Counter of video frames used to compute PTS */
     int video_frame_counter_;
-    /* Counter for the audio packets written in the output stream */
+    /* Counter of audio frames used to compute PTS */
     int audio_frame_counter_;
 
     AVPixelFormat video_pix_fmt_;
