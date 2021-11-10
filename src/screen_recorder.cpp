@@ -154,7 +154,8 @@ int ScreenRecorder::InitAudioConverter() {
 }
 
 /* establishing the connection between camera or screen through its respective folder */
-int ScreenRecorder::OpenInputDevice(AVFormatContext *&in_fmt_ctx, AVInputFormat *in_fmt, const char *device_name, AVDictionary **options) {
+int ScreenRecorder::OpenInputDevice(AVFormatContext *&in_fmt_ctx, AVInputFormat *in_fmt, const char *device_name,
+                                    AVDictionary **options) {
     int ret;
     in_fmt_ctx = NULL;
 
@@ -277,7 +278,7 @@ int ScreenRecorder::InitVideoEncoder() {
 int ScreenRecorder::InitAudioEncoder() {
     int ret;
     AVStream *in_stream;
-    
+
 #ifdef __linux__
     in_stream = in_audio_fmt_ctx_->streams[in_audio_stream_idx_];
 #else
@@ -301,13 +302,13 @@ int ScreenRecorder::InitAudioEncoder() {
         return -1;
     }
 
-// #ifdef __linux__
-//     sample_rate = 48000;
-//     channels = 2;
-// #else
-//     sample_rate = in_stream->codecpar->sample_rate;
-//     channels = in_stream->codecpar->channels;
-// #endif
+    // #ifdef __linux__
+    //     sample_rate = 48000;
+    //     channels = 2;
+    // #else
+    //     sample_rate = in_stream->codecpar->sample_rate;
+    //     channels = in_stream->codecpar->channels;
+    // #endif
 
     out_audio_codec_ctx_ = avcodec_alloc_context3(out_audio_codec_);
     out_audio_codec_ctx_->channels = in_stream->codecpar->channels;
@@ -482,7 +483,7 @@ int ScreenRecorder::ConvertWriteAudioFifo(AVFrame *in_frame) {
         throw std::runtime_error("Fail to alloc samples by av_samples_alloc_array_and_samples.");
     }
 
-    ret = swr_convert(audio_converter_ctx_, buf, in_frame->nb_samples, (const uint8_t**)in_frame->extended_data,
+    ret = swr_convert(audio_converter_ctx_, buf, in_frame->nb_samples, (const uint8_t **)in_frame->extended_data,
                       in_frame->nb_samples);
     if (ret < 0) {
         throw std::runtime_error("Fail to swr_convert.");
@@ -491,7 +492,7 @@ int ScreenRecorder::ConvertWriteAudioFifo(AVFrame *in_frame) {
     if (av_audio_fifo_space(audio_fifo_buf_) < in_frame->nb_samples)
         throw std::runtime_error("audio buffer is too small.");
 
-    ret = av_audio_fifo_write(audio_fifo_buf_, (void**)buf, in_frame->nb_samples);
+    ret = av_audio_fifo_write(audio_fifo_buf_, (void **)buf, in_frame->nb_samples);
     if (ret < 0) {
         throw std::runtime_error("Fail to write fifo");
     }
@@ -553,7 +554,7 @@ int ScreenRecorder::ConvertEncodeStoreAudioPkt(AVPacket *in_packet) {
             return -1;
         }
 
-        ret = av_audio_fifo_read(audio_fifo_buf_, (void**)out_frame->data, out_audio_codec_ctx_->frame_size);
+        ret = av_audio_fifo_read(audio_fifo_buf_, (void **)out_frame->data, out_audio_codec_ctx_->frame_size);
         if (ret < 0) {
             cerr << "Cannot read from audio FIFO";
             return -1;
@@ -575,7 +576,8 @@ int ScreenRecorder::ConvertEncodeStoreAudioPkt(AVPacket *in_packet) {
 
         /* dts and duration of out_packet should already be set */
         out_packet->stream_index = out_audio_stream_->index;
-        out_packet->pts = out_audio_codec_ctx_->frame_size * audio_pkt_counter_;
+        out_packet->pts = out_audio_codec_ctx_->frame_size * audio_pkt_counter_ * 2;
+
         audio_pkt_counter_++;
 
         ret = av_interleaved_write_frame(out_fmt_ctx_, out_packet);
@@ -599,6 +601,9 @@ int ScreenRecorder::CaptureFrames() {
     int ret;
     int in_pkt_counter = 0;
     AVPacket *in_packet;
+#ifdef __linux__
+    AVPacket *in_audio_packet;
+#endif
     int64_t start_time;
     int64_t current_time;
     int64_t duration = (10 * 1000 * 1000);  // 10 seconds
@@ -614,6 +619,14 @@ int ScreenRecorder::CaptureFrames() {
         exit(1);
     }
 
+#ifdef __linux__
+    in_audio_packet = av_packet_alloc();
+    if (!in_packet) {
+        cerr << "Could not allocate in_audio_packet";
+        exit(1);
+    }
+#endif
+
     start_time = av_gettime();
 
     while (true) {
@@ -622,14 +635,27 @@ int ScreenRecorder::CaptureFrames() {
 
         ret = av_read_frame(in_fmt_ctx_, in_packet);
         if (ret < 0) {
+            if (ret == AVERROR(EAGAIN)) continue;  // TO-DO: change on Linux
+            cerr << "ERROR: Cannot read frame" << endl;
+            exit(1);
+        }
+        cout << "Read packet " << in_pkt_counter << " ";
+        in_pkt_counter++;
+
+#ifdef __linux__
+        cout << "(video)" << endl;
+        ret = av_read_frame(in_audio_fmt_ctx_, in_audio_packet);
+        if (ret < 0) {
             if (ret == AVERROR(EAGAIN)) continue;
             cerr << "ERROR: Cannot read frame" << endl;
             exit(1);
         }
-
-        cout << "Read packet " << in_pkt_counter << " ";
+        cout << "Read packet " << in_pkt_counter << " (audio)" << endl;
         in_pkt_counter++;
-
+        if (ConvertEncodeStoreVideoPkt(in_packet)) exit(1);
+        if (ConvertEncodeStoreAudioPkt(in_audio_packet)) exit(1);
+        av_packet_unref(in_audio_packet);
+#else
         if (in_packet->stream_index == in_video_stream_idx_) {
             cout << "(video)" << endl;
             if (ConvertEncodeStoreVideoPkt(in_packet)) exit(1);
@@ -639,11 +665,15 @@ int ScreenRecorder::CaptureFrames() {
         } else {
             cerr << "ERROR: unknown stream, ignoring..." << endl;
         }
+#endif
 
         av_packet_unref(in_packet);
     }
 
     av_packet_free(&in_packet);
+#ifdef __linux__
+    av_packet_free(&in_audio_packet);
+#endif
 
     ret = av_write_trailer(out_fmt_ctx_);
     if (ret < 0) {

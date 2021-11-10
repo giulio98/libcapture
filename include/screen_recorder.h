@@ -25,6 +25,7 @@ extern "C" {
 
 // libav resample
 
+#include "libavutil/audio_fifo.h"
 #include "libavutil/channel_layout.h"
 #include "libavutil/common.h"
 #include "libavutil/file.h"
@@ -34,12 +35,11 @@ extern "C" {
 #include "libavutil/pixdesc.h"
 #include "libavutil/samplefmt.h"
 #include "libavutil/time.h"
-#include "libavutil/audio_fifo.h"
 
 // lib swresample
 
-#include "libswscale/swscale.h"
 #include "libswresample/swresample.h"
+#include "libswscale/swscale.h"
 }
 
 class ScreenRecorder {
@@ -101,7 +101,8 @@ private:
 
     int SetVideoOptions();
 
-    int OpenInputDevice(AVFormatContext *&in_fmt_ctx, AVInputFormat *in_fmt, const char *device_name, AVDictionary **options);
+    int OpenInputDevice(AVFormatContext *&in_fmt_ctx, AVInputFormat *in_fmt, const char *device_name,
+                        AVDictionary **options);
 
     int InitVideoEncoder();
     int InitAudioEncoder();
