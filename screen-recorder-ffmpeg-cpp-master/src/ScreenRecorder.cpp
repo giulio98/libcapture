@@ -234,7 +234,8 @@ int ScreenRecorder::openCamera() {
     se viene passato NULL in "AVInputFormat" ffmpeg indovina il formato
     per quanto riguarda linux il formato di input è "x11grab" permette la cattura di una regione di un x11 display"
     */
-    sprintf(str, ":0.0+%d,%d", offsetX, offsetY);
+    char *display = getenv("DISPLAY");
+    sprintf(str, "%s.0+%d,%d", display, offsetX, offsetY);
     cout << "\nSize: " << width << "x" << height << endl;
     cout << "\nOffset: " << offsetX << " " << offsetY << endl;
     value = avformat_open_input(&pAVFormatContext, str, pAVInputFormat, &options);
