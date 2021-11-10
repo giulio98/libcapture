@@ -5,11 +5,9 @@ using namespace std;
 /* driver function to run the application */
 int main() {
     ScreenRecorder screen_record;
-    std::cout << "\nSelect the area to record (click to select all the display) " << std::endl;
-    screen_record.SelectArea();
-    screen_record.OpenInputDevices();
-    screen_record.InitOutputFile();
-    screen_record.CaptureFrames();
+    screen_record.start();
+    std::this_thread::sleep_for(100000ms);
+    screen_record.stop();
 
     std::cout << "\nprogram executed successfully\n";
 

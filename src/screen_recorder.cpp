@@ -41,10 +41,10 @@ static int InitCodecCtx(AVCodecContext *&codec_ctx, AVCodec *&codec, AVCodecPara
 }
 
 /* initialize the resources*/
-ScreenRecorder::ScreenRecorder() {
+ScreenRecorder::ScreenRecorder() :stopCapture(false){
 #ifdef __linux__
     /* x11grab has some issues doing more than 30 fps */
-    video_framerate_ = 30;
+    video_framerate_ = 60;
 #else
     video_framerate_ = 60;
 #endif
@@ -70,8 +70,34 @@ ScreenRecorder::~ScreenRecorder() {
         std::cout << "\nunable to free avformat context";
         exit(1);
     }
-
+    if(tvideo.joinable()==true){
+        tvideo.join();
+    }
     /* TO-DO: free all data structures */
+}
+void ScreenRecorder::start() {
+
+    auto video_fun = [this]() {
+        this->CaptureFrames();
+    };
+
+    std::cout << "\nSelect the area to record (click to select all the display) " << std::endl;
+    this->SelectArea();
+    this->OpenInputDevices();
+    this->InitOutputFile();
+    
+
+    tvideo = std::thread(video_fun);
+}
+void ScreenRecorder::stop() {
+    {
+    std::unique_lock<std::mutex> ul(m);
+    stopCapture = true;
+    }
+    if(tvideo.joinable()==true){
+        tvideo.join();
+    }
+    
 }
 
 int ScreenRecorder::SetVideoOptions() {
@@ -628,8 +654,13 @@ int ScreenRecorder::CaptureFrames() {
     start_time = av_gettime();
 
     while (true) {
-        current_time = av_gettime();
-        if ((current_time - start_time) > duration) break;
+        //current_time = av_gettime();
+        //if ((current_time - start_time) > duration) break;
+        std::unique_lock<std::mutex> ul(m);
+        if (stopCapture) {
+            break;
+        }
+        ul.unlock();
 
 #ifdef __linux__
 

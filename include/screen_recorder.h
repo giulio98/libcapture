@@ -1,6 +1,8 @@
 #pragma once
 
 #include <iostream>
+#include <thread>
+#include <mutex>
 
 /* FFMPEG LIBRARIES */
 extern "C" {
@@ -102,12 +104,23 @@ class ScreenRecorder {
     /* Convert the audio frame and write it to the audio FIFO buffer */
     int WriteAudioFrameToFifo(AVFrame *in_frame);
 
-public:
-    ScreenRecorder();
-    ~ScreenRecorder();
-
     int OpenInputDevices();
     int InitOutputFile();
     int CaptureFrames();
     int SelectArea();
+    std::mutex m;
+
+    std::thread tvideo;
+    bool stopCapture;
+
+public:
+    ScreenRecorder();
+    ~ScreenRecorder();
+
+    
+    void start();
+    void stop();
+    //TODO
+    // void pause()
+    // void resume()
 };
