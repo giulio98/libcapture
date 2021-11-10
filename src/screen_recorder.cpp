@@ -561,8 +561,6 @@ int ScreenRecorder::ProcessAudioPkt(AVPacket *in_packet) {
             throw std::runtime_error("Fail to send frame in encoding");
         }
 
-        av_frame_free(&out_frame);
-
         ret = avcodec_receive_packet(out_audio_codec_ctx_, out_packet);
         if (ret == AVERROR(EAGAIN)) {
             continue;
@@ -573,6 +571,8 @@ int ScreenRecorder::ProcessAudioPkt(AVPacket *in_packet) {
         out_packet->stream_index = out_audio_stream_->index;
 
         ret = av_interleaved_write_frame(out_fmt_ctx_, out_packet);
+
+        av_frame_free(&out_frame);
     }
 
     av_packet_free(&out_packet);
