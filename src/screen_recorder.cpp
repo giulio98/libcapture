@@ -117,8 +117,14 @@ int ScreenRecorder::InitVideoConverter() {
 
 int ScreenRecorder::InitAudioConverter() {
     int ret;
-    int fifo_duration = 3;  // How many seconds of audio to store in the FIFO buffer
-    AVStream *in_stream = in_fmt_ctx_->streams[in_audio_stream_idx_];
+    int fifo_duration = 2;  // How many seconds of audio to store in the FIFO buffer
+    AVStream *in_stream;
+
+#ifdef __linux__
+    in_stream = in_audio_fmt_ctx_->streams[in_audio_stream_idx_];
+#else
+    in_stream = in_fmt_ctx_->streams[in_audio_stream_idx_];
+#endif
 
     audio_converter_ctx_ = swr_alloc_set_opts(
         nullptr, av_get_default_channel_layout(in_audio_codec_ctx_->channels), out_audio_codec_ctx_->sample_fmt,
@@ -181,16 +187,6 @@ int ScreenRecorder::OpenInputDevice(AVFormatContext *&in_fmt_ctx, AVInputFormat 
         }
     }
 
-    if (in_video_stream_idx_ == -1) {
-        cout << "\nunable to find the video stream index. (-1)";
-        exit(1);
-    }
-
-    if (in_audio_stream_idx_ == -1) {
-        cout << "\nunable to find the audio stream index. (-1)";
-        exit(1);
-    }
-
     av_dump_format(in_fmt_ctx, 0, device_name, 0);
 
     return 0;
@@ -203,16 +199,25 @@ int ScreenRecorder::OpenInputDevices() {
         exit(1);
     };
 
+    in_video_stream_idx_ = -1;
+    in_audio_stream_idx_ = -1;
+
 #ifdef __linux__
-    in_video_stream_idx_ = 0;
-    in_audio_stream_idx_ = 0;
     OpenInputDevice(in_fmt_ctx_, av_find_input_format("x11grab"), ":1.0", &video_options_);
     OpenInputDevice(in_audio_fmt_ctx_, av_find_input_format("alsa"), "hw:0", NULL);
 #else
-    in_video_stream_idx_ = -1;
-    in_audio_stream_idx_ = -1;
     OpenInputDevice(in_fmt_ctx_, av_find_input_format("avfoundation"), "1:0", &video_options_);
 #endif
+
+    if (in_video_stream_idx_ == -1) {
+        cout << "\nunable to find the video stream index. (-1)";
+        exit(1);
+    }
+
+    if (in_audio_stream_idx_ == -1) {
+        cout << "\nunable to find the audio stream index. (-1)";
+        exit(1);
+    }
 
     return 0;
 }
@@ -271,8 +276,13 @@ int ScreenRecorder::InitVideoEncoder() {
 
 int ScreenRecorder::InitAudioEncoder() {
     int ret;
-    AVStream *in_stream = in_fmt_ctx_->streams[in_audio_stream_idx_];
-    int channels;
+    AVStream *in_stream;
+    
+#ifdef __linux__
+    in_stream = in_audio_fmt_ctx_->streams[in_audio_stream_idx_];
+#else
+    in_stream = in_fmt_ctx_->streams[in_audio_stream_idx_];
+#endif
 
     out_audio_stream_ = avformat_new_stream(out_fmt_ctx_, NULL);
     if (!out_video_stream_) {
@@ -291,12 +301,17 @@ int ScreenRecorder::InitAudioEncoder() {
         return -1;
     }
 
-    channels = in_stream->codecpar->channels;
-    if (!channels) channels = 2;
+// #ifdef __linux__
+//     sample_rate = 48000;
+//     channels = 2;
+// #else
+//     sample_rate = in_stream->codecpar->sample_rate;
+//     channels = in_stream->codecpar->channels;
+// #endif
 
     out_audio_codec_ctx_ = avcodec_alloc_context3(out_audio_codec_);
-    out_audio_codec_ctx_->channels = channels;
-    out_audio_codec_ctx_->channel_layout = av_get_default_channel_layout(channels);
+    out_audio_codec_ctx_->channels = in_stream->codecpar->channels;
+    out_audio_codec_ctx_->channel_layout = av_get_default_channel_layout(in_stream->codecpar->channels);
     out_audio_codec_ctx_->sample_rate = in_stream->codecpar->sample_rate;
     out_audio_codec_ctx_->sample_fmt = out_audio_codec_->sample_fmts[0];  // for aac there is AV_SAMPLE_FMT_FLTP = 8
     out_audio_codec_ctx_->bit_rate = 96000;
@@ -340,9 +355,7 @@ int ScreenRecorder::InitOutputFile() {
     }
 
     if (InitVideoEncoder()) exit(1);
-#ifndef __linux__
     if (InitAudioEncoder()) exit(1);
-#endif
 
     /* create empty video file */
     if (!(out_fmt_ctx_->flags & AVFMT_NOFILE)) {
@@ -591,9 +604,7 @@ int ScreenRecorder::CaptureFrames() {
     int64_t duration = (10 * 1000 * 1000);  // 10 seconds
 
     if (InitVideoConverter()) exit(1);
-#ifndef __linux__
     if (InitAudioConverter()) exit(1);
-#endif
 
     audio_pkt_counter_ = 0;
 
