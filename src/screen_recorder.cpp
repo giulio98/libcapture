@@ -239,7 +239,7 @@ int ScreenRecorder::InitVideoEncoder() {
         return -1;
     }
 
-    out_video_codec_ = avcodec_find_encoder(AV_CODEC_ID_MPEG4);
+    out_video_codec_ = avcodec_find_encoder(AV_CODEC_ID_H264);
     if (!out_video_codec_) {
         cout << "\nerror in finding the av codecs. try again with correct codec";
         return -1;
