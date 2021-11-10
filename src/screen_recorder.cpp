@@ -2,12 +2,12 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-
-#include "../include/duration_logger.h"
 #ifdef __linux__
 #include <X11/Xlib.h>
 #include <X11/cursorfont.h>
 #endif
+
+#include "../include/duration_logger.h"
 
 using namespace std;
 

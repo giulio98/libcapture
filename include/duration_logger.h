@@ -1,3 +1,5 @@
+#pragma once
+
 #include <libavutil/time.h>
 
 #include <iostream>

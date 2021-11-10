@@ -1,18 +1,8 @@
-#ifndef SCREENRECORDER_H
-#define SCREENRECORDER_H
+#pragma once
 
-#include <math.h>
-#include <string.h>
-
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-#include <fstream>
 #include <iostream>
 
-#define __STDC_CONSTANT_MACROS
-
-// FFMPEG LIBRARIES
+/* FFMPEG LIBRARIES */
 extern "C" {
 #include "libavcodec/avcodec.h"
 #include "libavcodec/avfft.h"
@@ -22,9 +12,6 @@ extern "C" {
 #include "libavfilter/buffersrc.h"
 #include "libavformat/avformat.h"
 #include "libavformat/avio.h"
-
-// libav resample
-
 #include "libavutil/audio_fifo.h"
 #include "libavutil/channel_layout.h"
 #include "libavutil/common.h"
@@ -35,15 +22,11 @@ extern "C" {
 #include "libavutil/pixdesc.h"
 #include "libavutil/samplefmt.h"
 #include "libavutil/time.h"
-
-// lib swresample
-
 #include "libswresample/swresample.h"
 #include "libswscale/swscale.h"
 }
 
 class ScreenRecorder {
-private:
     /* Information about the input format (container) */
     AVFormatContext *in_fmt_ctx_;
 #ifdef __linux__
@@ -128,5 +111,3 @@ public:
     int CaptureFrames();
     int SelectArea();
 };
-
-#endif
