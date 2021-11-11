@@ -59,7 +59,7 @@ class ScreenRecorder {
     AVFormatContext *out_fmt_ctx_;
 
     /* Additional options for the video input format */
-    AVDictionary *video_options_;
+    AVDictionary *video_device_options_;
 
     /* Pixel format to which convert the video frames */
     AVPixelFormat out_video_pix_fmt_;
@@ -110,8 +110,8 @@ class ScreenRecorder {
     /* Counter of audio frames used to compute PTSs */
     int audio_frame_counter_;
 
-    /* Set video_options_ */
-    int SetVideoOptions();
+    /* Set video_device_options_ */
+    int SetVideoDeviceOptions();
 
     /**
      * Open an input device

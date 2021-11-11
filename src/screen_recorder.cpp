@@ -44,19 +44,38 @@ void ScreenRecorder::Start(const std::string &output_file) {
     out_video_pix_fmt_ = AV_PIX_FMT_YUV420P;
     out_video_codec_id_ = AV_CODEC_ID_H264;
 
-    auto video_fun = [this]() {
-        std::cout << "Recording..." << std::endl;
-        this->CaptureFrames();
-    };
-
     avdevice_register_all();
 
-    std::cout << "Select the area to record (click to select all the display)" << std::endl;
-    this->SelectArea();
-    this->OpenInputDevices();
-    this->InitOutputFile();
+    if (SelectArea()) {
+        std::cerr << "Error in SelectArea" << std::endl;
+        exit(1);
+    }
 
-    recorder_thread_ = std::thread(video_fun);
+    video_device_options_ = NULL;
+    if (SetVideoDeviceOptions()) {
+        std::cerr << "Error in setting video options" << std::endl;
+        exit(1);
+    };
+
+    if (OpenInputDevices()) {
+        std::cerr << "Error in OpenInputDevice" << std::endl;
+        exit(1);
+    }
+
+    if (InitOutputFile()) {
+        std::cerr << "Error in InitOutputFile" << std::endl;
+        exit(1);
+    }
+
+    // auto video_fun = [this]() {
+    //     std::cout << "Recording..." << std::endl;
+    //     this->CaptureFrames();
+    // };
+
+    recorder_thread_ = std::thread([this]() {
+        std::cout << "Recording..." << std::endl;
+        this->CaptureFrames();
+    });
 
 #if VERBOSE
     std::cout << "All required functions have been successfully registered" << std::endl;
@@ -96,6 +115,8 @@ void ScreenRecorder::Stop() {
         exit(1);
     }
 #endif
+
+    av_dict_free(&video_device_options_);
 
     if (recorder_thread_.joinable() == true) {
         recorder_thread_.join();
@@ -150,29 +171,42 @@ int ScreenRecorder::InitDecoder(int audio_video) {
     return 0;
 }
 
-int ScreenRecorder::SetVideoOptions() {
+int ScreenRecorder::SetVideoDeviceOptions() {
     char str[20];
     int ret;
 
-    sprintf(str, "%d", video_framerate_);
-    ret = av_dict_set(&video_options_, "framerate", str, 0);
-    if (ret < 0) {
-        std::cout << "\nerror in setting framerate";
+    if (video_device_options_) {
+        std::cerr << "video_device_options_ is not NULL (it may be already set)" << std::endl;
         return -1;
     }
 
-    ret = av_dict_set(&video_options_, "show_region", "1", 0);
+    sprintf(str, "%d", video_framerate_);
+    ret = av_dict_set(&video_device_options_, "framerate", str, 0);
     if (ret < 0) {
-        std::cout << "\nerror in setting show_region";
+        std::cerr << "Error in setting framerate" << std::endl;
         return -1;
     }
 
     sprintf(str, "%dx%d", width_, height_);
-    ret = av_dict_set(&video_options_, "video_size", str, 0);
+    ret = av_dict_set(&video_device_options_, "video_size", str, 0);
     if (ret < 0) {
-        std::cout << "\nerror in setting video_size";
+        std::cerr << "Error in setting video_size" << std::endl;
         return -1;
     }
+
+#ifdef __linux__
+    ret = av_dict_set(&video_device_options_, "show_region", "1", 0);
+    if (ret < 0) {
+        std::cerr << "Error in setting show_region" << std::endl;
+        return -1;
+    }
+#else
+    ret = av_dict_set(&video_device_options_, "capture_cursor", "1", 0);
+    if (ret < 0) {
+        std::cerr << "Error in setting capture_cursor" << std::endl;
+        return -1;
+    }
+#endif
 
     return 0;
 }
@@ -262,12 +296,6 @@ int ScreenRecorder::OpenInputDevice(AVFormatContext *&in_fmt_ctx, AVInputFormat 
 }
 
 int ScreenRecorder::OpenInputDevices() {
-    video_options_ = NULL;
-    if (SetVideoOptions()) {
-        std::cerr << "Error in etting video options" << std::endl;
-        exit(1);
-    };
-
     in_video_stream_ = NULL;
     in_audio_stream_ = NULL;
 
@@ -275,10 +303,10 @@ int ScreenRecorder::OpenInputDevices() {
     char video_device_name[20];
     char *display = getenv("DISPLAY");
     sprintf(video_device_name, "%s.0+%d,%d", display, offset_x_, offset_y_);
-    OpenInputDevice(in_fmt_ctx_, av_find_input_format("x11grab"), video_device_name, &video_options_);
+    OpenInputDevice(in_fmt_ctx_, av_find_input_format("x11grab"), video_device_name, &video_device_options_);
     OpenInputDevice(in_audio_fmt_ctx_, av_find_input_format("pulse"), "default", NULL);
 #else
-    OpenInputDevice(in_fmt_ctx_, av_find_input_format("avfoundation"), "1:0", &video_options_);
+    OpenInputDevice(in_fmt_ctx_, av_find_input_format("avfoundation"), "1:0", &video_device_options_);
 #endif
 
     if (!in_video_stream_) {
@@ -428,7 +456,7 @@ int ScreenRecorder::InitOutputFile() {
     }
 
     /* imp: mp4 container or some advanced container file required header information */
-    ret = avformat_write_header(out_fmt_ctx_, &video_options_);
+    ret = avformat_write_header(out_fmt_ctx_, &video_device_options_);
     if (ret < 0) {
         std::cout << "\nerror in writing the header context";
         exit(1);
@@ -808,6 +836,8 @@ int ScreenRecorder::SelectArea() {
     int rect_x = 0, rect_y = 0, rect_w = 0, rect_h = 0;
     int btn_pressed = 0, done = 0;
     int threshold = 10;
+
+    std::cout << "Select the area to record (click to select all the display)" << std::endl;
 
     disp = XOpenDisplay(NULL);
     if (!disp) return EXIT_FAILURE;
