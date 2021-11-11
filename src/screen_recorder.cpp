@@ -11,8 +11,6 @@
 
 #include "../include/duration_logger.h"
 
-#define VERBOSE 1
-
 /* initialize the resources*/
 ScreenRecorder::ScreenRecorder() {}
 
@@ -79,9 +77,7 @@ void ScreenRecorder::Start(const std::string &output_file, bool audio) {
         this->CaptureFrames();
     });
 
-#if VERBOSE
     std::cout << "All required functions have been successfully registered" << std::endl;
-#endif
 }
 
 void ScreenRecorder::Stop() {
@@ -555,9 +551,7 @@ int ScreenRecorder::ProcessVideoPkt(AVPacket *packet) {
     int ret;
     AVFrame *in_frame;
     AVFrame *out_frame;
-#if VERBOSE
     DurationLogger dl(" processed in ");
-#endif
 
     in_frame = av_frame_alloc();
     if (!in_frame) {
@@ -618,9 +612,7 @@ int ScreenRecorder::ProcessAudioPkt(AVPacket *packet) {
     int ret;
     AVFrame *in_frame;
     AVFrame *out_frame;
-#if VERBOSE
     DurationLogger dl(" processed in ");
-#endif
 
     in_frame = av_frame_alloc();
     if (!in_frame) {
@@ -763,17 +755,13 @@ int ScreenRecorder::CaptureFrames() {
         }
 
         if (video_data_present) {
-#if VERBOSE
             std::cout << "[V] packet " << video_pkt_counter++;
-#endif
             if (ProcessVideoPkt(packet)) exit(1);
             av_packet_unref(packet);
         }
 
         if (audio_data_present) {
-#if VERBOSE
             std::cout << std::endl << "[A] packet " << audio_pkt_counter++;
-#endif
             if (ProcessAudioPkt(audio_packet)) exit(1);
             av_packet_unref(audio_packet);
         }
@@ -789,14 +777,10 @@ int ScreenRecorder::CaptureFrames() {
         }
 
         if (packet->stream_index == in_video_stream_->index) {
-#if VERBOSE
             std::cout << "[V] packet " << video_pkt_counter++;
-#endif
             if (ProcessVideoPkt(packet)) exit(1);
         } else if (packet->stream_index == in_audio_stream_->index) {
-#if VERBOSE
             std::cout << "[A] packet " << audio_pkt_counter++;
-#endif
             if (ProcessAudioPkt(packet)) exit(1);
         } else {
             std::cout << " unknown, ignoring...";
@@ -806,9 +790,7 @@ int ScreenRecorder::CaptureFrames() {
 
 #endif
 
-#if VERBOSE
         std::cout << std::endl;
-#endif
     }
 
     av_packet_free(&packet);
