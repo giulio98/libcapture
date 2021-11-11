@@ -41,16 +41,13 @@ static int InitCodecCtx(AVCodecContext *&codec_ctx, AVCodec *&codec, AVCodecPara
 }
 
 /* initialize the resources*/
-ScreenRecorder::ScreenRecorder() : stop_capture_(false), paused_(false) {
+ScreenRecorder::ScreenRecorder() {
 #ifdef __linux__
     /* x11grab has some issues doing more than 30 fps */
     video_framerate_ = 30;
 #else
     video_framerate_ = 60;
 #endif
-    video_pix_fmt_ = AV_PIX_FMT_YUV420P;
-    avdevice_register_all();
-    std::cout << "\nall required functions are registered successfully";
 }
 
 /* uninitialize the resources */
@@ -79,7 +76,13 @@ ScreenRecorder::~ScreenRecorder() {
 }
 
 void ScreenRecorder::Start() {
+    video_pix_fmt_ = AV_PIX_FMT_YUV420P;
     auto video_fun = [this]() { this->CaptureFrames(); };
+
+    stop_capture_ = false;
+    paused_ = false;
+
+    avdevice_register_all();
 
     std::cout << "\nSelect the area to record (click to select all the display) " << std::endl;
     this->SelectArea();
@@ -87,6 +90,8 @@ void ScreenRecorder::Start() {
     this->InitOutputFile();
 
     video_thread_ = std::thread(video_fun);
+
+    std::cout << "\nall required functions are registered successfully";
 }
 
 void ScreenRecorder::Stop() {
@@ -96,9 +101,25 @@ void ScreenRecorder::Stop() {
         this->paused_ = false;
         cv_.notify_all();
     }
+
+    avformat_close_input(&in_fmt_ctx_);
+    if (!in_fmt_ctx_) {
+        std::cout << "\nfile closed sucessfully" << std::endl;
+    } else {
+        std::cout << "\nunable to close the file" << std::endl;
+        exit(1);
+    }
+
+    avformat_free_context(in_fmt_ctx_);
+    if (!in_fmt_ctx_) {
+        std::cout << "\navformat freed successfully" << std::endl;
+    } else {
+        std::cerr << "\nunable to freed avformat context" << std::endl;
+        exit(1);
+    }
+
     if (video_thread_.joinable() == true) {
         video_thread_.join();
-        stop_capture_ = false;
     }
 }
 
