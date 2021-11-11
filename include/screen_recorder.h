@@ -30,6 +30,8 @@ extern "C" {
 }
 
 class ScreenRecorder {
+    bool record_audio_;
+
     /* Video framerate (set at input-device opening time) */
     int video_framerate_;
 
@@ -120,7 +122,7 @@ class ScreenRecorder {
      * @param device_name Name of the device to open
      * @param options Additional options to use when opening the input. May be NULL
      */
-    int OpenInputDevice(AVFormatContext *&in_fmt_ctx, AVInputFormat *in_fmt, const char *device_name,
+    int OpenInputDevice(AVFormatContext *&in_fmt_ctx, AVInputFormat *in_fmt, const std::string &device_name,
                         AVDictionary **options);
 
     /**
@@ -163,7 +165,7 @@ public:
     ScreenRecorder();
     ~ScreenRecorder();
 
-    void Start(const std::string &output_file);
+    void Start(const std::string &output_file, bool audio);
     void Stop();
     void Pause();
     void Resume();

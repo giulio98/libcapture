@@ -9,7 +9,7 @@ int main() {
     std::string file2 = "../media/output2.mp4";
 
     std::cout << "Recording to " << file1 << std::endl;
-    screen_record.Start(file1);
+    screen_record.Start(file1, true);
     std::this_thread::sleep_for(5000ms);
     screen_record.Pause();
     std::this_thread::sleep_for(5000ms);
@@ -22,7 +22,7 @@ int main() {
     std::cout << std::endl;
 
     std::cout << "Recording to " << file2 << std::endl;
-    screen_record.Start(file2);
+    screen_record.Start(file2, false);
     std::this_thread::sleep_for(5000ms);
     screen_record.Pause();
     std::this_thread::sleep_for(5000ms);

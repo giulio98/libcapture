@@ -2,6 +2,8 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+
+#include <sstream>
 #ifdef __linux__
 #include <X11/Xlib.h>
 #include <X11/cursorfont.h>
@@ -35,13 +37,14 @@ ScreenRecorder::~ScreenRecorder() {
     /* TO-DO: free all data structures */
 }
 
-void ScreenRecorder::Start(const std::string &output_file) {
+void ScreenRecorder::Start(const std::string &output_file, bool audio) {
     output_file_ = output_file;
     stop_capture_ = false;
     paused_ = false;
     video_framerate_ = 30;
     out_video_pix_fmt_ = AV_PIX_FMT_YUV420P;
     out_video_codec_id_ = AV_CODEC_ID_H264;
+    record_audio_ = audio;
 
     avdevice_register_all();
 
@@ -255,12 +258,12 @@ int ScreenRecorder::InitAudioConverter() {
     return 0;
 }
 
-int ScreenRecorder::OpenInputDevice(AVFormatContext *&in_fmt_ctx, AVInputFormat *in_fmt, const char *device_name,
+int ScreenRecorder::OpenInputDevice(AVFormatContext *&in_fmt_ctx, AVInputFormat *in_fmt, const std::string &device_name,
                                     AVDictionary **options) {
     int ret;
     in_fmt_ctx = NULL;
 
-    ret = avformat_open_input(&in_fmt_ctx, device_name, in_fmt, options);
+    ret = avformat_open_input(&in_fmt_ctx, device_name.c_str(), in_fmt, options);
     if (ret != 0) {
         std::cerr << "\nerror in opening input device";
         exit(1);
@@ -289,12 +292,14 @@ int ScreenRecorder::OpenInputDevice(AVFormatContext *&in_fmt_ctx, AVInputFormat 
         }
     }
 
-    av_dump_format(in_fmt_ctx, 0, device_name, 0);
+    av_dump_format(in_fmt_ctx, 0, device_name.c_str(), 0);
 
     return 0;
 }
 
 int ScreenRecorder::OpenInputDevices() {
+    std::stringstream ss;
+
     in_video_stream_ = NULL;
     in_audio_stream_ = NULL;
 
@@ -303,9 +308,11 @@ int ScreenRecorder::OpenInputDevices() {
     char *display = getenv("DISPLAY");
     sprintf(video_device_name, "%s.0+%d,%d", display, offset_x_, offset_y_);
     OpenInputDevice(in_fmt_ctx_, av_find_input_format("x11grab"), video_device_name, &video_device_options_);
-    OpenInputDevice(in_audio_fmt_ctx_, av_find_input_format("pulse"), "default", NULL);
+    if (record_audio_) OpenInputDevice(in_audio_fmt_ctx_, av_find_input_format("pulse"), "default", NULL);
 #else
-    OpenInputDevice(in_fmt_ctx_, av_find_input_format("avfoundation"), "1:0", &video_device_options_);
+    ss << "1:";
+    if (record_audio_) ss << "0";
+    OpenInputDevice(in_fmt_ctx_, av_find_input_format("avfoundation"), ss.str(), &video_device_options_);
 #endif
 
     if (!in_video_stream_) {
@@ -313,7 +320,7 @@ int ScreenRecorder::OpenInputDevices() {
         exit(1);
     }
 
-    if (!in_audio_stream_) {
+    if (record_audio_ && !in_audio_stream_) {
         std::cerr << "Unable to find the audio stream index. (-1)" << std::endl;
         exit(1);
     }
@@ -444,7 +451,7 @@ int ScreenRecorder::InitOutputFile() {
     }
 
     if (InitVideoEncoder()) exit(1);
-    if (InitAudioEncoder()) exit(1);
+    if (record_audio_ && InitAudioEncoder()) exit(1);
 
     /* create empty video file */
     if (!(out_fmt_ctx_->flags & AVFMT_NOFILE)) {
@@ -678,8 +685,8 @@ int ScreenRecorder::ProcessAudioPkt(AVPacket *packet) {
 }
 
 int ScreenRecorder::FlushEncoders() {
-    for (int i = 0; i <= 1; i++)
-        if (EncodeWriteFrame(NULL, i)) return -1;
+    if (EncodeWriteFrame(NULL, 0)) return -1;
+    if (record_audio_ && EncodeWriteFrame(NULL, 1)) return -1;
     return 0;
 }
 
@@ -697,16 +704,16 @@ int ScreenRecorder::CaptureFrames() {
     AVPacket *packet;
 #ifdef __linux__
     AVPacket *audio_packet;
-    bool video_data_present;
-    bool audio_data_present;
+    bool video_data_present = false;
+    bool audio_data_present = false;
 #endif
 
     if (InitVideoConverter()) exit(1);
-    if (InitAudioConverter()) exit(1);
+    if (record_audio_ && InitAudioConverter()) exit(1);
 
     /* start counting for PTS */
     video_frame_counter_ = 0;
-    audio_frame_counter_ = 0;
+    if (record_audio_) audio_frame_counter_ = 0;
 
     packet = av_packet_alloc();
     if (!packet) {
@@ -715,10 +722,12 @@ int ScreenRecorder::CaptureFrames() {
     }
 
 #ifdef __linux__
-    audio_packet = av_packet_alloc();
-    if (!packet) {
-        std::cerr << "Could not allocate in_audio_packet";
-        exit(1);
+    if (record_audio_) {
+        audio_packet = av_packet_alloc();
+        if (!packet) {
+            std::cerr << "Could not allocate in_audio_packet";
+            exit(1);
+        }
     }
 #endif
 
@@ -741,14 +750,16 @@ int ScreenRecorder::CaptureFrames() {
             video_data_present = true;
         }
 
-        ret = av_read_frame(in_audio_fmt_ctx_, audio_packet);
-        if (ret == AVERROR(EAGAIN)) {
-            audio_data_present = false;
-        } else if (ret < 0) {
-            std::cerr << "ERROR: Cannot read frame" << std::endl;
-            exit(1);
-        } else {
-            audio_data_present = true;
+        if (record_audio_) {
+            ret = av_read_frame(in_audio_fmt_ctx_, audio_packet);
+            if (ret == AVERROR(EAGAIN)) {
+                audio_data_present = false;
+            } else if (ret < 0) {
+                std::cerr << "ERROR: Cannot read frame" << std::endl;
+                exit(1);
+            } else {
+                audio_data_present = true;
+            }
         }
 
         if (video_data_present) {
@@ -759,13 +770,9 @@ int ScreenRecorder::CaptureFrames() {
             av_packet_unref(packet);
         }
 
-#if VERBOSE
-        std::cout << std::endl;
-#endif
-
         if (audio_data_present) {
 #if VERBOSE
-            std::cout << "[A] packet " << audio_pkt_counter++;
+            std::cout << std::endl << "[A] packet " << audio_pkt_counter++;
 #endif
             if (ProcessAudioPkt(audio_packet)) exit(1);
             av_packet_unref(audio_packet);
@@ -806,7 +813,7 @@ int ScreenRecorder::CaptureFrames() {
 
     av_packet_free(&packet);
 #ifdef __linux__
-    av_packet_free(&audio_packet);
+    if (record_audio_) av_packet_free(&audio_packet);
 #endif
 
     if (FlushEncoders()) {
