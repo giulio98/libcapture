@@ -759,6 +759,10 @@ int ScreenRecorder::CaptureFrames() {
             av_packet_unref(packet);
         }
 
+#if VERBOSE
+        std::cout << std::endl;
+#endif
+
         if (audio_data_present) {
 #if VERBOSE
             std::cout << "[A] packet " << audio_pkt_counter++;
@@ -793,10 +797,10 @@ int ScreenRecorder::CaptureFrames() {
 
         av_packet_unref(packet);
 
-#if VERBOSE
-        std::cout << std::endl;
 #endif
 
+#if VERBOSE
+        std::cout << std::endl;
 #endif
     }
 
