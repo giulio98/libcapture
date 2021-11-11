@@ -9,37 +9,6 @@
 
 #include "../include/duration_logger.h"
 
-static int InitCodecCtx(AVCodecContext *&codec_ctx, AVCodec *&codec, AVCodecParameters *codec_params) {
-    int ret;
-
-    codec = avcodec_find_decoder(codec_params->codec_id);
-    if (codec == NULL) {
-        std::cerr << "\nunable to find the video decoder";
-        return -1;
-    }
-
-    codec_ctx = avcodec_alloc_context3(codec);
-    if (!codec_ctx) {
-        std::cerr << "\nfailed to allocated memory for AVCodecContext";
-        return -1;
-    }
-
-    // Fill the codec context based on the values from the supplied codec parameters
-    // https://ffmpeg.org/doxygen/trunk/group__lavc__core.html#gac7b282f51540ca7a99416a3ba6ee0d16
-    if (avcodec_parameters_to_context(codec_ctx, codec_params) < 0) {
-        std::cerr << "\nfailed to copy codec params to codec context";
-        return -1;
-    }
-
-    ret = avcodec_open2(codec_ctx, codec, NULL);
-    if (ret < 0) {
-        std::cerr << "\nunable to open the av codec";
-        return -1;
-    }
-
-    return 0;
-}
-
 /* initialize the resources*/
 ScreenRecorder::ScreenRecorder() {
 #ifdef __linux__
@@ -68,8 +37,8 @@ ScreenRecorder::~ScreenRecorder() {
         exit(1);
     }
 
-    if (video_thread_.joinable() == true) {
-        video_thread_.join();
+    if (recorder_thread_.joinable() == true) {
+        recorder_thread_.join();
     }
 
     /* TO-DO: free all data structures */
@@ -89,7 +58,7 @@ void ScreenRecorder::Start() {
     this->OpenInputDevices();
     this->InitOutputFile();
 
-    video_thread_ = std::thread(video_fun);
+    recorder_thread_ = std::thread(video_fun);
 
     std::cout << "\nall required functions are registered successfully";
 }
@@ -118,8 +87,8 @@ void ScreenRecorder::Stop() {
         exit(1);
     }
 
-    if (video_thread_.joinable() == true) {
-        video_thread_.join();
+    if (recorder_thread_.joinable() == true) {
+        recorder_thread_.join();
     }
 }
 
@@ -135,6 +104,50 @@ void ScreenRecorder::Resume() {
     this->paused_ = false;
     std::cout << "\nsuccesfully resumed\n";
     cv_.notify_all();
+}
+
+int ScreenRecorder::InitDecoder(int audio_video) {
+    int ret;
+    AVCodec **codec;
+    AVCodecContext **codec_ctx;
+    AVCodecParameters *codec_params;
+
+    if (audio_video) {
+        codec = &in_audio_codec_;
+        codec_ctx = &in_audio_codec_ctx_;
+        codec_params = in_audio_stream_->codecpar;
+    } else {
+        codec = &in_video_codec_;
+        codec_ctx = &in_video_codec_ctx_;
+        codec_params = in_video_stream_->codecpar;
+    }
+
+    *codec = avcodec_find_decoder(codec_params->codec_id);
+    if (*codec == NULL) {
+        std::cerr << "\nunable to find the video decoder";
+        return -1;
+    }
+
+    *codec_ctx = avcodec_alloc_context3(*codec);
+    if (!*codec_ctx) {
+        std::cerr << "\nfailed to allocated memory for AVCodecContext";
+        return -1;
+    }
+
+    // Fill the codec context based on the values from the supplied codec parameters
+    // https://ffmpeg.org/doxygen/trunk/group__lavc__core.html#gac7b282f51540ca7a99416a3ba6ee0d16
+    if (avcodec_parameters_to_context(*codec_ctx, codec_params) < 0) {
+        std::cerr << "\nfailed to copy codec params to codec context";
+        return -1;
+    }
+
+    ret = avcodec_open2(*codec_ctx, *codec, NULL);
+    if (ret < 0) {
+        std::cerr << "\nunable to open the av codec";
+        return -1;
+    }
+
+    return 0;
 }
 
 int ScreenRecorder::SetVideoOptions() {
@@ -181,18 +194,11 @@ int ScreenRecorder::InitVideoConverter() {
 int ScreenRecorder::InitAudioConverter() {
     int ret;
     int fifo_duration = 2;  // How many seconds of audio to store in the FIFO buffer
-    AVStream *in_stream;
-
-#ifdef __linux__
-    in_stream = in_audio_fmt_ctx_->streams[in_audio_stream_idx_];
-#else
-    in_stream = in_fmt_ctx_->streams[in_audio_stream_idx_];
-#endif
 
     audio_converter_ctx_ = swr_alloc_set_opts(
         nullptr, av_get_default_channel_layout(in_audio_codec_ctx_->channels), out_audio_codec_ctx_->sample_fmt,
         in_audio_codec_ctx_->sample_rate, av_get_default_channel_layout(in_audio_codec_ctx_->channels),
-        (AVSampleFormat)in_stream->codecpar->format, in_stream->codecpar->sample_rate, 0, nullptr);
+        (AVSampleFormat)in_audio_stream_->codecpar->format, in_audio_stream_->codecpar->sample_rate, 0, nullptr);
 
     if (!audio_converter_ctx_) {
         std::cerr << "Error allocating audio converter";
@@ -216,7 +222,6 @@ int ScreenRecorder::InitAudioConverter() {
     return 0;
 }
 
-/* establishing the connection between camera or screen through its respective folder */
 int ScreenRecorder::OpenInputDevice(AVFormatContext *&in_fmt_ctx, AVInputFormat *in_fmt, const char *device_name,
                                     AVDictionary **options) {
     int ret;
@@ -237,14 +242,14 @@ int ScreenRecorder::OpenInputDevice(AVFormatContext *&in_fmt_ctx, AVInputFormat 
     for (int i = 0; i < in_fmt_ctx->nb_streams; i++) {
         AVStream *stream = in_fmt_ctx->streams[i];
         if (stream->codecpar->codec_type == AVMEDIA_TYPE_VIDEO) {
-            in_video_stream_idx_ = i;
-            if (InitCodecCtx(in_video_codec_ctx_, in_video_codec_, stream->codecpar)) {
+            in_video_stream_ = stream;
+            if (InitDecoder(0)) {
                 std::cerr << "Cannot Initialize in_video_codec_ctx";
                 exit(1);
             }
         } else if (stream->codecpar->codec_type == AVMEDIA_TYPE_AUDIO) {
-            in_audio_stream_idx_ = i;
-            if (InitCodecCtx(in_audio_codec_ctx_, in_audio_codec_, stream->codecpar)) {
+            in_audio_stream_ = stream;
+            if (InitDecoder(1)) {
                 std::cerr << "Cannot Initialize in_audio_codec_ctx";
                 exit(1);
             }
@@ -263,8 +268,8 @@ int ScreenRecorder::OpenInputDevices() {
         exit(1);
     };
 
-    in_video_stream_idx_ = -1;
-    in_audio_stream_idx_ = -1;
+    in_video_stream_ = NULL;
+    in_audio_stream_ = NULL;
 
 #ifdef __linux__
     OpenInputDevice(in_fmt_ctx_, av_find_input_format("x11grab"), ":0.0", &video_options_);
@@ -273,12 +278,12 @@ int ScreenRecorder::OpenInputDevices() {
     OpenInputDevice(in_fmt_ctx_, av_find_input_format("avfoundation"), "1:0", &video_options_);
 #endif
 
-    if (in_video_stream_idx_ == -1) {
+    if (!in_video_stream_) {
         std::cout << "\nunable to find the video stream index. (-1)";
         exit(1);
     }
 
-    if (in_audio_stream_idx_ == -1) {
+    if (!in_audio_stream_) {
         std::cout << "\nunable to find the audio stream index. (-1)";
         exit(1);
     }
@@ -340,13 +345,6 @@ int ScreenRecorder::InitVideoEncoder() {
 
 int ScreenRecorder::InitAudioEncoder() {
     int ret;
-    AVStream *in_stream;
-
-#ifdef __linux__
-    in_stream = in_audio_fmt_ctx_->streams[in_audio_stream_idx_];
-#else
-    in_stream = in_fmt_ctx_->streams[in_audio_stream_idx_];
-#endif
 
     out_audio_stream_ = avformat_new_stream(out_fmt_ctx_, NULL);
     if (!out_video_stream_) {
@@ -366,9 +364,9 @@ int ScreenRecorder::InitAudioEncoder() {
     }
 
     out_audio_codec_ctx_ = avcodec_alloc_context3(out_audio_codec_);
-    out_audio_codec_ctx_->channels = in_stream->codecpar->channels;
-    out_audio_codec_ctx_->channel_layout = av_get_default_channel_layout(in_stream->codecpar->channels);
-    out_audio_codec_ctx_->sample_rate = in_stream->codecpar->sample_rate;
+    out_audio_codec_ctx_->channels = in_audio_stream_->codecpar->channels;
+    out_audio_codec_ctx_->channel_layout = av_get_default_channel_layout(in_audio_stream_->codecpar->channels);
+    out_audio_codec_ctx_->sample_rate = in_audio_stream_->codecpar->sample_rate;
     out_audio_codec_ctx_->sample_fmt = out_audio_codec_->sample_fmts[0];  // for aac there is AV_SAMPLE_FMT_FLTP = 8
     out_audio_codec_ctx_->bit_rate = 96000;
     out_audio_codec_ctx_->time_base.num = 1;
@@ -738,10 +736,10 @@ int ScreenRecorder::CaptureFrames() {
             exit(1);
         }
 
-        if (packet->stream_index == in_video_stream_idx_) {
+        if (packet->stream_index == in_video_stream_->index) {
             std::cout << std::endl << "[V] packet " << video_pkt_counter++;
             if (ProcessVideoPkt(packet)) exit(1);
-        } else if (packet->stream_index == in_audio_stream_idx_) {
+        } else if (packet->stream_index == in_audio_stream_->index) {
             std::cout << std::endl << "[A] packet " << audio_pkt_counter++;
             if (ProcessAudioPkt(packet)) exit(1);
         } else {
