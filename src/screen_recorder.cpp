@@ -108,40 +108,30 @@ void ScreenRecorder::Resume() {
 
 int ScreenRecorder::InitDecoder(int audio_video) {
     int ret;
-    AVCodec **codec;
-    AVCodecContext **codec_ctx;
-    AVCodecParameters *codec_params;
+    AVCodec *&codec = audio_video ? in_audio_codec_ : in_video_codec_;
+    AVCodecContext *&codec_ctx = audio_video ? in_audio_codec_ctx_ : in_video_codec_ctx_;
+    AVCodecParameters *codec_params = audio_video ? in_audio_stream_->codecpar : in_video_stream_->codecpar;
 
-    if (audio_video) {
-        codec = &in_audio_codec_;
-        codec_ctx = &in_audio_codec_ctx_;
-        codec_params = in_audio_stream_->codecpar;
-    } else {
-        codec = &in_video_codec_;
-        codec_ctx = &in_video_codec_ctx_;
-        codec_params = in_video_stream_->codecpar;
-    }
-
-    *codec = avcodec_find_decoder(codec_params->codec_id);
-    if (*codec == NULL) {
+    codec = avcodec_find_decoder(codec_params->codec_id);
+    if (codec == NULL) {
         std::cerr << "\nunable to find the video decoder";
         return -1;
     }
 
-    *codec_ctx = avcodec_alloc_context3(*codec);
-    if (!*codec_ctx) {
+    codec_ctx = avcodec_alloc_context3(codec);
+    if (!codec_ctx) {
         std::cerr << "\nfailed to allocated memory for AVCodecContext";
         return -1;
     }
 
     // Fill the codec context based on the values from the supplied codec parameters
     // https://ffmpeg.org/doxygen/trunk/group__lavc__core.html#gac7b282f51540ca7a99416a3ba6ee0d16
-    if (avcodec_parameters_to_context(*codec_ctx, codec_params) < 0) {
+    if (avcodec_parameters_to_context(codec_ctx, codec_params) < 0) {
         std::cerr << "\nfailed to copy codec params to codec context";
         return -1;
     }
 
-    ret = avcodec_open2(*codec_ctx, *codec, NULL);
+    ret = avcodec_open2(codec_ctx, codec, NULL);
     if (ret < 0) {
         std::cerr << "\nunable to open the av codec";
         return -1;
