@@ -19,6 +19,7 @@ int main() {
     std::cout << "Recording to " << file1 << " completed" << std::endl;
 
     std::this_thread::sleep_for(2000ms);
+    std::cout << std::endl;
 
     std::cout << "Recording to " << file2 << std::endl;
     screen_record.Start(file2);

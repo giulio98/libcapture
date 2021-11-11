@@ -9,31 +9,29 @@
 
 #include "../include/duration_logger.h"
 
+#define VERBOSE 1
+
 /* initialize the resources*/
 ScreenRecorder::ScreenRecorder() {
 #ifdef __linux__
     /* x11grab has some issues doing more than 30 fps */
     video_framerate_ = 30;
 #else
-    video_framerate_ = 60;
+    video_framerate_ = 10;
 #endif
 }
 
 /* uninitialize the resources */
 ScreenRecorder::~ScreenRecorder() {
     avformat_close_input(&in_fmt_ctx_);
-    if (!in_fmt_ctx_) {
-        std::cout << "\nfile closed sucessfully";
-    } else {
+    if (in_fmt_ctx_) {
         std::cout << "\nunable to close the file";
         exit(1);
     }
 
     avformat_free_context(in_fmt_ctx_);
-    if (!in_fmt_ctx_) {
-        std::cout << "\navformat free successfully";
-    } else {
-        std::cout << "\nunable to free avformat context";
+    if (in_fmt_ctx_) {
+        std::cout << "unable to free avformat context" << std::endl;
         exit(1);
     }
 
@@ -50,18 +48,23 @@ void ScreenRecorder::Start(const std::string &output_file) {
     paused_ = false;
     video_pix_fmt_ = AV_PIX_FMT_YUV420P;
 
-    auto video_fun = [this]() { this->CaptureFrames(); };
+    auto video_fun = [this]() {
+        std::cout << "Recording..." << std::endl;
+        this->CaptureFrames();
+    };
 
     avdevice_register_all();
 
-    std::cout << "\nSelect the area to record (click to select all the display) " << std::endl;
+    std::cout << "Select the area to record (click to select all the display)" << std::endl;
     this->SelectArea();
     this->OpenInputDevices();
     this->InitOutputFile();
 
     recorder_thread_ = std::thread(video_fun);
 
-    std::cout << "\nall required functions are registered successfully";
+#if VERBOSE
+    std::cout << "All required functions have been successfully registered" << std::endl;
+#endif
 }
 
 void ScreenRecorder::Stop() {
@@ -73,20 +76,30 @@ void ScreenRecorder::Stop() {
     }
 
     avformat_close_input(&in_fmt_ctx_);
-    if (!in_fmt_ctx_) {
-        std::cout << "\nfile closed sucessfully" << std::endl;
-    } else {
-        std::cout << "\nunable to close the file" << std::endl;
+    if (in_fmt_ctx_) {
+        std::cerr << "Unable to close the file" << std::endl;
         exit(1);
     }
 
     avformat_free_context(in_fmt_ctx_);
-    if (!in_fmt_ctx_) {
-        std::cout << "\navformat freed successfully" << std::endl;
-    } else {
-        std::cerr << "\nunable to freed avformat context" << std::endl;
+    if (in_fmt_ctx_) {
+        std::cerr << "Unable to freed avformat context" << std::endl;
         exit(1);
     }
+
+#ifdef __linux__
+    avformat_close_input(&in_audio_fmt_ctx_);
+    if (in_fmt_ctx_) {
+        std::cerr << "Unable to close the file" << std::endl;
+        exit(1);
+    }
+
+    avformat_free_context(in_audio_fmt_ctx_);
+    if (in_fmt_ctx_) {
+        std::cerr << "Unable to freed avformat context" << std::endl;
+        exit(1);
+    }
+#endif
 
     if (recorder_thread_.joinable() == true) {
         recorder_thread_.join();
@@ -96,14 +109,14 @@ void ScreenRecorder::Stop() {
 void ScreenRecorder::Pause() {
     std::unique_lock<std::mutex> ul{mutex_};
     this->paused_ = true;
-    std::cout << "\nsuccesfully paused\n";
+    std::cout << "Recording paused" << std::endl;
     cv_.notify_all();
 }
 
 void ScreenRecorder::Resume() {
     std::unique_lock<std::mutex> ul{mutex_};
     this->paused_ = false;
-    std::cout << "\nsuccesfully resumed\n";
+    std::cout << "Recording resumed" << std::endl;
     cv_.notify_all();
 }
 
@@ -115,26 +128,26 @@ int ScreenRecorder::InitDecoder(int audio_video) {
 
     codec = avcodec_find_decoder(codec_params->codec_id);
     if (codec == NULL) {
-        std::cerr << "\nunable to find the video decoder";
+        std::cerr << "Unable to find the video decoder" << std::endl;
         return -1;
     }
 
     codec_ctx = avcodec_alloc_context3(codec);
     if (!codec_ctx) {
-        std::cerr << "\nfailed to allocated memory for AVCodecContext";
+        std::cerr << "Failed to allocated memory for AVCodecContext" << std::endl;
         return -1;
     }
 
     // Fill the codec context based on the values from the supplied codec parameters
     // https://ffmpeg.org/doxygen/trunk/group__lavc__core.html#gac7b282f51540ca7a99416a3ba6ee0d16
     if (avcodec_parameters_to_context(codec_ctx, codec_params) < 0) {
-        std::cerr << "\nfailed to copy codec params to codec context";
+        std::cerr << "Failed to copy codec params to codec context" << std::endl;
         return -1;
     }
 
     ret = avcodec_open2(codec_ctx, codec, NULL);
     if (ret < 0) {
-        std::cerr << "\nunable to open the av codec";
+        std::cerr << "Unable to open the av codec" << std::endl;
         return -1;
     }
 
@@ -273,12 +286,12 @@ int ScreenRecorder::OpenInputDevices() {
 #endif
 
     if (!in_video_stream_) {
-        std::cout << "\nunable to find the video stream index. (-1)";
+        std::cerr << "Unable to find the video stream index. (-1)" << std::endl;
         exit(1);
     }
 
     if (!in_audio_stream_) {
-        std::cout << "\nunable to find the audio stream index. (-1)";
+        std::cerr << "Unable to find the audio stream index. (-1)" << std::endl;
         exit(1);
     }
 
@@ -506,7 +519,9 @@ int ScreenRecorder::ProcessVideoPkt(AVPacket *packet) {
     int ret;
     AVFrame *in_frame;
     AVFrame *out_frame;
+#if VERBOSE
     DurationLogger dl(" processed in ");
+#endif
 
     in_frame = av_frame_alloc();
     if (!in_frame) {
@@ -567,7 +582,9 @@ int ScreenRecorder::ProcessAudioPkt(AVPacket *packet) {
     int ret;
     AVFrame *in_frame;
     AVFrame *out_frame;
+#if VERBOSE
     DurationLogger dl(" processed in ");
+#endif
 
     in_frame = av_frame_alloc();
     if (!in_frame) {
@@ -706,13 +723,17 @@ int ScreenRecorder::CaptureFrames() {
         }
 
         if (video_data_present) {
-            std::cout << std::endl << "[V] packet " << video_pkt_counter++;
+#if VERBOSE
+            std::cout << "[V] packet " << video_pkt_counter++;
+#endif
             if (ProcessVideoPkt(packet)) exit(1);
             av_packet_unref(packet);
         }
 
         if (audio_data_present) {
-            std::cout << std::endl << "[A] packet " << audio_pkt_counter++;
+#if VERBOSE
+            std::cout << "[A] packet " << audio_pkt_counter++;
+#endif
             if (ProcessAudioPkt(audio_packet)) exit(1);
             av_packet_unref(audio_packet);
         }
@@ -728,16 +749,24 @@ int ScreenRecorder::CaptureFrames() {
         }
 
         if (packet->stream_index == in_video_stream_->index) {
-            std::cout << std::endl << "[V] packet " << video_pkt_counter++;
+#if VERBOSE
+            std::cout << "[V] packet " << video_pkt_counter++;
+#endif
             if (ProcessVideoPkt(packet)) exit(1);
         } else if (packet->stream_index == in_audio_stream_->index) {
-            std::cout << std::endl << "[A] packet " << audio_pkt_counter++;
+#if VERBOSE
+            std::cout << "[A] packet " << audio_pkt_counter++;
+#endif
             if (ProcessAudioPkt(packet)) exit(1);
         } else {
-            std::cout << std::endl << " unknown, ignoring...";
+            std::cout << " unknown, ignoring...";
         }
 
         av_packet_unref(packet);
+
+#if VERBOSE
+        std::cout << std::endl;
+#endif
 
 #endif
     }
@@ -884,8 +913,8 @@ int ScreenRecorder::SelectArea() {
     offset_x_ = offset_y_ = 0;
 #endif
 
-    std::cout << "\nSize: " << width_ << "x" << height_ << std::endl;
-    std::cout << "\nOffset: " << offset_x_ << " " << offset_y_ << std::endl;
+    std::cout << "Size: " << width_ << "x" << height_ << std::endl;
+    std::cout << "Offset: " << offset_x_ << "," << offset_y_ << std::endl;
 
     return 0;
 }
