@@ -454,7 +454,7 @@ int ScreenRecorder::EncodeWriteFrame(AVFrame *frame, int audio_video) {
     return 0;
 }
 
-int ScreenRecorder::ProcessVideoPkt(AVPacket *in_packet) {
+int ScreenRecorder::ProcessVideoPkt(AVPacket *packet) {
     int ret;
     AVFrame *in_frame;
     AVFrame *out_frame;
@@ -483,7 +483,7 @@ int ScreenRecorder::ProcessVideoPkt(AVPacket *in_packet) {
         return -1;
     }
 
-    ret = avcodec_send_packet(in_video_codec_ctx_, in_packet);
+    ret = avcodec_send_packet(in_video_codec_ctx_, packet);
     if (ret < 0) {
         fprintf(stderr, "Error sending a packet for decoding\n");
         return -1;
@@ -545,7 +545,7 @@ int ScreenRecorder::WriteAudioFrameToFifo(AVFrame *in_frame) {
     return 0;
 }
 
-int ScreenRecorder::ProcessAudioPkt(AVPacket *in_packet) {
+int ScreenRecorder::ProcessAudioPkt(AVPacket *packet) {
     int ret;
     AVFrame *in_frame;
     AVFrame *out_frame;
@@ -557,7 +557,7 @@ int ScreenRecorder::ProcessAudioPkt(AVPacket *in_packet) {
         return -1;
     }
 
-    ret = avcodec_send_packet(in_audio_codec_ctx_, in_packet);
+    ret = avcodec_send_packet(in_audio_codec_ctx_, packet);
     if (ret < 0) {
         throw std::runtime_error("can not send pkt in decoding");
     }
