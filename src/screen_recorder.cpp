@@ -611,6 +611,12 @@ int ScreenRecorder::ProcessAudioPkt(AVPacket *packet) {
     return 0;
 }
 
+int ScreenRecorder::FlushEncoders() {
+    EncodeWriteFrame(NULL, out_video_codec_ctx_, out_video_stream_->index);
+    EncodeWriteFrame(NULL, out_audio_codec_ctx_, out_audio_stream_->index);
+    return 0;
+}
+
 /* function to capture and store data in frames by allocating required memory and auto deallocating the memory.   */
 int ScreenRecorder::CaptureFrames() {
     /*
@@ -720,6 +726,8 @@ int ScreenRecorder::CaptureFrames() {
 #ifdef __linux__
     av_packet_free(&in_audio_packet);
 #endif
+
+    FlushEncoders();
 
     ret = av_write_trailer(out_fmt_ctx_);
     if (ret < 0) {

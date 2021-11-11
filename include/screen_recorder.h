@@ -118,6 +118,8 @@ class ScreenRecorder {
     /* Convert, encode and write in the output file the audio packet */
     int ProcessAudioPkt(AVPacket *packet);
 
+    int FlushEncoders();
+
     int OpenInputDevices();
     int InitOutputFile();
     int CaptureFrames();
