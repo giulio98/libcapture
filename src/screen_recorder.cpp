@@ -463,9 +463,19 @@ int ScreenRecorder::WriteAudioFrameToFifo(AVFrame *frame) {
     return 0;
 }
 
-int ScreenRecorder::EncodeWriteFrame(AVFrame *frame, AVCodecContext *codec_ctx, int stream_index) {
+int ScreenRecorder::EncodeWriteFrame(AVFrame *frame, int audio_video) {
     int ret;
     AVPacket *packet;
+    AVCodecContext *codec_ctx;
+    int stream_index;
+
+    if (audio_video) {
+        codec_ctx = out_audio_codec_ctx_;
+        stream_index = out_audio_stream_->index;
+    } else {
+        codec_ctx = out_video_codec_ctx_;
+        stream_index = out_video_stream_->index;
+    }
 
     packet = av_packet_alloc();
     if (!packet) {
@@ -547,14 +557,13 @@ int ScreenRecorder::ProcessVideoPkt(AVPacket *packet) {
             exit(1);
         }
 
-        /* Convert the image from input (set in OpenInputDevices) to output format (set in OpenOutputFile) */
         sws_scale(video_converter_ctx_, in_frame->data, in_frame->linesize, 0, out_frame->height, out_frame->data,
                   out_frame->linesize);
 
         out_frame->pts =
             av_rescale_q(video_frame_counter_++, out_video_codec_ctx_->time_base, out_video_stream_->time_base);
 
-        if (EncodeWriteFrame(out_frame, out_video_codec_ctx_, out_video_stream_->index)) return -1;
+        if (EncodeWriteFrame(out_frame, 0)) return -1;
     }
 
     av_frame_free(&in_frame);
@@ -622,7 +631,7 @@ int ScreenRecorder::ProcessAudioPkt(AVPacket *packet) {
                 return -1;
             }
 
-            if (EncodeWriteFrame(out_frame, out_audio_codec_ctx_, out_audio_stream_->index)) return -1;
+            if (EncodeWriteFrame(out_frame, 1)) return -1;
 
             av_frame_free(&out_frame);
         }
@@ -634,8 +643,8 @@ int ScreenRecorder::ProcessAudioPkt(AVPacket *packet) {
 }
 
 int ScreenRecorder::FlushEncoders() {
-    if (EncodeWriteFrame(NULL, out_video_codec_ctx_, out_video_stream_->index)) return -1;
-    if (EncodeWriteFrame(NULL, out_audio_codec_ctx_, out_audio_stream_->index)) return -1;
+    for (int i = 0; i <= 1; i++)
+        if (EncodeWriteFrame(NULL, i)) return -1;
     return 0;
 }
 
