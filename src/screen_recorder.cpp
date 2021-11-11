@@ -412,6 +412,35 @@ int ScreenRecorder::InitOutputFile() {
     return 0;
 }
 
+int ScreenRecorder::WriteAudioFrameToFifo(AVFrame *in_frame) {
+    int ret;
+    uint8_t **buf = nullptr;
+
+    ret = av_samples_alloc_array_and_samples(&buf, NULL, out_audio_codec_ctx_->channels, in_frame->nb_samples,
+                                             out_audio_codec_ctx_->sample_fmt, 0);
+    if (ret < 0) {
+        throw std::runtime_error("Fail to alloc samples by av_samples_alloc_array_and_samples.");
+    }
+
+    ret = swr_convert(audio_converter_ctx_, buf, in_frame->nb_samples, (const uint8_t **)in_frame->extended_data,
+                      in_frame->nb_samples);
+    if (ret < 0) {
+        throw std::runtime_error("Fail to swr_convert.");
+    }
+
+    if (av_audio_fifo_space(audio_fifo_buf_) < in_frame->nb_samples)
+        throw std::runtime_error("audio buffer is too small.");
+
+    ret = av_audio_fifo_write(audio_fifo_buf_, (void **)buf, in_frame->nb_samples);
+    if (ret < 0) {
+        throw std::runtime_error("Fail to write fifo");
+    }
+
+    av_freep(&buf[0]);
+
+    return 0;
+}
+
 int ScreenRecorder::EncodeWriteFrame(AVFrame *frame, AVCodecContext *codec_ctx, int stream_index) {
     int ret;
     AVPacket *packet;
@@ -510,35 +539,6 @@ int ScreenRecorder::ProcessVideoPkt(AVPacket *packet) {
 
     av_freep(&out_frame->data[0]);  // needed beacuse of av_image_alloc() (data is not reference-counted)
     av_frame_free(&out_frame);
-
-    return 0;
-}
-
-int ScreenRecorder::WriteAudioFrameToFifo(AVFrame *in_frame) {
-    int ret;
-    uint8_t **buf = nullptr;
-
-    ret = av_samples_alloc_array_and_samples(&buf, NULL, out_audio_codec_ctx_->channels, in_frame->nb_samples,
-                                             out_audio_codec_ctx_->sample_fmt, 0);
-    if (ret < 0) {
-        throw std::runtime_error("Fail to alloc samples by av_samples_alloc_array_and_samples.");
-    }
-
-    ret = swr_convert(audio_converter_ctx_, buf, in_frame->nb_samples, (const uint8_t **)in_frame->extended_data,
-                      in_frame->nb_samples);
-    if (ret < 0) {
-        throw std::runtime_error("Fail to swr_convert.");
-    }
-
-    if (av_audio_fifo_space(audio_fifo_buf_) < in_frame->nb_samples)
-        throw std::runtime_error("audio buffer is too small.");
-
-    ret = av_audio_fifo_write(audio_fifo_buf_, (void **)buf, in_frame->nb_samples);
-    if (ret < 0) {
-        throw std::runtime_error("Fail to write fifo");
-    }
-
-    av_freep(&buf[0]);
 
     return 0;
 }

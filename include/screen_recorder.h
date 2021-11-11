@@ -106,15 +106,17 @@ class ScreenRecorder {
     int InitVideoConverter();
     int InitAudioConverter();
 
+    /* Convert the audio frame and write it to the audio FIFO buffer */
+    int WriteAudioFrameToFifo(AVFrame *in_frame);
+
     /* Encode a frame and write to out_fmt_ */
     int EncodeWriteFrame(AVFrame *frame, AVCodecContext *codec_ctx, int stream_index);
 
     /* Convert, encode and write in the output file the video packet */
     int ProcessVideoPkt(AVPacket *packet);
+
     /* Convert, encode and write in the output file the audio packet */
     int ProcessAudioPkt(AVPacket *packet);
-    /* Convert the audio frame and write it to the audio FIFO buffer */
-    int WriteAudioFrameToFifo(AVFrame *in_frame);
 
     int OpenInputDevices();
     int InitOutputFile();
