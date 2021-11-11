@@ -412,11 +412,9 @@ int ScreenRecorder::InitOutputFile() {
     return 0;
 }
 
-int ScreenRecorder::EncodeWriteFrame(AVFrame *frame, int audio_video) {
+int ScreenRecorder::EncodeWriteFrame(AVFrame *frame, AVCodecContext *codec_ctx, int stream_index) {
     int ret;
     AVPacket *packet;
-    AVCodecContext *codec_ctx = audio_video ? out_audio_codec_ctx_ : out_video_codec_ctx_;
-    int stream_index = audio_video ? out_audio_stream_->index : out_video_stream_->index;
 
     packet = av_packet_alloc();
     if (!packet) {
@@ -505,7 +503,7 @@ int ScreenRecorder::ProcessVideoPkt(AVPacket *packet) {
         out_frame->pts =
             av_rescale_q(video_frame_counter_++, out_video_codec_ctx_->time_base, out_video_stream_->time_base);
 
-        EncodeWriteFrame(out_frame, 0);
+        EncodeWriteFrame(out_frame, out_video_codec_ctx_, out_video_stream_->index);
     }
 
     av_frame_free(&in_frame);
@@ -602,7 +600,7 @@ int ScreenRecorder::ProcessAudioPkt(AVPacket *packet) {
                 return -1;
             }
 
-            EncodeWriteFrame(out_frame, 1);
+            EncodeWriteFrame(out_frame, out_audio_codec_ctx_, out_audio_stream_->index);
 
             av_frame_free(&out_frame);
         }
