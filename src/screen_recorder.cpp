@@ -44,12 +44,13 @@ ScreenRecorder::~ScreenRecorder() {
     /* TO-DO: free all data structures */
 }
 
-void ScreenRecorder::Start() {
-    video_pix_fmt_ = AV_PIX_FMT_YUV420P;
-    auto video_fun = [this]() { this->CaptureFrames(); };
-
+void ScreenRecorder::Start(const std::string &output_file) {
+    output_file_ = output_file;
     stop_capture_ = false;
     paused_ = false;
+    video_pix_fmt_ = AV_PIX_FMT_YUV420P;
+
+    auto video_fun = [this]() { this->CaptureFrames(); };
 
     avdevice_register_all();
 
@@ -387,12 +388,11 @@ int ScreenRecorder::InitAudioEncoder() {
 
 /* initialize the video output file and its properties  */
 int ScreenRecorder::InitOutputFile() {
-    out_fmt_ctx_ = NULL;
-    output_file_ = "../media/output.mp4";
     int ret;
+    out_fmt_ctx_ = NULL;
 
     /* allocate out_fmt_ctx_ */
-    ret = avformat_alloc_output_context2(&out_fmt_ctx_, NULL, NULL, output_file_);
+    ret = avformat_alloc_output_context2(&out_fmt_ctx_, NULL, NULL, output_file_.c_str());
     if (ret < 0) {
         std::cout << "\nerror in allocating av format output context";
         exit(1);
@@ -403,7 +403,7 @@ int ScreenRecorder::InitOutputFile() {
 
     /* create empty video file */
     if (!(out_fmt_ctx_->flags & AVFMT_NOFILE)) {
-        if (avio_open(&out_fmt_ctx_->pb, output_file_, AVIO_FLAG_WRITE) < 0) {
+        if (avio_open(&out_fmt_ctx_->pb, output_file_.c_str(), AVIO_FLAG_WRITE) < 0) {
             std::cout << "\nerror in creating the output file";
             exit(1);
         }
@@ -417,7 +417,7 @@ int ScreenRecorder::InitOutputFile() {
     }
 
     /* show complete information */
-    av_dump_format(out_fmt_ctx_, 0, output_file_, 1);
+    av_dump_format(out_fmt_ctx_, 0, output_file_.c_str(), 1);
 
     return 0;
 }

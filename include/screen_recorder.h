@@ -38,7 +38,7 @@ class ScreenRecorder {
     int width_;
     int height_;
 
-    const char *output_file_;
+    std::string output_file_;
 
     std::mutex mutex_;
     std::condition_variable cv_;
@@ -160,7 +160,7 @@ public:
     ScreenRecorder();
     ~ScreenRecorder();
 
-    void Start();
+    void Start(const std::string &output_file);
     void Stop();
     void Pause();
     void Resume();
