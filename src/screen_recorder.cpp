@@ -296,6 +296,10 @@ int ScreenRecorder::OpenInputDevices() {
 
 int ScreenRecorder::InitVideoEncoder() {
     int ret;
+    AVDictionary *encoder_options = NULL;
+
+    /* Use ultrafast preset to avoid loss of frames */
+    av_dict_set(&encoder_options, "preset", "ultrafast", 0);
 
     out_video_stream_ = avformat_new_stream(out_fmt_ctx_, NULL);
     if (!out_video_stream_) {
@@ -331,7 +335,7 @@ int ScreenRecorder::InitVideoEncoder() {
         out_video_codec_ctx_->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
     }
 
-    ret = avcodec_open2(out_video_codec_ctx_, out_video_codec_, NULL);
+    ret = avcodec_open2(out_video_codec_ctx_, out_video_codec_, &encoder_options);
     if (ret < 0) {
         std::cout << "\nerror in opening the avcodec";
         return -1;
@@ -342,6 +346,8 @@ int ScreenRecorder::InitVideoEncoder() {
         std::cout << "\nerror in writing video stream parameters";
         return -1;
     }
+
+    av_dict_free(&encoder_options);
 
     return 0;
 }
