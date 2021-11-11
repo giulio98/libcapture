@@ -12,9 +12,7 @@
 #define VERBOSE 1
 
 /* initialize the resources*/
-ScreenRecorder::ScreenRecorder() {
-    video_framerate_ = 30;
-}
+ScreenRecorder::ScreenRecorder() {}
 
 /* uninitialize the resources */
 ScreenRecorder::~ScreenRecorder() {
@@ -41,6 +39,7 @@ void ScreenRecorder::Start(const std::string &output_file) {
     output_file_ = output_file;
     stop_capture_ = false;
     paused_ = false;
+    video_framerate_ = 30;
     out_video_pix_fmt_ = AV_PIX_FMT_YUV420P;
     out_video_codec_id_ = AV_CODEC_ID_H264;
 
