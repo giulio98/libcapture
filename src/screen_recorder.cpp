@@ -434,26 +434,26 @@ int ScreenRecorder::InitOutputFile() {
     return 0;
 }
 
-int ScreenRecorder::WriteAudioFrameToFifo(AVFrame *in_frame) {
+int ScreenRecorder::WriteAudioFrameToFifo(AVFrame *frame) {
     int ret;
     uint8_t **buf = nullptr;
 
-    ret = av_samples_alloc_array_and_samples(&buf, NULL, out_audio_codec_ctx_->channels, in_frame->nb_samples,
+    ret = av_samples_alloc_array_and_samples(&buf, NULL, out_audio_codec_ctx_->channels, frame->nb_samples,
                                              out_audio_codec_ctx_->sample_fmt, 0);
     if (ret < 0) {
         throw std::runtime_error("Fail to alloc samples by av_samples_alloc_array_and_samples.");
     }
 
-    ret = swr_convert(audio_converter_ctx_, buf, in_frame->nb_samples, (const uint8_t **)in_frame->extended_data,
-                      in_frame->nb_samples);
+    ret = swr_convert(audio_converter_ctx_, buf, frame->nb_samples, (const uint8_t **)frame->extended_data,
+                      frame->nb_samples);
     if (ret < 0) {
         throw std::runtime_error("Fail to swr_convert.");
     }
 
-    if (av_audio_fifo_space(audio_fifo_buf_) < in_frame->nb_samples)
+    if (av_audio_fifo_space(audio_fifo_buf_) < frame->nb_samples)
         throw std::runtime_error("audio buffer is too small.");
 
-    ret = av_audio_fifo_write(audio_fifo_buf_, (void **)buf, in_frame->nb_samples);
+    ret = av_audio_fifo_write(audio_fifo_buf_, (void **)buf, frame->nb_samples);
     if (ret < 0) {
         throw std::runtime_error("Fail to write fifo");
     }
@@ -648,11 +648,11 @@ int ScreenRecorder::CaptureFrames() {
      * will let you know you decoded enough to have a frame.
      */
     int ret;
-    int in_video_pkt_counter = 0;
-    int in_audio_pkt_counter = 0;
-    AVPacket *in_packet;
+    int video_pkt_counter = 0;
+    int audio_pkt_counter = 0;
+    AVPacket *packet;
 #ifdef __linux__
-    AVPacket *in_audio_packet;
+    AVPacket *audio_packet;
     bool video_data_present;
     bool audio_data_present;
 #endif
@@ -664,15 +664,15 @@ int ScreenRecorder::CaptureFrames() {
     video_frame_counter_ = 0;
     audio_frame_counter_ = 0;
 
-    in_packet = av_packet_alloc();
-    if (!in_packet) {
-        std::cerr << "Could not allocate in_packet";
+    packet = av_packet_alloc();
+    if (!packet) {
+        std::cerr << "Could not allocate packet";
         exit(1);
     }
 
 #ifdef __linux__
-    in_audio_packet = av_packet_alloc();
-    if (!in_packet) {
+    audio_packet = av_packet_alloc();
+    if (!packet) {
         std::cerr << "Could not allocate in_audio_packet";
         exit(1);
     }
@@ -687,7 +687,7 @@ int ScreenRecorder::CaptureFrames() {
 
 #ifdef __linux__
 
-        ret = av_read_frame(in_fmt_ctx_, in_packet);
+        ret = av_read_frame(in_fmt_ctx_, packet);
         if (ret == AVERROR(EAGAIN)) {
             video_data_present = false;
         } else if (ret < 0) {
@@ -697,7 +697,7 @@ int ScreenRecorder::CaptureFrames() {
             video_data_present = true;
         }
 
-        ret = av_read_frame(in_audio_fmt_ctx_, in_audio_packet);
+        ret = av_read_frame(in_audio_fmt_ctx_, audio_packet);
         if (ret == AVERROR(EAGAIN)) {
             audio_data_present = false;
         } else if (ret < 0) {
@@ -708,20 +708,20 @@ int ScreenRecorder::CaptureFrames() {
         }
 
         if (video_data_present) {
-            std::cout << std::endl << "[V] packet " << in_video_pkt_counter++;
-            if (ProcessVideoPkt(in_packet)) exit(1);
-            av_packet_unref(in_packet);
+            std::cout << std::endl << "[V] packet " << video_pkt_counter++;
+            if (ProcessVideoPkt(packet)) exit(1);
+            av_packet_unref(packet);
         }
 
         if (audio_data_present) {
-            std::cout << std::endl << "[A] packet " << in_audio_pkt_counter++;
-            if (ProcessAudioPkt(in_audio_packet)) exit(1);
-            av_packet_unref(in_audio_packet);
+            std::cout << std::endl << "[A] packet " << audio_pkt_counter++;
+            if (ProcessAudioPkt(audio_packet)) exit(1);
+            av_packet_unref(audio_packet);
         }
 
 #else  // macOS
 
-        ret = av_read_frame(in_fmt_ctx_, in_packet);
+        ret = av_read_frame(in_fmt_ctx_, packet);
         if (ret == AVERROR(EAGAIN)) {
             continue;
         } else if (ret < 0) {
@@ -729,24 +729,24 @@ int ScreenRecorder::CaptureFrames() {
             exit(1);
         }
 
-        if (in_packet->stream_index == in_video_stream_idx_) {
-            std::cout << std::endl << "[V] packet " << in_video_pkt_counter++;
-            if (ProcessVideoPkt(in_packet)) exit(1);
-        } else if (in_packet->stream_index == in_audio_stream_idx_) {
-            std::cout << std::endl << "[A] packet " << in_audio_pkt_counter++;
-            if (ProcessAudioPkt(in_packet)) exit(1);
+        if (packet->stream_index == in_video_stream_idx_) {
+            std::cout << std::endl << "[V] packet " << video_pkt_counter++;
+            if (ProcessVideoPkt(packet)) exit(1);
+        } else if (packet->stream_index == in_audio_stream_idx_) {
+            std::cout << std::endl << "[A] packet " << audio_pkt_counter++;
+            if (ProcessAudioPkt(packet)) exit(1);
         } else {
             std::cout << std::endl << " unknown, ignoring...";
         }
 
-        av_packet_unref(in_packet);
+        av_packet_unref(packet);
 
 #endif
     }
 
-    av_packet_free(&in_packet);
+    av_packet_free(&packet);
 #ifdef __linux__
-    av_packet_free(&in_audio_packet);
+    av_packet_free(&audio_packet);
 #endif
 
     if (FlushEncoders()) {

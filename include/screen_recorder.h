@@ -107,7 +107,7 @@ class ScreenRecorder {
     int InitAudioConverter();
 
     /* Convert the audio frame and write it to the audio FIFO buffer */
-    int WriteAudioFrameToFifo(AVFrame *in_frame);
+    int WriteAudioFrameToFifo(AVFrame *frame);
 
     /* Encode a frame and write to out_fmt_ */
     int EncodeWriteFrame(AVFrame *frame, AVCodecContext *codec_ctx, int stream_index);
