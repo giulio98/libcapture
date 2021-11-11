@@ -453,8 +453,8 @@ int ScreenRecorder::EncodeWriteFrame(AVFrame *frame, AVCodecContext *codec_ctx, 
 
     ret = avcodec_send_frame(codec_ctx, frame);
     if (ret < 0) {
-        fprintf(stderr, "Error sending a frame for encoding\n");
-        exit(1);
+        std::cerr << "Error sending a frame for encoding" << std::endl;
+        return -1;
     }
 
     while (true) {
@@ -464,14 +464,14 @@ int ScreenRecorder::EncodeWriteFrame(AVFrame *frame, AVCodecContext *codec_ctx, 
         } else if (ret == AVERROR_EOF) {
             return 0;
         } else if (ret < 0) {
-            fprintf(stderr, "Error during encoding\n");
-            exit(1);
+            std::cerr << "Error during encoding" << std::endl;
+            return -1;
         }
 
         packet->stream_index = stream_index;
 
         if (av_interleaved_write_frame(out_fmt_ctx_, packet)) {
-            std::cout << "\nerror in writing video frame";
+            std::cerr << "\nerror in writing video frame" << std::endl;
             return -1;
         }
     }
@@ -532,7 +532,7 @@ int ScreenRecorder::ProcessVideoPkt(AVPacket *packet) {
         out_frame->pts =
             av_rescale_q(video_frame_counter_++, out_video_codec_ctx_->time_base, out_video_stream_->time_base);
 
-        EncodeWriteFrame(out_frame, out_video_codec_ctx_, out_video_stream_->index);
+        if (EncodeWriteFrame(out_frame, out_video_codec_ctx_, out_video_stream_->index)) return -1;
     }
 
     av_frame_free(&in_frame);
@@ -600,7 +600,7 @@ int ScreenRecorder::ProcessAudioPkt(AVPacket *packet) {
                 return -1;
             }
 
-            EncodeWriteFrame(out_frame, out_audio_codec_ctx_, out_audio_stream_->index);
+            if (EncodeWriteFrame(out_frame, out_audio_codec_ctx_, out_audio_stream_->index)) return -1;
 
             av_frame_free(&out_frame);
         }
@@ -612,8 +612,8 @@ int ScreenRecorder::ProcessAudioPkt(AVPacket *packet) {
 }
 
 int ScreenRecorder::FlushEncoders() {
-    EncodeWriteFrame(NULL, out_video_codec_ctx_, out_video_stream_->index);
-    EncodeWriteFrame(NULL, out_audio_codec_ctx_, out_audio_stream_->index);
+    if (EncodeWriteFrame(NULL, out_video_codec_ctx_, out_video_stream_->index)) return -1;
+    if (EncodeWriteFrame(NULL, out_audio_codec_ctx_, out_audio_stream_->index)) return -1;
     return 0;
 }
 
@@ -727,7 +727,10 @@ int ScreenRecorder::CaptureFrames() {
     av_packet_free(&in_audio_packet);
 #endif
 
-    FlushEncoders();
+    if (FlushEncoders()) {
+        std::cerr << "ERROR: Could not flush encoders" << std::endl;
+        exit(1);
+    };
 
     ret = av_write_trailer(out_fmt_ctx_);
     if (ret < 0) {
