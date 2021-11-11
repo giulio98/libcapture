@@ -13,12 +13,7 @@
 
 /* initialize the resources*/
 ScreenRecorder::ScreenRecorder() {
-#ifdef __linux__
-    /* x11grab has some issues doing more than 30 fps */
     video_framerate_ = 30;
-#else
-    video_framerate_ = 10;
-#endif
 }
 
 /* uninitialize the resources */
