@@ -62,7 +62,10 @@ class ScreenRecorder {
     AVDictionary *video_options_;
 
     /* Pixel format to which convert the video frames */
-    AVPixelFormat video_pix_fmt_;
+    AVPixelFormat out_video_pix_fmt_;
+
+    /* Codec to which convert the video */
+    AVCodecID out_video_codec_id_;
 
     /* Video decoder */
     AVCodec *in_video_codec_;

@@ -41,7 +41,8 @@ void ScreenRecorder::Start(const std::string &output_file) {
     output_file_ = output_file;
     stop_capture_ = false;
     paused_ = false;
-    video_pix_fmt_ = AV_PIX_FMT_YUV420P;
+    out_video_pix_fmt_ = AV_PIX_FMT_YUV420P;
+    out_video_codec_id_ = AV_CODEC_ID_H264;
 
     auto video_fun = [this]() {
         std::cout << "Recording..." << std::endl;
@@ -307,7 +308,7 @@ int ScreenRecorder::InitVideoEncoder() {
         return -1;
     }
 
-    out_video_codec_ = avcodec_find_encoder(AV_CODEC_ID_H264);
+    out_video_codec_ = avcodec_find_encoder(out_video_codec_id_);
     if (!out_video_codec_) {
         std::cout << "\nerror in finding the av codecs. try again with correct codec";
         return -1;
@@ -315,7 +316,7 @@ int ScreenRecorder::InitVideoEncoder() {
 
     /* set property of the video file */
     out_video_codec_ctx_ = avcodec_alloc_context3(out_video_codec_);
-    out_video_codec_ctx_->pix_fmt = video_pix_fmt_;
+    out_video_codec_ctx_->pix_fmt = out_video_pix_fmt_;
     out_video_codec_ctx_->width = in_video_codec_ctx_->width;
     out_video_codec_ctx_->height = in_video_codec_ctx_->height;
     out_video_codec_ctx_->framerate = (AVRational){video_framerate_, 1};
