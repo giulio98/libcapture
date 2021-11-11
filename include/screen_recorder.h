@@ -106,6 +106,12 @@ class ScreenRecorder {
     int InitVideoConverter();
     int InitAudioConverter();
 
+    /**
+     * Encode a frame and write to out_fmt_
+     * @param audio_video indicate if the packet is either video (0) or audio (any other value)
+     */
+    int EncodeWriteFrame(AVFrame *frame, int audio_video);
+
     /* Convert, encode and write in the output file the video packet */
     int ProcessVideoPkt(AVPacket *in_packet);
     /* Convert, encode and write in the output file the audio packet */

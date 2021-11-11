@@ -412,18 +412,53 @@ int ScreenRecorder::InitOutputFile() {
     return 0;
 }
 
-int ScreenRecorder::ProcessVideoPkt(AVPacket *in_packet) {
+int ScreenRecorder::EncodeWriteFrame(AVFrame *frame, int audio_video) {
     int ret;
-    AVPacket *out_packet;
-    AVFrame *in_frame;
-    AVFrame *out_frame;
-    DurationLogger dl(" processed in ");
+    AVPacket *packet;
+    AVCodecContext *codec_ctx = audio_video ? out_audio_codec_ctx_ : out_video_codec_ctx_;
+    int stream_index = audio_video ? out_audio_stream_->index : out_video_stream_->index;
 
-    out_packet = av_packet_alloc();
-    if (!out_packet) {
+    packet = av_packet_alloc();
+    if (!packet) {
         std::cerr << "Could not allocate inPacket" << std::endl;
         return -1;
     }
+
+    ret = avcodec_send_frame(codec_ctx, frame);
+    if (ret < 0) {
+        fprintf(stderr, "Error sending a frame for encoding\n");
+        exit(1);
+    }
+
+    while (true) {
+        ret = avcodec_receive_packet(codec_ctx, packet);
+        if (ret == AVERROR(EAGAIN)) {
+            break;
+        } else if (ret == AVERROR_EOF) {
+            return 0;
+        } else if (ret < 0) {
+            fprintf(stderr, "Error during encoding\n");
+            exit(1);
+        }
+
+        packet->stream_index = stream_index;
+
+        if (av_interleaved_write_frame(out_fmt_ctx_, packet)) {
+            std::cout << "\nerror in writing video frame";
+            return -1;
+        }
+    }
+
+    av_packet_free(&packet);
+
+    return 0;
+}
+
+int ScreenRecorder::ProcessVideoPkt(AVPacket *in_packet) {
+    int ret;
+    AVFrame *in_frame;
+    AVFrame *out_frame;
+    DurationLogger dl(" processed in ");
 
     in_frame = av_frame_alloc();
     if (!in_frame) {
@@ -470,33 +505,8 @@ int ScreenRecorder::ProcessVideoPkt(AVPacket *in_packet) {
         out_frame->pts =
             av_rescale_q(video_frame_counter_++, out_video_codec_ctx_->time_base, out_video_stream_->time_base);
 
-        ret = avcodec_send_frame(out_video_codec_ctx_, out_frame);
-        if (ret < 0) {
-            fprintf(stderr, "Error sending a frame for encoding\n");
-            exit(1);
-        }
-
-        while (true) {
-            ret = avcodec_receive_packet(out_video_codec_ctx_, out_packet);
-            if (ret == AVERROR(EAGAIN)) {
-                break;
-            } else if (ret == AVERROR_EOF) {
-                return 0;
-            } else if (ret < 0) {
-                fprintf(stderr, "Error during encoding\n");
-                exit(1);
-            }
-
-            out_packet->stream_index = out_video_stream_->index;
-
-            if (av_interleaved_write_frame(out_fmt_ctx_, out_packet)) {
-                std::cout << "\nerror in writing video frame";
-                return -1;
-            }
-        }
+        EncodeWriteFrame(out_frame, 0);
     }
-
-    av_packet_free(&out_packet);
 
     av_frame_free(&in_frame);
 
@@ -537,16 +547,9 @@ int ScreenRecorder::WriteAudioFrameToFifo(AVFrame *in_frame) {
 
 int ScreenRecorder::ProcessAudioPkt(AVPacket *in_packet) {
     int ret;
-    AVPacket *out_packet;
     AVFrame *in_frame;
     AVFrame *out_frame;
     DurationLogger dl(" processed in ");
-
-    out_packet = av_packet_alloc();
-    if (!out_packet) {
-        std::cerr << "Could not allocate inPacket" << std::endl;
-        return -1;
-    }
 
     in_frame = av_frame_alloc();
     if (!in_frame) {
@@ -596,31 +599,11 @@ int ScreenRecorder::ProcessAudioPkt(AVPacket *in_packet) {
             return -1;
         }
 
-        ret = avcodec_send_frame(out_audio_codec_ctx_, out_frame);
-        if (ret < 0) {
-            throw std::runtime_error("Fail to send frame in encoding");
-        }
-
-        while (true) {
-            ret = avcodec_receive_packet(out_audio_codec_ctx_, out_packet);
-            if (ret == AVERROR(EAGAIN)) {
-                break;
-            } else if (ret < 0) {
-                throw std::runtime_error("Fail to receive packet in encoding");
-            }
-
-            out_packet->stream_index = out_audio_stream_->index;
-
-            if (av_interleaved_write_frame(out_fmt_ctx_, out_packet)) {
-                std::cout << "\nerror in writing audio frame";
-                return -1;
-            }
-        }
+        EncodeWriteFrame(out_frame, 1);
 
         av_frame_free(&out_frame);
     }
 
-    av_packet_free(&out_packet);
     av_frame_free(&in_frame);
 
     return 0;
