@@ -779,7 +779,7 @@ int ScreenRecorder::CaptureFrames() {
         if (packet->stream_index == in_video_stream_->index) {
             std::cout << "[V] packet " << video_pkt_counter++;
             if (ProcessVideoPkt(packet)) exit(1);
-        } else if (packet->stream_index == in_audio_stream_->index) {
+        } else if (record_audio_ && (packet->stream_index == in_audio_stream_->index)) {
             std::cout << "[A] packet " << audio_pkt_counter++;
             if (ProcessAudioPkt(packet)) exit(1);
         } else {
