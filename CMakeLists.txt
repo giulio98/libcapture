@@ -37,6 +37,7 @@ add_executable(screen-recorder
     src/screen_recorder.cpp
     include/screen_recorder.h
     include/duration_logger.h
+    include/packet.h
 )
 
 target_link_libraries(screen-recorder PkgConfig::LIBAV)

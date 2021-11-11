@@ -10,6 +10,7 @@
 #endif
 
 #include "../include/duration_logger.h"
+#include "../include/packet.h"
 
 /* initialize the resources*/
 ScreenRecorder::ScreenRecorder() {}
@@ -693,7 +694,7 @@ int ScreenRecorder::CaptureFrames() {
     int ret;
     int video_pkt_counter = 0;
     int audio_pkt_counter = 0;
-    AVPacket *packet;
+    Packet packet;
 #ifdef __linux__
     AVPacket *audio_packet;
     bool video_data_present = false;
@@ -707,11 +708,11 @@ int ScreenRecorder::CaptureFrames() {
     video_frame_counter_ = 0;
     if (record_audio_) audio_frame_counter_ = 0;
 
-    packet = av_packet_alloc();
-    if (!packet) {
-        std::cerr << "Could not allocate packet";
-        exit(1);
-    }
+        // packet = av_packet_alloc();
+        // if (!packet) {
+        //     std::cerr << "Could not allocate packet";
+        //     exit(1);
+        // }
 
 #ifdef __linux__
     if (record_audio_) {
@@ -768,7 +769,7 @@ int ScreenRecorder::CaptureFrames() {
 
 #else  // macOS
 
-        ret = av_read_frame(in_fmt_ctx_, packet);
+        ret = av_read_frame(in_fmt_ctx_, packet.Get());
         if (ret == AVERROR(EAGAIN)) {
             continue;
         } else if (ret < 0) {
@@ -778,22 +779,23 @@ int ScreenRecorder::CaptureFrames() {
 
         if (packet->stream_index == in_video_stream_->index) {
             std::cout << "[V] packet " << video_pkt_counter++;
-            if (ProcessVideoPkt(packet)) exit(1);
+            if (ProcessVideoPkt(packet.Get())) exit(1);
         } else if (record_audio_ && (packet->stream_index == in_audio_stream_->index)) {
             std::cout << "[A] packet " << audio_pkt_counter++;
-            if (ProcessAudioPkt(packet)) exit(1);
+            if (ProcessAudioPkt(packet.Get())) exit(1);
         } else {
             std::cout << " unknown, ignoring...";
         }
 
-        av_packet_unref(packet);
+        // av_packet_unref(packet);
+        packet.Unref();
 
 #endif
 
         std::cout << std::endl;
     }
 
-    av_packet_free(&packet);
+    // av_packet_free(&packet);
 #ifdef __linux__
     if (record_audio_) av_packet_free(&audio_packet);
 #endif
