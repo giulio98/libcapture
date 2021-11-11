@@ -263,7 +263,10 @@ int ScreenRecorder::OpenInputDevices() {
     in_audio_stream_ = NULL;
 
 #ifdef __linux__
-    OpenInputDevice(in_fmt_ctx_, av_find_input_format("x11grab"), ":0.0", &video_options_);
+    char video_device_name[20];
+    char *display = getenv("DISPLAY");
+    sprintf(video_device_name, "%s.0+%d,%d", display, offset_x_, offset_y_);
+    OpenInputDevice(in_fmt_ctx_, av_find_input_format("x11grab"), video_device_name, &video_options_);
     OpenInputDevice(in_audio_fmt_ctx_, av_find_input_format("pulse"), "default", NULL);
 #else
     OpenInputDevice(in_fmt_ctx_, av_find_input_format("avfoundation"), "1:0", &video_options_);
