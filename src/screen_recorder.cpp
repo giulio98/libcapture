@@ -41,10 +41,10 @@ static int InitCodecCtx(AVCodecContext *&codec_ctx, AVCodec *&codec, AVCodecPara
 }
 
 /* initialize the resources*/
-ScreenRecorder::ScreenRecorder() : stop_capture_(false), started_(true), paused_(false) {
+ScreenRecorder::ScreenRecorder() : stop_capture_(false), paused_(false) {
 #ifdef __linux__
     /* x11grab has some issues doing more than 30 fps */
-    video_framerate_ = 60;
+    video_framerate_ = 30;
 #else
     video_framerate_ = 60;
 #endif
@@ -98,6 +98,7 @@ void ScreenRecorder::Stop() {
     }
     if (video_thread_.joinable() == true) {
         video_thread_.join();
+        stop_capture_ = false;
     }
 }
 
@@ -658,7 +659,7 @@ int ScreenRecorder::CaptureFrames() {
 
     while (true) {
         std::unique_lock<std::mutex> ul{mutex_};
-        cv_.wait(ul, [this]() { return (!paused_ && started_); });
+        cv_.wait(ul, [this]() { return !paused_; });
         if (stop_capture_) {
             break;
         }
