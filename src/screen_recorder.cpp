@@ -479,10 +479,8 @@ int ScreenRecorder::EncodeWriteFrame(AVFrame *frame, int audio_video) {
 
     while (true) {
         ret = avcodec_receive_packet(codec_ctx, packet);
-        if (ret == AVERROR(EAGAIN)) {
+        if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) {
             break;
-        } else if (ret == AVERROR_EOF) {
-            return 0;
         } else if (ret < 0) {
             std::cerr << "Error during encoding" << std::endl;
             return -1;
