@@ -562,46 +562,50 @@ int ScreenRecorder::ProcessAudioPkt(AVPacket *packet) {
         throw std::runtime_error("can not send pkt in decoding");
     }
 
-    ret = avcodec_receive_frame(in_audio_codec_ctx_, in_frame);
-    if (ret < 0) {
-        throw std::runtime_error("can not receive frame in decoding");
-    }
-
-    ret = WriteAudioFrameToFifo(in_frame);
-    if (ret < 0) {
-        throw std::runtime_error("can not write in audio FIFO buffer");
-    }
-
-    while (av_audio_fifo_size(audio_fifo_buf_) >= out_audio_codec_ctx_->frame_size) {
-        out_frame = av_frame_alloc();
-        if (!out_frame) {
-            std::cerr << "Could not allocate audio out_frame" << std::endl;
-            return -1;
+    while (true) {
+        ret = avcodec_receive_frame(in_audio_codec_ctx_, in_frame);
+        if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) {
+            break;
+        } else if (ret < 0) {
+            throw std::runtime_error("can not receive frame in decoding");
         }
 
-        out_frame->nb_samples = out_audio_codec_ctx_->frame_size;
-        out_frame->channels = in_audio_codec_ctx_->channels;
-        out_frame->channel_layout = av_get_default_channel_layout(in_audio_codec_ctx_->channels);
-        out_frame->format = out_audio_codec_ctx_->sample_fmt;
-        out_frame->sample_rate = out_audio_codec_ctx_->sample_rate;
-        out_frame->pts = av_rescale_q(out_audio_codec_ctx_->frame_size * audio_frame_counter_++,
-                                      out_audio_codec_ctx_->time_base, out_audio_stream_->time_base);
-
-        ret = av_frame_get_buffer(out_frame, 0);
+        ret = WriteAudioFrameToFifo(in_frame);
         if (ret < 0) {
-            std::cerr << "Cannot fill out_frame buffers";
-            return -1;
+            throw std::runtime_error("can not write in audio FIFO buffer");
         }
 
-        ret = av_audio_fifo_read(audio_fifo_buf_, (void **)out_frame->data, out_audio_codec_ctx_->frame_size);
-        if (ret < 0) {
-            std::cerr << "Cannot read from audio FIFO";
-            return -1;
+        while (av_audio_fifo_size(audio_fifo_buf_) >= out_audio_codec_ctx_->frame_size) {
+            out_frame = av_frame_alloc();
+            if (!out_frame) {
+                std::cerr << "Could not allocate audio out_frame" << std::endl;
+                return -1;
+            }
+
+            out_frame->nb_samples = out_audio_codec_ctx_->frame_size;
+            out_frame->channels = in_audio_codec_ctx_->channels;
+            out_frame->channel_layout = av_get_default_channel_layout(in_audio_codec_ctx_->channels);
+            out_frame->format = out_audio_codec_ctx_->sample_fmt;
+            out_frame->sample_rate = out_audio_codec_ctx_->sample_rate;
+            out_frame->pts = av_rescale_q(out_audio_codec_ctx_->frame_size * audio_frame_counter_++,
+                                          out_audio_codec_ctx_->time_base, out_audio_stream_->time_base);
+
+            ret = av_frame_get_buffer(out_frame, 0);
+            if (ret < 0) {
+                std::cerr << "Cannot fill out_frame buffers";
+                return -1;
+            }
+
+            ret = av_audio_fifo_read(audio_fifo_buf_, (void **)out_frame->data, out_audio_codec_ctx_->frame_size);
+            if (ret < 0) {
+                std::cerr << "Cannot read from audio FIFO";
+                return -1;
+            }
+
+            EncodeWriteFrame(out_frame, 1);
+
+            av_frame_free(&out_frame);
         }
-
-        EncodeWriteFrame(out_frame, 1);
-
-        av_frame_free(&out_frame);
     }
 
     av_frame_free(&in_frame);
