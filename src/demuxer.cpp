@@ -46,7 +46,12 @@ const AVStream *Demuxer::getAudioStream() { return audio_stream_; }
 AVPacket *Demuxer::readPacket() {
     AVPacket *packet = av_packet_alloc();
     if (!packet) throw std::runtime_error("Failed to allocate a packet");
-    av_read_frame(fmt_ctx_, packet);
+
+    if (av_read_frame(fmt_ctx_, packet) < 0) {
+        av_packet_free(&packet);
+        throw std::runtime_error("Failed to read a packet");
+    }
+
     return packet;
 }
 
