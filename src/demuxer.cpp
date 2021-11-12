@@ -39,9 +39,13 @@ Demuxer::~Demuxer() {
     if (fmt_ctx_) avformat_free_context(fmt_ctx_);  // This will also free the streams
 }
 
-const AVStream *Demuxer::getVideoStream() { return video_stream_; }
+int Demuxer::getVideoStreamIdx() { return video_stream_->index; };
 
-const AVStream *Demuxer::getAudioStream() { return audio_stream_; }
+int Demuxer::getAudioStreamIdx() { return audio_stream_->index; };
+
+const AVCodecParameters *Demuxer::getVideoStreamParams() { return video_stream_->codecpar; }
+
+const AVCodecParameters *Demuxer::getAudioStreamParams() { return audio_stream_->codecpar; }
 
 AVPacket *Demuxer::readPacket() {
     AVPacket *packet = av_packet_alloc();
