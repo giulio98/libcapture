@@ -14,7 +14,7 @@ int main() {
     screen_record.Pause();
     std::this_thread::sleep_for(5000ms);
     screen_record.Resume();
-    std::this_thread::sleep_for(5000ms);
+    std::this_thread::sleep_for(10000ms);
     screen_record.Stop();
     std::cout << "Recording to " << file1 << " completed" << std::endl;
 
