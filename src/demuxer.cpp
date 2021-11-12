@@ -47,16 +47,9 @@ const AVCodecParameters *Demuxer::getVideoStreamParams() { return video_stream_-
 
 const AVCodecParameters *Demuxer::getAudioStreamParams() { return audio_stream_->codecpar; }
 
-AVPacket *Demuxer::readPacket() {
-    AVPacket *packet = av_packet_alloc();
-    if (!packet) throw std::runtime_error("Failed to allocate a packet");
-
-    if (av_read_frame(fmt_ctx_, packet) < 0) {
-        av_packet_free(&packet);
-        throw std::runtime_error("Failed to read a packet");
-    }
-
-    return packet;
+void Demuxer::fillPacket(AVPacket *packet) {
+    if (!packet) throw std::runtime_error("Packet not allocated");
+    if (av_read_frame(fmt_ctx_, packet) < 0) throw std::runtime_error("Failed to read a packet");
 }
 
 void Demuxer::dumpInfo() { av_dump_format(fmt_ctx_, 0, device_name_.c_str(), 0); }

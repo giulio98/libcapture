@@ -30,7 +30,7 @@ public:
      * Allocate a packet and fill it with the information read from the input format
      * The owneship of the packet is transfered to the caller who will have to free it using av_packet_free
      */
-    AVPacket *readPacket();
+    void fillPacket(AVPacket *packet);
 
     void dumpInfo();
 };
