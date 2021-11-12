@@ -1,6 +1,6 @@
-#include "../include/input_container.h"
+#include "../include/demuxer.h"
 
-InputContainer::InputContainer(const std::string &fmt_name, const std::string &device_name)
+Demuxer::Demuxer(const std::string &fmt_name, const std::string &device_name)
     : fmt_ctx_(nullptr),
       fmt_(nullptr),
       device_name_(device_name),
@@ -10,17 +10,17 @@ InputContainer::InputContainer(const std::string &fmt_name, const std::string &d
     fmt_ = av_find_input_format(fmt_name.c_str());
 }
 
-InputContainer::~InputContainer() {
+Demuxer::~Demuxer() {
     if (fmt_ctx_) avformat_free_context(fmt_ctx_);  // This will also free the streams
     if (options_) av_dict_free(&options_);
     /* TO-DO: free fmt_ (which function to use?) */
 }
 
-void InputContainer::setOption(const std::string &key, const std::string &value) {
+void Demuxer::setOption(const std::string &key, const std::string &value) {
     av_dict_set(&options_, key.c_str(), value.c_str(), 0);
 }
 
-void InputContainer::open() {
+void Demuxer::open() {
     avformat_open_input(&fmt_ctx_, device_name_.c_str(), fmt_, &options_);
 
     avformat_find_stream_info(fmt_ctx_, nullptr);
@@ -35,12 +35,12 @@ void InputContainer::open() {
     }
 }
 
-AVStream *InputContainer::getVideoStream() {
+AVStream *Demuxer::getVideoStream() {
     return video_stream_;
 }
 
-AVStream *InputContainer::getAudioStream() {
+AVStream *Demuxer::getAudioStream() {
     return audio_stream_;
 }
 
-void InputContainer::dumpInfo() { av_dump_format(fmt_ctx_, 0, device_name_.c_str(), 0); }
+void Demuxer::dumpInfo() { av_dump_format(fmt_ctx_, 0, device_name_.c_str(), 0); }

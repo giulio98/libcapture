@@ -5,7 +5,7 @@
 #include "decoder.h"
 #include "ffmpeg_libs.h"
 
-class InputContainer {
+class Demuxer {
     AVFormatContext *fmt_ctx_;
     AVInputFormat *fmt_;
     std::string device_name_;
@@ -14,9 +14,9 @@ class InputContainer {
     AVStream *audio_stream_;
 
 public:
-    InputContainer(const std::string &fmt_name, const std::string &device_name);
+    Demuxer(const std::string &fmt_name, const std::string &device_name);
 
-    ~InputContainer();
+    ~Demuxer();
 
     void setOption(const std::string &key, const std::string &value);
 
