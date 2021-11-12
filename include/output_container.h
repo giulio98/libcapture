@@ -17,12 +17,14 @@ public:
 
     /**
      * Add a video stream and return a pointer to it
+     * Or return the already present video stream if there is one
      * The ownership of the stream remains to the Container
      */
     AVStream *addVideoStream();
 
     /**
      * Add an audio stream and return a pointer to it
+     * Or return the already present audio stream if there is one
      * The ownership of the stream remains to the Container
      */
     AVStream *addAudioStream();
@@ -47,4 +49,6 @@ public:
      * Print informations
      */
     void dumpInfo();
+
+    int getGlobalHeaderFlags();
 };
