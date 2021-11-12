@@ -6,6 +6,7 @@
 #include "ffmpeg_libs.h"
 
 class Decoder {
+    AVCodec *codec_;
     AVCodecContext *codec_ctx_;
 
 public:
@@ -16,4 +17,6 @@ public:
     void sendPacket(AVPacket *packet);
 
     void fillFrame(AVFrame *frame);
+
+    const AVCodecContext *getCodecContext();
 };
