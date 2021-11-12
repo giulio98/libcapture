@@ -1,27 +1,27 @@
 #include "../include/demuxer.h"
 
-Demuxer::Demuxer(const std::string &fmt_name, const std::string &device_name)
-    : fmt_ctx_(nullptr),
-      fmt_(nullptr),
-      device_name_(device_name),
-      options_(nullptr),
-      video_stream_(nullptr),
-      audio_stream_(nullptr) {
-    fmt_ = av_find_input_format(fmt_name.c_str());
-}
+Demuxer::Demuxer(const std::string &fmt_name, const std::string &device_name,
+                 std::map<std::string, std::string> options)
+    : fmt_ctx_(nullptr), device_name_(device_name), video_stream_(nullptr), audio_stream_(nullptr) {
+    int ret;
+    AVDictionary **dict_ptr = nullptr;
 
-Demuxer::~Demuxer() {
-    if (fmt_ctx_) avformat_free_context(fmt_ctx_);  // This will also free the streams
-    if (options_) av_dict_free(&options_);
-    /* TO-DO: free fmt_ (which function to use?) */
-}
+    AVInputFormat *fmt = av_find_input_format(fmt_name.c_str());
+    if (!fmt) {
+        throw std::runtime_error("Cannot find input format");
+    }
 
-void Demuxer::setOption(const std::string &key, const std::string &value) {
-    av_dict_set(&options_, key.c_str(), value.c_str(), 0);
-}
+    for (auto const &[key, val] : options) {
+        if (av_dict_set(dict_ptr, key.c_str(), val.c_str(), 0) < 0) {
+            if (*dict_ptr) av_dict_free(dict_ptr);
+            throw std::runtime_error("Cannot set " + key + "in dictionary");
+        }
+    }
 
-void Demuxer::open() {
-    avformat_open_input(&fmt_ctx_, device_name_.c_str(), fmt_, &options_);
+    ret = avformat_open_input(&fmt_ctx_, device_name_.c_str(), fmt, dict_ptr);
+    if (*dict_ptr) av_dict_free(dict_ptr);
+    /* TO-DO: free fmt (which function to use?) */
+    if (ret) throw std::runtime_error("Cannot open input format");
 
     avformat_find_stream_info(fmt_ctx_, nullptr);
 
@@ -35,12 +35,19 @@ void Demuxer::open() {
     }
 }
 
-AVStream *Demuxer::getVideoStream() {
-    return video_stream_;
+Demuxer::~Demuxer() {
+    if (fmt_ctx_) avformat_free_context(fmt_ctx_);  // This will also free the streams
 }
 
-AVStream *Demuxer::getAudioStream() {
-    return audio_stream_;
+const AVStream *Demuxer::getVideoStream() { return video_stream_; }
+
+const AVStream *Demuxer::getAudioStream() { return audio_stream_; }
+
+AVPacket *Demuxer::readPacket() {
+    AVPacket *packet = av_packet_alloc();
+    if (!packet) throw std::runtime_error("Failed to allocate a packet");
+    av_read_frame(fmt_ctx_, packet);
+    return packet;
 }
 
 void Demuxer::dumpInfo() { av_dump_format(fmt_ctx_, 0, device_name_.c_str(), 0); }
