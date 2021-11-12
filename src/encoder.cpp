@@ -1,6 +1,6 @@
 #include "../include/encoder.h"
 
-Encoder::Encoder(AVCodecID codec_id, std::map<std::string, std::string> options, int global_header_flags)
+Encoder::Encoder(AVCodecID codec_id, const std::map<std::string, std::string> &options, int global_header_flags)
     : codec_(nullptr), codec_ctx_(nullptr) {
     int ret;
 

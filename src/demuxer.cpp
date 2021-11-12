@@ -1,7 +1,7 @@
 #include "../include/demuxer.h"
 
 Demuxer::Demuxer(const std::string &fmt_name, const std::string &device_name,
-                 std::map<std::string, std::string> options)
+                 const std::map<std::string, std::string> &options)
     : fmt_ctx_(nullptr), device_name_(device_name), video_stream_(nullptr), audio_stream_(nullptr) {
     int ret;
     AVDictionary **dict_ptr = nullptr;
