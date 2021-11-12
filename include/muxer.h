@@ -4,16 +4,16 @@
 
 #include "ffmpeg_libs.h"
 
-class OutputContainer {
+class Muxer {
     AVFormatContext *fmt_ctx_;
     std::string filename_;
     AVStream *video_stream_;
     AVStream *audio_stream_;
 
 public:
-    OutputContainer(const std::string &filename);
+    Muxer(const std::string &filename);
 
-    ~OutputContainer();
+    ~Muxer();
 
     /**
      * Add a video stream and return a pointer to it
