@@ -7,7 +7,9 @@ OutputContainer::OutputContainer(const std::string &filename)
     avformat_alloc_output_context2(&fmt_ctx_, nullptr, nullptr, filename_.c_str());
 }
 
-OutputContainer::~OutputContainer() {}
+OutputContainer::~OutputContainer() {
+    if (fmt_ctx_) avformat_free_context(fmt_ctx_);
+}
 
 AVStream *OutputContainer::addVideoStream() {
     if (!video_stream_) {
