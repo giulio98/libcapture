@@ -1,7 +1,9 @@
 #pragma once
 
-#include "ffmpeg_libs.h"
+#include <iostream>
+
 #include "exceptions.h"
+#include "ffmpeg_libs.h"
 
 class Decoder {
     AVCodecContext *codec_ctx_;
@@ -14,6 +16,4 @@ public:
     void sendPacket(AVPacket *packet);
 
     void fillFrame(AVFrame *frame);
-
-    int flush();
 };

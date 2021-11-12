@@ -1,10 +1,5 @@
 #include "../include/decoder.h"
 
-#include <iostream>
-
-// AVCodec *codec_;
-// AVCodecContext *codec_ctx_;
-
 Decoder::Decoder(const AVCodecParameters *params) : codec_ctx_(nullptr) {
     AVCodec *codec = avcodec_find_decoder(params->codec_id);
     if (!codec) throw std::runtime_error("Cannot find codec");
@@ -26,8 +21,6 @@ Decoder::~Decoder() {
 
 void Decoder::sendPacket(AVPacket *packet) {
     int ret;
-
-    if (!packet) throw std::runtime_error("Empty packet, use flush() to flush");
 
     ret = avcodec_send_packet(codec_ctx_, packet);
     if (ret == AVERROR(EAGAIN)) {
