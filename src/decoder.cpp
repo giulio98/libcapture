@@ -15,7 +15,9 @@ Decoder::Decoder(const AVCodecParameters *params) : codec_ctx_(nullptr) {
     if (avcodec_parameters_to_context(codec_ctx_, params) < 0)
         throw std::runtime_error("Failed to copy codec params to codec context");
 
-    // TO-DO: free codec_ (with which function?)
+    if (avcodec_open2(codec_ctx_, codec, nullptr) < 0) throw std::runtime_error("Unable to open the av codec");
+
+    // TO-DO: free codec (with which function?)
 }
 
 Decoder::~Decoder() {
