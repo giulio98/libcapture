@@ -5,45 +5,49 @@
 // AVCodec *codec_;
 // AVCodecContext *codec_ctx_;
 
-Decoder::Decoder(AVCodecID codec_id) : codec_(nullptr), codec_ctx_(nullptr) {
-    codec_ = avcodec_find_decoder(codec_id);
-    if (!codec_) {
-        std::cerr << "Unable to find the video decoder" << std::endl;
-        return;
-    }
+Decoder::Decoder(const AVCodecParameters *params) : codec_ctx_(nullptr) {
+    AVCodec *codec = avcodec_find_decoder(params->codec_id);
+    if (!codec) throw std::runtime_error("Cannot find codec");
 
-    codec_ctx_ = avcodec_alloc_context3(codec_);
-    if (!codec_ctx_) {
-        std::cerr << "Failed to allocated memory for AVCodecContext" << std::endl;
-        return;
-    }
+    codec_ctx_ = avcodec_alloc_context3(codec);
+    if (!codec_ctx_) throw std::runtime_error("Failed to allocated memory for AVCodecContext");
+
+    if (avcodec_parameters_to_context(codec_ctx_, params) < 0)
+        throw std::runtime_error("Failed to copy codec params to codec context");
+
+    // TO-DO: free codec_ (with which function?)
 }
 
 Decoder::~Decoder() {
-    // TO-DO: free codec_ (with which function?)
     if (codec_ctx_) avcodec_free_context(&codec_ctx_);
 }
 
-void Decoder::setParamsFromStream(AVStream *stream) {
-    if (avcodec_parameters_to_context(codec_ctx_, stream->codecpar) < 0) {
-        std::cerr << "Failed to copy codec params to codec context" << std::endl;
-        return;
+void Decoder::sendPacket(AVPacket *packet) {
+    int ret;
+
+    if (!packet) throw std::runtime_error("Empty packet, use flush() to flush");
+
+    ret = avcodec_send_packet(codec_ctx_, packet);
+    if (ret == AVERROR(EAGAIN)) {
+        throw BufferFullException();
+    } else if (ret == AVERROR_EOF) {
+        throw BufferFlushedException();
+    } else if (ret < 0) {
+        throw std::runtime_error("Failed to send packet to decoder");
     }
 }
 
-int Decoder::sendPacket(AVPacket *packet) {
-    if (!packet) {
-        std::cerr << "ERROR: packet not allocated" << std::endl;
-        return -1;
-    }
-    return avcodec_send_packet(codec_ctx_, packet);
-}
+void Decoder::fillFrame(AVFrame *frame) {
+    int ret;
 
-// TO-DO: adjust using exceptions instead of returning an integer
-int Decoder::fillFrame(AVFrame *frame) {
-    if (!frame) {
-        std::cerr << "ERROR: frame not allocated" << std::endl;
-        return -1;
+    if (!frame) throw std::runtime_error("Empty frame");
+
+    ret = avcodec_receive_frame(codec_ctx_, frame);
+    if (ret == AVERROR(EAGAIN)) {
+        throw BufferEmptyException();
+    } else if (ret == AVERROR_EOF) {
+        throw BufferFlushedException();
+    } else if (ret < 0) {
+        throw std::runtime_error("Failed to receive frame from decoder");
     }
-    return avcodec_receive_frame(codec_ctx_, frame);
 }

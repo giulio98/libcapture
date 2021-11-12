@@ -1,19 +1,19 @@
 #pragma once
 
 #include "ffmpeg_libs.h"
+#include "exceptions.h"
 
 class Decoder {
-    AVCodec *codec_;
     AVCodecContext *codec_ctx_;
 
 public:
-    Decoder(AVCodecID codec_id);
+    Decoder(const AVCodecParameters *params);
 
     ~Decoder();
 
-    void setParamsFromStream(AVStream *stream);
+    void sendPacket(AVPacket *packet);
 
-    int sendPacket(AVPacket *packet);
+    void fillFrame(AVFrame *frame);
 
-    int fillFrame(AVFrame *frame);
+    int flush();
 };
