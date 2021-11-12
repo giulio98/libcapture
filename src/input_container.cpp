@@ -35,4 +35,12 @@ void InputContainer::open() {
     }
 }
 
+AVStream *InputContainer::getVideoStream() {
+    return video_stream_;
+}
+
+AVStream *InputContainer::getAudioStream() {
+    return audio_stream_;
+}
+
 void InputContainer::dumpInfo() { av_dump_format(fmt_ctx_, 0, device_name_.c_str(), 0); }

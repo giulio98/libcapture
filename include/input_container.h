@@ -2,6 +2,7 @@
 
 #include <string>
 
+#include "decoder.h"
 #include "ffmpeg_libs.h"
 
 class InputContainer {
@@ -14,8 +15,16 @@ class InputContainer {
 
 public:
     InputContainer(const std::string &fmt_name, const std::string &device_name);
+
     ~InputContainer();
+
     void setOption(const std::string &key, const std::string &value);
+
     void open();
+
+    AVStream *getVideoStream();
+
+    AVStream *getAudioStream();
+
     void dumpInfo();
 };
