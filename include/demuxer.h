@@ -18,13 +18,9 @@ public:
 
     ~Demuxer();
 
-    int getVideoStreamIdx();
+    const AVStream *getVideoStream();
 
-    int getAudioStreamIdx();
-
-    const AVCodecParameters *getVideoStreamParams();
-
-    const AVCodecParameters *getAudioStreamParams();
+    const AVStream *getAudioStream();
 
     /**
      * Allocate a packet and fill it with the information read from the input format

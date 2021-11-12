@@ -31,24 +31,14 @@ void Muxer::addAudioStream(const AVCodecContext *codec_ctx) {
         throw std::runtime_error("Failed to write audio stream parameters");
 }
 
-int Muxer::getVideoStreamIdx() {
+const AVStream *Muxer::getVideoStream() {
     if (!video_stream_) throw std::runtime_error("Video stream not present");
-    return video_stream_->index;
+    return video_stream_;
 }
 
-int Muxer::getAudioStreamIdx() {
+const AVStream *Muxer::getAudioStream() {
     if (!audio_stream_) throw std::runtime_error("Audio stream not present");
-    return audio_stream_->index;
-}
-
-const AVCodecParameters *Muxer::getVideoStreamParams() {
-    if (!video_stream_) throw std::runtime_error("Video stream not present");
-    return video_stream_->codecpar;
-}
-
-const AVCodecParameters *Muxer::getAudioStreamParams() {
-    if (!audio_stream_) throw std::runtime_error("Audio stream not present");
-    return audio_stream_->codecpar;
+    return audio_stream_;
 }
 
 void Muxer::writeHeader() {
