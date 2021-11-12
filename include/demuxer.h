@@ -13,7 +13,8 @@ class Demuxer {
     AVStream *audio_stream_;
 
 public:
-    Demuxer(const std::string &fmt_name, const std::string &device_name, std::map<std::string, std::string> options);
+    Demuxer(const std::string &fmt_name, const std::string &device_name,
+            const std::map<std::string, std::string> &options);
 
     ~Demuxer();
 
