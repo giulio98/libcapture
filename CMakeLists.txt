@@ -35,12 +35,22 @@ pkg_check_modules(LIBAV REQUIRED IMPORTED_TARGET
 add_executable(screen-recorder
     src/main.cpp
     src/screen_recorder.cpp
-    src/input_container.cpp
+    src/demuxer.cpp
+    src/muxer.cpp
+    src/decoder.cpp
+    src/encoder.cpp
+    src/video_encoder.cpp
+    src/audio_encoder.cpp
     include/ffmpeg_libs.h
+    include/exceptions.h
     include/screen_recorder.h
     include/duration_logger.h
-    include/packet.h
-    include/input_container.h
+    include/demuxer.h
+    include/muxer.h
+    include/decoder.h
+    include/encoder.h
+    include/video_encoder.h
+    include/audio_encoder.h
 )
 
 target_link_libraries(screen-recorder PkgConfig::LIBAV)
