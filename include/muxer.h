@@ -1,5 +1,6 @@
 #pragma once
 
+#include <iostream>
 #include <string>
 
 #include "ffmpeg_libs.h"
@@ -15,19 +16,17 @@ public:
 
     ~Muxer();
 
-    /**
-     * Add a video stream and return a pointer to it
-     * Or return the already present video stream if there is one
-     * The ownership of the stream remains to the Container
-     */
-    AVStream *addVideoStream();
+    void addVideoStream(const AVCodecContext *codec_ctx);
 
-    /**
-     * Add an audio stream and return a pointer to it
-     * Or return the already present audio stream if there is one
-     * The ownership of the stream remains to the Container
-     */
-    AVStream *addAudioStream();
+    void addAudioStream(const AVCodecContext *codec_ctx);
+
+    int getVideoStreamIdx();
+
+    int getAudioStreamIdx();
+
+    const AVCodecParameters *getVideoStreamParams();
+
+    const AVCodecParameters *getAudioStreamParams();
 
     /**
      * Open the file and write the header
@@ -36,7 +35,7 @@ public:
 
     /**
      * Write a packet to the output file
-     * The ownership of the packet remains to the caller
+     * The ownership of the packet is tranfered to the muxer
      */
     void writePacket(AVPacket *packet);
 
