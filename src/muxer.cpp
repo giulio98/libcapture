@@ -63,4 +63,4 @@ void Muxer::writeTrailer() {
 
 void Muxer::dumpInfo() { av_dump_format(fmt_ctx_, 0, filename_.c_str(), 1); }
 
-int Muxer::getGlobalHeaderFlags() { return fmt_ctx_->oformat->flags & AVFMT_GLOBALHEADER; }
+int Muxer::getGlobalHeaderFlags() { return fmt_ctx_->oformat->flags; }
