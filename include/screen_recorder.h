@@ -36,12 +36,19 @@ class ScreenRecorder {
     AVCodecID out_video_codec_id_;
     AVCodecID out_audio_codec_id_;
 
+    std::string in_fmt_name_;
+    std::string in_device_name_;
+
     std::unique_ptr<Demuxer> demuxer_;
     std::unique_ptr<Muxer> muxer_;
     std::unique_ptr<Decoder> video_dec_;
     std::unique_ptr<Decoder> audio_dec_;
     std::shared_ptr<VideoEncoder> video_enc_;
     std::shared_ptr<AudioEncoder> audio_enc_;
+
+    std::map<std::string, std::string> demux_options_;
+    std::map<std::string, std::string> video_enc_options_;
+    std::map<std::string, std::string> audio_enc_options_;
 
     /* Thread responsible for recording video and audio */
     std::thread recorder_thread_;

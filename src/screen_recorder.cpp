@@ -12,7 +12,20 @@
 #include "../include/duration_logger.h"
 
 /* initialize the resources*/
-ScreenRecorder::ScreenRecorder() {}
+ScreenRecorder::ScreenRecorder() {
+    video_framerate_ = 30;
+    out_video_pix_fmt_ = AV_PIX_FMT_YUV420P;
+    out_video_codec_id_ = AV_CODEC_ID_H264;
+    out_audio_codec_id_ = AV_CODEC_ID_AAC;
+
+    demux_options_.insert({"video_size", "1920x1080"});
+    demux_options_.insert({"framerate", "30"});
+    demux_options_.insert({"capture_cursor", "1"});
+
+    video_enc_options_.insert({"preset", "ultrafast"});
+
+    in_fmt_name_ = "avfoundation";
+}
 
 /* uninitialize the resources */
 ScreenRecorder::~ScreenRecorder() {
@@ -27,10 +40,9 @@ void ScreenRecorder::Start(const std::string &output_file, bool audio) {
     output_file_ = output_file;
     stop_capture_ = false;
     paused_ = false;
-    video_framerate_ = 30;
-    out_video_pix_fmt_ = AV_PIX_FMT_YUV420P;
-    out_video_codec_id_ = AV_CODEC_ID_H264;
     record_audio_ = audio;
+
+    in_device_name_ = "1:0";
 
     avdevice_register_all();
 
@@ -49,35 +61,22 @@ void ScreenRecorder::Start(const std::string &output_file, bool audio) {
     //     ss << "1:";
     //     if (record_audio_) ss << "0";
 
-    auto demux_options = std::map<std::string, std::string>();
-    demux_options.insert({"video_size", "1920x1080"});
-    demux_options.insert({"framerate", "30"});
-    demux_options.insert({"capture_cursor", "1"});
+    demuxer_ = std::unique_ptr<Demuxer>(new Demuxer(in_fmt_name_, in_device_name_, demux_options_));
 
-    auto video_enc_options = std::map<std::string, std::string>();
-    video_enc_options.insert({"preset", "ultrafast"});
-
-    auto audio_enc_options = std::map<std::string, std::string>();
-
-    demuxer_ = std::unique_ptr<Demuxer>(new Demuxer("avfoundation", "1:0", demux_options));
+    video_dec_ = std::unique_ptr<Decoder>(new Decoder(demuxer_->getVideoStream()->codecpar));
+    audio_dec_ = std::unique_ptr<Decoder>(new Decoder(demuxer_->getAudioStream()->codecpar));
 
     muxer_ = std::unique_ptr<Muxer>(new Muxer(output_file_));
 
-    video_dec_ = std::unique_ptr<Decoder>(new Decoder(demuxer_->getVideoStream()->codecpar));
-
-    audio_dec_ = std::unique_ptr<Decoder>(new Decoder(demuxer_->getAudioStream()->codecpar));
-
     video_enc_ = std::shared_ptr<VideoEncoder>(
-        new VideoEncoder(out_video_codec_id_, video_enc_options, muxer_->getGlobalHeaderFlags(),
+        new VideoEncoder(out_video_codec_id_, video_enc_options_, muxer_->getGlobalHeaderFlags(),
                          demuxer_->getVideoStream()->codecpar, out_video_pix_fmt_, video_framerate_));
-
     audio_enc_ = std::shared_ptr<AudioEncoder>(new AudioEncoder(
-        AV_CODEC_ID_AAC, audio_enc_options, muxer_->getGlobalHeaderFlags(), demuxer_->getAudioStream()->codecpar));
+        out_audio_codec_id_, audio_enc_options_, muxer_->getGlobalHeaderFlags(), demuxer_->getAudioStream()->codecpar));
 
     muxer_->addVideoStream(video_enc_->getCodecContext());
     muxer_->addAudioStream(audio_enc_->getCodecContext());
-
-    muxer_->writeHeader();
+    muxer_->openFile();
 
     recorder_thread_ = std::thread([this]() {
         std::cout << "Recording..." << std::endl;
@@ -96,6 +95,8 @@ void ScreenRecorder::Stop() {
     if (recorder_thread_.joinable() == true) {
         recorder_thread_.join();
     }
+
+    // muxer_->closeFile();
 }
 
 void ScreenRecorder::Pause() {
@@ -222,12 +223,7 @@ int ScreenRecorder::EncodeWriteFrame(AVFrame *frame, int audio_video) {
 
     while (true) {
         try {
-            encoder->fillPacket(packet);
-        } catch (const BufferEmptyException &e) {
-            break;
-        } catch (const BufferFlushedException &e) {
-            std::cerr << e.what() << std::endl;
-            break;
+            if (!encoder->fillPacket(packet)) break;
         } catch (const std::exception &e) {
             std::cerr << e.what() << std::endl;
             return -1;
@@ -283,10 +279,8 @@ int ScreenRecorder::ProcessVideoPkt(AVPacket *packet) {
 
     while (true) {
         try {
-            video_dec_->fillFrame(in_frame);
-        } catch (BufferEmptyException &e) {
-            break;
-        } catch (BufferFlushedException &e) {
+            if (!video_dec_->fillFrame(in_frame)) break;
+        } catch (const std::runtime_error &e) {
             std::cerr << e.what() << std::endl;
             break;
         }
@@ -332,10 +326,8 @@ int ScreenRecorder::ProcessAudioPkt(AVPacket *packet) {
 
     while (true) {
         try {
-            audio_dec_->fillFrame(in_frame);
-        } catch (BufferEmptyException &e) {
-            break;
-        } catch (BufferFlushedException &e) {
+            if (!audio_dec_->fillFrame(in_frame)) break;
+        } catch (const std::runtime_error &e) {
             std::cerr << e.what() << std::endl;
             break;
         }
@@ -476,8 +468,8 @@ int ScreenRecorder::CaptureFrames() {
 #else  // macOS
 
         try {
-            demuxer_->fillPacket(packet);
-        } catch (std::exception &e) {
+            if (!demuxer_->fillPacket(packet)) continue;
+        } catch (const std::exception &e) {
             std::cerr << e.what() << std::endl;
             exit(1);
         }
@@ -508,8 +500,6 @@ int ScreenRecorder::CaptureFrames() {
         std::cerr << "ERROR: Could not flush encoders" << std::endl;
         exit(1);
     };
-
-    muxer_->writeTrailer();
 
     return 0;
 }
