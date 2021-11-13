@@ -4,25 +4,24 @@ Demuxer::Demuxer(const std::string &fmt_name, const std::string &device_name,
                  const std::map<std::string, std::string> &options)
     : fmt_ctx_(nullptr), device_name_(device_name), video_stream_(nullptr), audio_stream_(nullptr) {
     AVInputFormat *fmt = av_find_input_format(fmt_name.c_str());
-    if (!fmt) {
-        throw std::runtime_error("Cannot find input format");
-    }
+    if (!fmt) throw std::runtime_error("Demuxer: Cannot find input format");
 
     AVDictionary *dict = nullptr;
-
     for (auto const &[key, val] : options) {
         if (av_dict_set(&dict, key.c_str(), val.c_str(), 0) < 0) {
+            /* TO-DO: free fmt (how?) */
             if (dict) av_dict_free(&dict);
-            throw std::runtime_error("Cannot set " + key + "in dictionary");
+            throw std::runtime_error("Demuxer: Cannot set " + key + "in dictionary");
         }
     }
 
     int ret = avformat_open_input(&fmt_ctx_, device_name_.c_str(), fmt, dict ? &dict : nullptr);
+    /* TO-DO: free fmt (how?) */
     if (dict) av_dict_free(&dict);
-    /* TO-DO: free fmt (which function to use?) */
-    if (ret) throw std::runtime_error("Cannot open input format");
+    if (ret) throw std::runtime_error("Demuxer: Cannot open input format");
 
-    avformat_find_stream_info(fmt_ctx_, nullptr);
+    if (avformat_find_stream_info(fmt_ctx_, nullptr) < 0)
+        throw std::runtime_error("Demuxer: Failed to find stream info");
 
     for (int i = 0; i < fmt_ctx_->nb_streams; i++) {
         AVStream *stream = fmt_ctx_->streams[i];
@@ -39,18 +38,18 @@ Demuxer::~Demuxer() {
 }
 
 const AVStream *Demuxer::getVideoStream() {
-    if (!video_stream_) throw std::runtime_error("Video stream not present");
+    if (!video_stream_) throw std::runtime_error("Demuxer: Video stream not present");
     return video_stream_;
 }
 
 const AVStream *Demuxer::getAudioStream() {
-    if (!audio_stream_) throw std::runtime_error("Audio stream not present");
+    if (!audio_stream_) throw std::runtime_error("Demuxer: Audio stream not present");
     return audio_stream_;
 }
 
 void Demuxer::fillPacket(AVPacket *packet) {
-    if (!packet) throw std::runtime_error("Packet not allocated");
-    if (av_read_frame(fmt_ctx_, packet) < 0) throw std::runtime_error("Failed to read a packet");
+    if (!packet) throw std::runtime_error("Demuxer: Packet not allocated");
+    if (av_read_frame(fmt_ctx_, packet) < 0) throw std::runtime_error("Demuxer: Failed to read a packet");
 }
 
 void Demuxer::dumpInfo() { av_dump_format(fmt_ctx_, 0, device_name_.c_str(), 0); }
