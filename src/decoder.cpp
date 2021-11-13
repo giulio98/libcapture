@@ -24,9 +24,9 @@ bool Decoder::sendPacket(const AVPacket *packet) {
     if (ret == AVERROR(EAGAIN)) {
         return false;
     } else if (ret == AVERROR_EOF) {
-        throw FlushedException("Decoder");
+        throw std::runtime_error("Decoder has already been flushed");
     } else if (ret < 0) {
-        throw std::runtime_error("Decoder: Failed to send packet to decoder");
+        throw std::runtime_error("Failed to send packet to decoder");
     }
     return true;
 }
@@ -35,10 +35,8 @@ bool Decoder::fillFrame(AVFrame *frame) {
     if (!frame) throw std::runtime_error("Decoder: Frame is not allocated");
 
     int ret = avcodec_receive_frame(codec_ctx_, frame);
-    if (ret == AVERROR(EAGAIN)) {
+    if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) {
         return false;
-    } else if (ret == AVERROR_EOF) {
-        throw FlushedException("Decoder");
     } else if (ret < 0) {
         throw std::runtime_error("Decoder: Failed to receive frame from decoder");
     }
