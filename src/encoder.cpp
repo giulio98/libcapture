@@ -2,7 +2,7 @@
 
 Encoder::Encoder(AVCodecID codec_id, const std::map<std::string, std::string> &options, int global_header_flags)
     : codec_(nullptr), codec_ctx_(nullptr) {
-    codec_ = avcodec_find_decoder(codec_id);
+    codec_ = avcodec_find_encoder(codec_id);
     if (!codec_) throw std::runtime_error("Cannot find codec");
 
     codec_ctx_ = avcodec_alloc_context3(codec_);
