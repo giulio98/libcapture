@@ -10,6 +10,8 @@ class Muxer {
     std::string filename_;
     AVStream *video_stream_;
     AVStream *audio_stream_;
+    bool file_opened_;
+    bool file_closed_;
 
 public:
     Muxer(const std::string &filename);
