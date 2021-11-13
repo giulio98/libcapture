@@ -38,9 +38,15 @@ Demuxer::~Demuxer() {
     if (fmt_ctx_) avformat_free_context(fmt_ctx_);  // This will also free the streams
 }
 
-const AVStream *Demuxer::getVideoStream() { return video_stream_; }
+const AVStream *Demuxer::getVideoStream() {
+    if (!video_stream_) throw std::runtime_error("Video stream not present");
+    return video_stream_;
+}
 
-const AVStream *Demuxer::getAudioStream() { return audio_stream_; }
+const AVStream *Demuxer::getAudioStream() {
+    if (!audio_stream_) throw std::runtime_error("Audio stream not present");
+    return audio_stream_;
+}
 
 void Demuxer::fillPacket(AVPacket *packet) {
     if (!packet) throw std::runtime_error("Packet not allocated");
