@@ -45,7 +45,6 @@ class ScreenRecorder {
     std::shared_ptr<VideoEncoder> video_enc_;
     std::shared_ptr<AudioEncoder> audio_enc_;
 
-    std::map<std::string, std::string> demux_options_;
     std::map<std::string, std::string> video_enc_options_;
     std::map<std::string, std::string> audio_enc_options_;
 
