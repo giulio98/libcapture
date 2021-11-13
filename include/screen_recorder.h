@@ -34,6 +34,7 @@ class ScreenRecorder {
 
     AVPixelFormat out_video_pix_fmt_;
     AVCodecID out_video_codec_id_;
+    AVCodecID out_audio_codec_id_;
 
     std::unique_ptr<Demuxer> demuxer_;
     std::unique_ptr<Muxer> muxer_;
