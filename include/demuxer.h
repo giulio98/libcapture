@@ -23,10 +23,11 @@ public:
     const AVStream *getAudioStream();
 
     /**
-     * Allocate a packet and fill it with the information read from the input format
-     * The owneship of the packet is transfered to the caller who will have to free it using av_packet_free
+     * Fill an allocated packet with the information read from the input format
+     * The owneship of the packet remains to the caller
+     * @return true if the packet has been correctly filled, false if the demuxer had nothing to write
      */
-    void fillPacket(AVPacket *packet);
+    bool fillPacket(AVPacket *packet);
 
     void dumpInfo();
 };

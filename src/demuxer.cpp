@@ -47,12 +47,14 @@ const AVStream *Demuxer::getAudioStream() {
     return audio_stream_;
 }
 
-void Demuxer::fillPacket(AVPacket *packet) {
+bool Demuxer::fillPacket(AVPacket *packet) {
     if (!packet) throw std::runtime_error("Demuxer: Packet not allocated");
 
     int ret = av_read_frame(fmt_ctx_, packet);
-    if (ret == AVERROR(EAGAIN)) throw EmptyException("Demuxer");
+    if (ret == AVERROR(EAGAIN)) return false;
     if (ret < 0) throw std::runtime_error("Demuxer: Failed to read a packet");
+
+    return true;
 }
 
 void Demuxer::dumpInfo() { av_dump_format(fmt_ctx_, 0, device_name_.c_str(), 0); }
