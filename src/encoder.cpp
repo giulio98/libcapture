@@ -3,14 +3,14 @@
 Encoder::Encoder(AVCodecID codec_id, const std::map<std::string, std::string> &options, int global_header_flags)
     : codec_(nullptr), codec_ctx_(nullptr), options_(nullptr) {
     codec_ = avcodec_find_encoder(codec_id);
-    if (!codec_) throw std::runtime_error("Cannot find codec");
+    if (!codec_) throw std::runtime_error("Encoder: Cannot find codec");
 
     codec_ctx_ = avcodec_alloc_context3(codec_);
-    if (!codec_ctx_) throw std::runtime_error("Failed to allocated memory for AVCodecContext");
+    if (!codec_ctx_) throw std::runtime_error("Encoder: Failed to allocated memory for AVCodecContext");
 
     for (auto const &[key, val] : options) {
         if (av_dict_set(&options_, key.c_str(), val.c_str(), 0) < 0) {
-            throw std::runtime_error("Cannot set " + key + "in dictionary");
+            throw std::runtime_error("Encoder: Cannot set " + key + "in dictionary");
         }
     }
 }
@@ -28,12 +28,12 @@ void Encoder::sendFrame(AVFrame *frame) {
     } else if (ret == AVERROR_EOF) {
         throw BufferFlushedException();
     } else if (ret < 0) {
-        throw std::runtime_error("Failed to send frame to encoder");
+        throw std::runtime_error("Encoder: Failed to send frame to encoder");
     }
 }
 
 void Encoder::fillPacket(AVPacket *packet) {
-    if (!packet) throw std::runtime_error("Packet is not allocated");
+    if (!packet) throw std::runtime_error("Encoder: Packet is not allocated");
 
     int ret = avcodec_receive_packet(codec_ctx_, packet);
     if (ret == AVERROR(EAGAIN)) {
@@ -41,7 +41,7 @@ void Encoder::fillPacket(AVPacket *packet) {
     } else if (ret == AVERROR_EOF) {
         throw BufferFlushedException();
     } else if (ret < 0) {
-        throw std::runtime_error("Failed to receive frame from decoder");
+        throw std::runtime_error("Encoder: Failed to receive frame from decoder");
     }
 }
 
