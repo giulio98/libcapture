@@ -19,20 +19,18 @@ Encoder::Encoder(AVCodecID codec_id, const std::map<std::string, std::string> &o
 
     int ret = avcodec_open2(codec_ctx_, codec_, dict ? &dict : nullptr);
     if (dict) av_dict_free(&dict);
-    if (ret < 0) throw std::runtime_error("Failed to initialize Codec Context");
+    if (ret) throw std::runtime_error("Failed to initialize Codec Context");
 
     if (global_header_flags & AVFMT_GLOBALHEADER) codec_ctx_->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
 }
 
 Encoder::~Encoder() {
-    // TO-DO: free codec (how?)
+    // TO-DO: free codec_ (how?)
     if (codec_ctx_) avcodec_free_context(&codec_ctx_);
 }
 
 void Encoder::sendFrame(AVFrame *frame) {
-    int ret;
-
-    ret = avcodec_send_frame(codec_ctx_, frame);
+    int ret = avcodec_send_frame(codec_ctx_, frame);
     if (ret == AVERROR(EAGAIN)) {
         throw BufferFullException();
     } else if (ret == AVERROR_EOF) {
@@ -43,11 +41,9 @@ void Encoder::sendFrame(AVFrame *frame) {
 }
 
 void Encoder::fillPacket(AVPacket *packet) {
-    int ret;
+    if (!packet) throw std::runtime_error("Packet is not allocated");
 
-    if (!packet) throw std::runtime_error("Frame is not allocated");
-
-    ret = avcodec_receive_packet(codec_ctx_, packet);
+    int ret = avcodec_receive_packet(codec_ctx_, packet);
     if (ret == AVERROR(EAGAIN)) {
         throw BufferEmptyException();
     } else if (ret == AVERROR_EOF) {

@@ -19,9 +19,7 @@ Decoder::~Decoder() {
 }
 
 void Decoder::sendPacket(AVPacket *packet) {
-    int ret;
-
-    ret = avcodec_send_packet(codec_ctx_, packet);
+    int ret = avcodec_send_packet(codec_ctx_, packet);
     if (ret == AVERROR(EAGAIN)) {
         throw BufferFullException();
     } else if (ret == AVERROR_EOF) {
@@ -32,11 +30,9 @@ void Decoder::sendPacket(AVPacket *packet) {
 }
 
 void Decoder::fillFrame(AVFrame *frame) {
-    int ret;
+    if (!frame) throw std::runtime_error("Frame is not allocated");
 
-    if (!frame) throw std::runtime_error("Empty frame");
-
-    ret = avcodec_receive_frame(codec_ctx_, frame);
+    int ret = avcodec_receive_frame(codec_ctx_, frame);
     if (ret == AVERROR(EAGAIN)) {
         throw BufferEmptyException();
     } else if (ret == AVERROR_EOF) {
