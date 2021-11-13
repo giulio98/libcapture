@@ -21,9 +21,9 @@ Decoder::~Decoder() {
 void Decoder::sendPacket(AVPacket *packet) {
     int ret = avcodec_send_packet(codec_ctx_, packet);
     if (ret == AVERROR(EAGAIN)) {
-        throw BufferFullException();
+        throw FullException("Decoder");
     } else if (ret == AVERROR_EOF) {
-        throw BufferFlushedException();
+        throw FlushedException("Decoder");
     } else if (ret < 0) {
         throw std::runtime_error("Decoder: Failed to send packet to decoder");
     }
@@ -34,9 +34,9 @@ void Decoder::fillFrame(AVFrame *frame) {
 
     int ret = avcodec_receive_frame(codec_ctx_, frame);
     if (ret == AVERROR(EAGAIN)) {
-        throw BufferEmptyException();
+        throw EmptyException("Decoder");
     } else if (ret == AVERROR_EOF) {
-        throw BufferFlushedException();
+        throw FlushedException("Decoder");
     } else if (ret < 0) {
         throw std::runtime_error("Decoder: Failed to receive frame from decoder");
     }

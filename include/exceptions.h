@@ -2,14 +2,24 @@
 
 #include <exception>
 
-struct BufferFullException : public std::exception {
-    const char* what() const throw() { return "Internal buffer is full, read from it and re-try to send"; }
+class AVException : public std::runtime_error {
+public:
+    AVException(const std::string &msg) : std::runtime_error(msg) {}
 };
 
-struct BufferEmptyException : public std::exception {
-    const char* what() const throw() { return "Internal buffer is empty, send data and re-try to read"; }
+class FullException : public AVException {
+public:
+    FullException(const std::string &item_name)
+        : AVException(item_name + " is full, read from it and re-try to send") {}
 };
 
-struct BufferFlushedException : public std::exception {
-    const char* what() const throw() { return "Internal buffer has been flushed"; }
+class EmptyException : public AVException {
+public:
+    EmptyException(const std::string &item_name)
+        : AVException(item_name + " is empty, send something to it and re-try to read") {}
+};
+
+class FlushedException : public AVException {
+public:
+    FlushedException(const std::string &item_name) : AVException(item_name + " has been flushed") {}
 };

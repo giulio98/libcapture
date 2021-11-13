@@ -24,9 +24,9 @@ Encoder::~Encoder() {
 void Encoder::sendFrame(AVFrame *frame) {
     int ret = avcodec_send_frame(codec_ctx_, frame);
     if (ret == AVERROR(EAGAIN)) {
-        throw BufferFullException();
+        throw FullException("Encoder");
     } else if (ret == AVERROR_EOF) {
-        throw BufferFlushedException();
+        throw FlushedException("Encoder");
     } else if (ret < 0) {
         throw std::runtime_error("Encoder: Failed to send frame to encoder");
     }
@@ -37,9 +37,9 @@ void Encoder::fillPacket(AVPacket *packet) {
 
     int ret = avcodec_receive_packet(codec_ctx_, packet);
     if (ret == AVERROR(EAGAIN)) {
-        throw BufferEmptyException();
+        throw EmptyException("Encoder");
     } else if (ret == AVERROR_EOF) {
-        throw BufferFlushedException();
+        throw FlushedException("Encoder");
     } else if (ret < 0) {
         throw std::runtime_error("Encoder: Failed to receive frame from decoder");
     }
