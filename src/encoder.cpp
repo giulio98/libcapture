@@ -21,28 +21,30 @@ Encoder::~Encoder() {
     if (options_) av_dict_free(&options_);
 }
 
-void Encoder::sendFrame(AVFrame *frame) {
+bool Encoder::sendFrame(const AVFrame *frame) {
     int ret = avcodec_send_frame(codec_ctx_, frame);
     if (ret == AVERROR(EAGAIN)) {
-        throw FullException("Encoder");
+        return false;
     } else if (ret == AVERROR_EOF) {
         throw FlushedException("Encoder");
     } else if (ret < 0) {
         throw std::runtime_error("Encoder: Failed to send frame to encoder");
     }
+    return true;
 }
 
-void Encoder::fillPacket(AVPacket *packet) {
+bool Encoder::fillPacket(AVPacket *packet) {
     if (!packet) throw std::runtime_error("Encoder: Packet is not allocated");
 
     int ret = avcodec_receive_packet(codec_ctx_, packet);
     if (ret == AVERROR(EAGAIN)) {
-        throw EmptyException("Encoder");
+        return false;
     } else if (ret == AVERROR_EOF) {
         throw FlushedException("Encoder");
     } else if (ret < 0) {
         throw std::runtime_error("Encoder: Failed to receive frame from decoder");
     }
+    return true;
 }
 
 const AVCodecContext *Encoder::getCodecContext() { return codec_ctx_; }

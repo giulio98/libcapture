@@ -17,9 +17,19 @@ protected:
 public:
     ~Encoder();
 
-    void sendFrame(AVFrame *frame);
+    /**
+     * Send an allocated frame to the encoder
+     * The owneship of the frame remains to the caller
+     * @return true if the frame has been correctly sent, false if the encoder could not receive it
+     */
+    bool sendFrame(const AVFrame *frame);
 
-    void fillPacket(AVPacket *packet);
+    /**
+     * Fill an allocated packet obtained by encoding frames
+     * The owneship of the packet remains to the caller
+     * @return true if the packet has been correctly filled, false if the encoder had nothing to write
+     */
+    bool fillPacket(AVPacket *packet);
 
     const AVCodecContext *getCodecContext();
 };
