@@ -55,7 +55,7 @@ void ScreenRecorder::Start(const std::string &output_file, bool audio) {
     demux_options.insert({"capture_cursor", "1"});
 
     auto video_enc_options = std::map<std::string, std::string>();
-    demux_options.insert({"preset", "ultrafast"});
+    video_enc_options.insert({"preset", "ultrafast"});
 
     auto audio_enc_options = std::map<std::string, std::string>();
 
