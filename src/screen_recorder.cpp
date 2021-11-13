@@ -18,10 +18,6 @@ ScreenRecorder::ScreenRecorder() {
     out_video_codec_id_ = AV_CODEC_ID_H264;
     out_audio_codec_id_ = AV_CODEC_ID_AAC;
 
-    demux_options_.insert({"video_size", "1920x1080"});
-    demux_options_.insert({"framerate", "30"});
-    demux_options_.insert({"capture_cursor", "1"});
-
     video_enc_options_.insert({"preset", "ultrafast"});
 
     in_fmt_name_ = "avfoundation";
@@ -41,8 +37,7 @@ void ScreenRecorder::Start(const std::string &output_file, bool audio) {
     stop_capture_ = false;
     paused_ = false;
     record_audio_ = audio;
-
-    in_device_name_ = "1:0";
+    std::stringstream ss;
 
     avdevice_register_all();
 
@@ -61,21 +56,32 @@ void ScreenRecorder::Start(const std::string &output_file, bool audio) {
     //     ss << "1:";
     //     if (record_audio_) ss << "0";
 
-    demuxer_ = std::unique_ptr<Demuxer>(new Demuxer(in_fmt_name_, in_device_name_, demux_options_));
+    ss << "1:";
+    if (record_audio_) ss << "0";
+
+    demux_options_.insert({"video_size", "1920x1080"});
+    demux_options_.insert({"framerate", "30"});
+    demux_options_.insert({"capture_cursor", "1"});
+
+    demuxer_ = std::unique_ptr<Demuxer>(new Demuxer(in_fmt_name_, ss.str(), demux_options_));
+    demuxer_->dumpInfo();
 
     video_dec_ = std::unique_ptr<Decoder>(new Decoder(demuxer_->getVideoStream()->codecpar));
-    audio_dec_ = std::unique_ptr<Decoder>(new Decoder(demuxer_->getAudioStream()->codecpar));
+    if (record_audio_) audio_dec_ = std::unique_ptr<Decoder>(new Decoder(demuxer_->getAudioStream()->codecpar));
 
     muxer_ = std::unique_ptr<Muxer>(new Muxer(output_file_));
 
     video_enc_ = std::shared_ptr<VideoEncoder>(
         new VideoEncoder(out_video_codec_id_, video_enc_options_, muxer_->getGlobalHeaderFlags(),
                          demuxer_->getVideoStream()->codecpar, out_video_pix_fmt_, video_framerate_));
-    audio_enc_ = std::shared_ptr<AudioEncoder>(new AudioEncoder(
-        out_audio_codec_id_, audio_enc_options_, muxer_->getGlobalHeaderFlags(), demuxer_->getAudioStream()->codecpar));
+    if (record_audio_)
+        audio_enc_ = std::shared_ptr<AudioEncoder>(new AudioEncoder(out_audio_codec_id_, audio_enc_options_,
+                                                                    muxer_->getGlobalHeaderFlags(),
+                                                                    demuxer_->getAudioStream()->codecpar));
 
     muxer_->addVideoStream(video_enc_->getCodecContext());
-    muxer_->addAudioStream(audio_enc_->getCodecContext());
+    if (record_audio_) muxer_->addAudioStream(audio_enc_->getCodecContext());
+    muxer_->dumpInfo();
     muxer_->openFile();
 
     recorder_thread_ = std::thread([this]() {
@@ -96,7 +102,7 @@ void ScreenRecorder::Stop() {
         recorder_thread_.join();
     }
 
-    // muxer_->closeFile();
+    muxer_->closeFile();
 }
 
 void ScreenRecorder::Pause() {
@@ -481,7 +487,7 @@ int ScreenRecorder::CaptureFrames() {
             std::cout << "[A] packet " << audio_pkt_counter++;
             if (ProcessAudioPkt(packet)) exit(1);
         } else {
-            std::cout << " unknown, ignoring...";
+            std::cout << "unknown packet (index: " << packet->stream_index << "), ignoring...";
         }
 
         av_packet_unref(packet);
