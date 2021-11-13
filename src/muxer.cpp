@@ -40,7 +40,7 @@ const AVStream *Muxer::getAudioStream() {
     return audio_stream_;
 }
 
-void Muxer::writeHeader() {
+void Muxer::openFile() {
     /* create empty video file */
     if (!(fmt_ctx_->flags & AVFMT_NOFILE)) {
         if (avio_open(&fmt_ctx_->pb, filename_.c_str(), AVIO_FLAG_WRITE) < 0) {
@@ -55,7 +55,7 @@ void Muxer::writePacket(AVPacket *packet) {
     if (av_interleaved_write_frame(fmt_ctx_, packet)) throw std::runtime_error("Muxer: Failed to write packet");
 }
 
-void Muxer::writeTrailer() {
+void Muxer::closeFile() {
     if (av_write_trailer(fmt_ctx_) < 0) throw std::runtime_error("Muxer: Failed to write file trailer");
     if (avio_close(fmt_ctx_->pb) < 0) throw std::runtime_error("Muxer: Failed to close file");
 }

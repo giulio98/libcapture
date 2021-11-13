@@ -27,7 +27,7 @@ public:
     /**
      * Open the file and write the header
      */
-    void writeHeader();
+    void openFile();
 
     /**
      * Write a packet to the output file
@@ -38,7 +38,7 @@ public:
     /**
      * Write the trailer and close the file
      */
-    void writeTrailer();
+    void closeFile();
 
     /**
      * Print informations
