@@ -34,7 +34,7 @@ Demuxer::Demuxer(const std::string &fmt_name, const std::string &device_name,
 }
 
 Demuxer::~Demuxer() {
-    if (fmt_ctx_) avformat_free_context(fmt_ctx_);  // This will also free the streams
+    if (fmt_ctx_) avformat_close_input(&fmt_ctx_);  // This will also free the streams
 }
 
 const AVStream *Demuxer::getVideoStream() {
