@@ -1,32 +1,24 @@
 #include "../include/encoder.h"
 
 Encoder::Encoder(AVCodecID codec_id, const std::map<std::string, std::string> &options, int global_header_flags)
-    : codec_(nullptr), codec_ctx_(nullptr) {
+    : codec_(nullptr), codec_ctx_(nullptr), options_(nullptr) {
     codec_ = avcodec_find_encoder(codec_id);
     if (!codec_) throw std::runtime_error("Cannot find codec");
 
     codec_ctx_ = avcodec_alloc_context3(codec_);
     if (!codec_ctx_) throw std::runtime_error("Failed to allocated memory for AVCodecContext");
 
-    AVDictionary *dict = nullptr;
-
     for (auto const &[key, val] : options) {
-        if (av_dict_set(&dict, key.c_str(), val.c_str(), 0) < 0) {
-            if (dict) av_dict_free(&dict);
+        if (av_dict_set(&options_, key.c_str(), val.c_str(), 0) < 0) {
             throw std::runtime_error("Cannot set " + key + "in dictionary");
         }
     }
-
-    int ret = avcodec_open2(codec_ctx_, codec_, dict ? &dict : nullptr);
-    if (dict) av_dict_free(&dict);
-    if (ret) throw std::runtime_error("Failed to initialize Codec Context");
-
-    if (global_header_flags & AVFMT_GLOBALHEADER) codec_ctx_->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
 }
 
 Encoder::~Encoder() {
     // TO-DO: free codec_ (how?)
     if (codec_ctx_) avcodec_free_context(&codec_ctx_);
+    if (options_) av_dict_free(&options_);
 }
 
 void Encoder::sendFrame(AVFrame *frame) {
