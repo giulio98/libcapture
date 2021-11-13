@@ -2,9 +2,8 @@
 
 Muxer::Muxer(const std::string &filename)
     : fmt_ctx_(nullptr), filename_(filename), video_stream_(nullptr), audio_stream_(nullptr) {
-    if (avformat_alloc_output_context2(&fmt_ctx_, NULL, NULL, filename_.c_str()) < 0) {
+    if (avformat_alloc_output_context2(&fmt_ctx_, NULL, NULL, filename_.c_str()) < 0)
         throw std::runtime_error("Failed to allocate output format context");
-    }
 }
 
 Muxer::~Muxer() {
