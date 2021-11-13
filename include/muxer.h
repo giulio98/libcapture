@@ -32,15 +32,15 @@ public:
     void openFile();
 
     /**
+     * Write the trailer and close the file
+     */
+    void closeFile();
+
+    /**
      * Write a packet to the output file
      * The ownership of the packet is tranfered to the muxer
      */
     void writePacket(AVPacket *packet);
-
-    /**
-     * Write the trailer and close the file
-     */
-    void closeFile();
 
     /**
      * Print informations
