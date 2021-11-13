@@ -42,7 +42,6 @@ add_executable(screen-recorder
     src/video_encoder.cpp
     src/audio_encoder.cpp
     include/ffmpeg_libs.h
-    include/exceptions.h
     include/screen_recorder.h
     include/duration_logger.h
     include/demuxer.h

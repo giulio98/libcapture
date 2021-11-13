@@ -3,7 +3,6 @@
 #include <map>
 #include <string>
 
-#include "exceptions.h"
 #include "ffmpeg_libs.h"
 
 class Encoder {

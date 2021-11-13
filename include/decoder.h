@@ -2,7 +2,6 @@
 
 #include <iostream>
 
-#include "exceptions.h"
 #include "ffmpeg_libs.h"
 
 class Decoder {

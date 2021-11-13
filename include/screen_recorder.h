@@ -8,7 +8,6 @@
 #include "audio_encoder.h"
 #include "decoder.h"
 #include "demuxer.h"
-#include "exceptions.h"
 #include "ffmpeg_libs.h"
 #include "muxer.h"
 #include "video_encoder.h"
