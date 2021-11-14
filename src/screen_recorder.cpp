@@ -183,10 +183,10 @@ void ScreenRecorder::encodeWriteFrame(const AVFrame *frame, AVType audio_video) 
 void ScreenRecorder::processVideoPacket(const AVPacket *packet) {
     DurationLogger dl(" processed in ");
 
-    bool retry = true;
+    bool retry_decoder = true;
 
-    while (retry) {
-        retry = !video_decoder_->sendPacket(packet);
+    while (retry_decoder) {
+        retry_decoder = !video_decoder_->sendPacket(packet);
 
         while (true) {
             auto in_frame = video_decoder_->getFrame();
