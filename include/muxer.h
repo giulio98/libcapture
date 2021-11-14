@@ -22,9 +22,14 @@ public:
 
     void addAudioStream(const AVCodecContext *codec_ctx);
 
-    const AVStream *getVideoStream();
+    int getVideoStreamIdx();
+    int getAudioStreamIdx();
 
-    const AVStream *getAudioStream();
+    const AVCodecParameters *getVideoParams();
+    const AVCodecParameters *getAudioParams();
+
+    AVRational getVideoTimeBase();
+    AVRational getAudioTimeBase();
 
     /**
      * Open the file and write the header

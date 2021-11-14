@@ -207,10 +207,10 @@ int ScreenRecorder::EncodeWriteFrame(AVFrame *frame, int audio_video) {
 
     if (audio_video) {
         encoder = audio_enc_;
-        stream_index = muxer_->getAudioStream()->index;
+        stream_index = muxer_->getAudioStreamIdx();
     } else {
         encoder = video_enc_;
-        stream_index = muxer_->getVideoStream()->index;
+        stream_index = muxer_->getVideoStreamIdx();
     }
 
     packet = av_packet_alloc();
@@ -248,7 +248,6 @@ int ScreenRecorder::ProcessVideoPkt(AVPacket *packet) {
     AVFrame *in_frame;
     AVFrame *out_frame;
     auto out_video_codec_ctx = video_enc_->getCodecContext();
-    auto out_video_stream = muxer_->getVideoStream();
     DurationLogger dl(" processed in ");
 
     in_frame = av_frame_alloc();
@@ -277,7 +276,7 @@ int ScreenRecorder::ProcessVideoPkt(AVPacket *packet) {
         video_conv_->convertFrame(in_frame, out_frame);
 
         out_frame->pts =
-            av_rescale_q(video_frame_counter_++, out_video_codec_ctx->time_base, out_video_stream->time_base);
+            av_rescale_q(video_frame_counter_++, out_video_codec_ctx->time_base, muxer_->getVideoTimeBase());
 
         if (EncodeWriteFrame(out_frame, 0)) return -1;
     }
@@ -295,7 +294,6 @@ int ScreenRecorder::ProcessAudioPkt(AVPacket *packet) {
     AVFrame *out_frame;
     auto in_audio_codec_ctx = audio_dec_->getCodecContext();
     auto out_audio_codec_ctx = audio_enc_->getCodecContext();
-    auto out_audio_stream = muxer_->getAudioStream();
     DurationLogger dl(" processed in ");
 
     in_frame = av_frame_alloc();
@@ -337,7 +335,7 @@ int ScreenRecorder::ProcessAudioPkt(AVPacket *packet) {
             out_frame->format = out_audio_codec_ctx->sample_fmt;
             out_frame->sample_rate = out_audio_codec_ctx->sample_rate;
             out_frame->pts = av_rescale_q(out_audio_codec_ctx->frame_size * audio_frame_counter_++,
-                                          out_audio_codec_ctx->time_base, out_audio_stream->time_base);
+                                          out_audio_codec_ctx->time_base, muxer_->getAudioTimeBase());
 
             ret = av_frame_get_buffer(out_frame, 0);
             if (ret < 0) {
