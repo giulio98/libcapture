@@ -16,9 +16,6 @@
 class ScreenRecorder {
     bool record_audio_;
 
-    /* Video framerate (set at input-device opening time) */
-    int video_framerate_;
-
     int offset_x_;
     int offset_y_;
     int width_;
@@ -32,6 +29,7 @@ class ScreenRecorder {
     bool stop_capture_;
     bool paused_;
 
+    int video_framerate_;
     AVPixelFormat out_video_pix_fmt_;
     AVCodecID out_video_codec_id_;
     AVCodecID out_audio_codec_id_;
