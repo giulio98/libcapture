@@ -42,6 +42,7 @@ add_executable(screen-recorder
     src/video_encoder.cpp
     src/audio_encoder.cpp
     src/video_converter.cpp
+    src/audio_converter.cpp
     include/ffmpeg_libs.h
     include/screen_recorder.h
     include/duration_logger.h
@@ -52,6 +53,7 @@ add_executable(screen-recorder
     include/video_encoder.h
     include/audio_encoder.h
     include/video_converter.h
+    include/audio_converter.h
 )
 
 target_link_libraries(screen-recorder PkgConfig::LIBAV)
