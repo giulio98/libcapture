@@ -71,7 +71,7 @@ class ScreenRecorder {
 
     int ProcessAudioPkt(AVPacket *packet);
 
-    int EncodeWriteFrame(AVFrame *frame, int audio_video);
+    int EncodeWriteFrame(const AVFrame *frame, int audio_video);
 
     int FlushEncoders();
 

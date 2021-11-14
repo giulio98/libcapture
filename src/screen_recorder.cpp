@@ -91,8 +91,8 @@ void ScreenRecorder::Start(const std::string &output_file, bool audio) {
 
         muxer_->openFile();
 
-        video_conv_ = std::unique_ptr<VideoConverter>(new VideoConverter(
-            video_dec_->getCodecContext(), video_enc_->getCodecContext(), muxer_->getVideoTimeBase()));
+        video_conv_ = std::unique_ptr<VideoConverter>(
+            new VideoConverter(video_dec_->getCodecContext(), video_enc_->getCodecContext()));
 
         recorder_thread_ = std::thread([this]() {
             std::cout << "Recording..." << std::endl;
@@ -144,7 +144,7 @@ int ScreenRecorder::InitAudioConverter() {
     audio_converter_ctx_ = swr_alloc_set_opts(
         nullptr, av_get_default_channel_layout(in_audio_codec_ctx->channels), out_audio_codec_ctx->sample_fmt,
         in_audio_codec_ctx->sample_rate, av_get_default_channel_layout(in_audio_codec_ctx->channels),
-        (AVSampleFormat)in_audio_params->format, in_audio_params->sample_rate, 0, nullptr);
+        (AVSampleFormat)in_audio_codec_ctx->sample_fmt, in_audio_codec_ctx->sample_rate, 0, nullptr);
 
     if (!audio_converter_ctx_) {
         std::cerr << "Error allocating audio converter";
@@ -198,7 +198,7 @@ int ScreenRecorder::WriteAudioFrameToFifo(AVFrame *frame) {
     return 0;
 }
 
-int ScreenRecorder::EncodeWriteFrame(AVFrame *frame, int audio_video) {
+int ScreenRecorder::EncodeWriteFrame(const AVFrame *frame, int audio_video) {
     int ret;
     AVPacket *packet;
     const AVCodecContext *codec_ctx;
@@ -246,7 +246,7 @@ int ScreenRecorder::EncodeWriteFrame(AVFrame *frame, int audio_video) {
 
 int ScreenRecorder::ProcessVideoPkt(AVPacket *packet) {
     AVFrame *in_frame;
-    AVFrame *out_frame;
+    const AVFrame *out_frame;
     auto out_video_codec_ctx = video_enc_->getCodecContext();
     DurationLogger dl(" processed in ");
 
@@ -254,25 +254,23 @@ int ScreenRecorder::ProcessVideoPkt(AVPacket *packet) {
         in_frame = av_frame_alloc();
         if (!in_frame) throw std::runtime_error("Failed to allocate in_frame");
 
-        out_frame = video_conv_->allocFrame();
-
         video_dec_->sendPacket(packet);
 
         while (true) {
             if (!video_dec_->fillFrame(in_frame)) break;
-            video_conv_->convertFrame(in_frame, out_frame, video_frame_counter_++);
+            out_frame = video_conv_->convertFrame(in_frame, video_frame_counter_++);
             if (EncodeWriteFrame(out_frame, 0)) return -1;
         }
 
     } catch (const std::exception &e) {
         std::cerr << e.what() << std::endl;
         if (in_frame) av_frame_free(&in_frame);
-        video_conv_->freeFrame(&out_frame);
+        // video_conv_->freeFrame(&out_frame);
         return -1;
     }
 
     if (in_frame) av_frame_free(&in_frame);
-    video_conv_->freeFrame(&out_frame);
+    // video_conv_->freeFrame(&out_frame);
 
     return 0;
 }
