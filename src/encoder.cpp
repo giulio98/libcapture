@@ -21,7 +21,7 @@ Encoder::~Encoder() {
     if (options_) av_dict_free(&options_);
 }
 
-bool Encoder::sendFrame(const AVFrame *frame) {
+bool Encoder::sendFrame(const AVFrame *frame) const {
     int ret = avcodec_send_frame(codec_ctx_, frame);
     if (ret == AVERROR(EAGAIN)) {
         return false;
@@ -33,7 +33,7 @@ bool Encoder::sendFrame(const AVFrame *frame) {
     return true;
 }
 
-bool Encoder::fillPacket(AVPacket *packet) {
+bool Encoder::fillPacket(AVPacket *packet) const {
     if (!packet) throw std::runtime_error("Encoder: Packet is not allocated");
 
     int ret = avcodec_receive_packet(codec_ctx_, packet);
@@ -45,4 +45,4 @@ bool Encoder::fillPacket(AVPacket *packet) {
     return true;
 }
 
-const AVCodecContext *Encoder::getCodecContext() { return codec_ctx_; }
+const AVCodecContext *Encoder::getCodecContext() const { return codec_ctx_; }

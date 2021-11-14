@@ -19,7 +19,7 @@ Decoder::~Decoder() {
     if (codec_ctx_) avcodec_free_context(&codec_ctx_);
 }
 
-bool Decoder::sendPacket(const AVPacket *packet) {
+bool Decoder::sendPacket(const AVPacket *packet) const {
     int ret = avcodec_send_packet(codec_ctx_, packet);
     if (ret == AVERROR(EAGAIN)) {
         return false;
@@ -31,7 +31,7 @@ bool Decoder::sendPacket(const AVPacket *packet) {
     return true;
 }
 
-bool Decoder::fillFrame(AVFrame *frame) {
+bool Decoder::fillFrame(AVFrame *frame) const {
     if (!frame) throw std::runtime_error("Decoder: Frame is not allocated");
 
     int ret = avcodec_receive_frame(codec_ctx_, frame);
@@ -43,4 +43,4 @@ bool Decoder::fillFrame(AVFrame *frame) {
     return true;
 }
 
-const AVCodecContext *Decoder::getCodecContext() { return codec_ctx_; }
+const AVCodecContext *Decoder::getCodecContext() const { return codec_ctx_; }

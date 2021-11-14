@@ -23,14 +23,14 @@ public:
 
     void addAudioStream(const AVCodecContext *codec_ctx);
 
-    int getVideoStreamIdx();
-    int getAudioStreamIdx();
+    int getVideoStreamIdx() const;
+    int getAudioStreamIdx() const;
 
-    const AVCodecParameters *getVideoParams();
-    const AVCodecParameters *getAudioParams();
+    const AVCodecParameters *getVideoParams() const;
+    const AVCodecParameters *getAudioParams() const;
 
-    AVRational getVideoTimeBase();
-    AVRational getAudioTimeBase();
+    AVRational getVideoTimeBase() const;
+    AVRational getAudioTimeBase() const;
 
     /**
      * Open the file and write the header
@@ -46,12 +46,12 @@ public:
      * Write a packet to the output file
      * The ownership of the packet is tranfered to the muxer
      */
-    void writePacket(AVPacket *packet);
+    void writePacket(AVPacket *packet) const;
 
     /**
      * Print informations
      */
-    void dumpInfo();
+    void dumpInfo() const;
 
-    int getGlobalHeaderFlags();
+    int getGlobalHeaderFlags() const;
 };

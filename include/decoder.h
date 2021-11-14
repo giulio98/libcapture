@@ -18,14 +18,14 @@ public:
      * The owneship of the packet remains to the caller
      * @return true if the packet has been correctly sent, false if the decoder could not receive it
      */
-    bool sendPacket(const AVPacket *packet);
+    bool sendPacket(const AVPacket *packet) const;
 
     /**
      * Fill an allocated frame obtained by decoding packets
      * The owneship of the frame remains to the caller
      * @return true if the frame has been correctly filled, false if the decoder had nothing to write
      */
-    bool fillFrame(AVFrame *frame);
+    bool fillFrame(AVFrame *frame) const;
 
-    const AVCodecContext *getCodecContext();
+    const AVCodecContext *getCodecContext() const;
 };

@@ -37,27 +37,27 @@ Demuxer::~Demuxer() {
     if (fmt_ctx_) avformat_close_input(&fmt_ctx_);  // This will also free the streams
 }
 
-int Demuxer::getVideoStreamIdx() {
+int Demuxer::getVideoStreamIdx() const {
     if (!video_stream_) throw std::runtime_error("Demuxer: Video stream not present");
     return video_stream_->index;
 }
 
-int Demuxer::getAudioStreamIdx() {
+int Demuxer::getAudioStreamIdx() const {
     if (!audio_stream_) throw std::runtime_error("Demuxer: Audio stream not present");
     return audio_stream_->index;
 }
 
-const AVCodecParameters *Demuxer::getVideoParams() {
+const AVCodecParameters *Demuxer::getVideoParams() const {
     if (!video_stream_) throw std::runtime_error("Demuxer: Video stream not present");
     return video_stream_->codecpar;
 }
 
-const AVCodecParameters *Demuxer::getAudioParams() {
+const AVCodecParameters *Demuxer::getAudioParams() const {
     if (!audio_stream_) throw std::runtime_error("Demuxer: Audio stream not present");
     return audio_stream_->codecpar;
 }
 
-bool Demuxer::fillPacket(AVPacket *packet) {
+bool Demuxer::fillPacket(AVPacket *packet) const {
     if (!packet) throw std::runtime_error("Demuxer: Packet not allocated");
 
     int ret = av_read_frame(fmt_ctx_, packet);
@@ -67,4 +67,4 @@ bool Demuxer::fillPacket(AVPacket *packet) {
     return true;
 }
 
-void Demuxer::dumpInfo() { av_dump_format(fmt_ctx_, 0, device_name_.c_str(), 0); }
+void Demuxer::dumpInfo() const { av_dump_format(fmt_ctx_, 0, device_name_.c_str(), 0); }

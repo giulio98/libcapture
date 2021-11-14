@@ -20,7 +20,7 @@ VideoConverter::~VideoConverter() {
     if (ctx_) sws_freeContext(ctx_);
 }
 
-AVFrame *VideoConverter::allocFrame() {
+AVFrame *VideoConverter::allocFrame() const {
     AVFrame *frame = av_frame_alloc();
     if (!frame) throw std::runtime_error("VideoConverter: failed to allocate frame");
 
@@ -30,13 +30,13 @@ AVFrame *VideoConverter::allocFrame() {
     return frame;
 }
 
-void VideoConverter::freeFrame(AVFrame **frame_ptr) {
+void VideoConverter::freeFrame(AVFrame **frame_ptr) const {
     if (!*frame_ptr) return;
     av_freep(&(*frame_ptr)->data[0]);
     av_frame_free(frame_ptr);
 }
 
-void VideoConverter::convertFrame(const AVFrame *in_frame, AVFrame *out_frame, int frame_number) {
+void VideoConverter::convertFrame(const AVFrame *in_frame, AVFrame *out_frame, int frame_number) const {
     if (!in_frame) throw std::runtime_error("VideoConverter: in_frame is not allocated");
     if (!out_frame) throw std::runtime_error("VideoConverter: out_frame is not allocated");
     if (sws_scale(ctx_, in_frame->data, in_frame->linesize, 0, out_height_, out_frame->data, out_frame->linesize) < 0)

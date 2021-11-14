@@ -13,13 +13,14 @@ class VideoConverter {
     AVRational stream_time_base_;
 
 public:
-    VideoConverter(const AVCodecContext *in_codec_ctx, const AVCodecContext *out_codec_ctx, AVRational stream_time_base);
+    VideoConverter(const AVCodecContext *in_codec_ctx, const AVCodecContext *out_codec_ctx,
+                   AVRational stream_time_base);
 
     ~VideoConverter();
 
-    AVFrame *allocFrame();
+    AVFrame *allocFrame() const;
 
-    void freeFrame(AVFrame **frame_ptr);
+    void freeFrame(AVFrame **frame_ptr) const;
 
-    void convertFrame(const AVFrame *in_frame, AVFrame *out_frame, int frame_number);
+    void convertFrame(const AVFrame *in_frame, AVFrame *out_frame, int frame_number) const;
 };

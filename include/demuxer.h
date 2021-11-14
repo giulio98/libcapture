@@ -18,18 +18,18 @@ public:
 
     ~Demuxer();
 
-    int getVideoStreamIdx();
-    int getAudioStreamIdx();
+    int getVideoStreamIdx() const;
+    int getAudioStreamIdx() const;
 
-    const AVCodecParameters *getVideoParams();
-    const AVCodecParameters *getAudioParams();
+    const AVCodecParameters *getVideoParams() const;
+    const AVCodecParameters *getAudioParams() const;
 
     /**
      * Fill an allocated packet with the information read from the input format
      * The owneship of the packet remains to the caller
      * @return true if the packet has been correctly filled, false if the demuxer had nothing to write
      */
-    bool fillPacket(AVPacket *packet);
+    bool fillPacket(AVPacket *packet) const;
 
-    void dumpInfo();
+    void dumpInfo() const;
 };

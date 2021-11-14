@@ -21,14 +21,14 @@ public:
      * The owneship of the frame remains to the caller
      * @return true if the frame has been correctly sent, false if the encoder could not receive it
      */
-    bool sendFrame(const AVFrame *frame);
+    bool sendFrame(const AVFrame *frame) const;
 
     /**
      * Fill an allocated packet obtained by encoding frames
      * The owneship of the packet remains to the caller
      * @return true if the packet has been correctly filled, false if the encoder had nothing to write
      */
-    bool fillPacket(AVPacket *packet);
+    bool fillPacket(AVPacket *packet) const;
 
-    const AVCodecContext *getCodecContext();
+    const AVCodecContext *getCodecContext() const;
 };

@@ -44,34 +44,34 @@ void Muxer::addAudioStream(const AVCodecContext *codec_ctx) {
         throw std::runtime_error("Muxer: Failed to write audio stream parameters");
 }
 
-int Muxer::getVideoStreamIdx() {
+int Muxer::getVideoStreamIdx() const {
     if (!video_stream_) throw std::runtime_error("Muxer: Video stream not present");
     return video_stream_->index;
 }
 
-int Muxer::getAudioStreamIdx() {
+int Muxer::getAudioStreamIdx() const {
     if (!audio_stream_) throw std::runtime_error("Muxer: Audio stream not present");
     return audio_stream_->index;
 }
 
-const AVCodecParameters *Muxer::getVideoParams() {
+const AVCodecParameters *Muxer::getVideoParams() const {
     if (!video_stream_) throw std::runtime_error("Muxer: Video stream not present");
     return video_stream_->codecpar;
 }
 
-const AVCodecParameters *Muxer::getAudioParams() {
+const AVCodecParameters *Muxer::getAudioParams() const {
     if (!audio_stream_) throw std::runtime_error("Muxer: Audio stream not present");
     return audio_stream_->codecpar;
 }
 
-AVRational Muxer::getVideoTimeBase() {
+AVRational Muxer::getVideoTimeBase() const {
     if (!video_stream_) throw std::runtime_error("Muxer: Video stream not present");
     if (!time_base_valid_)
         throw std::runtime_error("Muxer: Time base has not been set yet, open the file with openFile() first");
     return video_stream_->time_base;
 }
 
-AVRational Muxer::getAudioTimeBase() {
+AVRational Muxer::getAudioTimeBase() const {
     if (!audio_stream_) throw std::runtime_error("Muxer: Audio stream not present");
     if (!time_base_valid_)
         throw std::runtime_error("Muxer: Time base has not been set yet, open the file with openFile() first");
@@ -100,12 +100,12 @@ void Muxer::closeFile() {
     file_closed_ = true;
 }
 
-void Muxer::writePacket(AVPacket *packet) {
+void Muxer::writePacket(AVPacket *packet) const {
     if (!file_opened_) throw std::runtime_error("Muxer: cannot write packet, file has not been opened");
     if (file_closed_) throw std::runtime_error("Muxer: cannot write packet, file has already been closed");
     if (av_interleaved_write_frame(fmt_ctx_, packet)) throw std::runtime_error("Muxer: Failed to write packet");
 }
 
-void Muxer::dumpInfo() { av_dump_format(fmt_ctx_, 0, filename_.c_str(), 1); }
+void Muxer::dumpInfo() const { av_dump_format(fmt_ctx_, 0, filename_.c_str(), 1); }
 
-int Muxer::getGlobalHeaderFlags() { return fmt_ctx_->oformat->flags; }
+int Muxer::getGlobalHeaderFlags() const { return fmt_ctx_->oformat->flags; }
