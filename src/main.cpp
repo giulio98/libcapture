@@ -18,14 +18,14 @@ int main() {
     screen_record.Stop();
     std::cout << "Recording to " << file1 << " completed" << std::endl;
 
-    std::this_thread::sleep_for(2000ms);
+    std::this_thread::sleep_for(1000ms);
     std::cout << std::endl;
 
     std::cout << "Recording to " << file2 << std::endl;
     screen_record.Start(file2, false);
     std::this_thread::sleep_for(5000ms);
     screen_record.Pause();
-    std::this_thread::sleep_for(5000ms);
+    std::this_thread::sleep_for(1000ms);
     screen_record.Stop();
     std::cout << "Recording to " << file2 << " completed" << std::endl;
 
