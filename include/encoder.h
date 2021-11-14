@@ -11,6 +11,8 @@ protected:
     AVCodecContext *codec_ctx_;
     AVDictionary *options_;
 
+    void cleanup();
+
     Encoder(AVCodecID codec_id, const std::map<std::string, std::string> &options, int global_header_flags);
 
 public:

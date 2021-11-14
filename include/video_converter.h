@@ -13,8 +13,11 @@ class VideoConverter {
     AVRational codec_ctx_time_base_;
     AVRational stream_time_base_;
 
+    void cleanup();
+
 public:
-    VideoConverter(const AVCodecContext *in_codec_ctx, const AVCodecContext *out_codec_ctx, AVRational stream_time_base);
+    VideoConverter(const AVCodecContext *in_codec_ctx, const AVCodecContext *out_codec_ctx,
+                   AVRational stream_time_base);
 
     ~VideoConverter();
 

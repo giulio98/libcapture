@@ -9,6 +9,8 @@ class Decoder {
     AVCodecContext *codec_ctx_;
     AVFrame *frame_;
 
+    void cleanup();
+
 public:
     Decoder(const AVCodecParameters *params);
 

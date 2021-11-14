@@ -2,20 +2,28 @@
 
 Encoder::Encoder(AVCodecID codec_id, const std::map<std::string, std::string> &options, int global_header_flags)
     : codec_(nullptr), codec_ctx_(nullptr), options_(nullptr) {
-    codec_ = avcodec_find_encoder(codec_id);
-    if (!codec_) throw std::runtime_error("Encoder: Cannot find codec");
+    try {
+        codec_ = avcodec_find_encoder(codec_id);
+        if (!codec_) throw std::runtime_error("Encoder: Cannot find codec");
 
-    codec_ctx_ = avcodec_alloc_context3(codec_);
-    if (!codec_ctx_) throw std::runtime_error("Encoder: Failed to allocated memory for AVCodecContext");
+        codec_ctx_ = avcodec_alloc_context3(codec_);
+        if (!codec_ctx_) throw std::runtime_error("Encoder: Failed to allocated memory for AVCodecContext");
 
-    for (auto const &[key, val] : options) {
-        if (av_dict_set(&options_, key.c_str(), val.c_str(), 0) < 0) {
-            throw std::runtime_error("Encoder: Cannot set " + key + "in dictionary");
+        for (auto const &[key, val] : options) {
+            if (av_dict_set(&options_, key.c_str(), val.c_str(), 0) < 0) {
+                throw std::runtime_error("Encoder: Cannot set " + key + "in dictionary");
+            }
         }
+
+    } catch (const std::exception &e) {
+        cleanup();
+        throw;
     }
 }
 
-Encoder::~Encoder() {
+Encoder::~Encoder() { cleanup(); }
+
+void Encoder::cleanup() {
     // TO-DO: free codec_ (how?)
     if (codec_ctx_) avcodec_free_context(&codec_ctx_);
     if (options_) av_dict_free(&options_);

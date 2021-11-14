@@ -14,6 +14,8 @@ class Muxer {
     bool file_closed_;
     bool time_base_valid_;
 
+    void cleanup();
+
 public:
     Muxer(const std::string &filename);
 

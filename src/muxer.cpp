@@ -8,8 +8,13 @@ Muxer::Muxer(const std::string &filename)
       file_opened_(false),
       file_closed_(false),
       time_base_valid_(false) {
-    if (avformat_alloc_output_context2(&fmt_ctx_, NULL, NULL, filename_.c_str()) < 0)
-        throw std::runtime_error("Failed to allocate output format context");
+    try {
+        if (avformat_alloc_output_context2(&fmt_ctx_, NULL, NULL, filename_.c_str()) < 0)
+            throw std::runtime_error("Failed to allocate output format context");
+    } catch (const std::exception &e) {
+        cleanup();
+        throw;
+    }
 }
 
 Muxer::~Muxer() {
@@ -19,6 +24,10 @@ Muxer::~Muxer() {
         if (avio_close(fmt_ctx_->pb) < 0) std::cerr << " failed to close file";
         std::cerr << std::endl;
     }
+    cleanup();
+}
+
+void Muxer::cleanup() {
     if (fmt_ctx_) avformat_free_context(fmt_ctx_);  // This will also free the streams
 }
 

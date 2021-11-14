@@ -16,6 +16,8 @@ class AudioConverter {
     AVRational stream_time_base_;
     AVFrame *out_frame_;
 
+    void cleanup();
+
 public:
     AudioConverter(const AVCodecContext *in_codec_ctx, const AVCodecContext *out_codec_ctx,
                    AVRational stream_time_base);
