@@ -44,16 +44,6 @@ void Muxer::addAudioStream(const AVCodecContext *codec_ctx) {
         throw std::runtime_error("Muxer: Failed to write audio stream parameters");
 }
 
-int Muxer::getVideoStreamIdx() const {
-    if (!video_stream_) throw std::runtime_error("Muxer: Video stream not present");
-    return video_stream_->index;
-}
-
-int Muxer::getAudioStreamIdx() const {
-    if (!audio_stream_) throw std::runtime_error("Muxer: Audio stream not present");
-    return audio_stream_->index;
-}
-
 const AVCodecParameters *Muxer::getVideoParams() const {
     if (!video_stream_) throw std::runtime_error("Muxer: Video stream not present");
     return video_stream_->codecpar;
@@ -100,11 +90,17 @@ void Muxer::closeFile() {
     file_closed_ = true;
 }
 
-void Muxer::writePacket(AVPacket *packet) const {
+void Muxer::writePacket(AVPacket *packet, int index) const {
     if (!file_opened_) throw std::runtime_error("Muxer: cannot write packet, file has not been opened");
     if (file_closed_) throw std::runtime_error("Muxer: cannot write packet, file has already been closed");
+    if (!packet) throw std::runtime_error("Muxer: packet is not allocated");
+    packet->stream_index = index;
     if (av_interleaved_write_frame(fmt_ctx_, packet)) throw std::runtime_error("Muxer: Failed to write packet");
 }
+
+void Muxer::writeVideoPacket(AVPacket *packet) const { writePacket(packet, video_stream_->index); }
+
+void Muxer::writeAudioPacket(AVPacket *packet) const { writePacket(packet, audio_stream_->index); }
 
 void Muxer::dumpInfo() const { av_dump_format(fmt_ctx_, 0, filename_.c_str(), 1); }
 
