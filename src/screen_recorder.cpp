@@ -39,7 +39,7 @@ void ScreenRecorder::Start(const std::string &output_file, bool audio) {
     output_file_ = output_file;
     stop_capture_ = false;
     paused_ = false;
-    video_framerate_ = 30;
+    video_framerate_ = 40;
     out_video_pix_fmt_ = AV_PIX_FMT_YUV420P;
     out_video_codec_id_ = AV_CODEC_ID_H264;
     record_audio_ = audio;
@@ -657,7 +657,8 @@ int ScreenRecorder::ProcessAudioPkt(AVPacket *packet) {
             out_frame->channel_layout = av_get_default_channel_layout(in_audio_codec_ctx_->channels);
             out_frame->format = out_audio_codec_ctx_->sample_fmt;
             out_frame->sample_rate = out_audio_codec_ctx_->sample_rate;
-            out_frame->pts = av_rescale_q(out_audio_codec_ctx_->frame_size * audio_frame_counter_++,
+            audio_frame_counter_+=out_frame->nb_samples;
+            out_frame->pts = av_rescale_q(/*out_audio_codec_ctx_->frame_size * audio_frame_counter_++*/ audio_frame_counter_,
                                           out_audio_codec_ctx_->time_base, out_audio_stream_->time_base);
 
             ret = av_frame_get_buffer(out_frame, 0);
