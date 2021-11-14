@@ -31,7 +31,7 @@ AVFrame *VideoConverter::allocFrame() {
 }
 
 void VideoConverter::freeFrame(AVFrame **frame_ptr) {
-    if (!*frame_ptr) throw std::runtime_error("VideoConverter: frame is not allocated");
+    if (!*frame_ptr) return;
     av_freep(&(*frame_ptr)->data[0]);
     av_frame_free(frame_ptr);
 }

@@ -250,36 +250,28 @@ int ScreenRecorder::ProcessVideoPkt(AVPacket *packet) {
     auto out_video_codec_ctx = video_enc_->getCodecContext();
     DurationLogger dl(" processed in ");
 
-    in_frame = av_frame_alloc();
-    if (!in_frame) {
-        std::cerr << "\nunable to release the avframe resources" << std::endl;
-        return -1;
-    }
-
-    out_frame = video_conv_->allocFrame();
-
     try {
-        video_dec_->sendPacket(packet);
-    } catch (const std::exception &e) {
-        std::cerr << e.what() << std::endl;
-        return -1;
-    }
+        in_frame = av_frame_alloc();
+        if (!in_frame) throw std::runtime_error("Failed to allocate in_frame");
 
-    while (true) {
-        try {
+        out_frame = video_conv_->allocFrame();
+
+        video_dec_->sendPacket(packet);
+
+        while (true) {
             if (!video_dec_->fillFrame(in_frame)) break;
-        } catch (const std::runtime_error &e) {
-            std::cerr << e.what() << std::endl;
-            return -1;
+            video_conv_->convertFrame(in_frame, out_frame, video_frame_counter_++);
+            if (EncodeWriteFrame(out_frame, 0)) return -1;
         }
 
-        video_conv_->convertFrame(in_frame, out_frame, video_frame_counter_++);
-
-        if (EncodeWriteFrame(out_frame, 0)) return -1;
+    } catch (const std::exception &e) {
+        std::cerr << e.what() << std::endl;
+        if (in_frame) av_frame_free(&in_frame);
+        video_conv_->freeFrame(&out_frame);
+        return -1;
     }
 
-    av_frame_free(&in_frame);
-
+    if (in_frame) av_frame_free(&in_frame);
     video_conv_->freeFrame(&out_frame);
 
     return 0;
