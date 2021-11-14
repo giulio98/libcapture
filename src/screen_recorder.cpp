@@ -87,6 +87,9 @@ void ScreenRecorder::Start(const std::string &output_file, bool audio) {
             muxer_->addAudioStream(audio_enc_->getCodecContext());
         }
 
+        video_conv_ = std::unique_ptr<VideoConverter>(
+            new VideoConverter(video_dec_->getCodecContext(), video_enc_->getCodecContext()));
+
         demuxer_->dumpInfo();
         muxer_->dumpInfo();
 
@@ -130,22 +133,6 @@ void ScreenRecorder::Resume() {
     this->paused_ = false;
     std::cout << "Recording resumed" << std::endl;
     cv_.notify_all();
-}
-
-int ScreenRecorder::InitVideoConverter() {
-    auto in_video_codec_ctx = video_dec_->getCodecContext();
-    auto out_video_codec_ctx = video_enc_->getCodecContext();
-
-    video_converter_ctx_ = sws_getContext(
-        in_video_codec_ctx->width, in_video_codec_ctx->height, in_video_codec_ctx->pix_fmt, out_video_codec_ctx->width,
-        out_video_codec_ctx->height, out_video_codec_ctx->pix_fmt, SWS_BICUBIC, NULL, NULL, NULL);
-
-    if (!video_converter_ctx_) {
-        std::cerr << "Cannot allocate video_converter_ctx_";
-        return -1;
-    }
-
-    return 0;
 }
 
 int ScreenRecorder::InitAudioConverter() {
@@ -259,7 +246,6 @@ int ScreenRecorder::EncodeWriteFrame(AVFrame *frame, int audio_video) {
 }
 
 int ScreenRecorder::ProcessVideoPkt(AVPacket *packet) {
-    int ret;
     AVFrame *in_frame;
     AVFrame *out_frame;
     auto out_video_codec_ctx = video_enc_->getCodecContext();
@@ -272,22 +258,7 @@ int ScreenRecorder::ProcessVideoPkt(AVPacket *packet) {
         return -1;
     }
 
-    out_frame = av_frame_alloc();
-    if (!out_frame) {
-        std::cerr << "\nunable to release the avframe resources for outframe";
-        return -1;
-    }
-
-    out_frame->format = out_video_codec_ctx->pix_fmt;
-    out_frame->width = out_video_codec_ctx->width;
-    out_frame->height = out_video_codec_ctx->height;
-
-    ret = av_image_alloc(out_frame->data, out_frame->linesize, out_frame->width, out_frame->height,
-                         out_video_codec_ctx->pix_fmt, 1);
-    if (ret < 0) {
-        std::cerr << "Failed to allocate out_frame data";
-        return -1;
-    }
+    out_frame = video_conv_->allocFrame();
 
     try {
         video_dec_->sendPacket(packet);
@@ -301,11 +272,10 @@ int ScreenRecorder::ProcessVideoPkt(AVPacket *packet) {
             if (!video_dec_->fillFrame(in_frame)) break;
         } catch (const std::runtime_error &e) {
             std::cerr << e.what() << std::endl;
-            break;
+            return -1;
         }
 
-        sws_scale(video_converter_ctx_, in_frame->data, in_frame->linesize, 0, out_frame->height, out_frame->data,
-                  out_frame->linesize);
+        video_conv_->convertFrame(in_frame, out_frame);
 
         out_frame->pts =
             av_rescale_q(video_frame_counter_++, out_video_codec_ctx->time_base, out_video_stream->time_base);
@@ -315,8 +285,7 @@ int ScreenRecorder::ProcessVideoPkt(AVPacket *packet) {
 
     av_frame_free(&in_frame);
 
-    av_freep(&out_frame->data[0]);  // needed beacuse of av_image_alloc() (data is not reference-counted)
-    av_frame_free(&out_frame);
+    video_conv_->freeFrame(&out_frame);
 
     return 0;
 }
@@ -418,7 +387,7 @@ int ScreenRecorder::CaptureFrames() {
     bool audio_data_present = false;
 #endif
 
-    if (InitVideoConverter()) exit(1);
+    // if (InitVideoConverter()) exit(1);
     if (record_audio_ && InitAudioConverter()) exit(1);
 
     /* start counting for PTS */

@@ -10,6 +10,7 @@
 #include "demuxer.h"
 #include "ffmpeg_libs.h"
 #include "muxer.h"
+#include "video_converter.h"
 #include "video_encoder.h"
 
 class ScreenRecorder {
@@ -44,6 +45,7 @@ class ScreenRecorder {
     std::unique_ptr<Decoder> audio_dec_;
     std::shared_ptr<VideoEncoder> video_enc_;
     std::shared_ptr<AudioEncoder> audio_enc_;
+    std::shared_ptr<VideoConverter> video_conv_;
 
     std::map<std::string, std::string> video_enc_options_;
     std::map<std::string, std::string> audio_enc_options_;
@@ -51,8 +53,6 @@ class ScreenRecorder {
     /* Thread responsible for recording video and audio */
     std::thread recorder_thread_;
 
-    /* Video converter context */
-    SwsContext *video_converter_ctx_;
     /* Audio converter context */
     SwrContext *audio_converter_ctx_;
 
@@ -64,7 +64,6 @@ class ScreenRecorder {
     /* Counter of audio frames used to compute PTSs */
     int audio_frame_counter_;
 
-    int InitVideoConverter();
     int InitAudioConverter();
 
     /* Convert the audio frame and write it to the audio FIFO buffer */
