@@ -85,7 +85,8 @@ void ScreenRecorder::Stop() {
         std::unique_lock<std::mutex> ul{mutex_};
         this->stop_capture_ = true;
         this->paused_ = false;
-        cv_.notify_all();
+        
+        cv_.notify_one();
     }
 
     avformat_close_input(&in_fmt_ctx_);
@@ -124,15 +125,21 @@ void ScreenRecorder::Stop() {
 void ScreenRecorder::Pause() {
     std::unique_lock<std::mutex> ul{mutex_};
     this->paused_ = true;
+#ifdef __linux__
+    if (record_audio_) avformat_close_input(&in_audio_fmt_ctx_);
+#endif
     std::cout << "Recording paused" << std::endl;
-    cv_.notify_all();
+    cv_.notify_one();
 }
 
 void ScreenRecorder::Resume() {
     std::unique_lock<std::mutex> ul{mutex_};
     this->paused_ = false;
+#ifdef __linux__
+    avformat_open_input(&in_audio_fmt_ctx_, "default", av_find_input_format("pulse"), NULL);
+#endif
     std::cout << "Recording resumed" << std::endl;
-    cv_.notify_all();
+    cv_.notify_one();
 }
 
 int ScreenRecorder::InitDecoder(int audio_video) {
