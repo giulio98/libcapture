@@ -36,7 +36,10 @@ ScreenRecorder::~ScreenRecorder() {
 }
 
 void ScreenRecorder::initInput() {
-    std::stringstream ss;
+    std::stringstream device_ss;
+    std::stringstream framerate_ss;
+
+    framerate_ss << video_framerate_;
 
 #ifdef __linux__
     char video_device_name[20];
@@ -45,16 +48,16 @@ void ScreenRecorder::initInput() {
     OpenInputDevice(in_fmt_ctx_, av_find_input_format("x11grab"), video_device_name, &video_device_options_);
     if (record_audio_) OpenInputDevice(in_audio_fmt_ctx_, av_find_input_format("pulse"), "default", NULL);
 #else
-    ss << "1:";
-    if (record_audio_) ss << "0";
+    device_ss << "1:";
+    if (record_audio_) device_ss << "0";
 #endif
 
     auto demux_options = std::map<std::string, std::string>();
     demux_options.insert({"video_size", "1920x1080"});
-    demux_options.insert({"framerate", "30"});
+    demux_options.insert({"framerate", framerate_ss.str()});
     demux_options.insert({"capture_cursor", "1"});
 
-    demuxer_ = std::unique_ptr<Demuxer>(new Demuxer(in_fmt_name_, ss.str(), demux_options));
+    demuxer_ = std::unique_ptr<Demuxer>(new Demuxer(in_fmt_name_, device_ss.str(), demux_options));
 
     video_decoder_ = std::unique_ptr<Decoder>(new Decoder(demuxer_->getVideoParams()));
     if (record_audio_) {
