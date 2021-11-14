@@ -1,6 +1,6 @@
 #include "../include/decoder.h"
 
-Decoder::Decoder(const AVCodecParameters *params) : codec_(nullptr), codec_ctx_(nullptr) {
+Decoder::Decoder(const AVCodecParameters *params) : codec_(nullptr), codec_ctx_(nullptr), frame_(nullptr) {
     codec_ = avcodec_find_decoder(params->codec_id);
     if (!codec_) throw std::runtime_error("Decoder: Cannot find codec");
 
@@ -12,11 +12,15 @@ Decoder::Decoder(const AVCodecParameters *params) : codec_(nullptr), codec_ctx_(
 
     if (avcodec_open2(codec_ctx_, codec_, nullptr) < 0)
         throw std::runtime_error("Decoder: Unable to open the av codec");
+
+    frame_ = av_frame_alloc();
+    if (!frame_) throw std::runtime_error("Deoder: failed to allocate frame");
 }
 
 Decoder::~Decoder() {
     // TO-DO: free codec_ (how?)
     if (codec_ctx_) avcodec_free_context(&codec_ctx_);
+    if (frame_) av_frame_free(&frame_);
 }
 
 bool Decoder::sendPacket(const AVPacket *packet) const {
@@ -31,16 +35,14 @@ bool Decoder::sendPacket(const AVPacket *packet) const {
     return true;
 }
 
-bool Decoder::fillFrame(AVFrame *frame) const {
-    if (!frame) throw std::runtime_error("Decoder: Frame is not allocated");
-
-    int ret = avcodec_receive_frame(codec_ctx_, frame);
+const AVFrame *Decoder::getFrame() const {
+    int ret = avcodec_receive_frame(codec_ctx_, frame_);
     if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) {
-        return false;
+        return nullptr;
     } else if (ret < 0) {
         throw std::runtime_error("Decoder: Failed to receive frame from decoder");
     }
-    return true;
+    return frame_;
 }
 
 const AVCodecContext *Decoder::getCodecContext() const { return codec_ctx_; }

@@ -7,6 +7,7 @@
 class Decoder {
     AVCodec *codec_;
     AVCodecContext *codec_ctx_;
+    AVFrame *frame_;
 
 public:
     Decoder(const AVCodecParameters *params);
@@ -25,7 +26,7 @@ public:
      * The owneship of the frame remains to the caller
      * @return true if the frame has been correctly filled, false if the decoder had nothing to write
      */
-    bool fillFrame(AVFrame *frame) const;
+    const AVFrame *getFrame() const;
 
     const AVCodecContext *getCodecContext() const;
 };

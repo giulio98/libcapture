@@ -11,6 +11,7 @@ class Demuxer {
     std::string device_name_;
     AVStream *video_stream_;
     AVStream *audio_stream_;
+    AVPacket *packet_;
 
 public:
     Demuxer(const std::string &fmt_name, const std::string &device_name,
@@ -29,7 +30,7 @@ public:
      * The owneship of the packet remains to the caller
      * @return true if the packet has been correctly filled, false if the demuxer had nothing to write
      */
-    bool fillPacket(AVPacket *packet) const;
+    const AVPacket *getPacket() const;
 
     void dumpInfo() const;
 };
