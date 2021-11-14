@@ -38,9 +38,11 @@ class ScreenRecorder {
     AVCodecID out_audio_codec_id_;
 
     std::string in_fmt_name_;
-    std::string in_device_name_;
-
     std::unique_ptr<Demuxer> demuxer_;
+#ifdef __linux__
+    std::string in_audio_fmt_name_;
+    std::unique_ptr<Demuxer> audio_demuxer_;
+#endif
     std::unique_ptr<Muxer> muxer_;
     std::unique_ptr<Decoder> video_decoder_;
     std::unique_ptr<Decoder> audio_decoder_;
@@ -71,6 +73,12 @@ class ScreenRecorder {
     void captureFrames();
 
     int selectArea();
+
+    void initInput();
+
+    void initOutput();
+
+    void initConverters();
 
 public:
     ScreenRecorder();
