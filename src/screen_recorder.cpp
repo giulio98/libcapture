@@ -68,18 +68,17 @@ void ScreenRecorder::Start(const std::string &output_file, bool audio) {
         demuxer_ = std::unique_ptr<Demuxer>(new Demuxer(in_fmt_name_, ss.str(), demux_options));
         muxer_ = std::unique_ptr<Muxer>(new Muxer(output_file_));
 
-        video_dec_ = std::unique_ptr<Decoder>(new Decoder(demuxer_->getVideoStream()->codecpar));
+        video_dec_ = std::unique_ptr<Decoder>(new Decoder(demuxer_->getVideoParams()));
         if (record_audio_) {
-            audio_dec_ = std::unique_ptr<Decoder>(new Decoder(demuxer_->getAudioStream()->codecpar));
+            audio_dec_ = std::unique_ptr<Decoder>(new Decoder(demuxer_->getAudioParams()));
         }
 
         video_enc_ = std::shared_ptr<VideoEncoder>(
             new VideoEncoder(out_video_codec_id_, video_enc_options_, muxer_->getGlobalHeaderFlags(),
-                             demuxer_->getVideoStream()->codecpar, out_video_pix_fmt_, video_framerate_));
+                             demuxer_->getVideoParams(), out_video_pix_fmt_, video_framerate_));
         if (record_audio_) {
-            audio_enc_ = std::shared_ptr<AudioEncoder>(new AudioEncoder(out_audio_codec_id_, audio_enc_options_,
-                                                                        muxer_->getGlobalHeaderFlags(),
-                                                                        demuxer_->getAudioStream()->codecpar));
+            audio_enc_ = std::shared_ptr<AudioEncoder>(new AudioEncoder(
+                out_audio_codec_id_, audio_enc_options_, muxer_->getGlobalHeaderFlags(), demuxer_->getAudioParams()));
         }
 
         muxer_->addVideoStream(video_enc_->getCodecContext());
@@ -140,12 +139,12 @@ int ScreenRecorder::InitAudioConverter() {
     int fifo_duration = 2;  // How many seconds of audio to store in the FIFO buffer
     auto in_audio_codec_ctx = audio_dec_->getCodecContext();
     auto out_audio_codec_ctx = audio_enc_->getCodecContext();
-    auto in_audio_stream = demuxer_->getAudioStream();
+    auto in_audio_params = demuxer_->getAudioParams();
 
     audio_converter_ctx_ = swr_alloc_set_opts(
         nullptr, av_get_default_channel_layout(in_audio_codec_ctx->channels), out_audio_codec_ctx->sample_fmt,
         in_audio_codec_ctx->sample_rate, av_get_default_channel_layout(in_audio_codec_ctx->channels),
-        (AVSampleFormat)in_audio_stream->codecpar->format, in_audio_stream->codecpar->sample_rate, 0, nullptr);
+        (AVSampleFormat)in_audio_params->format, in_audio_params->sample_rate, 0, nullptr);
 
     if (!audio_converter_ctx_) {
         std::cerr << "Error allocating audio converter";
@@ -462,10 +461,10 @@ int ScreenRecorder::CaptureFrames() {
             exit(1);
         }
 
-        if (packet->stream_index == demuxer_->getVideoStream()->index) {
+        if (packet->stream_index == demuxer_->getVideoStreamIdx()) {
             std::cout << "[V] packet " << video_pkt_counter++;
             if (ProcessVideoPkt(packet)) exit(1);
-        } else if (record_audio_ && (packet->stream_index == demuxer_->getAudioStream()->index)) {
+        } else if (record_audio_ && (packet->stream_index == demuxer_->getAudioStreamIdx())) {
             std::cout << "[A] packet " << audio_pkt_counter++;
             if (ProcessAudioPkt(packet)) exit(1);
         } else {
