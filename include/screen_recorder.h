@@ -5,6 +5,7 @@
 #include <mutex>
 #include <thread>
 
+#include "audio_converter.h"
 #include "audio_encoder.h"
 #include "decoder.h"
 #include "demuxer.h"
@@ -12,6 +13,8 @@
 #include "muxer.h"
 #include "video_converter.h"
 #include "video_encoder.h"
+
+enum AVType { audio, video };
 
 class ScreenRecorder {
     bool record_audio_;
@@ -39,46 +42,35 @@ class ScreenRecorder {
 
     std::unique_ptr<Demuxer> demuxer_;
     std::unique_ptr<Muxer> muxer_;
-    std::unique_ptr<Decoder> video_dec_;
-    std::unique_ptr<Decoder> audio_dec_;
-    std::shared_ptr<VideoEncoder> video_enc_;
-    std::shared_ptr<AudioEncoder> audio_enc_;
-    std::shared_ptr<VideoConverter> video_conv_;
+    std::unique_ptr<Decoder> video_decoder_;
+    std::unique_ptr<Decoder> audio_decoder_;
+    std::shared_ptr<VideoEncoder> video_encoder_;
+    std::shared_ptr<AudioEncoder> audio_encoder_;
+    std::unique_ptr<VideoConverter> video_converter_;
+    std::unique_ptr<AudioConverter> audio_converter_;
 
-    std::map<std::string, std::string> video_enc_options_;
-    std::map<std::string, std::string> audio_enc_options_;
+    std::map<std::string, std::string> video_encoder_options_;
+    std::map<std::string, std::string> audio_encoder_options_;
 
     /* Thread responsible for recording video and audio */
     std::thread recorder_thread_;
-
-    /* Audio converter context */
-    SwrContext *audio_converter_ctx_;
-
-    /* FIFO buffer for the audio used for resampling */
-    AVAudioFifo *audio_fifo_buf_;
 
     /* Counter of video frames used to compute PTSs */
     int video_frame_counter_;
     /* Counter of audio frames used to compute PTSs */
     int audio_frame_counter_;
 
-    int InitAudioConverter();
+    void processVideoPkt(const AVPacket *packet);
 
-    /* Convert the audio frame and write it to the audio FIFO buffer */
-    int WriteAudioFrameToFifo(AVFrame *frame);
+    void processAudioPkt(const AVPacket *packet);
 
-    int ProcessVideoPkt(AVPacket *packet);
+    void encodeWriteFrame(const AVFrame *frame, AVType audio_video);
 
-    int ProcessAudioPkt(AVPacket *packet);
+    void flushPipelines();
 
-    int EncodeWriteFrame(const AVFrame *frame, int audio_video);
+    void captureFrames();
 
-    int FlushEncoders();
-
-    int OpenInputDevices();
-    int InitOutputFile();
-    int CaptureFrames();
-    int SelectArea();
+    int selectArea();
 
 public:
     ScreenRecorder();
