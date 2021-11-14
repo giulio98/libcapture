@@ -180,7 +180,7 @@ void ScreenRecorder::encodeWriteFrame(const AVFrame *frame, AVType audio_video) 
     }
 }
 
-void ScreenRecorder::processVideoPkt(const AVPacket *packet) {
+void ScreenRecorder::processVideoPacket(const AVPacket *packet) {
     DurationLogger dl(" processed in ");
 
     bool retry = true;
@@ -199,7 +199,7 @@ void ScreenRecorder::processVideoPkt(const AVPacket *packet) {
     }
 }
 
-void ScreenRecorder::processAudioPkt(const AVPacket *packet) {
+void ScreenRecorder::processAudioPacket(const AVPacket *packet) {
     DurationLogger dl(" processed in ");
 
     bool retry_decoder = true;
@@ -229,10 +229,10 @@ void ScreenRecorder::processAudioPkt(const AVPacket *packet) {
 }
 
 void ScreenRecorder::flushPipelines() {
-    processVideoPkt(nullptr);
+    processVideoPacket(nullptr);
     encodeWriteFrame(nullptr, video);
     if (record_audio_) {
-        processAudioPkt(nullptr);
+        processAudioPacket(nullptr);
         encodeWriteFrame(nullptr, audio);
     }
     muxer_->writePacket(nullptr, 0);
@@ -302,13 +302,13 @@ void ScreenRecorder::captureFrames() {
 
         if (video_data_present) {
             std::cout << "[V] packet " << video_pkt_counter++;
-            if (processVideoPkt(packet)) exit(1);
+            if (processVideoPacket(packet)) exit(1);
             av_packet_unref(packet);
         }
 
         if (audio_data_present) {
             std::cout << std::endl << "[A] packet " << audio_pkt_counter++;
-            if (processAudioPkt(audio_packet)) exit(1);
+            if (processAudioPacket(audio_packet)) exit(1);
             av_packet_unref(audio_packet);
         }
 
@@ -319,10 +319,10 @@ void ScreenRecorder::captureFrames() {
 
         if (packet->stream_index == demuxer_->getVideoStreamIdx()) {
             std::cout << "[V] packet " << video_pkt_counter++;
-            processVideoPkt(packet);
+            processVideoPacket(packet);
         } else if (record_audio_ && (packet->stream_index == demuxer_->getAudioStreamIdx())) {
             std::cout << "[A] packet " << audio_pkt_counter++;
-            processAudioPkt(packet);
+            processAudioPacket(packet);
         } else {
             std::cout << "unknown packet (index: " << packet->stream_index << "), ignoring...";
         }

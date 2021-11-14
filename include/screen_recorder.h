@@ -60,9 +60,9 @@ class ScreenRecorder {
     /* Counter of audio frames used to compute PTSs */
     int audio_frame_counter_;
 
-    void processVideoPkt(const AVPacket *packet);
+    void processVideoPacket(const AVPacket *packet);
 
-    void processAudioPkt(const AVPacket *packet);
+    void processAudioPacket(const AVPacket *packet);
 
     void encodeWriteFrame(const AVFrame *frame, AVType audio_video);
 
