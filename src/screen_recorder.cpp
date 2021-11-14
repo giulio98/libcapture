@@ -86,13 +86,13 @@ void ScreenRecorder::Start(const std::string &output_file, bool audio) {
             muxer_->addAudioStream(audio_enc_->getCodecContext());
         }
 
-        video_conv_ = std::unique_ptr<VideoConverter>(
-            new VideoConverter(video_dec_->getCodecContext(), video_enc_->getCodecContext()));
-
         demuxer_->dumpInfo();
         muxer_->dumpInfo();
 
         muxer_->openFile();
+
+        video_conv_ = std::unique_ptr<VideoConverter>(new VideoConverter(
+            video_dec_->getCodecContext(), video_enc_->getCodecContext(), muxer_->getVideoTimeBase()));
 
         recorder_thread_ = std::thread([this]() {
             std::cout << "Recording..." << std::endl;
@@ -273,10 +273,7 @@ int ScreenRecorder::ProcessVideoPkt(AVPacket *packet) {
             return -1;
         }
 
-        video_conv_->convertFrame(in_frame, out_frame);
-
-        out_frame->pts =
-            av_rescale_q(video_frame_counter_++, out_video_codec_ctx->time_base, muxer_->getVideoTimeBase());
+        video_conv_->convertFrame(in_frame, out_frame, video_frame_counter_++);
 
         if (EncodeWriteFrame(out_frame, 0)) return -1;
     }

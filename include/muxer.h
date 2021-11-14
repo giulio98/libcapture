@@ -12,6 +12,7 @@ class Muxer {
     AVStream *audio_stream_;
     bool file_opened_;
     bool file_closed_;
+    bool time_base_valid_;
 
 public:
     Muxer(const std::string &filename);
