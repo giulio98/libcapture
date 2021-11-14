@@ -14,12 +14,6 @@ class Muxer {
     bool file_closed_;
     bool time_base_valid_;
 
-    /**
-     * Write a packet to the output file
-     * The ownership of the packet is tranfered to the muxer
-     */
-    void writePacket(AVPacket *packet, int index) const;
-
 public:
     Muxer(const std::string &filename);
 
@@ -28,6 +22,10 @@ public:
     void addVideoStream(const AVCodecContext *codec_ctx);
 
     void addAudioStream(const AVCodecContext *codec_ctx);
+
+    int getVideoStreamIdx() const;
+
+    int getAudioStreamIdx() const;
 
     const AVCodecParameters *getVideoParams() const;
 
@@ -47,9 +45,11 @@ public:
      */
     void closeFile();
 
-    void writeVideoPacket(AVPacket *packet) const;
-
-    void writeAudioPacket(AVPacket *packet) const;
+    /**
+     * Write a packet to the output file
+     * The ownership of the packet is tranfered to the muxer
+     */
+    void writePacket(AVPacket *packet, int stream_index) const;
 
     /**
      * Print informations
