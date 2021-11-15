@@ -27,5 +27,5 @@ public:
      * @param frame_number the sequence number of the frame to use to compute the PTS
      * @return a new converted frame
      */
-    std::shared_ptr<const AVFrame> convertFrame(std::shared_ptr<const AVFrame> in_frame, int frame_number) const;
+    std::shared_ptr<const AVFrame> convertFrame(std::shared_ptr<const AVFrame> in_frame, int64_t frame_number) const;
 };

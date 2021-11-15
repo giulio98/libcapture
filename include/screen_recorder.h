@@ -56,9 +56,9 @@ class ScreenRecorder {
     std::thread recorder_thread_;
 
     /* Counter of video frames used to compute PTSs */
-    int video_frame_counter_;
+    int64_t video_frame_counter_;
     /* Counter of audio frames used to compute PTSs */
-    int audio_frame_counter_;
+    int64_t audio_frame_counter_;
 
     void processVideoPacket(std::shared_ptr<const AVPacket> packet);
 

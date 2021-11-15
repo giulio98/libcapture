@@ -29,7 +29,7 @@ void VideoConverter::cleanup() {
 }
 
 std::shared_ptr<const AVFrame> VideoConverter::convertFrame(std::shared_ptr<const AVFrame> in_frame,
-                                                            int frame_number) const {
+                                                            int64_t frame_number) const {
     if (!in_frame) throw std::runtime_error("VideoConverter: in_frame is not allocated");
 
     auto out_frame = std::shared_ptr<AVFrame>(av_frame_alloc(), AVFrameDeleter());

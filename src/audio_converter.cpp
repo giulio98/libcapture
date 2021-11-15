@@ -63,7 +63,7 @@ bool AudioConverter::sendFrame(std::shared_ptr<const AVFrame> frame) const {
     }
 }
 
-std::shared_ptr<const AVFrame> AudioConverter::getFrame(int frame_number) const {
+std::shared_ptr<const AVFrame> AudioConverter::getFrame(int64_t frame_number) const {
     /* not enough samples to build a frame */
     if (av_audio_fifo_size(fifo_buf_) < out_frame_size_) return nullptr;
 

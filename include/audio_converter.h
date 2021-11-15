@@ -37,5 +37,5 @@ public:
      * @return a new converted frame if it was possible to build it, nullptr if the internal buffer didn't have
      * enough samples to build a frame
      */
-    std::shared_ptr<const AVFrame> getFrame(int frame_number) const;
+    std::shared_ptr<const AVFrame> getFrame(int64_t frame_number) const;
 };
