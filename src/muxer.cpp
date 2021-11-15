@@ -107,9 +107,11 @@ void Muxer::writePacket(std::shared_ptr<AVPacket> packet, AVType packet_type) co
         if (packet_type == video) {
             if (!video_stream_) throw std::runtime_error("Muxer: Video stream not present");
             packet->stream_index = video_stream_->index;
-        } else {
+        } else if (packet_type == audio) {
             if (!audio_stream_) throw std::runtime_error("Muxer: Audio stream not present");
             packet->stream_index = audio_stream_->index;
+        } else {
+            throw std::runtime_error("Muxer: received packet is of unknown type");
         }
     }
 
