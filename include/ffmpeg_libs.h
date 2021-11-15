@@ -24,4 +24,4 @@ extern "C" {
 #include "libswscale/swscale.h"
 }
 
-enum AVType { audio, video };
+enum AVType { none, audio, video };
