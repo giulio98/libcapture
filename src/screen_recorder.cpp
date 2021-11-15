@@ -154,8 +154,10 @@ void ScreenRecorder::processConvertedFrame(std::shared_ptr<const AVFrame> frame,
 
     if (frame_type == video) {
         encoder = video_encoder_;
-    } else {
+    } else if (frame_type == audio) {
         encoder = audio_encoder_;
+    } else {
+        throw std::runtime_error("frame type is unknown");
     }
 
     encoder->sendFrame(frame);
@@ -222,7 +224,7 @@ void ScreenRecorder::flushPipelines() {
         processAudioPacket(nullptr);
         processConvertedFrame(nullptr, audio);
     }
-    muxer_->writePacket(nullptr, video);  // video or audio is the same
+    muxer_->writePacket(nullptr, none);
 }
 
 /* function to capture and store data in frames by allocating required memory and auto deallocating the memory.   */
@@ -238,15 +240,15 @@ void ScreenRecorder::captureFrames() {
             if (stop_capture_) break;
         }
 
-        auto packet = demuxer_->getPacket();
+        auto [packet, packet_type] = demuxer_->getPacket();
         if (!packet) continue;
 
-        if (packet->stream_index == demuxer_->getVideoStreamIdx()) {
+        if (packet_type == video) {
             processVideoPacket(packet);
-        } else if (capture_audio_ && (packet->stream_index == demuxer_->getAudioStreamIdx())) {
+        } else if (capture_audio_ && (packet_type == audio)) {
             processAudioPacket(packet);
         } else {
-            throw std::runtime_error("Unknown packet index");
+            throw std::runtime_error("Unknown packet received from demuxer");
         }
     }
 
