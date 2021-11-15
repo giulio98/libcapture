@@ -3,32 +3,36 @@
 #include <iostream>
 
 #include "ffmpeg_libs.h"
+#include "releasers.h"
 
 class Decoder {
     AVCodec *codec_;
     AVCodecContext *codec_ctx_;
-    AVFrame *frame_;
 
     void cleanup();
 
 public:
+    /**
+     * Create a new decoder
+     * @param params the parameters to use to initialize the decoder
+     */
     Decoder(const AVCodecParameters *params);
 
     ~Decoder();
 
     /**
-     * Send an allocated packet to the decoder
-     * The owneship of the packet remains to the caller
+     * Send a packet to the decoder
+     * @param packet the packet to send to the decoder. It can be nullptr to flush the decoder
      * @return true if the packet has been correctly sent, false if the decoder could not receive it
      */
-    bool sendPacket(const AVPacket *packet) const;
+    bool sendPacket(std::shared_ptr<const AVPacket> packet) const;
 
     /**
-     * Fill an allocated frame obtained by decoding packets
-     * The owneship of the frame remains to the caller
-     * @return true if the frame has been correctly filled, false if the decoder had nothing to write
+     * Get a converted Frame from the decoder
+     * @return a frame if it was possible to get it, nullptr if the decoder had nothing to write
+     * because it is empty or flushed
      */
-    const AVFrame *getFrame() const;
+    std::shared_ptr<const AVFrame> getFrame() const;
 
     const AVCodecContext *getCodecContext() const;
 };

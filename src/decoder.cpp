@@ -1,6 +1,6 @@
 #include "../include/decoder.h"
 
-Decoder::Decoder(const AVCodecParameters *params) : codec_(nullptr), codec_ctx_(nullptr), frame_(nullptr) {
+Decoder::Decoder(const AVCodecParameters *params) : codec_(nullptr), codec_ctx_(nullptr) {
     try {
         codec_ = avcodec_find_decoder(params->codec_id);
         if (!codec_) throw std::runtime_error("Decoder: Cannot find codec");
@@ -14,9 +14,6 @@ Decoder::Decoder(const AVCodecParameters *params) : codec_(nullptr), codec_ctx_(
         if (avcodec_open2(codec_ctx_, codec_, nullptr) < 0)
             throw std::runtime_error("Decoder: Unable to open the av codec");
 
-        frame_ = av_frame_alloc();
-        if (!frame_) throw std::runtime_error("Deoder: failed to allocate frame");
-
     } catch (const std::exception &e) {
         cleanup();
         throw;
@@ -28,11 +25,10 @@ Decoder::~Decoder() { cleanup(); }
 void Decoder::cleanup() {
     // TO-DO: free codec_ (how?)
     if (codec_ctx_) avcodec_free_context(&codec_ctx_);
-    if (frame_) av_frame_free(&frame_);
 }
 
-bool Decoder::sendPacket(const AVPacket *packet) const {
-    int ret = avcodec_send_packet(codec_ctx_, packet);
+bool Decoder::sendPacket(std::shared_ptr<const AVPacket> packet) const {
+    int ret = avcodec_send_packet(codec_ctx_, packet.get());
     if (ret == AVERROR(EAGAIN)) {
         return false;
     } else if (ret == AVERROR_EOF) {
@@ -43,14 +39,17 @@ bool Decoder::sendPacket(const AVPacket *packet) const {
     return true;
 }
 
-const AVFrame *Decoder::getFrame() const {
-    int ret = avcodec_receive_frame(codec_ctx_, frame_);
+std::shared_ptr<const AVFrame> Decoder::getFrame() const {
+    auto frame = std::shared_ptr<AVFrame>(av_frame_alloc(), AVFrameDeleter());
+    if (!frame) throw std::runtime_error("DEcoder: failed to allocate frame");
+
+    int ret = avcodec_receive_frame(codec_ctx_, frame.get());
     if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) {
         return nullptr;
     } else if (ret < 0) {
         throw std::runtime_error("Decoder: Failed to receive frame from decoder");
     }
-    return frame_;
+    return frame;
 }
 
 const AVCodecContext *Decoder::getCodecContext() const { return codec_ctx_; }

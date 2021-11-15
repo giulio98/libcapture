@@ -5,13 +5,13 @@
 
 #include "decoder.h"
 #include "ffmpeg_libs.h"
+#include "releasers.h"
 
 class Demuxer {
     AVFormatContext *fmt_ctx_;
     std::string device_name_;
     AVStream *video_stream_;
     AVStream *audio_stream_;
-    AVPacket *packet_;
 
     void cleanup();
 
@@ -28,11 +28,10 @@ public:
     const AVCodecParameters *getAudioParams() const;
 
     /**
-     * Fill an allocated packet with the information read from the input format
-     * The owneship of the packet remains to the caller
-     * @return true if the packet has been correctly filled, false if the demuxer had nothing to write
+     * Read a packet from the input device and return it
+     * @return a packet if it was possible to read it, nullptr if the demuxer had nothing to read
      */
-    const AVPacket *getPacket() const;
+    std::shared_ptr<const AVPacket> getPacket() const;
 
     void dumpInfo() const;
 };

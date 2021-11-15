@@ -2,7 +2,7 @@
 
 Demuxer::Demuxer(const std::string &fmt_name, const std::string &device_name,
                  const std::map<std::string, std::string> &options)
-    : fmt_ctx_(nullptr), device_name_(device_name), video_stream_(nullptr), audio_stream_(nullptr), packet_(nullptr) {
+    : fmt_ctx_(nullptr), device_name_(device_name), video_stream_(nullptr), audio_stream_(nullptr) {
     AVInputFormat *fmt = nullptr;
     AVDictionary *dict = nullptr;
 
@@ -31,9 +31,6 @@ Demuxer::Demuxer(const std::string &fmt_name, const std::string &device_name,
             }
         }
 
-        packet_ = av_packet_alloc();
-        if (!packet_) throw std::runtime_error("Demuxer: failed to allocate packet");
-
         // TO-DO: free fmt (how?)
         if (dict) av_dict_free(&dict);
 
@@ -49,7 +46,6 @@ Demuxer::~Demuxer() { cleanup(); }
 
 void Demuxer::cleanup() {
     if (fmt_ctx_) avformat_close_input(&fmt_ctx_);  // This will also free the streams
-    if (packet_) av_packet_free(&packet_);
 }
 
 int Demuxer::getVideoStreamIdx() const {
@@ -72,14 +68,15 @@ const AVCodecParameters *Demuxer::getAudioParams() const {
     return audio_stream_->codecpar;
 }
 
-const AVPacket *Demuxer::getPacket() const {
-    av_packet_unref(packet_);
+std::shared_ptr<const AVPacket> Demuxer::getPacket() const {
+    auto packet = std::shared_ptr<AVPacket>(av_packet_alloc(), AVPacketDeleter());
+    if (!packet) throw std::runtime_error("Demuxer: failed to allocate packet");
 
-    int ret = av_read_frame(fmt_ctx_, packet_);
+    int ret = av_read_frame(fmt_ctx_, packet.get());
     if (ret == AVERROR(EAGAIN)) return nullptr;
     if (ret < 0) throw std::runtime_error("Demuxer: Failed to read a packet");
 
-    return packet_;
+    return packet;
 }
 
 void Demuxer::dumpInfo() const { av_dump_format(fmt_ctx_, 0, device_name_.c_str(), 0); }
