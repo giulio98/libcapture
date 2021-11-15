@@ -81,6 +81,13 @@ void ScreenRecorder::initConverters() {
     }
 }
 
+void ScreenRecorder::printInfo() {
+    std::cout << "########## Streams Info ##########" << std::endl;
+    demuxer_->dumpInfo();
+    muxer_->dumpInfo();
+    std::cout << "Video framerate: " << video_framerate_ << " fps" << std::endl;
+}
+
 void ScreenRecorder::start(const std::string &output_file, bool capture_audio) {
     output_file_ = output_file;
     capture_audio_ = capture_audio;
@@ -98,8 +105,7 @@ void ScreenRecorder::start(const std::string &output_file, bool capture_audio) {
 
         initConverters();
 
-        demuxer_->dumpInfo();
-        muxer_->dumpInfo();
+        printInfo();
 
         recorder_thread_ = std::thread([this]() {
             std::cout << "Recording..." << std::endl;
@@ -377,9 +383,6 @@ int ScreenRecorder::selectArea() {
     height_ = 1080;
     offset_x_ = offset_y_ = 0;
 #endif
-
-    std::cout << "Size: " << width_ << "x" << height_ << std::endl;
-    std::cout << "Offset: " << offset_x_ << "," << offset_y_ << std::endl;
 
     return 0;
 }

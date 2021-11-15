@@ -78,6 +78,8 @@ class ScreenRecorder {
 
     void initConverters();
 
+    void printInfo();
+
 public:
     ScreenRecorder();
 
