@@ -9,24 +9,24 @@ int main() {
     std::string file2 = "../media/output2.mp4";
 
     std::cout << "Recording to " << file1 << std::endl;
-    screen_record.Start(file1, true);
+    screen_record.start(file1, true);
     std::this_thread::sleep_for(5000ms);
-    screen_record.Pause();
+    screen_record.pause();
     std::this_thread::sleep_for(5000ms);
-    screen_record.Resume();
+    screen_record.resume();
     std::this_thread::sleep_for(5000ms);
-    screen_record.Stop();
+    screen_record.stop();
     std::cout << "Recording to " << file1 << " completed" << std::endl;
 
     std::this_thread::sleep_for(1000ms);
     std::cout << std::endl;
 
     std::cout << "Recording to " << file2 << std::endl;
-    screen_record.Start(file2, false);
+    screen_record.start(file2, false);
     std::this_thread::sleep_for(5000ms);
-    screen_record.Pause();
+    screen_record.pause();
     std::this_thread::sleep_for(1000ms);
-    screen_record.Stop();
+    screen_record.stop();
     std::cout << "Recording to " << file2 << " completed" << std::endl;
 
     std::cout << std::endl << "Program executed successfully" << std::endl;

@@ -20,12 +20,7 @@ ScreenRecorder::ScreenRecorder() {
 
     video_encoder_options_.insert({"preset", "ultrafast"});
 
-#ifdef __linux__
-    in_fmt_name_ = "x11grab";
-    in_audio_fmt_name = "pulse";
-#else
     in_fmt_name_ = "avfoundation";
-#endif
 }
 
 /* uninitialize the resources */
@@ -41,16 +36,8 @@ void ScreenRecorder::initInput() {
 
     framerate_ss << video_framerate_;
 
-#ifdef __linux__
-    char video_device_name[20];
-    char *display = getenv("DISPLAY");
-    sprintf(video_device_name, "%s.0+%d,%d", display, offset_x_, offset_y_);
-    OpenInputDevice(in_fmt_ctx_, av_find_input_format("x11grab"), video_device_name, &video_device_options_);
-    if (record_audio_) OpenInputDevice(in_audio_fmt_ctx_, av_find_input_format("pulse"), "default", NULL);
-#else
     device_ss << "1:";
-    if (record_audio_) device_ss << "0";
-#endif
+    if (capture_audio_) device_ss << "0";
 
     auto demux_options = std::map<std::string, std::string>();
     demux_options.insert({"video_size", "1920x1080"});
@@ -60,7 +47,7 @@ void ScreenRecorder::initInput() {
     demuxer_ = std::unique_ptr<Demuxer>(new Demuxer(in_fmt_name_, device_ss.str(), demux_options));
 
     video_decoder_ = std::unique_ptr<Decoder>(new Decoder(demuxer_->getVideoParams()));
-    if (record_audio_) {
+    if (capture_audio_) {
         audio_decoder_ = std::unique_ptr<Decoder>(new Decoder(demuxer_->getAudioParams()));
     }
 }
@@ -71,13 +58,13 @@ void ScreenRecorder::initOutput() {
     video_encoder_ = std::shared_ptr<VideoEncoder>(
         new VideoEncoder(out_video_codec_id_, video_encoder_options_, muxer_->getGlobalHeaderFlags(),
                          demuxer_->getVideoParams(), out_video_pix_fmt_, video_framerate_));
-    if (record_audio_) {
+    if (capture_audio_) {
         audio_encoder_ = std::shared_ptr<AudioEncoder>(new AudioEncoder(
             out_audio_codec_id_, audio_encoder_options_, muxer_->getGlobalHeaderFlags(), demuxer_->getAudioParams()));
     }
 
     muxer_->addVideoStream(video_encoder_->getCodecContext());
-    if (record_audio_) {
+    if (capture_audio_) {
         muxer_->addAudioStream(audio_encoder_->getCodecContext());
     }
 
@@ -88,25 +75,22 @@ void ScreenRecorder::initConverters() {
     video_converter_ = std::unique_ptr<VideoConverter>(new VideoConverter(
         video_decoder_->getCodecContext(), video_encoder_->getCodecContext(), muxer_->getVideoTimeBase()));
 
-    if (record_audio_) {
+    if (capture_audio_) {
         audio_converter_ = std::unique_ptr<AudioConverter>(new AudioConverter(
             audio_decoder_->getCodecContext(), audio_encoder_->getCodecContext(), muxer_->getAudioTimeBase()));
     }
 }
 
-void ScreenRecorder::Start(const std::string &output_file, bool audio) {
+void ScreenRecorder::start(const std::string &output_file, bool capture_audio) {
     output_file_ = output_file;
+    capture_audio_ = capture_audio;
     stop_capture_ = false;
     paused_ = false;
-    record_audio_ = audio;
 
     avdevice_register_all();
 
     try {
-        if (selectArea()) {
-            std::cerr << "Error in selectArea" << std::endl;
-            exit(1);
-        }
+        if (selectArea()) throw std::runtime_error("Failed to select area");
 
         initInput();
 
@@ -136,11 +120,11 @@ void ScreenRecorder::Start(const std::string &output_file, bool audio) {
     }
 }
 
-void ScreenRecorder::Stop() {
+void ScreenRecorder::stop() {
     {
         std::unique_lock<std::mutex> ul{mutex_};
-        this->stop_capture_ = true;
-        this->paused_ = false;
+        stop_capture_ = true;
+        paused_ = false;
         cv_.notify_all();
     }
 
@@ -151,16 +135,16 @@ void ScreenRecorder::Stop() {
     muxer_->closeFile();
 }
 
-void ScreenRecorder::Pause() {
+void ScreenRecorder::pause() {
     std::unique_lock<std::mutex> ul{mutex_};
-    this->paused_ = true;
+    paused_ = true;
     std::cout << "Recording paused" << std::endl;
     cv_.notify_all();
 }
 
-void ScreenRecorder::Resume() {
+void ScreenRecorder::resume() {
     std::unique_lock<std::mutex> ul{mutex_};
-    this->paused_ = false;
+    paused_ = false;
     std::cout << "Recording resumed" << std::endl;
     cv_.notify_all();
 }
@@ -234,7 +218,7 @@ void ScreenRecorder::processAudioPacket(std::shared_ptr<const AVPacket> packet) 
 void ScreenRecorder::flushPipelines() {
     processVideoPacket(nullptr);
     processConvertedFrame(nullptr, video);
-    if (record_audio_) {
+    if (capture_audio_) {
         processAudioPacket(nullptr);
         processConvertedFrame(nullptr, audio);
     }
@@ -259,7 +243,7 @@ void ScreenRecorder::captureFrames() {
 
         if (packet->stream_index == demuxer_->getVideoStreamIdx()) {
             processVideoPacket(packet);
-        } else if (record_audio_ && (packet->stream_index == demuxer_->getAudioStreamIdx())) {
+        } else if (capture_audio_ && (packet->stream_index == demuxer_->getAudioStreamIdx())) {
             processAudioPacket(packet);
         } else {
             throw std::runtime_error("Unknown packet index");

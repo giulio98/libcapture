@@ -15,7 +15,7 @@
 #include "video_encoder.h"
 
 class ScreenRecorder {
-    bool record_audio_;
+    bool capture_audio_;
 
     int offset_x_;
     int offset_y_;
@@ -80,10 +80,14 @@ class ScreenRecorder {
 
 public:
     ScreenRecorder();
+
     ~ScreenRecorder();
 
-    void Start(const std::string &output_file, bool audio);
-    void Stop();
-    void Pause();
-    void Resume();
+    void start(const std::string &output_file, bool capture_audio);
+
+    void stop();
+
+    void pause();
+
+    void resume();
 };
