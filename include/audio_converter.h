@@ -2,6 +2,7 @@
 
 #include <iostream>
 
+#include "deleters.h"
 #include "ffmpeg_libs.h"
 
 class AudioConverter {
@@ -14,7 +15,6 @@ class AudioConverter {
     int fifo_duration_;
     AVRational codec_ctx_time_base_;
     AVRational stream_time_base_;
-    AVFrame *out_frame_;
 
     void cleanup();
 
@@ -24,7 +24,18 @@ public:
 
     ~AudioConverter();
 
-    bool sendFrame(const AVFrame *frame);
+    /**
+     * Send a frame to convert
+     * @return true if the conversion was successful, false, if the internal
+     * buffer didn't have enough space to copy the input samples
+     */
+    bool sendFrame(std::shared_ptr<const AVFrame> frame) const;
 
-    const AVFrame *getFrame(int frame_number);
+    /**
+     * Get a converted frame
+     * @param frame_number the sequence number of the frame to use to compute the PTS
+     * @return a new converted frame if it was possible to build it, nullptr if the internal buffer didn't have
+     * enough samples to build a frame
+     */
+    std::shared_ptr<const AVFrame> getFrame(int frame_number) const;
 };

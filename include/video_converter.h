@@ -2,6 +2,7 @@
 
 #include <iostream>
 
+#include "deleters.h"
 #include "ffmpeg_libs.h"
 
 class VideoConverter {
@@ -9,7 +10,6 @@ class VideoConverter {
     int out_height_;
     AVPixelFormat out_pix_fmt_;
     SwsContext *ctx_;
-    AVFrame *converted_frame_;
     AVRational codec_ctx_time_base_;
     AVRational stream_time_base_;
 
@@ -21,5 +21,11 @@ public:
 
     ~VideoConverter();
 
-    const AVFrame *convertFrame(const AVFrame *in_frame, int frame_number) const;
+    /**
+     * Convert a frame
+     * @param in_frame the frame to convert
+     * @param frame_number the sequence number of the frame to use to compute the PTS
+     * @return a new converted frame
+     */
+    std::shared_ptr<const AVFrame> convertFrame(std::shared_ptr<const AVFrame> in_frame, int frame_number) const;
 };
