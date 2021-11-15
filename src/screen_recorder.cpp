@@ -159,12 +159,16 @@ void ScreenRecorder::processConvertedFrame(std::shared_ptr<const AVFrame> frame,
         throw std::runtime_error("frame type is unknown");
     }
 
-    encoder->sendFrame(frame);
+    bool encoder_received = false;
 
-    while (true) {
-        auto packet = encoder->getPacket();
-        if (!packet) break;
-        muxer_->writePacket(packet, frame_type);
+    while (!encoder_received) {
+        encoder_received = encoder->sendFrame(frame);
+
+        while (true) {
+            auto packet = encoder->getPacket();
+            if (!packet) break;
+            muxer_->writePacket(packet, frame_type);
+        }
     }
 }
 
