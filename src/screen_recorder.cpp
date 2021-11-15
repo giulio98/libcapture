@@ -18,33 +18,33 @@ ScreenRecorder::ScreenRecorder() {
     out_video_pix_fmt_ = AV_PIX_FMT_YUV420P;
     out_video_codec_id_ = AV_CODEC_ID_H264;
     out_audio_codec_id_ = AV_CODEC_ID_AAC;
-
-    video_encoder_options_.insert({"preset", "ultrafast"});
-
     in_fmt_name_ = "avfoundation";
+    video_encoder_options_.insert({"preset", "ultrafast"});
+    avdevice_register_all();
 }
 
 ScreenRecorder::~ScreenRecorder() {
-    if (recorder_thread_.joinable() == true) {
-        recorder_thread_.join();
-    }
+    if (recorder_thread_.joinable()) recorder_thread_.join();
 }
 
 void ScreenRecorder::initInput() {
-    std::stringstream device_ss;
-    std::stringstream framerate_ss;
+    std::stringstream device_name;
+    std::stringstream video_size;
+    std::stringstream framerate;
+    std::map<std::string, std::string> demux_options;
 
-    framerate_ss << video_framerate_;
+    device_name << "1:";
+    if (capture_audio_) device_name << "0";
 
-    device_ss << "1:";
-    if (capture_audio_) device_ss << "0";
+    video_size << width_ << "x" << height_;
 
-    auto demux_options = std::map<std::string, std::string>();
-    demux_options.insert({"video_size", "1920x1080"});
-    demux_options.insert({"framerate", framerate_ss.str()});
+    framerate << video_framerate_;
+
+    demux_options.insert({"video_size", video_size.str()});
+    demux_options.insert({"framerate", framerate.str()});
     demux_options.insert({"capture_cursor", "1"});
 
-    demuxer_ = std::unique_ptr<Demuxer>(new Demuxer(in_fmt_name_, device_ss.str(), demux_options));
+    demuxer_ = std::unique_ptr<Demuxer>(new Demuxer(in_fmt_name_, device_name.str(), demux_options));
 
     video_decoder_ = std::unique_ptr<Decoder>(new Decoder(demuxer_->getVideoParams()));
     if (capture_audio_) {
@@ -94,8 +94,6 @@ void ScreenRecorder::start(const std::string &output_file, bool capture_audio) {
     stop_capture_ = false;
     paused_ = false;
 
-    avdevice_register_all();
-
     try {
         if (selectArea()) throw std::runtime_error("Failed to select area");
 
@@ -131,9 +129,7 @@ void ScreenRecorder::stop() {
         cv_.notify_all();
     }
 
-    if (recorder_thread_.joinable() == true) {
-        recorder_thread_.join();
-    }
+    if (recorder_thread_.joinable() == true) recorder_thread_.join();
 
     muxer_->closeFile();
 }
