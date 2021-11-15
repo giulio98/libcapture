@@ -3,7 +3,10 @@
 Encoder::Encoder(AVCodecID codec_id, const std::map<std::string, std::string> &options, int global_header_flags)
     : codec_(nullptr), codec_ctx_(nullptr), options_(nullptr) {
     try {
-        codec_ = avcodec_find_encoder(codec_id);
+#ifdef MACOS
+        if (codec_id == AV_CODEC_ID_H264) codec_ = avcodec_find_encoder_by_name("h264_videotoolbox");
+#endif
+        if (!codec_) codec_ = avcodec_find_encoder(codec_id);
         if (!codec_) throw std::runtime_error("Encoder: Cannot find codec");
 
         codec_ctx_ = avcodec_alloc_context3(codec_);
