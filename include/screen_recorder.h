@@ -14,8 +14,6 @@
 #include "video_converter.h"
 #include "video_encoder.h"
 
-enum AVType { audio, video };
-
 class ScreenRecorder {
     bool record_audio_;
 
@@ -62,11 +60,11 @@ class ScreenRecorder {
     /* Counter of audio frames used to compute PTSs */
     int audio_frame_counter_;
 
-    void processVideoPacket(const AVPacket *packet);
+    void processVideoPacket(std::shared_ptr<const AVPacket> packet);
 
-    void processAudioPacket(const AVPacket *packet);
+    void processAudioPacket(std::shared_ptr<const AVPacket> packet);
 
-    void encodeWriteFrame(const AVFrame *frame, AVType audio_video);
+    void processConvertedFrame(std::shared_ptr<const AVFrame> frame, AVType audio_video);
 
     void flushPipelines();
 

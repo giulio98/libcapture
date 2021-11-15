@@ -165,45 +165,31 @@ void ScreenRecorder::Resume() {
     cv_.notify_all();
 }
 
-void ScreenRecorder::encodeWriteFrame(const AVFrame *frame, AVType audio_video) {
-    AVPacket *out_packet = nullptr;
+void ScreenRecorder::processConvertedFrame(std::shared_ptr<const AVFrame> frame, AVType frame_type) {
+    std::shared_ptr<Encoder> encoder;
 
-    try {
-        std::shared_ptr<Encoder> encoder;
-        int stream_index;
+    if (frame_type == video) {
+        encoder = video_encoder_;
+    } else {
+        encoder = audio_encoder_;
+    }
 
-        if (audio_video == audio) {
-            encoder = audio_encoder_;
-            stream_index = muxer_->getAudioStreamIdx();
-        } else {
-            encoder = video_encoder_;
-            stream_index = muxer_->getVideoStreamIdx();
-        }
+    encoder->sendFrame(frame);
 
-        out_packet = av_packet_alloc();
-        if (!out_packet) throw std::runtime_error("Failed to allocate output packet");
-
-        encoder->sendFrame(frame);
-
-        while (encoder->fillPacket(out_packet)) {
-            muxer_->writePacket(out_packet, stream_index);
-        }
-
-        av_packet_free(&out_packet);
-
-    } catch (const std::exception &e) {
-        if (out_packet) av_packet_free(&out_packet);
-        throw;
+    while (true) {
+        auto packet = encoder->getPacket();
+        if (!packet) break;
+        muxer_->writePacket(packet, frame_type);
     }
 }
 
-void ScreenRecorder::processVideoPacket(const AVPacket *packet) {
-    DurationLogger dl(" processed in ");
+void ScreenRecorder::processVideoPacket(std::shared_ptr<const AVPacket> packet) {
+    DurationLogger dl("Video packet processed in ");
 
-    bool retry_decoder = true;
+    bool decoder_received = false;
 
-    while (retry_decoder) {
-        retry_decoder = !video_decoder_->sendPacket(packet);
+    while (!decoder_received) {
+        decoder_received = video_decoder_->sendPacket(packet);
 
         while (true) {
             auto in_frame = video_decoder_->getFrame();
@@ -211,26 +197,26 @@ void ScreenRecorder::processVideoPacket(const AVPacket *packet) {
 
             auto out_frame = video_converter_->convertFrame(in_frame, video_frame_counter_++);
 
-            encodeWriteFrame(out_frame, video);
+            processConvertedFrame(out_frame, video);
         }
     }
 }
 
-void ScreenRecorder::processAudioPacket(const AVPacket *packet) {
-    DurationLogger dl(" processed in ");
+void ScreenRecorder::processAudioPacket(std::shared_ptr<const AVPacket> packet) {
+    DurationLogger dl("Audio packet processed in ");
 
-    bool retry_decoder = true;
-    bool retry_converter = true;
+    bool decoder_received = false;
+    bool converter_received = false;
 
-    while (retry_decoder) {
-        retry_decoder = !audio_decoder_->sendPacket(packet);
+    while (!decoder_received) {
+        decoder_received = audio_decoder_->sendPacket(packet);
 
         while (true) {
             auto in_frame = audio_decoder_->getFrame();
             if (!in_frame) break;
 
-            while (retry_converter) {
-                retry_converter = !audio_converter_->sendFrame(in_frame);
+            while (!converter_received) {
+                converter_received = audio_converter_->sendFrame(in_frame);
 
                 while (true) {
                     auto out_frame = audio_converter_->getFrame(audio_frame_counter_);
@@ -238,7 +224,7 @@ void ScreenRecorder::processAudioPacket(const AVPacket *packet) {
 
                     audio_frame_counter_++;
 
-                    encodeWriteFrame(out_frame, audio);
+                    processConvertedFrame(out_frame, audio);
                 }
             }
         }
@@ -247,44 +233,19 @@ void ScreenRecorder::processAudioPacket(const AVPacket *packet) {
 
 void ScreenRecorder::flushPipelines() {
     processVideoPacket(nullptr);
-    encodeWriteFrame(nullptr, video);
+    processConvertedFrame(nullptr, video);
     if (record_audio_) {
         processAudioPacket(nullptr);
-        encodeWriteFrame(nullptr, audio);
+        processConvertedFrame(nullptr, audio);
     }
-    muxer_->writePacket(nullptr, 0);
+    muxer_->writePacket(nullptr, video);  // video or audio is the same
 }
 
 /* function to capture and store data in frames by allocating required memory and auto deallocating the memory.   */
 void ScreenRecorder::captureFrames() {
-    /*
-     * When you decode a single packet, you still don't have information enough to have a frame
-     * [depending on the type of codec, some of them you do], when you decode a GROUP of packets
-     * that represents a frame, then you have a picture! that's why frame_finished
-     * will let you know you decoded enough to have a frame.
-     */
-    int video_pkt_counter = 0;
-    int audio_pkt_counter = 0;
-
-#ifdef __linux__
-    AVPacket *audio_packet;
-    bool video_data_present = false;
-    bool audio_data_present = false;
-#endif
-
     /* start counting for PTS */
     video_frame_counter_ = 0;
-    if (record_audio_) audio_frame_counter_ = 0;
-
-#ifdef __linux__
-    if (record_audio_) {
-        audio_packet = av_packet_alloc();
-        if (!packet) {
-            std::cerr << "Could not allocate in_audio_packet";
-            exit(1);
-        }
-    }
-#endif
+    audio_frame_counter_ = 0;
 
     while (true) {
         std::unique_lock<std::mutex> ul{mutex_};
@@ -293,58 +254,16 @@ void ScreenRecorder::captureFrames() {
             break;
         }
 
-#ifdef __linux__
-
-        ret = av_read_frame(in_fmt_ctx_, packet);
-        if (ret == AVERROR(EAGAIN)) {
-            video_data_present = false;
-        } else if (ret < 0) {
-            std::cerr << "ERROR: Cannot read frame" << std::endl;
-            exit(1);
-        } else {
-            video_data_present = true;
-        }
-
-        if (record_audio_) {
-            ret = av_read_frame(in_audio_fmt_ctx_, audio_packet);
-            if (ret == AVERROR(EAGAIN)) {
-                audio_data_present = false;
-            } else if (ret < 0) {
-                std::cerr << "ERROR: Cannot read frame" << std::endl;
-                exit(1);
-            } else {
-                audio_data_present = true;
-            }
-        }
-
-        if (video_data_present) {
-            std::cout << "[V] packet " << video_pkt_counter++;
-            if (processVideoPacket(packet)) exit(1);
-            av_packet_unref(packet);
-        }
-
-        if (audio_data_present) {
-            std::cout << std::endl << "[A] packet " << audio_pkt_counter++;
-            if (processAudioPacket(audio_packet)) exit(1);
-            av_packet_unref(audio_packet);
-        }
-
-#else  // macOS
-
         auto packet = demuxer_->getPacket();
         if (!packet) continue;
 
         if (packet->stream_index == demuxer_->getVideoStreamIdx()) {
-            std::cout << "[V] packet " << video_pkt_counter++;
             processVideoPacket(packet);
         } else if (record_audio_ && (packet->stream_index == demuxer_->getAudioStreamIdx())) {
-            std::cout << "[A] packet " << audio_pkt_counter++;
             processAudioPacket(packet);
         } else {
             std::cout << "unknown packet (index: " << packet->stream_index << "), ignoring...";
         }
-
-#endif
 
         std::cout << std::endl;
     }
