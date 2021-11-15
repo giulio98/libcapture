@@ -199,7 +199,6 @@ void ScreenRecorder::processAudioPacket(std::shared_ptr<const AVPacket> packet) 
 #endif
 
     bool decoder_received = false;
-    bool converter_received = false;
 
     while (!decoder_received) {
         decoder_received = audio_decoder_->sendPacket(packet);
@@ -207,6 +206,8 @@ void ScreenRecorder::processAudioPacket(std::shared_ptr<const AVPacket> packet) 
         while (true) {
             auto in_frame = audio_decoder_->getFrame();
             if (!in_frame) break;
+
+            bool converter_received = false;
 
             while (!converter_received) {
                 converter_received = audio_converter_->sendFrame(in_frame);
