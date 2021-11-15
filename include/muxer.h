@@ -14,6 +14,13 @@ class Muxer {
     bool file_closed_;
     bool time_base_valid_;
 
+    /**
+     * Write a packet to the output file
+     * @param packet the packet to write. If nullptr, the output queue will be flushed
+     * @param stream_index the index of the stream to which the packet belongs
+     */
+    void writePacket(std::shared_ptr<AVPacket> packet, int stream_index) const;
+
     void cleanup();
 
 public:
@@ -24,10 +31,6 @@ public:
     void addVideoStream(const AVCodecContext *codec_ctx);
 
     void addAudioStream(const AVCodecContext *codec_ctx);
-
-    int getVideoStreamIdx() const;
-
-    int getAudioStreamIdx() const;
 
     const AVCodecParameters *getVideoParams() const;
 
@@ -48,11 +51,16 @@ public:
     void closeFile();
 
     /**
-     * Write a packet to the output file
+     * Write a video packet to the output file
      * @param packet the packet to write. If nullptr, the output queue will be flushed
-     * @param stream_index the index of the stream to which the packet belongs
      */
-    void writePacket(std::shared_ptr<AVPacket> packet, int stream_index) const;
+    void writeVideoPacket(std::shared_ptr<AVPacket> packet) const;
+
+    /**
+     * Write an audio packet to the output file
+     * @param packet the packet to write. If nullptr, the output queue will be flushed
+     */
+    void writeAudioPacket(std::shared_ptr<AVPacket> packet) const;
 
     /**
      * Print informations
