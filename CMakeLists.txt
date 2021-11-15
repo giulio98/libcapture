@@ -44,6 +44,7 @@ add_executable(screen-recorder
     src/video_converter.cpp
     src/audio_converter.cpp
     include/ffmpeg_libs.h
+    include/deleters.h
     include/screen_recorder.h
     include/duration_logger.h
     include/demuxer.h
