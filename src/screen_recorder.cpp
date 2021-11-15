@@ -225,12 +225,19 @@ void ScreenRecorder::processAudioPacket(std::shared_ptr<const AVPacket> packet) 
 }
 
 void ScreenRecorder::flushPipelines() {
+    /* flush video decoder */
     processVideoPacket(nullptr);
+    /* flush video encoder */
     processConvertedFrame(nullptr, video);
+
     if (capture_audio_) {
+        /* flush audio decoder */
         processAudioPacket(nullptr);
+        /* flush audio encoder */
         processConvertedFrame(nullptr, audio);
     }
+
+    /* flush output queue */
     muxer_->writePacket(nullptr, none);
 }
 
