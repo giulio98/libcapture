@@ -251,9 +251,7 @@ void ScreenRecorder::captureFrames() {
         {
             std::unique_lock<std::mutex> ul{mutex_};
             cv_.wait(ul, [this]() { return !paused_; });
-            if (stop_capture_) {
-                break;
-            }
+            if (stop_capture_) break;
         }
 
         auto packet = demuxer_->getPacket();
