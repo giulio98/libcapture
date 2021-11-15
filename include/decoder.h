@@ -2,8 +2,8 @@
 
 #include <iostream>
 
+#include "deleters.h"
 #include "ffmpeg_libs.h"
-#include "releasers.h"
 
 class Decoder {
     AVCodec *codec_;

@@ -4,8 +4,8 @@
 #include <string>
 
 #include "decoder.h"
+#include "deleters.h"
 #include "ffmpeg_libs.h"
-#include "releasers.h"
 
 class Demuxer {
     AVFormatContext *fmt_ctx_;
