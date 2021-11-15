@@ -160,7 +160,6 @@ void ScreenRecorder::processConvertedFrame(std::shared_ptr<const AVFrame> frame,
     }
 
     bool encoder_received = false;
-
     while (!encoder_received) {
         encoder_received = encoder->sendFrame(frame);
 
@@ -178,7 +177,6 @@ void ScreenRecorder::processVideoPacket(std::shared_ptr<const AVPacket> packet) 
 #endif
 
     bool decoder_received = false;
-
     while (!decoder_received) {
         decoder_received = video_decoder_->sendPacket(packet);
 
@@ -199,7 +197,6 @@ void ScreenRecorder::processAudioPacket(std::shared_ptr<const AVPacket> packet) 
 #endif
 
     bool decoder_received = false;
-
     while (!decoder_received) {
         decoder_received = audio_decoder_->sendPacket(packet);
 
@@ -208,7 +205,6 @@ void ScreenRecorder::processAudioPacket(std::shared_ptr<const AVPacket> packet) 
             if (!in_frame) break;
 
             bool converter_received = false;
-
             while (!converter_received) {
                 converter_received = audio_converter_->sendFrame(in_frame);
 
