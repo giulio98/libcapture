@@ -99,25 +99,21 @@ void Muxer::closeFile() {
     file_closed_ = true;
 }
 
-void Muxer::writePacket(std::shared_ptr<AVPacket> packet, int stream_index) const {
+void Muxer::writePacket(std::shared_ptr<AVPacket> packet, AVType packet_type) const {
     if (!file_opened_) throw std::runtime_error("Muxer: cannot write packet, file has not been opened");
     if (file_closed_) throw std::runtime_error("Muxer: cannot write packet, file has already been closed");
+
     if (packet) {
-        if (stream_index != video_stream_->index && stream_index != audio_stream_->index)
-            throw std::runtime_error("Muxer: unknown stream index");
-        packet->stream_index = stream_index;
+        if (packet_type == video) {
+            if (!video_stream_) throw std::runtime_error("Muxer: Video stream not present");
+            packet->stream_index = video_stream_->index;
+        } else {
+            if (!audio_stream_) throw std::runtime_error("Muxer: Audio stream not present");
+            packet->stream_index = audio_stream_->index;
+        }
     }
+
     if (av_interleaved_write_frame(fmt_ctx_, packet.get())) throw std::runtime_error("Muxer: Failed to write packet");
-}
-
-void Muxer::writeVideoPacket(std::shared_ptr<AVPacket> packet) const {
-    if (!video_stream_) throw std::runtime_error("Muxer: Video stream not present");
-    writePacket(packet, video_stream_->index);
-}
-
-void Muxer::writeAudioPacket(std::shared_ptr<AVPacket> packet) const {
-    if (!audio_stream_) throw std::runtime_error("Muxer: Audio stream not present");
-    writePacket(packet, audio_stream_->index);
 }
 
 void Muxer::dumpInfo() const { av_dump_format(fmt_ctx_, 0, filename_.c_str(), 1); }

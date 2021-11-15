@@ -14,13 +14,6 @@ class Muxer {
     bool file_closed_;
     bool time_base_valid_;
 
-    /**
-     * Write a packet to the output file
-     * @param packet the packet to write. If nullptr, the output queue will be flushed
-     * @param stream_index the index of the stream to which the packet belongs
-     */
-    void writePacket(std::shared_ptr<AVPacket> packet, int stream_index) const;
-
     void cleanup();
 
 public:
@@ -51,16 +44,11 @@ public:
     void closeFile();
 
     /**
-     * Write a video packet to the output file
+     * Write a packet to the output file
      * @param packet the packet to write. If nullptr, the output queue will be flushed
+     * @param packet_type the type of the packet (audio or video)
      */
-    void writeVideoPacket(std::shared_ptr<AVPacket> packet) const;
-
-    /**
-     * Write an audio packet to the output file
-     * @param packet the packet to write. If nullptr, the output queue will be flushed
-     */
-    void writeAudioPacket(std::shared_ptr<AVPacket> packet) const;
+    void writePacket(std::shared_ptr<AVPacket> packet, AVType packet_type) const;
 
     /**
      * Print informations
