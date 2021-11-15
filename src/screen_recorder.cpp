@@ -264,10 +264,8 @@ void ScreenRecorder::captureFrames() {
         } else if (record_audio_ && (packet->stream_index == demuxer_->getAudioStreamIdx())) {
             processAudioPacket(packet);
         } else {
-            std::cout << "unknown packet (index: " << packet->stream_index << "), ignoring...";
+            throw std::runtime_error("Unknown packet index");
         }
-
-        std::cout << std::endl;
     }
 
     flushPipelines();
