@@ -98,11 +98,8 @@ void ScreenRecorder::start(const std::string &output_file, bool capture_audio) {
 
         initConverters();
 
-        std::cout << std::endl;
         demuxer_->dumpInfo();
-        std::cout << std::endl;
         muxer_->dumpInfo();
-        std::cout << std::endl;
 
         recorder_thread_ = std::thread([this]() {
             std::cout << "Recording..." << std::endl;
