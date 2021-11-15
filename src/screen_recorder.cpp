@@ -245,11 +245,9 @@ void ScreenRecorder::captureFrames() {
     audio_frame_counter_ = 0;
 
     while (true) {
-        {
-            std::unique_lock<std::mutex> ul{mutex_};
-            cv_.wait(ul, [this]() { return !paused_; });
-            if (stop_capture_) break;
-        }
+        std::unique_lock<std::mutex> ul{mutex_};
+        cv_.wait(ul, [this]() { return !paused_; });
+        if (stop_capture_) break;
 
         auto [packet, packet_type] = demuxer_->getPacket();
         if (!packet) continue;
