@@ -21,17 +21,15 @@ public:
 
     ~Demuxer();
 
-    int getVideoStreamIdx() const;
-    int getAudioStreamIdx() const;
-
     const AVCodecParameters *getVideoParams() const;
+
     const AVCodecParameters *getAudioParams() const;
 
     /**
-     * Read a packet from the input device and return it
-     * @return a packet if it was possible to read it, nullptr if the demuxer had nothing to read
+     * Read a packet from the input device and return it together with its type
+     * @return a packet and its type if it was possible to read it, nullptr if the demuxer had nothing to read
      */
-    std::shared_ptr<const AVPacket> getPacket() const;
+    std::pair<std::shared_ptr<const AVPacket>, AVType> getPacket() const;
 
     void dumpInfo() const;
 };

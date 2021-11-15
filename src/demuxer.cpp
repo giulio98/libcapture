@@ -48,16 +48,6 @@ void Demuxer::cleanup() {
     if (fmt_ctx_) avformat_close_input(&fmt_ctx_);  // This will also free the streams
 }
 
-int Demuxer::getVideoStreamIdx() const {
-    if (!video_stream_) throw std::runtime_error("Demuxer: Video stream not present");
-    return video_stream_->index;
-}
-
-int Demuxer::getAudioStreamIdx() const {
-    if (!audio_stream_) throw std::runtime_error("Demuxer: Audio stream not present");
-    return audio_stream_->index;
-}
-
 const AVCodecParameters *Demuxer::getVideoParams() const {
     if (!video_stream_) throw std::runtime_error("Demuxer: Video stream not present");
     return video_stream_->codecpar;
@@ -68,15 +58,24 @@ const AVCodecParameters *Demuxer::getAudioParams() const {
     return audio_stream_->codecpar;
 }
 
-std::shared_ptr<const AVPacket> Demuxer::getPacket() const {
+std::pair<std::shared_ptr<const AVPacket>, AVType> Demuxer::getPacket() const {
     auto packet = std::shared_ptr<AVPacket>(av_packet_alloc(), AVPacketDeleter());
     if (!packet) throw std::runtime_error("Demuxer: failed to allocate packet");
 
     int ret = av_read_frame(fmt_ctx_, packet.get());
-    if (ret == AVERROR(EAGAIN)) return nullptr;
+    if (ret == AVERROR(EAGAIN)) return std::make_pair(nullptr, none);
     if (ret < 0) throw std::runtime_error("Demuxer: Failed to read a packet");
 
-    return packet;
+    AVType packet_type;
+    if (video_stream_ && packet->stream_index == video_stream_->index) {
+        packet_type = video;
+    } else if (audio_stream_ && packet->stream_index == audio_stream_->index) {
+        packet_type = audio;
+    } else {
+        throw std::runtime_error("Demuxer: unknown packet stream index");
+    }
+
+    return std::make_pair(packet, packet_type);
 }
 
 void Demuxer::dumpInfo() const { av_dump_format(fmt_ctx_, 0, device_name_.c_str(), 0); }
