@@ -23,3 +23,5 @@ extern "C" {
 #include "libswresample/swresample.h"
 #include "libswscale/swscale.h"
 }
+
+enum AVType { audio, video };
