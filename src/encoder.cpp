@@ -29,8 +29,8 @@ void Encoder::cleanup() {
     if (options_) av_dict_free(&options_);
 }
 
-bool Encoder::sendFrame(const AVFrame *frame) const {
-    int ret = avcodec_send_frame(codec_ctx_, frame);
+bool Encoder::sendFrame(std::shared_ptr<const AVFrame> frame) const {
+    int ret = avcodec_send_frame(codec_ctx_, frame.get());
     if (ret == AVERROR(EAGAIN)) {
         return false;
     } else if (ret == AVERROR_EOF) {
@@ -41,16 +41,17 @@ bool Encoder::sendFrame(const AVFrame *frame) const {
     return true;
 }
 
-bool Encoder::fillPacket(AVPacket *packet) const {
-    if (!packet) throw std::runtime_error("Encoder: Packet is not allocated");
+std::shared_ptr<AVPacket> Encoder::getPacket() const {
+    auto packet = std::shared_ptr<AVPacket>(av_packet_alloc(), AVPacketDeleter());
+    if (!packet) throw std::runtime_error("Encoder: failed to allocate packet");
 
-    int ret = avcodec_receive_packet(codec_ctx_, packet);
+    int ret = avcodec_receive_packet(codec_ctx_, packet.get());
     if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) {
-        return false;
+        return nullptr;
     } else if (ret < 0) {
         throw std::runtime_error("Encoder: Failed to receive frame from decoder");
     }
-    return true;
+    return packet;
 }
 
 const AVCodecContext *Encoder::getCodecContext() const { return codec_ctx_; }

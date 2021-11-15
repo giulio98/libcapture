@@ -3,6 +3,7 @@
 #include <map>
 #include <string>
 
+#include "deleters.h"
 #include "ffmpeg_libs.h"
 
 class Encoder {
@@ -19,18 +20,18 @@ public:
     ~Encoder();
 
     /**
-     * Send an allocated frame to the encoder
-     * The owneship of the frame remains to the caller
+     * Send a frame to the encoder
+     * @param frame the frame to send to the encoder. It can be nullptr to flush the encoder
      * @return true if the frame has been correctly sent, false if the encoder could not receive it
      */
-    bool sendFrame(const AVFrame *frame) const;
+    bool sendFrame(std::shared_ptr<const AVFrame> frame) const;
 
     /**
-     * Fill an allocated packet obtained by encoding frames
-     * The owneship of the packet remains to the caller
-     * @return true if the packet has been correctly filled, false if the encoder had nothing to write
+     * Get a converted packet from the encoder
+     * @return a packet if it was possible to get it, nullptr if the encoder had nothing to write
+     * because it is empty or flushed
      */
-    bool fillPacket(AVPacket *packet) const;
+    std::shared_ptr<AVPacket> getPacket() const;
 
     const AVCodecContext *getCodecContext() const;
 };

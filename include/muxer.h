@@ -49,9 +49,10 @@ public:
 
     /**
      * Write a packet to the output file
-     * The ownership of the packet is tranfered to the muxer
+     * @param packet the packet to write. If nullptr, the output queue will be flushed
+     * @param stream_index the index of the stream to which the packet belongs
      */
-    void writePacket(AVPacket *packet, int stream_index) const;
+    void writePacket(std::shared_ptr<AVPacket> packet, int stream_index) const;
 
     /**
      * Print informations
