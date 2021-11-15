@@ -11,7 +11,6 @@
 
 #include "../include/duration_logger.h"
 
-/* initialize the resources*/
 ScreenRecorder::ScreenRecorder() {
     video_framerate_ = 25;
     out_video_pix_fmt_ = AV_PIX_FMT_YUV420P;
@@ -23,7 +22,6 @@ ScreenRecorder::ScreenRecorder() {
     in_fmt_name_ = "avfoundation";
 }
 
-/* uninitialize the resources */
 ScreenRecorder::~ScreenRecorder() {
     if (recorder_thread_.joinable() == true) {
         recorder_thread_.join();
