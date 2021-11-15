@@ -11,6 +11,8 @@
 
 #include "../include/duration_logger.h"
 
+#define DURATION_LOG 0
+
 ScreenRecorder::ScreenRecorder() {
     video_framerate_ = 25;
     out_video_pix_fmt_ = AV_PIX_FMT_YUV420P;
@@ -168,7 +170,9 @@ void ScreenRecorder::processConvertedFrame(std::shared_ptr<const AVFrame> frame,
 }
 
 void ScreenRecorder::processVideoPacket(std::shared_ptr<const AVPacket> packet) {
+#if DURATION_LOG
     DurationLogger dl("Video packet processed in ");
+#endif
 
     bool decoder_received = false;
 
@@ -187,7 +191,9 @@ void ScreenRecorder::processVideoPacket(std::shared_ptr<const AVPacket> packet) 
 }
 
 void ScreenRecorder::processAudioPacket(std::shared_ptr<const AVPacket> packet) {
+#if DURATION_LOG
     DurationLogger dl("Audio packet processed in ");
+#endif
 
     bool decoder_received = false;
     bool converter_received = false;
