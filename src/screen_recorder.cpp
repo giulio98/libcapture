@@ -12,9 +12,10 @@
 #include "../include/duration_logger.h"
 
 #define DURATION_LOG 0
+#define FRAMERATE_LOGGING 0
 
 ScreenRecorder::ScreenRecorder() {
-    video_framerate_ = 25;
+    video_framerate_ = 30;
     out_video_pix_fmt_ = AV_PIX_FMT_YUV420P;
     out_video_codec_id_ = AV_CODEC_ID_H264;
     out_audio_codec_id_ = AV_CODEC_ID_AAC;
@@ -150,6 +151,20 @@ void ScreenRecorder::resume() {
     cv_.notify_all();
 }
 
+void ScreenRecorder::estimateFramerate() {
+    int64_t estimated_framerate = 1000000 * video_frame_counter_ / (av_gettime() - start_time_);
+#if FRAMERATE_LOGGING
+    std::cout << "Estimated framerate: " << estimated_framerate << " fps" << std::endl;
+#else
+    if (estimated_framerate < video_framerate_) dropped_frame_counter_++;
+    if (dropped_frame_counter_ == 2) {
+        std::cerr << "WARNING: it looks like you're dropping some frames (estimated " << estimated_framerate
+                  << " fps), try to lower the fps" << std::endl;
+        dropped_frame_counter_ = 0;
+    }
+#endif
+}
+
 void ScreenRecorder::processConvertedFrame(std::shared_ptr<const AVFrame> frame, av::DataType frame_type) {
     std::shared_ptr<Encoder> encoder;
 
@@ -187,6 +202,8 @@ void ScreenRecorder::processVideoPacket(std::shared_ptr<const AVPacket> packet) 
             if (!in_frame) break;
 
             auto out_frame = video_converter_->convertFrame(in_frame, video_frame_counter_++);
+
+            if (video_frame_counter_ % video_framerate_ == 0) estimateFramerate();
 
             processConvertedFrame(out_frame, av::DataType::video);
         }
@@ -245,6 +262,10 @@ void ScreenRecorder::captureFrames() {
     /* start counting for PTS */
     video_frame_counter_ = 0;
     audio_frame_counter_ = 0;
+
+    /* start counting for fps estimation */
+    start_time_ = av_gettime();
+    dropped_frame_counter_ = -1;  // wait for an extra second at the beginning to allow the framerate to stabilize
 
     while (true) {
         {

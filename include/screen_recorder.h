@@ -60,6 +60,11 @@ class ScreenRecorder {
     /* Counter of audio frames used to compute PTSs */
     int64_t audio_frame_counter_;
 
+    /* Recording start time */
+    int64_t start_time_;
+    /* Counter of times in which the estimated framerate is lower than the specified one */
+    int dropped_frame_counter_;
+
     void processVideoPacket(std::shared_ptr<const AVPacket> packet);
 
     void processAudioPacket(std::shared_ptr<const AVPacket> packet);
@@ -79,6 +84,8 @@ class ScreenRecorder {
     void initConverters();
 
     void printInfo();
+
+    void estimateFramerate();
 
 public:
     ScreenRecorder();
