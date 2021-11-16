@@ -5,30 +5,24 @@ Decoder::Decoder(const AVCodecParameters *params) : codec_(nullptr), codec_ctx_(
         codec_ = avcodec_find_decoder(params->codec_id);
         if (!codec_) throw std::runtime_error("Decoder: Cannot find codec");
 
-        codec_ctx_ = avcodec_alloc_context3(codec_);
+        codec_ctx_ = unique_ptr_codec_ctx(avcodec_alloc_context3(codec_));
         if (!codec_ctx_) throw std::runtime_error("Decoder: Failed to allocated memory for AVCodecContext");
 
-        if (avcodec_parameters_to_context(codec_ctx_, params) < 0)
+        if (avcodec_parameters_to_context(codec_ctx_.get(), params) < 0)
             throw std::runtime_error("Decoder: Failed to copy codec params to codec context");
 
-        if (avcodec_open2(codec_ctx_, codec_, nullptr) < 0)
+        if (avcodec_open2(codec_ctx_.get(), codec_, nullptr) < 0)
             throw std::runtime_error("Decoder: Unable to open the av codec");
 
     } catch (const std::exception &e) {
-        cleanup();
         throw;
     }
 }
 
-Decoder::~Decoder() { cleanup(); }
-
-void Decoder::cleanup() {
-    // TO-DO: free codec_ (how?)
-    if (codec_ctx_) avcodec_free_context(&codec_ctx_);
-}
+Decoder::~Decoder() {}
 
 bool Decoder::sendPacket(std::shared_ptr<const AVPacket> packet) const {
-    int ret = avcodec_send_packet(codec_ctx_, packet.get());
+    int ret = avcodec_send_packet(codec_ctx_.get(), packet.get());
     if (ret == AVERROR(EAGAIN)) {
         return false;
     } else if (ret == AVERROR_EOF) {
@@ -40,10 +34,10 @@ bool Decoder::sendPacket(std::shared_ptr<const AVPacket> packet) const {
 }
 
 std::shared_ptr<const AVFrame> Decoder::getFrame() const {
-    std::shared_ptr<AVFrame> frame(av_frame_alloc(), Deleter<av_frame_free>());
+    std::shared_ptr<AVFrame> frame(av_frame_alloc(), DeleterPP<av_frame_free>());
     if (!frame) throw std::runtime_error("Decoder: failed to allocate frame");
 
-    int ret = avcodec_receive_frame(codec_ctx_, frame.get());
+    int ret = avcodec_receive_frame(codec_ctx_.get(), frame.get());
     if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) {
         return nullptr;
     } else if (ret < 0) {
@@ -52,4 +46,4 @@ std::shared_ptr<const AVFrame> Decoder::getFrame() const {
     return frame;
 }
 
-const AVCodecContext *Decoder::getCodecContext() const { return codec_ctx_; }
+const AVCodecContext *Decoder::getCodecContext() const { return codec_ctx_.get(); }

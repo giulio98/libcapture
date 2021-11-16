@@ -9,7 +9,7 @@ Encoder::Encoder(AVCodecID codec_id, const std::map<std::string, std::string> &o
         if (!codec_) codec_ = avcodec_find_encoder(codec_id);
         if (!codec_) throw std::runtime_error("Encoder: Cannot find codec");
 
-        codec_ctx_ = avcodec_alloc_context3(codec_);
+        codec_ctx_ = unique_ptr_codec_ctx(avcodec_alloc_context3(codec_));
         if (!codec_ctx_) throw std::runtime_error("Encoder: Failed to allocated memory for AVCodecContext");
 
         for (auto const &[key, val] : options) {
@@ -28,12 +28,11 @@ Encoder::~Encoder() { cleanup(); }
 
 void Encoder::cleanup() {
     // TO-DO: free codec_ (how?)
-    if (codec_ctx_) avcodec_free_context(&codec_ctx_);
     if (options_) av_dict_free(&options_);
 }
 
 bool Encoder::sendFrame(std::shared_ptr<const AVFrame> frame) const {
-    int ret = avcodec_send_frame(codec_ctx_, frame.get());
+    int ret = avcodec_send_frame(codec_ctx_.get(), frame.get());
     if (ret == AVERROR(EAGAIN)) {
         return false;
     } else if (ret == AVERROR_EOF) {
@@ -45,10 +44,10 @@ bool Encoder::sendFrame(std::shared_ptr<const AVFrame> frame) const {
 }
 
 std::shared_ptr<AVPacket> Encoder::getPacket() const {
-    std::shared_ptr<AVPacket> packet(av_packet_alloc(), Deleter<av_packet_free>());
+    std::shared_ptr<AVPacket> packet(av_packet_alloc(), DeleterPP<av_packet_free>());
     if (!packet) throw std::runtime_error("Encoder: failed to allocate packet");
 
-    int ret = avcodec_receive_packet(codec_ctx_, packet.get());
+    int ret = avcodec_receive_packet(codec_ctx_.get(), packet.get());
     if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) {
         return nullptr;
     } else if (ret < 0) {
@@ -57,4 +56,4 @@ std::shared_ptr<AVPacket> Encoder::getPacket() const {
     return packet;
 }
 
-const AVCodecContext *Encoder::getCodecContext() const { return codec_ctx_; }
+const AVCodecContext *Encoder::getCodecContext() const { return codec_ctx_.get(); }

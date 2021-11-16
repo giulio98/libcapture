@@ -3,18 +3,19 @@
 #include <iostream>
 #include <string>
 
+#include "deleter.h"
 #include "ffmpeg_libs.h"
 
 class Muxer {
-    AVFormatContext *fmt_ctx_;
+    using unique_ptr_fmt_ctx = std::unique_ptr<AVFormatContext, DeleterP<avformat_free_context>>;
+
+    unique_ptr_fmt_ctx fmt_ctx_;
     std::string filename_;
     const AVStream *video_stream_;
     const AVStream *audio_stream_;
     bool file_opened_;
     bool file_closed_;
     bool time_base_valid_;
-
-    void cleanup();
 
 public:
     Muxer(const std::string &filename);

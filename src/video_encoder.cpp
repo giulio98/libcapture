@@ -11,6 +11,6 @@ VideoEncoder::VideoEncoder(AVCodecID codec_id, std::map<std::string, std::string
 
     if (global_header_flags & AVFMT_GLOBALHEADER) codec_ctx_->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
 
-    int ret = avcodec_open2(codec_ctx_, codec_, options_ ? &options_ : nullptr);
+    int ret = avcodec_open2(codec_ctx_.get(), codec_, options_ ? &options_ : nullptr);
     if (ret) throw std::runtime_error("Encoder: Failed to initialize Codec Context");
 }

@@ -8,9 +8,11 @@
 
 class Encoder {
 protected:
+    using unique_ptr_codec_ctx = std::unique_ptr<AVCodecContext, DeleterPP<avcodec_free_context>>;
+
     AVCodec *codec_;
-    AVCodecContext *codec_ctx_;
     AVDictionary *options_;
+    unique_ptr_codec_ctx codec_ctx_;
 
     void cleanup();
 

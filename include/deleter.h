@@ -1,20 +1,34 @@
 #pragma once
 
-#include <iostream>
-
 #include "ffmpeg_libs.h"
 
 /**
- * auto will accept any signature for the "deleter" function (e.g. void (*deleter)(AVFrame **)),
+ * Wrapper template for a deleter function that accept a pointer to the struct to free
+ * "auto" will accept any signature for the "deleter" function (e.g. void (*deleter)(AVFrame **)),
  * creating a different struct for each one of them at compile-time
  */
 template <auto deleter>
-struct Deleter {
+struct DeleterP {
+    template <typename T>
+    void operator()(T* t) const {
+        deleter(t);
+    }
+};
+
+/**
+ * Wrapper template for a deleter function that accept a pointer-to-pointer to the struct to free
+ * "auto" will accept any signature for the "deleter" function (e.g. void (*deleter)(AVFrame **)),
+ * creating a different struct for each one of them at compile-time
+ */
+template <auto deleter>
+struct DeleterPP {
     template <typename T>
     void operator()(T* t) const {
         deleter(&t);
     }
 };
 
-// template <typename T, auto deleter>
-// using unique_ptr_deleter = std::unique_ptr<T, Deleter<deleter>>;
+/**
+ * To use unique pointers with these custom deleters wrappers follow this approach:
+ * std::unique_ptr<Struct, Deleter<deleter_func>> ptr(obj_ptr)
+ */

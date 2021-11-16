@@ -6,10 +6,10 @@
 #include "ffmpeg_libs.h"
 
 class Decoder {
-    AVCodec *codec_;
-    AVCodecContext *codec_ctx_;
+    using unique_ptr_codec_ctx = std::unique_ptr<AVCodecContext, DeleterPP<avcodec_free_context>>;
 
-    void cleanup();
+    AVCodec *codec_;
+    unique_ptr_codec_ctx codec_ctx_;
 
 public:
     /**

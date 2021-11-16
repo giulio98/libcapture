@@ -16,10 +16,14 @@ Demuxer::Demuxer(const std::string &fmt_name, const std::string &device_name,
             }
         }
 
-        if (avformat_open_input(&fmt_ctx_, device_name_.c_str(), fmt, dict ? &dict : nullptr))
-            throw std::runtime_error("Demuxer: Cannot open input format");
+        {
+            AVFormatContext *fmt_ctx = nullptr;
+            if (avformat_open_input(&fmt_ctx, device_name_.c_str(), fmt, dict ? &dict : nullptr))
+                throw std::runtime_error("Demuxer: Cannot open input format");
+            fmt_ctx_ = unique_ptr_fmt_ctx(fmt_ctx);
+        }
 
-        if (avformat_find_stream_info(fmt_ctx_, nullptr) < 0)
+        if (avformat_find_stream_info(fmt_ctx_.get(), nullptr) < 0)
             throw std::runtime_error("Demuxer: Failed to find stream info");
 
         for (int i = 0; i < fmt_ctx_->nb_streams; i++) {
@@ -35,18 +39,13 @@ Demuxer::Demuxer(const std::string &fmt_name, const std::string &device_name,
         if (dict) av_dict_free(&dict);
 
     } catch (const std::exception &e) {
-        cleanup();
         // TO-DO: free fmt (how?)
         if (dict) av_dict_free(&dict);
         throw;
     }
 }
 
-Demuxer::~Demuxer() { cleanup(); }
-
-void Demuxer::cleanup() {
-    if (fmt_ctx_) avformat_close_input(&fmt_ctx_);  // This will also free the streams
-}
+Demuxer::~Demuxer() {}
 
 const AVCodecParameters *Demuxer::getVideoParams() const {
     if (!video_stream_) throw std::runtime_error("Demuxer: Video stream not present");
@@ -59,10 +58,10 @@ const AVCodecParameters *Demuxer::getAudioParams() const {
 }
 
 std::pair<std::shared_ptr<const AVPacket>, AVType> Demuxer::getPacket() const {
-    std::shared_ptr<AVPacket> packet(av_packet_alloc(), Deleter<av_packet_free>());
+    std::shared_ptr<AVPacket> packet(av_packet_alloc(), DeleterPP<av_packet_free>());
     if (!packet) throw std::runtime_error("Demuxer: failed to allocate packet");
 
-    int ret = av_read_frame(fmt_ctx_, packet.get());
+    int ret = av_read_frame(fmt_ctx_.get(), packet.get());
     if (ret == AVERROR(EAGAIN)) return std::make_pair(nullptr, none);
     if (ret < 0) throw std::runtime_error("Demuxer: Failed to read a packet");
 
@@ -78,4 +77,4 @@ std::pair<std::shared_ptr<const AVPacket>, AVType> Demuxer::getPacket() const {
     return std::make_pair(packet, packet_type);
 }
 
-void Demuxer::dumpInfo() const { av_dump_format(fmt_ctx_, 0, device_name_.c_str(), 0); }
+void Demuxer::dumpInfo() const { av_dump_format(fmt_ctx_.get(), 0, device_name_.c_str(), 0); }

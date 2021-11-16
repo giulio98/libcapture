@@ -6,17 +6,18 @@
 #include "ffmpeg_libs.h"
 
 class AudioConverter {
+    using unique_ptr_swr_ctx = std::unique_ptr<SwrContext, DeleterPP<swr_free>>;
+    using unique_ptr_fifo = std::unique_ptr<AVAudioFifo, DeleterP<av_audio_fifo_free>>;
+
     int out_channels_;
     int out_frame_size_;
     int out_sample_rate_;
     AVSampleFormat out_sample_fmt_;
-    SwrContext *ctx_;
-    AVAudioFifo *fifo_buf_;
+    unique_ptr_swr_ctx ctx_;
+    unique_ptr_fifo fifo_buf_;
     int fifo_duration_;
     AVRational codec_ctx_time_base_;
     AVRational stream_time_base_;
-
-    void cleanup();
 
 public:
     AudioConverter(const AVCodecContext *in_codec_ctx, const AVCodecContext *out_codec_ctx,

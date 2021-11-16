@@ -8,12 +8,12 @@
 #include "ffmpeg_libs.h"
 
 class Demuxer {
-    AVFormatContext *fmt_ctx_;
+    using unique_ptr_fmt_ctx = std::unique_ptr<AVFormatContext, DeleterPP<avformat_close_input>>;
+
+    unique_ptr_fmt_ctx fmt_ctx_;
     std::string device_name_;
     const AVStream *video_stream_;
     const AVStream *audio_stream_;
-
-    void cleanup();
 
 public:
     Demuxer(const std::string &fmt_name, const std::string &device_name,
