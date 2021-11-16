@@ -42,12 +42,12 @@ void ScreenRecorder::initInput() {
 
 #ifdef LINUX
     std::string display = getenv("DISPLAY");
-    device_name << display << ".0+" << offset_x_ << "," << offset_y_;
+    device_name << display << ".0+" << video_offset_x_ << "," << video_offset_y_;
 #else
     device_name << "1:";
     if (capture_audio_) device_name << "0";
 #endif
-    video_size << width_ << "x" << height_;
+    video_size << video_width_ << "x" << video_height_;
     framerate << video_framerate_;
 
     demux_options.insert({"video_size", video_size.str()});
@@ -431,23 +431,23 @@ int ScreenRecorder::selectArea() {
     }
 
     if (rw < threshold || rh < threshold) {
-        width_ = scr->width;
-        height_ = scr->height;
-        offset_x_ = 0;
-        offset_y_ = 0;
+        video_width_ = scr->width;
+        video_height_ = scr->height;
+        video_offset_x_ = 0;
+        video_offset_y_ = 0;
     } else {
-        width_ = rw;
-        height_ = rh;
-        offset_x_ = rx;
-        offset_y_ = ry;
+        video_width_ = rw;
+        video_height_ = rh;
+        video_offset_x_ = rx;
+        video_offset_y_ = ry;
     }
 
     XCloseDisplay(disp);
 
 #else
-    width_ = 1920;
-    height_ = 1080;
-    offset_x_ = offset_y_ = 0;
+    video_width_ = 1920;
+    video_height_ = 1080;
+    video_offset_x_ = video_offset_y_ = 0;
 #endif
 
     return 0;

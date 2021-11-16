@@ -17,23 +17,20 @@
 class ScreenRecorder {
     bool capture_audio_;
 
-    int offset_x_;
-    int offset_y_;
-    int width_;
-    int height_;
-
-    std::string output_file_;
-
-    std::mutex mutex_;
-    std::condition_variable cv_;
-
-    bool stop_capture_;
-    bool paused_;
-
+    int video_offset_x_;
+    int video_offset_y_;
+    int video_width_;
+    int video_height_;
     int video_framerate_;
     AVPixelFormat out_video_pix_fmt_;
     AVCodecID out_video_codec_id_;
     AVCodecID out_audio_codec_id_;
+    std::string output_file_;
+
+    bool stop_capture_;
+    bool paused_;
+    std::mutex mutex_;
+    std::condition_variable cv_;
 
     std::string in_fmt_name_;
     std::unique_ptr<Demuxer> demuxer_;
