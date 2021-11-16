@@ -11,7 +11,7 @@ template <auto deleter>
 struct DeleterP {
     template <typename T>
     void operator()(T* t) const {
-        deleter(t);
+        if (t) deleter(t);
     }
 };
 
@@ -24,7 +24,7 @@ template <auto deleter>
 struct DeleterPP {
     template <typename T>
     void operator()(T* t) const {
-        deleter(&t);
+        if (t) deleter(&t);
     }
 };
 
