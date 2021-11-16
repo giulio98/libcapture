@@ -10,7 +10,7 @@ Demuxer::Demuxer(const std::string &fmt_name, const std::string &device_name,
         fmt = av_find_input_format(fmt_name.c_str());
         if (!fmt) throw std::runtime_error("Demuxer: Cannot find input format");
 
-        for (auto const &[key, val] : options) {
+        for (const auto &[key, val] : options) {
             if (av_dict_set(&dict, key.c_str(), val.c_str(), 0) < 0) {
                 throw std::runtime_error("Demuxer: Cannot set " + key + "in dictionary");
             }
