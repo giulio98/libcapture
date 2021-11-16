@@ -32,7 +32,7 @@ std::shared_ptr<const AVFrame> VideoConverter::convertFrame(std::shared_ptr<cons
                                                             int64_t frame_number) const {
     if (!in_frame) throw std::runtime_error("VideoConverter: in_frame is not allocated");
 
-    std::shared_ptr<AVFrame> out_frame(av_frame_alloc(), Deleter(av_frame_free));
+    std::shared_ptr<AVFrame> out_frame(av_frame_alloc(), Deleter<av_frame_free>());
     if (!out_frame) throw std::runtime_error("VideoConverter: failed to allocate frame");
 
     out_frame->width = out_width_;

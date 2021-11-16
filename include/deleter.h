@@ -4,15 +4,17 @@
 
 #include "ffmpeg_libs.h"
 
-template <typename T>
-class Deleter {
-    void (*deleter_)(T **);
-
-public:
-    Deleter(void (*deleter)(T **)) : deleter_(deleter) {}
-    void operator()(T *t) {
-        // std::cout << "Deleter: " << t;
-        deleter_(&t);
-        // std::cout << " -> " << t << std::endl;
+/**
+ * auto will accept any signature for the "deleter" function (e.g. void (*deleter)(AVFrame **)),
+ * creating a different struct for each one of them at compile-time
+ */
+template <auto deleter>
+struct Deleter {
+    template <typename T>
+    void operator()(T* t) const {
+        deleter(&t);
     }
 };
+
+// template <typename T, auto deleter>
+// using unique_ptr_deleter = std::unique_ptr<T, Deleter<deleter>>;

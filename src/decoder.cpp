@@ -40,7 +40,7 @@ bool Decoder::sendPacket(std::shared_ptr<const AVPacket> packet) const {
 }
 
 std::shared_ptr<const AVFrame> Decoder::getFrame() const {
-    std::shared_ptr<AVFrame> frame(av_frame_alloc(), Deleter(av_frame_free));
+    std::shared_ptr<AVFrame> frame(av_frame_alloc(), Deleter<av_frame_free>());
     if (!frame) throw std::runtime_error("Decoder: failed to allocate frame");
 
     int ret = avcodec_receive_frame(codec_ctx_, frame.get());
