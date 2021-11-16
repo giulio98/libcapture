@@ -136,6 +136,7 @@ void ScreenRecorder::stop() {
 
 void ScreenRecorder::pause() {
     std::unique_lock<std::mutex> ul{mutex_};
+    if (stop_capture_) return;
     paused_ = true;
     std::cout << "Recording paused" << std::endl;
     cv_.notify_all();
@@ -143,6 +144,7 @@ void ScreenRecorder::pause() {
 
 void ScreenRecorder::resume() {
     std::unique_lock<std::mutex> ul{mutex_};
+    if (stop_capture_) return;
     paused_ = false;
     std::cout << "Recording resumed" << std::endl;
     cv_.notify_all();
