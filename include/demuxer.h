@@ -4,7 +4,7 @@
 #include <string>
 
 #include "decoder.h"
-#include "deleters.h"
+#include "deleter.h"
 #include "ffmpeg_libs.h"
 
 class Demuxer {

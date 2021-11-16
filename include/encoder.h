@@ -3,7 +3,7 @@
 #include <map>
 #include <string>
 
-#include "deleters.h"
+#include "deleter.h"
 #include "ffmpeg_libs.h"
 
 class Encoder {

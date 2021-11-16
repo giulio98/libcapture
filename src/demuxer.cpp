@@ -59,7 +59,7 @@ const AVCodecParameters *Demuxer::getAudioParams() const {
 }
 
 std::pair<std::shared_ptr<const AVPacket>, AVType> Demuxer::getPacket() const {
-    auto packet = std::shared_ptr<AVPacket>(av_packet_alloc(), AVPacketDeleter());
+    std::shared_ptr<AVPacket> packet(av_packet_alloc(), Deleter(av_packet_free));
     if (!packet) throw std::runtime_error("Demuxer: failed to allocate packet");
 
     int ret = av_read_frame(fmt_ctx_, packet.get());

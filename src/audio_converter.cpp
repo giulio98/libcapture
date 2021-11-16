@@ -67,7 +67,7 @@ std::shared_ptr<const AVFrame> AudioConverter::getFrame(int64_t frame_number) co
     /* not enough samples to build a frame */
     if (av_audio_fifo_size(fifo_buf_) < out_frame_size_) return nullptr;
 
-    auto out_frame = std::shared_ptr<AVFrame>(av_frame_alloc(), AVFrameDeleter());
+    std::shared_ptr<AVFrame> out_frame(av_frame_alloc(), Deleter(av_frame_free));
     if (!out_frame) throw std::runtime_error("AudioConverter: failed to allocate internal frame");
 
     out_frame->nb_samples = out_frame_size_;

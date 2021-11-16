@@ -45,7 +45,7 @@ bool Encoder::sendFrame(std::shared_ptr<const AVFrame> frame) const {
 }
 
 std::shared_ptr<AVPacket> Encoder::getPacket() const {
-    auto packet = std::shared_ptr<AVPacket>(av_packet_alloc(), AVPacketDeleter());
+    std::shared_ptr<AVPacket> packet(av_packet_alloc(), Deleter(av_packet_free));
     if (!packet) throw std::runtime_error("Encoder: failed to allocate packet");
 
     int ret = avcodec_receive_packet(codec_ctx_, packet.get());

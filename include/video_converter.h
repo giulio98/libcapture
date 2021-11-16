@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-#include "deleters.h"
+#include "deleter.h"
 #include "ffmpeg_libs.h"
 
 class VideoConverter {
