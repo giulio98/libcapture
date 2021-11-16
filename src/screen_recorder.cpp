@@ -3,11 +3,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include <sstream>
-#ifdef __linux__
+#ifdef LINUX
 #include <X11/Xlib.h>
 #include <X11/cursorfont.h>
 #endif
+
+#include <sstream>
 
 #include "../include/duration_logger.h"
 
@@ -19,7 +20,12 @@ ScreenRecorder::ScreenRecorder() {
     out_video_pix_fmt_ = AV_PIX_FMT_YUV420P;
     out_video_codec_id_ = AV_CODEC_ID_H264;
     out_audio_codec_id_ = AV_CODEC_ID_AAC;
+#ifdef LINUX
+    in_fmt_name_ = "x11grab";
+    in_audio_fmt_name_ = "pulse";
+#else
     in_fmt_name_ = "avfoundation";
+#endif
     video_encoder_options_.insert({"preset", "ultrafast"});
     avdevice_register_all();
 }
@@ -34,22 +40,36 @@ void ScreenRecorder::initInput() {
     std::stringstream framerate;
     std::map<std::string, std::string> demux_options;
 
+#ifdef LINUX
+    std::string display = getenv("DISPLAY");
+    device_name << display << ".0+" << offset_x_ << "," << offset_y_;
+#else
     device_name << "1:";
     if (capture_audio_) device_name << "0";
-
+#endif
     video_size << width_ << "x" << height_;
-
     framerate << video_framerate_;
 
     demux_options.insert({"video_size", video_size.str()});
     demux_options.insert({"framerate", framerate.str()});
+#ifdef LINUX
+    demux_options.insert({"show_region", "1"});
+#else
     demux_options.insert({"capture_cursor", "1"});
+#endif
 
     demuxer_ = std::unique_ptr<Demuxer>(new Demuxer(in_fmt_name_, device_name.str(), demux_options));
 
     video_decoder_ = std::unique_ptr<Decoder>(new Decoder(demuxer_->getVideoParams()));
     if (capture_audio_) {
-        audio_decoder_ = std::unique_ptr<Decoder>(new Decoder(demuxer_->getAudioParams()));
+#ifdef LINUX
+        audio_demuxer_ =
+            std::unique_ptr<Demuxer>(new Demuxer(in_audio_fmt_name_, "default", std::map<std::string, std::string>()));
+        auto params = audio_demuxer_->getAudioParams();
+#else
+        auto params = demuxer_->getAudioParams();
+#endif
+        audio_decoder_ = std::unique_ptr<Decoder>(new Decoder(params));
     }
 }
 
@@ -60,8 +80,13 @@ void ScreenRecorder::initOutput() {
         new VideoEncoder(out_video_codec_id_, video_encoder_options_, muxer_->getGlobalHeaderFlags(),
                          demuxer_->getVideoParams(), out_video_pix_fmt_, video_framerate_));
     if (capture_audio_) {
-        audio_encoder_ = std::shared_ptr<AudioEncoder>(new AudioEncoder(
-            out_audio_codec_id_, audio_encoder_options_, muxer_->getGlobalHeaderFlags(), demuxer_->getAudioParams()));
+#ifdef LINUX
+        auto params = audio_demuxer_->getAudioParams();
+#else
+        auto params = demuxer_->getAudioParams();
+#endif
+        audio_encoder_ = std::shared_ptr<AudioEncoder>(
+            new AudioEncoder(out_audio_codec_id_, audio_encoder_options_, muxer_->getGlobalHeaderFlags(), params));
     }
 
     muxer_->addVideoStream(video_encoder_->getCodecContext());
@@ -274,6 +299,18 @@ void ScreenRecorder::captureFrames() {
             if (stop_capture_) break;
         }
 
+#ifdef LINUX
+
+        auto [packet, packet_type] = demuxer_->readPacket();
+        if (packet) processVideoPacket(packet);
+
+        if (capture_audio_) {
+            auto [audio_packet, audio_packet_type] = audio_demuxer_->readPacket();
+            if (audio_packet) processAudioPacket(audio_packet);
+        }
+
+#else  // macOS
+
         auto [packet, packet_type] = demuxer_->readPacket();
         if (!packet) continue;
 
@@ -284,13 +321,15 @@ void ScreenRecorder::captureFrames() {
         } else {
             throw std::runtime_error("Unknown packet received from demuxer");
         }
+
+#endif
     }
 
     flushPipelines();
 }
 
 int ScreenRecorder::selectArea() {
-#ifdef __linux__
+#ifdef LINUX
     XEvent ev;
     Display *disp = NULL;
     Screen *scr = NULL;

@@ -37,7 +37,7 @@ class ScreenRecorder {
 
     std::string in_fmt_name_;
     std::unique_ptr<Demuxer> demuxer_;
-#ifdef __linux__
+#ifdef LINUX
     std::string in_audio_fmt_name_;
     std::unique_ptr<Demuxer> audio_demuxer_;
 #endif
