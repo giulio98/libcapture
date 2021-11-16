@@ -8,8 +8,8 @@
 class Muxer {
     AVFormatContext *fmt_ctx_;
     std::string filename_;
-    AVStream *video_stream_;
-    AVStream *audio_stream_;
+    const AVStream *video_stream_;
+    const AVStream *audio_stream_;
     bool file_opened_;
     bool file_closed_;
     bool time_base_valid_;

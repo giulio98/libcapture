@@ -10,8 +10,8 @@
 class Demuxer {
     AVFormatContext *fmt_ctx_;
     std::string device_name_;
-    AVStream *video_stream_;
-    AVStream *audio_stream_;
+    const AVStream *video_stream_;
+    const AVStream *audio_stream_;
 
     void cleanup();
 
