@@ -23,7 +23,7 @@ Demuxer::Demuxer(const std::string &fmt_name, const std::string &device_name,
             throw std::runtime_error("Demuxer: Failed to find stream info");
 
         for (int i = 0; i < fmt_ctx_->nb_streams; i++) {
-            AVStream *stream = fmt_ctx_->streams[i];
+            const AVStream *stream = fmt_ctx_->streams[i];
             if (stream->codecpar->codec_type == AVMEDIA_TYPE_VIDEO) {
                 video_stream_ = stream;
             } else if (stream->codecpar->codec_type == AVMEDIA_TYPE_AUDIO) {
