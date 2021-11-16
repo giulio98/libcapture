@@ -1,15 +1,12 @@
 #pragma once
 
-#include <iostream>
+#include <memory>
 #include <string>
 
-#include "deleter.h"
-#include "ffmpeg_libs.h"
+#include "common.h"
 
 class Muxer {
-    using unique_ptr_fmt_ctx = std::unique_ptr<AVFormatContext, DeleterP<avformat_free_context>>;
-
-    unique_ptr_fmt_ctx fmt_ctx_;
+    av::FormatContextPtr fmt_ctx_;
     std::string filename_;
     const AVStream *video_stream_;
     const AVStream *audio_stream_;
@@ -49,7 +46,7 @@ public:
      * @param packet the packet to write. If nullptr, the output queue will be flushed
      * @param packet_type the type of the packet (audio or video)
      */
-    void writePacket(std::shared_ptr<AVPacket> packet, AVType packet_type) const;
+    void writePacket(std::shared_ptr<AVPacket> packet, av::DataType packet_type) const;
 
     /**
      * Print informations

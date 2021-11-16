@@ -1,8 +1,8 @@
 #include "../include/audio_encoder.h"
 
-AudioEncoder::AudioEncoder(AVCodecID codec_id, std::map<std::string, std::string> options, int global_header_flags,
+AudioEncoder::AudioEncoder(AVCodecID codec_id, const std::map<std::string, std::string> &options, int global_header_flags,
                            const AVCodecParameters *params)
-    : Encoder(codec_id, options, global_header_flags) {
+    : Encoder(codec_id) {
     codec_ctx_->channels = params->channels;
     codec_ctx_->channel_layout = av_get_default_channel_layout(params->channels);
     codec_ctx_->sample_rate = params->sample_rate;
@@ -11,7 +11,6 @@ AudioEncoder::AudioEncoder(AVCodecID codec_id, std::map<std::string, std::string
     codec_ctx_->time_base = (AVRational){1, params->sample_rate};
 
     if (global_header_flags & AVFMT_GLOBALHEADER) codec_ctx_->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
-
-    int ret = avcodec_open2(codec_ctx_.get(), codec_, options_ ? &options_ : nullptr);
-    if (ret) throw std::runtime_error("Encoder: Failed to initialize Codec Context");
+    
+    open(options);
 }

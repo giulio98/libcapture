@@ -1,9 +1,10 @@
 #pragma once
 
 #include "encoder.h"
-#include "ffmpeg_libs.h"
+#include "common.h"
 
 class AudioEncoder : public Encoder {
 public:
-    AudioEncoder(AVCodecID codec_id, std::map<std::string, std::string> options, int global_header_flags, const AVCodecParameters *params);
+    AudioEncoder(AVCodecID codec_id, const std::map<std::string, std::string> &options, int global_header_flags,
+                 const AVCodecParameters *params);
 };

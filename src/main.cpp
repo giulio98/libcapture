@@ -1,3 +1,5 @@
+#include <iostream>
+
 #include "../include/screen_recorder.h"
 
 using namespace std;

@@ -1,25 +1,18 @@
 #include "../include/decoder.h"
 
 Decoder::Decoder(const AVCodecParameters *params) : codec_(nullptr), codec_ctx_(nullptr) {
-    try {
-        codec_ = avcodec_find_decoder(params->codec_id);
-        if (!codec_) throw std::runtime_error("Decoder: Cannot find codec");
+    codec_ = avcodec_find_decoder(params->codec_id);
+    if (!codec_) throw std::runtime_error("Decoder: Cannot find codec");
 
-        codec_ctx_ = unique_ptr_codec_ctx(avcodec_alloc_context3(codec_));
-        if (!codec_ctx_) throw std::runtime_error("Decoder: Failed to allocated memory for AVCodecContext");
+    codec_ctx_ = av::CodecContextPtr(avcodec_alloc_context3(codec_));
+    if (!codec_ctx_) throw std::runtime_error("Decoder: Failed to allocated memory for AVCodecContext");
 
-        if (avcodec_parameters_to_context(codec_ctx_.get(), params) < 0)
-            throw std::runtime_error("Decoder: Failed to copy codec params to codec context");
+    if (avcodec_parameters_to_context(codec_ctx_.get(), params) < 0)
+        throw std::runtime_error("Decoder: Failed to copy codec params to codec context");
 
-        if (avcodec_open2(codec_ctx_.get(), codec_, nullptr) < 0)
-            throw std::runtime_error("Decoder: Unable to open the av codec");
-
-    } catch (const std::exception &e) {
-        throw;
-    }
+    if (avcodec_open2(codec_ctx_.get(), codec_, nullptr) < 0)
+        throw std::runtime_error("Decoder: Unable to open the av codec");
 }
-
-Decoder::~Decoder() {}
 
 bool Decoder::sendPacket(std::shared_ptr<const AVPacket> packet) const {
     int ret = avcodec_send_packet(codec_ctx_.get(), packet.get());

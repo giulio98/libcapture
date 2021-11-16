@@ -12,12 +12,10 @@ VideoConverter::VideoConverter(const AVCodecContext *in_codec_ctx, const AVCodec
     codec_ctx_time_base_ = out_codec_ctx->time_base;
 
     ctx_ =
-        unique_ptr_sws_ctx(sws_getContext(in_codec_ctx->width, in_codec_ctx->height, in_codec_ctx->pix_fmt, out_width_,
-                                          out_height_, out_pix_fmt_, SWS_BICUBIC, nullptr, nullptr, nullptr));
+        av::SwsContextPtr(sws_getContext(in_codec_ctx->width, in_codec_ctx->height, in_codec_ctx->pix_fmt, out_width_,
+                                         out_height_, out_pix_fmt_, SWS_BICUBIC, nullptr, nullptr, nullptr));
     if (!ctx_) throw std::runtime_error("VideoConverter: failed to allocate context");
 }
-
-VideoConverter::~VideoConverter() {}
 
 std::shared_ptr<const AVFrame> VideoConverter::convertFrame(std::shared_ptr<const AVFrame> in_frame,
                                                             int64_t frame_number) const {

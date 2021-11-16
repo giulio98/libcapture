@@ -1,15 +1,12 @@
 #pragma once
 
-#include <iostream>
+#include <memory>
 
-#include "deleter.h"
-#include "ffmpeg_libs.h"
+#include "common.h"
 
 class Decoder {
-    using unique_ptr_codec_ctx = std::unique_ptr<AVCodecContext, DeleterPP<avcodec_free_context>>;
-
     AVCodec *codec_;
-    unique_ptr_codec_ctx codec_ctx_;
+    av::CodecContextPtr codec_ctx_;
 
 public:
     /**
@@ -17,8 +14,6 @@ public:
      * @param params the parameters to use to initialize the decoder
      */
     Decoder(const AVCodecParameters *params);
-
-    ~Decoder();
 
     /**
      * Send a packet to the decoder

@@ -1,34 +1,27 @@
 #include "../include/encoder.h"
 
-Encoder::Encoder(AVCodecID codec_id, const std::map<std::string, std::string> &options, int global_header_flags)
-    : codec_(nullptr), codec_ctx_(nullptr), options_(nullptr) {
-    try {
+Encoder::Encoder(AVCodecID codec_id) : codec_(nullptr), codec_ctx_(nullptr) {
 #ifdef MACOS
-        if (codec_id == AV_CODEC_ID_H264) codec_ = avcodec_find_encoder_by_name("h264_videotoolbox");
+    if (codec_id == AV_CODEC_ID_H264) codec_ = avcodec_find_encoder_by_name("h264_videotoolbox");
 #endif
-        if (!codec_) codec_ = avcodec_find_encoder(codec_id);
-        if (!codec_) throw std::runtime_error("Encoder: Cannot find codec");
+    if (!codec_) codec_ = avcodec_find_encoder(codec_id);
+    if (!codec_) throw std::runtime_error("Encoder: Cannot find codec");
 
-        codec_ctx_ = unique_ptr_codec_ctx(avcodec_alloc_context3(codec_));
-        if (!codec_ctx_) throw std::runtime_error("Encoder: Failed to allocated memory for AVCodecContext");
-
-        for (auto const &[key, val] : options) {
-            if (av_dict_set(&options_, key.c_str(), val.c_str(), 0) < 0) {
-                throw std::runtime_error("Encoder: Cannot set " + key + "in dictionary");
-            }
-        }
-
-    } catch (const std::exception &e) {
-        cleanup();
-        throw;
-    }
+    codec_ctx_ = av::CodecContextPtr(avcodec_alloc_context3(codec_));
+    if (!codec_ctx_) throw std::runtime_error("Encoder: Failed to allocated memory for AVCodecContext");
 }
 
-Encoder::~Encoder() { cleanup(); }
-
-void Encoder::cleanup() {
-    // TO-DO: free codec_ (how?)
-    if (options_) av_dict_free(&options_);
+void Encoder::open(const std::map<std::string, std::string> &options) {
+    AVDictionary *dict = nullptr;
+    for (auto const &[key, val] : options) {
+        if (av_dict_set(&dict, key.c_str(), val.c_str(), 0) < 0) {
+            if (dict) av_dict_free(&dict);
+            throw std::runtime_error("Encoder: Cannot set " + key + "in dictionary");
+        }
+    }
+    int ret = avcodec_open2(codec_ctx_.get(), codec_, dict ? &dict : nullptr);
+    if (dict) av_dict_free(&dict);
+    if (ret) throw std::runtime_error("Encoder: Failed to initialize Codec Context");
 }
 
 bool Encoder::sendFrame(std::shared_ptr<const AVFrame> frame) const {

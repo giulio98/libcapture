@@ -150,12 +150,12 @@ void ScreenRecorder::resume() {
     cv_.notify_all();
 }
 
-void ScreenRecorder::processConvertedFrame(std::shared_ptr<const AVFrame> frame, AVType frame_type) {
+void ScreenRecorder::processConvertedFrame(std::shared_ptr<const AVFrame> frame, av::DataType frame_type) {
     std::shared_ptr<Encoder> encoder;
 
-    if (frame_type == video) {
+    if (frame_type == av::DataType::video) {
         encoder = video_encoder_;
-    } else if (frame_type == audio) {
+    } else if (frame_type == av::DataType::audio) {
         encoder = audio_encoder_;
     } else {
         throw std::runtime_error("frame type is unknown");
@@ -188,7 +188,7 @@ void ScreenRecorder::processVideoPacket(std::shared_ptr<const AVPacket> packet) 
 
             auto out_frame = video_converter_->convertFrame(in_frame, video_frame_counter_++);
 
-            processConvertedFrame(out_frame, video);
+            processConvertedFrame(out_frame, av::DataType::video);
         }
     }
 }
@@ -216,7 +216,7 @@ void ScreenRecorder::processAudioPacket(std::shared_ptr<const AVPacket> packet) 
 
                     audio_frame_counter_++;
 
-                    processConvertedFrame(out_frame, audio);
+                    processConvertedFrame(out_frame, av::DataType::audio);
                 }
             }
         }
@@ -227,17 +227,17 @@ void ScreenRecorder::flushPipelines() {
     /* flush video decoder */
     processVideoPacket(nullptr);
     /* flush video encoder */
-    processConvertedFrame(nullptr, video);
+    processConvertedFrame(nullptr, av::DataType::video);
 
     if (capture_audio_) {
         /* flush audio decoder */
         processAudioPacket(nullptr);
         /* flush audio encoder */
-        processConvertedFrame(nullptr, audio);
+        processConvertedFrame(nullptr, av::DataType::audio);
     }
 
     /* flush output queue */
-    muxer_->writePacket(nullptr, none);
+    muxer_->writePacket(nullptr, av::DataType::none);
 }
 
 /* function to capture and store data in frames by allocating required memory and auto deallocating the memory.   */
@@ -256,9 +256,9 @@ void ScreenRecorder::captureFrames() {
         auto [packet, packet_type] = demuxer_->readPacket();
         if (!packet) continue;
 
-        if (packet_type == video) {
+        if (packet_type == av::DataType::video) {
             processVideoPacket(packet);
-        } else if (capture_audio_ && (packet_type == audio)) {
+        } else if (capture_audio_ && (packet_type == av::DataType::audio)) {
             processAudioPacket(packet);
         } else {
             throw std::runtime_error("Unknown packet received from demuxer");

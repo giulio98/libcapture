@@ -1,15 +1,15 @@
 #pragma once
 
 #include <condition_variable>
-#include <iostream>
+#include <memory>
 #include <mutex>
 #include <thread>
 
 #include "audio_converter.h"
 #include "audio_encoder.h"
+#include "common.h"
 #include "decoder.h"
 #include "demuxer.h"
-#include "ffmpeg_libs.h"
 #include "muxer.h"
 #include "video_converter.h"
 #include "video_encoder.h"
@@ -64,7 +64,7 @@ class ScreenRecorder {
 
     void processAudioPacket(std::shared_ptr<const AVPacket> packet);
 
-    void processConvertedFrame(std::shared_ptr<const AVFrame> frame, AVType audio_video);
+    void processConvertedFrame(std::shared_ptr<const AVFrame> frame, av::DataType audio_video);
 
     void flushPipelines();
 

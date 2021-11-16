@@ -1,5 +1,7 @@
 #include "../include/muxer.h"
 
+#include <iostream>
+
 Muxer::Muxer(const std::string &filename)
     : fmt_ctx_(nullptr),
       filename_(filename),
@@ -11,7 +13,7 @@ Muxer::Muxer(const std::string &filename)
     AVFormatContext *fmt_ctx = nullptr;
     if (avformat_alloc_output_context2(&fmt_ctx, NULL, NULL, filename_.c_str()) < 0)
         throw std::runtime_error("Failed to allocate output format context");
-    fmt_ctx_ = unique_ptr_fmt_ctx(fmt_ctx);
+    fmt_ctx_ = av::FormatContextPtr(fmt_ctx);
 }
 
 Muxer::~Muxer() {
@@ -92,15 +94,15 @@ void Muxer::closeFile() {
     file_closed_ = true;
 }
 
-void Muxer::writePacket(std::shared_ptr<AVPacket> packet, AVType packet_type) const {
+void Muxer::writePacket(std::shared_ptr<AVPacket> packet, av::DataType packet_type) const {
     if (!file_opened_) throw std::runtime_error("Muxer: cannot write packet, file has not been opened");
     if (file_closed_) throw std::runtime_error("Muxer: cannot write packet, file has already been closed");
 
     if (packet) {
-        if (packet_type == video) {
+        if (packet_type == av::DataType::video) {
             if (!video_stream_) throw std::runtime_error("Muxer: Video stream not present");
             packet->stream_index = video_stream_->index;
-        } else if (packet_type == audio) {
+        } else if (packet_type == av::DataType::audio) {
             if (!audio_stream_) throw std::runtime_error("Muxer: Audio stream not present");
             packet->stream_index = audio_stream_->index;
         } else {
