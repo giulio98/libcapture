@@ -1,7 +1,5 @@
 #pragma once
 
-#include "ffmpeg_libs.h"
-
 /**
  * Wrapper template for a deleter function that accept a pointer to the struct to free
  * "auto" will accept any signature for the "deleter" function (e.g. void (*deleter)(Struct *)),
