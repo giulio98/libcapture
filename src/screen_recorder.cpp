@@ -253,7 +253,7 @@ void ScreenRecorder::captureFrames() {
             if (stop_capture_) break;
         }
 
-        auto [packet, packet_type] = demuxer_->getPacket();
+        auto [packet, packet_type] = demuxer_->readPacket();
         if (!packet) continue;
 
         if (packet_type == video) {

@@ -29,7 +29,7 @@ public:
      * Read a packet from the input device and return it together with its type
      * @return a packet and its type if it was possible to read it, nullptr if the demuxer had nothing to read
      */
-    std::pair<std::shared_ptr<const AVPacket>, AVType> getPacket() const;
+    std::pair<std::shared_ptr<const AVPacket>, AVType> readPacket() const;
 
     void dumpInfo() const;
 };
