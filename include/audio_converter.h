@@ -17,7 +17,7 @@ class AudioConverter {
 
 public:
     AudioConverter(const AVCodecContext *in_codec_ctx, const AVCodecContext *out_codec_ctx,
-                   AVRational stream_time_base);
+                   AVRational out_stream_time_base);
 
     /**
      * Send a frame to convert

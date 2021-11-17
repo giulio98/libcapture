@@ -1,8 +1,8 @@
 #include "../include/audio_converter.h"
 
 AudioConverter::AudioConverter(const AVCodecContext *in_codec_ctx, const AVCodecContext *out_codec_ctx,
-                               AVRational stream_time_base)
-    : ctx_(nullptr), fifo_buf_(nullptr), stream_time_base_(stream_time_base), fifo_duration_(1) {
+                               AVRational out_stream_time_base)
+    : ctx_(nullptr), fifo_buf_(nullptr), stream_time_base_(out_stream_time_base), fifo_duration_(1) {
     if (!in_codec_ctx) throw std::runtime_error("AudioConverter: in_codec_ctx is NULL");
     if (!out_codec_ctx) throw std::runtime_error("AudioConverter: out_codec_ctx is NULL");
 

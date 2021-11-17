@@ -1,8 +1,8 @@
 #include "../include/video_converter.h"
 
 VideoConverter::VideoConverter(const AVCodecContext *in_codec_ctx, const AVCodecContext *out_codec_ctx,
-                               AVRational stream_time_base)
-    : ctx_(nullptr), stream_time_base_(stream_time_base) {
+                               AVRational out_stream_time_base)
+    : ctx_(nullptr), stream_time_base_(out_stream_time_base) {
     if (!in_codec_ctx) throw std::runtime_error("VideoConverter: in_codec_ctx is NULL");
     if (!out_codec_ctx) throw std::runtime_error("VideoConverter: out_codec_ctx is NULL");
 
