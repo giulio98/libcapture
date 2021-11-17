@@ -302,7 +302,13 @@ void ScreenRecorder::captureFrames() {
             std::unique_lock<std::mutex> ul{mutex_};
             auto pause_start_time = paused_ ? av_gettime() : 0;
             cv_.wait(ul, [this]() { return !paused_; });
-            if (pause_start_time) start_time_ += (av_gettime() - pause_start_time);
+            if (pause_start_time) {
+                demuxer_->flush();
+#ifdef LINUX
+                if (capture_audio_) audio_demuxer_->flush();
+#endif
+                start_time_ += (av_gettime() - pause_start_time);
+            }
             if (stop_capture_) break;
         }
 

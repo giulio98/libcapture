@@ -25,5 +25,7 @@ public:
      */
     std::pair<std::shared_ptr<const AVPacket>, av::DataType> readPacket() const;
 
+    void flush() const;
+
     void dumpInfo() const;
 };

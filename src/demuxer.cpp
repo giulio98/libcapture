@@ -75,4 +75,8 @@ std::pair<std::shared_ptr<const AVPacket>, av::DataType> Demuxer::readPacket() c
     return std::make_pair(packet, packet_type);
 }
 
+void Demuxer::flush() const {
+    if (avformat_flush(fmt_ctx_.get()) < 0) throw std::runtime_error("Demuxer: failed to flush");
+}
+
 void Demuxer::dumpInfo() const { av_dump_format(fmt_ctx_.get(), 0, device_name_.c_str(), 0); }
