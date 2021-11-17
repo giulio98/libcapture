@@ -76,7 +76,7 @@ void ScreenRecorder::initInput() {
 void ScreenRecorder::initOutput() {
     muxer_ = std::unique_ptr<Muxer>(new Muxer(output_file_));
 
-    video_encoder_ = std::shared_ptr<VideoEncoder>(
+    video_encoder_ = std::unique_ptr<VideoEncoder>(
         new VideoEncoder(out_video_codec_id_, video_encoder_options_, muxer_->getGlobalHeaderFlags(),
                          demuxer_->getVideoParams(), out_video_pix_fmt_, video_framerate_));
     if (capture_audio_) {
@@ -85,7 +85,7 @@ void ScreenRecorder::initOutput() {
 #else
         auto params = demuxer_->getAudioParams();
 #endif
-        audio_encoder_ = std::shared_ptr<AudioEncoder>(
+        audio_encoder_ = std::unique_ptr<AudioEncoder>(
             new AudioEncoder(out_audio_codec_id_, audio_encoder_options_, muxer_->getGlobalHeaderFlags(), params));
     }
 
@@ -206,13 +206,13 @@ void ScreenRecorder::estimateFramerate() {
 }
 
 void ScreenRecorder::processConvertedFrame(std::shared_ptr<const AVFrame> frame, av::DataType frame_type) {
-    std::shared_ptr<Encoder> encoder;
+    const Encoder *encoder;
 
     if (frame_type == av::DataType::video) {
-        encoder = video_encoder_;
+        encoder = video_encoder_.get();
         if (video_frame_counter_ % video_framerate_ == 0) estimateFramerate();
     } else if (frame_type == av::DataType::audio) {
-        encoder = audio_encoder_;
+        encoder = audio_encoder_.get();
     } else {
         throw std::runtime_error("frame type is unknown");
     }
