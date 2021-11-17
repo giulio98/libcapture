@@ -12,7 +12,7 @@
 
 #include "../include/duration_logger.h"
 
-#define DURATION_LOG 0
+#define DURATION_LOGGING 0
 #define FRAMERATE_LOGGING 0
 
 ScreenRecorder::ScreenRecorder() {
@@ -214,7 +214,7 @@ void ScreenRecorder::processConvertedFrame(std::shared_ptr<const AVFrame> frame,
 }
 
 void ScreenRecorder::processVideoPacket(std::shared_ptr<const AVPacket> packet) {
-#if DURATION_LOG
+#if DURATION_LOGGING
     DurationLogger dl("Video packet processed in ");
 #endif
 
@@ -236,7 +236,7 @@ void ScreenRecorder::processVideoPacket(std::shared_ptr<const AVPacket> packet) 
 }
 
 void ScreenRecorder::processAudioPacket(std::shared_ptr<const AVPacket> packet) {
-#if DURATION_LOG
+#if DURATION_LOGGING
     DurationLogger dl("Audio packet processed in ");
 #endif
 
