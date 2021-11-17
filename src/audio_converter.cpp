@@ -32,7 +32,7 @@ bool AudioConverter::sendFrame(std::shared_ptr<const AVFrame> frame) const {
     if (av_audio_fifo_space(fifo_buf_.get()) < frame->nb_samples) return false;
 
     try {
-        if (av_samples_alloc_array_and_samples(&buf, nullptr, out_channels_, out_frame_size_, out_sample_fmt_, 0) < 0)
+        if (av_samples_alloc_array_and_samples(&buf, nullptr, out_channels_, frame->nb_samples, out_sample_fmt_, 0) < 0)
             throw std::runtime_error("AudioConverter: failed to alloc samples by av_samples_alloc_array_and_samples.");
 
         if (swr_convert(ctx_.get(), buf, frame->nb_samples, (const uint8_t **)frame->extended_data, frame->nb_samples) <
