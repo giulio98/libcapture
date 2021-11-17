@@ -25,11 +25,10 @@ AudioConverter::AudioConverter(const AVCodecContext *in_codec_ctx, const AVCodec
 }
 
 bool AudioConverter::sendFrame(std::shared_ptr<const AVFrame> frame) const {
-    uint8_t **buf = nullptr;
-
     if (!frame) throw std::runtime_error("AudioConverter: frame is not allocated");
-
     if (av_audio_fifo_space(fifo_buf_.get()) < frame->nb_samples) return false;
+
+    uint8_t **buf = nullptr;
 
     try {
         if (av_samples_alloc_array_and_samples(&buf, nullptr, out_channels_, frame->nb_samples, out_sample_fmt_, 0) < 0)
@@ -44,12 +43,12 @@ bool AudioConverter::sendFrame(std::shared_ptr<const AVFrame> frame) const {
 
         if (**buf) av_freep(&buf[0]);
 
-        return true;
-
     } catch (const std::exception &e) {
         if (**buf) av_freep(&buf[0]);
         throw;
     }
+
+    return true;
 }
 
 std::shared_ptr<const AVFrame> AudioConverter::getFrame(int64_t frame_number) const {
