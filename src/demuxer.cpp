@@ -3,45 +3,28 @@
 Demuxer::Demuxer(const std::string &fmt_name, const std::string &device_name,
                  const std::map<std::string, std::string> &options)
     : fmt_ctx_(nullptr), device_name_(device_name), video_stream_(nullptr), audio_stream_(nullptr) {
-    AVInputFormat *fmt = nullptr;
-    AVDictionary *dict = nullptr;
+    auto fmt = av_find_input_format(fmt_name.c_str());
+    if (!fmt) throw std::runtime_error("Demuxer: Cannot find input format");
 
-    try {
-        fmt = av_find_input_format(fmt_name.c_str());
-        if (!fmt) throw std::runtime_error("Demuxer: Cannot find input format");
+    {
+        AVFormatContext *fmt_ctx = nullptr;
+        auto dict = av::map2dict(options).release();
+        int err = avformat_open_input(&fmt_ctx, device_name_.c_str(), fmt, dict ? &dict : nullptr);
+        av_dict_free(&dict);
+        fmt_ctx_ = av::InFormatContextPtr(fmt_ctx);
+        if (err) throw std::runtime_error("Demuxer: Cannot open input format");
+    }
 
-        for (const auto &[key, val] : options) {
-            if (av_dict_set(&dict, key.c_str(), val.c_str(), 0) < 0) {
-                throw std::runtime_error("Demuxer: Cannot set " + key + "in dictionary");
-            }
+    if (avformat_find_stream_info(fmt_ctx_.get(), nullptr) < 0)
+        throw std::runtime_error("Demuxer: Failed to find stream info");
+
+    for (int i = 0; i < fmt_ctx_->nb_streams; i++) {
+        const AVStream *stream = fmt_ctx_->streams[i];
+        if (stream->codecpar->codec_type == AVMEDIA_TYPE_VIDEO) {
+            video_stream_ = stream;
+        } else if (stream->codecpar->codec_type == AVMEDIA_TYPE_AUDIO) {
+            audio_stream_ = stream;
         }
-
-        {
-            AVFormatContext *fmt_ctx = nullptr;
-            if (avformat_open_input(&fmt_ctx, device_name_.c_str(), fmt, dict ? &dict : nullptr))
-                throw std::runtime_error("Demuxer: Cannot open input format");
-            fmt_ctx_ = av::InFormatContextPtr(fmt_ctx);
-        }
-
-        if (avformat_find_stream_info(fmt_ctx_.get(), nullptr) < 0)
-            throw std::runtime_error("Demuxer: Failed to find stream info");
-
-        for (int i = 0; i < fmt_ctx_->nb_streams; i++) {
-            const AVStream *stream = fmt_ctx_->streams[i];
-            if (stream->codecpar->codec_type == AVMEDIA_TYPE_VIDEO) {
-                video_stream_ = stream;
-            } else if (stream->codecpar->codec_type == AVMEDIA_TYPE_AUDIO) {
-                audio_stream_ = stream;
-            }
-        }
-
-        // TO-DO: free fmt (how?)
-        if (dict) av_dict_free(&dict);
-
-    } catch (const std::exception &e) {
-        // TO-DO: free fmt (how?)
-        if (dict) av_dict_free(&dict);
-        throw;
     }
 }
 

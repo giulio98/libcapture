@@ -1,6 +1,8 @@
 #pragma once
 
+#include <map>
 #include <memory>
+#include <string>
 
 #include "deleter.h"
 
@@ -40,4 +42,16 @@ using SwsContextPtr = std::unique_ptr<SwsContext, DeleterP<sws_freeContext>>;
 using SwrContextPtr = std::unique_ptr<SwrContext, DeleterPP<swr_free>>;
 using AudioFifoPtr = std::unique_ptr<AVAudioFifo, DeleterP<av_audio_fifo_free>>;
 using DictionaryPtr = std::unique_ptr<AVDictionary, DeleterPP<av_dict_free>>;
+
+inline DictionaryPtr map2dict(const std::map<std::string, std::string> &map) {
+    AVDictionary *dict = nullptr;
+    for (const auto &[key, val] : map) {
+        if (av_dict_set(&dict, key.c_str(), val.c_str(), 0) < 0) {
+            if (dict) av_dict_free(&dict);
+            throw std::runtime_error("Cannot set " + key + "in dictionary");
+        }
+    }
+    return DictionaryPtr(dict);
+}
+
 }  // namespace av

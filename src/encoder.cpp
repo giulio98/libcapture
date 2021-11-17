@@ -12,16 +12,10 @@ Encoder::Encoder(AVCodecID codec_id) : codec_(nullptr), codec_ctx_(nullptr) {
 }
 
 void Encoder::open(const std::map<std::string, std::string> &options) {
-    AVDictionary *dict = nullptr;
-    for (auto const &[key, val] : options) {
-        if (av_dict_set(&dict, key.c_str(), val.c_str(), 0) < 0) {
-            if (dict) av_dict_free(&dict);
-            throw std::runtime_error("Encoder: Cannot set " + key + "in dictionary");
-        }
-    }
-    int ret = avcodec_open2(codec_ctx_.get(), codec_, dict ? &dict : nullptr);
-    if (dict) av_dict_free(&dict);
-    if (ret) throw std::runtime_error("Encoder: Failed to initialize Codec Context");
+    auto dict = av::map2dict(options).release();
+    int err = avcodec_open2(codec_ctx_.get(), codec_, dict ? &dict : nullptr);
+    av_dict_free(&dict);
+    if (err) throw std::runtime_error("Encoder: Failed to initialize Codec Context");
 }
 
 bool Encoder::sendFrame(std::shared_ptr<const AVFrame> frame) const {
