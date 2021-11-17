@@ -89,7 +89,7 @@ public:
 
     ~ScreenRecorder();
 
-    void start(const std::string &output_file, bool capture_audio);
+    void start(const std::string &output_file, int framerate, bool capture_audio);
 
     void stop();
 

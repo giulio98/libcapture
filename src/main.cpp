@@ -11,7 +11,7 @@ int main() {
     std::string file2 = "../media/output2.mp4";
 
     std::cout << "Recording to " << file1 << std::endl;
-    screen_record.start(file1, true);
+    screen_record.start(file1, 60, true);
     std::this_thread::sleep_for(5000ms);
     screen_record.pause();
     std::this_thread::sleep_for(5000ms);
@@ -24,7 +24,7 @@ int main() {
     std::cout << std::endl;
 
     std::cout << "Recording to " << file2 << std::endl;
-    screen_record.start(file2, false);
+    screen_record.start(file2, 30, false);
     std::this_thread::sleep_for(5000ms);
     screen_record.pause();
     std::this_thread::sleep_for(1000ms);

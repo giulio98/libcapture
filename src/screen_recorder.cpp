@@ -16,7 +16,6 @@
 #define FRAMERATE_LOGGING 0
 
 ScreenRecorder::ScreenRecorder() {
-    video_framerate_ = 30;
     out_video_pix_fmt_ = AV_PIX_FMT_YUV420P;
     out_video_codec_id_ = AV_CODEC_ID_H264;
     out_audio_codec_id_ = AV_CODEC_ID_AAC;
@@ -114,8 +113,9 @@ void ScreenRecorder::printInfo() {
     std::cout << "Video framerate: " << video_framerate_ << " fps" << std::endl;
 }
 
-void ScreenRecorder::start(const std::string &output_file, bool capture_audio) {
+void ScreenRecorder::start(const std::string &output_file, int framerate, bool capture_audio) {
     output_file_ = output_file;
+    video_framerate_ = framerate;
     capture_audio_ = capture_audio;
     stop_capture_ = false;
     paused_ = false;
