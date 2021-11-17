@@ -170,10 +170,6 @@ void ScreenRecorder::stop() {
 void ScreenRecorder::pause() {
     std::unique_lock<std::mutex> ul{mutex_};
     if (stop_capture_) return;
-#ifdef LINUX
-    demuxer_->closeInput();
-    if (capture_audio_) audio_demuxer_->closeInput();
-#endif
     paused_ = true;
     std::cout << "Recording paused" << std::endl;
     cv_.notify_all();
@@ -182,10 +178,6 @@ void ScreenRecorder::pause() {
 void ScreenRecorder::resume() {
     std::unique_lock<std::mutex> ul{mutex_};
     if (stop_capture_) return;
-#ifdef LINUX
-    demuxer_->openInput();
-    if (capture_audio_) audio_demuxer_->openInput();
-#endif
     paused_ = false;
     std::cout << "Recording resumed" << std::endl;
     cv_.notify_all();
@@ -307,11 +299,31 @@ void ScreenRecorder::captureFrames() {
     start_time_ = av_gettime();
 
     while (true) {
-        std::unique_lock<std::mutex> ul{mutex_};
-        auto pause_start_time = paused_ ? av_gettime() : 0;
-        cv_.wait(ul, [this]() { return !paused_; });
-        if (pause_start_time) start_time_ += (av_gettime() - pause_start_time);
-        if (stop_capture_) break;
+        {
+            std::unique_lock<std::mutex> ul{mutex_};
+
+            int64_t pause_start_time = 0;
+
+            if (paused_) {
+                pause_start_time = av_gettime();
+#ifdef LINUX
+                demuxer_->closeInput();
+                if (capture_audio_) audio_demuxer_->closeInput();
+#endif
+            }
+
+            cv_.wait(ul, [this]() { return !paused_; });
+
+            if (pause_start_time) {
+#ifdef LINUX
+                demuxer_->openInput();
+                if (capture_audio_) audio_demuxer_->openInput();
+#endif
+                start_time_ += (av_gettime() - pause_start_time);
+            }
+
+            if (stop_capture_) break;
+        }
 
 #ifdef LINUX
 
