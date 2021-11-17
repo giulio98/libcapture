@@ -184,7 +184,7 @@ void ScreenRecorder::estimateFramerate() {
 #if FRAMERATE_LOGGING
     std::cout << "Estimated framerate: " << estimated_framerate << " fps" << std::endl;
 #else
-    if (estimated_framerate < video_framerate_) dropped_frame_counter_++;
+    if (estimated_framerate < (video_framerate_ - 1)) dropped_frame_counter_++;
     if (dropped_frame_counter_ == 2) {
         std::cerr << "WARNING: it looks like you're dropping some frames (estimated " << estimated_framerate
                   << " fps), try to lower the fps" << std::endl;
