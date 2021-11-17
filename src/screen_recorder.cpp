@@ -177,7 +177,7 @@ void ScreenRecorder::resume() {
 }
 
 void ScreenRecorder::estimateFramerate() {
-    int64_t estimated_framerate = 1000000 * video_frame_counter_ / (av_gettime() - start_time_);
+    auto estimated_framerate = 1000000 * video_frame_counter_ / (av_gettime() - start_time_);
 #if FRAMERATE_LOGGING
     std::cout << "Estimated framerate: " << estimated_framerate << " fps" << std::endl;
 #else
@@ -289,13 +289,15 @@ void ScreenRecorder::captureFrames() {
     audio_frame_counter_ = 0;
 
     /* start counting for fps estimation */
-    start_time_ = av_gettime();
     dropped_frame_counter_ = -1;  // wait for an extra second at the beginning to allow the framerate to stabilize
+    start_time_ = av_gettime();
 
     while (true) {
         {
             std::unique_lock<std::mutex> ul{mutex_};
+            auto pause_start_time = paused_ ? av_gettime() : 0;
             cv_.wait(ul, [this]() { return !paused_; });
+            if (pause_start_time) start_time_ += (av_gettime() - pause_start_time);
             if (stop_capture_) break;
         }
 
