@@ -54,7 +54,7 @@ void ScreenRecorder::initInput() {
 #ifdef LINUX
     demux_options.insert({"show_region", "1"});
 #else
-    demux_options.insert({"capture_cursor", "1"});
+    demux_options.insert({"capture_cursor", "0"});
 #endif
 
     demuxer_ = std::unique_ptr<Demuxer>(new Demuxer(in_fmt_name_, device_name.str(), demux_options));
