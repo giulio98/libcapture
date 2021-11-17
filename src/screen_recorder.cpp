@@ -303,8 +303,8 @@ void ScreenRecorder::captureFrames() {
             auto pause_start_time = paused_ ? av_gettime() : 0;
             cv_.wait(ul, [this]() { return !paused_; });
             if (pause_start_time) {
-                demuxer_->flush();
 #ifdef LINUX
+                demuxer_->flush();
                 if (capture_audio_) audio_demuxer_->flush();
 #endif
                 start_time_ += (av_gettime() - pause_start_time);
