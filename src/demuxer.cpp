@@ -2,16 +2,26 @@
 
 Demuxer::Demuxer(const std::string &fmt_name, const std::string &device_name,
                  const std::map<std::string, std::string> &options)
-    : fmt_ctx_(nullptr), device_name_(device_name), video_stream_(nullptr), audio_stream_(nullptr) {
-    auto fmt = av_find_input_format(fmt_name.c_str());
-    if (!fmt) throw std::runtime_error("Demuxer: Cannot find input format");
+    : fmt_ctx_(nullptr),
+      fmt_(nullptr),
+      device_name_(device_name),
+      options_dict_(nullptr),
+      video_stream_(nullptr),
+      audio_stream_(nullptr) {
+    fmt_ = av_find_input_format(fmt_name.c_str());
+    if (!fmt_) throw std::runtime_error("Demuxer: Cannot find input format");
+    options_dict_ = av::map2dict(options);
+}
+
+void Demuxer::openInput() {
+    if (fmt_ctx_) throw std::runtime_error("Demuxer: input is already open");
 
     {
         AVFormatContext *fmt_ctx = nullptr;
-        auto dict = av::map2dict(options).release();
-        int err = avformat_open_input(&fmt_ctx, device_name_.c_str(), fmt, dict ? &dict : nullptr);
-        av_dict_free(&dict);
+        auto dict = options_dict_.release();
+        int err = avformat_open_input(&fmt_ctx, device_name_.c_str(), fmt_, dict ? &dict : nullptr);
         fmt_ctx_ = av::InFormatContextPtr(fmt_ctx);
+        options_dict_ = av::DictionaryPtr(dict);
         if (err) throw std::runtime_error("Demuxer: Cannot open input format");
     }
 
@@ -28,17 +38,27 @@ Demuxer::Demuxer(const std::string &fmt_name, const std::string &device_name,
     }
 }
 
+void Demuxer::closeInput() {
+    if (!fmt_ctx_) throw std::runtime_error("Demuxer: input is not open");
+    fmt_ctx_ = av::InFormatContextPtr(nullptr);
+    video_stream_ = nullptr;
+    audio_stream_ = nullptr;
+}
+
 const AVCodecParameters *Demuxer::getVideoParams() const {
+    if (!fmt_ctx_) throw std::runtime_error("Demuxer: input is not open");
     if (!video_stream_) throw std::runtime_error("Demuxer: Video stream not present");
     return video_stream_->codecpar;
 }
 
 const AVCodecParameters *Demuxer::getAudioParams() const {
+    if (!fmt_ctx_) throw std::runtime_error("Demuxer: input is not open");
     if (!audio_stream_) throw std::runtime_error("Demuxer: Audio stream not present");
     return audio_stream_->codecpar;
 }
 
 std::pair<std::shared_ptr<const AVPacket>, av::DataType> Demuxer::readPacket() const {
+    if (!fmt_ctx_) throw std::runtime_error("Demuxer: input is not open");
     std::shared_ptr<AVPacket> packet(av_packet_alloc(), DeleterPP<av_packet_free>());
     if (!packet) throw std::runtime_error("Demuxer: failed to allocate packet");
 
@@ -59,22 +79,11 @@ std::pair<std::shared_ptr<const AVPacket>, av::DataType> Demuxer::readPacket() c
 }
 
 void Demuxer::flush() const {
+    if (!fmt_ctx_) throw std::runtime_error("Demuxer: input is not open");
     if (avformat_flush(fmt_ctx_.get()) < 0) throw std::runtime_error("Demuxer: failed to flush");
 }
 
-void Demuxer::dumpInfo() const { av_dump_format(fmt_ctx_.get(), 0, device_name_.c_str(), 0); }
-
-void Demuxer::closeInput(){
-    fmt_ctx_ = av::InFormatContextPtr(nullptr);
-}
-void Demuxer::openInput(const std::string &fmt_name, const std::string &device_name) {
-    {
-    AVFormatContext *fmt_ctx = nullptr;
-    auto dict = dict_.release();
-    int err = avformat_open_input(&fmt_ctx, device_name_.c_str(), av_find_input_format(fmt_name.c_str()), dict ? &dict : nullptr);
-    fmt_ctx_ = av::InFormatContextPtr(fmt_ctx);
-    dict_ = av::DictionaryPtr(dict);
-    if (err) throw std::runtime_error("Demuxer: Cannot open input format");
-
-    }
+void Demuxer::dumpInfo() const {
+    if (!fmt_ctx_) throw std::runtime_error("Demuxer: input is not open");
+    av_dump_format(fmt_ctx_.get(), 0, device_name_.c_str(), 0);
 }

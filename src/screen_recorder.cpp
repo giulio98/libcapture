@@ -58,6 +58,7 @@ void ScreenRecorder::initInput() {
 #endif
 
     demuxer_ = std::unique_ptr<Demuxer>(new Demuxer(in_fmt_name_, device_name.str(), demux_options));
+    demuxer_->openInput();
 
     video_decoder_ = std::unique_ptr<Decoder>(new Decoder(demuxer_->getVideoParams()));
     if (capture_audio_) {
@@ -169,8 +170,10 @@ void ScreenRecorder::stop() {
 void ScreenRecorder::pause() {
     std::unique_lock<std::mutex> ul{mutex_};
     if (stop_capture_) return;
+#ifdef LINUX
     demuxer_->closeInput();
-    if(capture_audio_) audio_demuxer_->closeInput();
+    if (capture_audio_) audio_demuxer_->closeInput();
+#endif
     paused_ = true;
     std::cout << "Recording paused" << std::endl;
     cv_.notify_all();
@@ -179,11 +182,10 @@ void ScreenRecorder::pause() {
 void ScreenRecorder::resume() {
     std::unique_lock<std::mutex> ul{mutex_};
     if (stop_capture_) return;
-    std::stringstream device_name;
-    std::string display = getenv("DISPLAY");
-    device_name << display << ".0+" << video_offset_x_ << "," << video_offset_y_;
-    demuxer_->openInput(in_fmt_name_, device_name.str());
-    if(capture_audio_) audio_demuxer_->openInput(in_audio_fmt_name_, "default");
+#ifdef LINUX
+    demuxer_->openInput();
+    if (capture_audio_) audio_demuxer_->openInput();
+#endif
     paused_ = false;
     std::cout << "Recording resumed" << std::endl;
     cv_.notify_all();
@@ -305,19 +307,11 @@ void ScreenRecorder::captureFrames() {
     start_time_ = av_gettime();
 
     while (true) {
-        {
-            std::unique_lock<std::mutex> ul{mutex_};
-            auto pause_start_time = paused_ ? av_gettime() : 0;
-            cv_.wait(ul, [this]() { return !paused_; });
-            if (pause_start_time) {
-#ifdef LINUX
-                demuxer_->flush();
-                if (capture_audio_) audio_demuxer_->flush();
-#endif
-                start_time_ += (av_gettime() - pause_start_time);
-            }
-            if (stop_capture_) break;
-        }
+        std::unique_lock<std::mutex> ul{mutex_};
+        auto pause_start_time = paused_ ? av_gettime() : 0;
+        cv_.wait(ul, [this]() { return !paused_; });
+        if (pause_start_time) start_time_ += (av_gettime() - pause_start_time);
+        if (stop_capture_) break;
 
 #ifdef LINUX
 
