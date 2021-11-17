@@ -110,7 +110,10 @@ void ScreenRecorder::printInfo() {
     std::cout << "########## Streams Info ##########" << std::endl;
     demuxer_->dumpInfo();
     muxer_->dumpInfo();
-    std::cout << "Video framerate: " << video_framerate_ << " fps" << std::endl;
+    std::cout << "Video framerate: " << video_framerate_ << " fps";
+    if (video_framerate_ > 30)
+        std::cout << " (WARNING: you may experience video frame loss and audio dropouts with high fps)";
+    std::cout << std::endl;
 }
 
 void ScreenRecorder::start(const std::string &output_file, int framerate, bool capture_audio) {
