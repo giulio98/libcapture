@@ -10,6 +10,7 @@ class Demuxer {
     std::string device_name_;
     const AVStream *video_stream_;
     const AVStream *audio_stream_;
+    av::DictionaryPtr dict_;
 
 public:
     Demuxer(const std::string &fmt_name, const std::string &device_name,
@@ -28,4 +29,8 @@ public:
     void flush() const;
 
     void dumpInfo() const;
+
+    void openInput(const std::string &fmt_name, const std::string &device_name);
+
+    void closeInput();
 };

@@ -63,3 +63,18 @@ void Demuxer::flush() const {
 }
 
 void Demuxer::dumpInfo() const { av_dump_format(fmt_ctx_.get(), 0, device_name_.c_str(), 0); }
+
+void Demuxer::closeInput(){
+    fmt_ctx_ = av::InFormatContextPtr(nullptr);
+}
+void Demuxer::openInput(const std::string &fmt_name, const std::string &device_name) {
+    {
+    AVFormatContext *fmt_ctx = nullptr;
+    auto dict = dict_.release();
+    int err = avformat_open_input(&fmt_ctx, device_name_.c_str(), av_find_input_format(fmt_name.c_str()), dict ? &dict : nullptr);
+    fmt_ctx_ = av::InFormatContextPtr(fmt_ctx);
+    dict_ = av::DictionaryPtr(dict);
+    if (err) throw std::runtime_error("Demuxer: Cannot open input format");
+
+    }
+}

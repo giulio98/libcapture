@@ -169,6 +169,8 @@ void ScreenRecorder::stop() {
 void ScreenRecorder::pause() {
     std::unique_lock<std::mutex> ul{mutex_};
     if (stop_capture_) return;
+    demuxer_->closeInput();
+    if(capture_audio_) audio_demuxer_->closeInput();
     paused_ = true;
     std::cout << "Recording paused" << std::endl;
     cv_.notify_all();
@@ -177,6 +179,11 @@ void ScreenRecorder::pause() {
 void ScreenRecorder::resume() {
     std::unique_lock<std::mutex> ul{mutex_};
     if (stop_capture_) return;
+    std::stringstream device_name;
+    std::string display = getenv("DISPLAY");
+    device_name << display << ".0+" << video_offset_x_ << "," << video_offset_y_;
+    demuxer_->openInput(in_fmt_name_, device_name.str());
+    if(capture_audio_) audio_demuxer_->openInput(in_audio_fmt_name_, "default");
     paused_ = false;
     std::cout << "Recording resumed" << std::endl;
     cv_.notify_all();
