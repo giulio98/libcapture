@@ -198,6 +198,7 @@ void ScreenRecorder::processConvertedFrame(std::shared_ptr<const AVFrame> frame,
 
     if (frame_type == av::DataType::video) {
         encoder = video_encoder_;
+        if (video_frame_counter_ % video_framerate_ == 0) estimateFramerate();
     } else if (frame_type == av::DataType::audio) {
         encoder = audio_encoder_;
     } else {
@@ -230,8 +231,6 @@ void ScreenRecorder::processVideoPacket(std::shared_ptr<const AVPacket> packet) 
             if (!in_frame) break;
 
             auto out_frame = video_converter_->convertFrame(in_frame, video_frame_counter_++);
-
-            if (video_frame_counter_ % video_framerate_ == 0) estimateFramerate();
 
             processConvertedFrame(out_frame, av::DataType::video);
         }
