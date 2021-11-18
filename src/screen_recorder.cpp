@@ -96,12 +96,12 @@ void ScreenRecorder::initOutput() {
 }
 
 void ScreenRecorder::initConverters() {
-    video_converter_ = std::make_unique<VideoConverter>(video_decoder_->getCodecContext(),
-                                                        video_encoder_->getCodecContext(), muxer_->getVideoTimeBase());
+    video_converter_ =
+        std::make_unique<VideoConverter>(video_decoder_->getCodecContext(), video_encoder_->getCodecContext());
 
     if (capture_audio_) {
-        audio_converter_ = std::make_unique<AudioConverter>(
-            audio_decoder_->getCodecContext(), audio_encoder_->getCodecContext(), muxer_->getAudioTimeBase());
+        audio_converter_ =
+            std::make_unique<AudioConverter>(audio_decoder_->getCodecContext(), audio_encoder_->getCodecContext());
     }
 }
 

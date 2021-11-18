@@ -8,8 +8,7 @@ Muxer::Muxer(const std::string &filename)
       video_stream_(nullptr),
       audio_stream_(nullptr),
       file_opened_(false),
-      file_closed_(false),
-      time_base_valid_(false) {
+      file_closed_(false) {
     AVFormatContext *fmt_ctx = nullptr;
     if (avformat_alloc_output_context2(&fmt_ctx, NULL, NULL, filename_.c_str()) < 0)
         throw std::runtime_error("Failed to allocate output format context");
@@ -34,6 +33,8 @@ void Muxer::addVideoStream(const AVCodecContext *codec_ctx) {
 
     if (avcodec_parameters_from_context(video_stream_->codecpar, codec_ctx) < 0)
         throw std::runtime_error("Muxer: Failed to write video stream parameters");
+
+    video_codec_time_base_ = codec_ctx->time_base;
 }
 
 void Muxer::addAudioStream(const AVCodecContext *codec_ctx) {
@@ -45,6 +46,8 @@ void Muxer::addAudioStream(const AVCodecContext *codec_ctx) {
 
     if (avcodec_parameters_from_context(audio_stream_->codecpar, codec_ctx) < 0)
         throw std::runtime_error("Muxer: Failed to write audio stream parameters");
+
+    audio_codec_time_base_ = codec_ctx->time_base;
 }
 
 const AVCodecParameters *Muxer::getVideoParams() const {
@@ -55,20 +58,6 @@ const AVCodecParameters *Muxer::getVideoParams() const {
 const AVCodecParameters *Muxer::getAudioParams() const {
     if (!audio_stream_) throw std::runtime_error("Muxer: Audio stream not present");
     return audio_stream_->codecpar;
-}
-
-AVRational Muxer::getVideoTimeBase() const {
-    if (!video_stream_) throw std::runtime_error("Muxer: Video stream not present");
-    if (!time_base_valid_)
-        throw std::runtime_error("Muxer: Time base has not been set yet, open the file with openFile() first");
-    return video_stream_->time_base;
-}
-
-AVRational Muxer::getAudioTimeBase() const {
-    if (!audio_stream_) throw std::runtime_error("Muxer: Audio stream not present");
-    if (!time_base_valid_)
-        throw std::runtime_error("Muxer: Time base has not been set yet, open the file with openFile() first");
-    return audio_stream_->time_base;
 }
 
 void Muxer::openFile() {
@@ -83,7 +72,6 @@ void Muxer::openFile() {
     file_opened_ = true;
     if (avformat_write_header(fmt_ctx_.get(), nullptr) < 0)
         throw std::runtime_error("Muxer: Failed to write file header");
-    time_base_valid_ = true;  // now the time_bases are set
 }
 
 void Muxer::closeFile() {
@@ -101,9 +89,11 @@ void Muxer::writePacket(av::PacketUPtr packet, av::DataType packet_type) const {
     if (packet) {
         if (packet_type == av::DataType::video) {
             if (!video_stream_) throw std::runtime_error("Muxer: Video stream not present");
+            av_packet_rescale_ts(packet.get(), video_codec_time_base_, video_stream_->time_base);
             packet->stream_index = video_stream_->index;
         } else if (packet_type == av::DataType::audio) {
             if (!audio_stream_) throw std::runtime_error("Muxer: Audio stream not present");
+            av_packet_rescale_ts(packet.get(), audio_codec_time_base_, audio_stream_->time_base);
             packet->stream_index = audio_stream_->index;
         } else {
             throw std::runtime_error("Muxer: received packet is of unknown type");

@@ -10,9 +10,10 @@ class Muxer {
     std::string filename_;
     const AVStream *video_stream_;
     const AVStream *audio_stream_;
+    AVRational video_codec_time_base_;
+    AVRational audio_codec_time_base_;
     bool file_opened_;
     bool file_closed_;
-    bool time_base_valid_;
 
 public:
     Muxer(const std::string &filename);
@@ -26,10 +27,6 @@ public:
     const AVCodecParameters *getVideoParams() const;
 
     const AVCodecParameters *getAudioParams() const;
-
-    AVRational getVideoTimeBase() const;
-
-    AVRational getAudioTimeBase() const;
 
     /**
      * Open the file and write the header

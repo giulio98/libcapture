@@ -9,12 +9,9 @@ class VideoConverter {
     int out_height_;
     AVPixelFormat out_pix_fmt_;
     av::SwsContextUPtr ctx_;
-    AVRational codec_ctx_time_base_;
-    AVRational stream_time_base_;
 
 public:
-    VideoConverter(const AVCodecContext *in_codec_ctx, const AVCodecContext *out_codec_ctx,
-                   AVRational out_stream_time_base);
+    VideoConverter(const AVCodecContext *in_codec_ctx, const AVCodecContext *out_codec_ctx);
 
     /**
      * Convert a frame

@@ -1,8 +1,7 @@
 #include "../include/audio_converter.h"
 
-AudioConverter::AudioConverter(const AVCodecContext *in_codec_ctx, const AVCodecContext *out_codec_ctx,
-                               AVRational out_stream_time_base)
-    : ctx_(nullptr), fifo_buf_(nullptr), stream_time_base_(out_stream_time_base), fifo_duration_(1) {
+AudioConverter::AudioConverter(const AVCodecContext *in_codec_ctx, const AVCodecContext *out_codec_ctx)
+    : ctx_(nullptr), fifo_buf_(nullptr), fifo_duration_(1) {
     if (!in_codec_ctx) throw std::runtime_error("AudioConverter: in_codec_ctx is NULL");
     if (!out_codec_ctx) throw std::runtime_error("AudioConverter: out_codec_ctx is NULL");
 
@@ -10,11 +9,11 @@ AudioConverter::AudioConverter(const AVCodecContext *in_codec_ctx, const AVCodec
     out_frame_size_ = out_codec_ctx->frame_size;
     out_sample_rate_ = out_codec_ctx->sample_rate;
     out_sample_fmt_ = out_codec_ctx->sample_fmt;
-    codec_ctx_time_base_ = out_codec_ctx->time_base;
 
-    ctx_ = av::SwrContextUPtr(swr_alloc_set_opts(nullptr, av_get_default_channel_layout(out_channels_), out_sample_fmt_,
-                                                out_sample_rate_, av_get_default_channel_layout(in_codec_ctx->channels),
-                                                in_codec_ctx->sample_fmt, in_codec_ctx->sample_rate, 0, nullptr));
+    ctx_ =
+        av::SwrContextUPtr(swr_alloc_set_opts(nullptr, av_get_default_channel_layout(out_channels_), out_sample_fmt_,
+                                              out_sample_rate_, av_get_default_channel_layout(in_codec_ctx->channels),
+                                              in_codec_ctx->sample_fmt, in_codec_ctx->sample_rate, 0, nullptr));
     if (!ctx_) throw std::runtime_error("AudioConverter: failed to allocate context");
 
     if (swr_init(ctx_.get()) < 0) throw std::runtime_error("AudioConverter: failed to initialize context");
@@ -69,7 +68,7 @@ av::FrameUPtr AudioConverter::getFrame(int64_t frame_number) const {
     if (av_audio_fifo_read(fifo_buf_.get(), (void **)out_frame->data, out_frame_size_) < 0)
         throw std::runtime_error("AudioConverter: failed to read data into frame");
 
-    out_frame->pts = av_rescale_q(out_frame_size_ * frame_number, codec_ctx_time_base_, stream_time_base_);
+    out_frame->pts = frame_number * out_frame_size_;
 
     return out_frame;
 }

@@ -12,12 +12,9 @@ class AudioConverter {
     av::SwrContextUPtr ctx_;
     av::AudioFifoUPtr fifo_buf_;
     int fifo_duration_;
-    AVRational codec_ctx_time_base_;
-    AVRational stream_time_base_;
 
 public:
-    AudioConverter(const AVCodecContext *in_codec_ctx, const AVCodecContext *out_codec_ctx,
-                   AVRational out_stream_time_base);
+    AudioConverter(const AVCodecContext *in_codec_ctx, const AVCodecContext *out_codec_ctx);
 
     /**
      * Send a frame to convert
