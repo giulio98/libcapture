@@ -59,7 +59,7 @@ const AVCodecParameters *Demuxer::getAudioParams() const {
 std::pair<av::PacketPtr, av::DataType> Demuxer::readPacket() const {
     if (!fmt_ctx_) throw std::runtime_error("Demuxer: input is not open");
 
-    auto packet = av::PacketPtr(av_packet_alloc());
+    av::PacketPtr packet(av_packet_alloc());
     if (!packet) throw std::runtime_error("Demuxer: failed to allocate packet");
 
     int ret = av_read_frame(fmt_ctx_.get(), packet.get());
