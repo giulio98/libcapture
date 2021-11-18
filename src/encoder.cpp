@@ -7,7 +7,7 @@ Encoder::Encoder(AVCodecID codec_id) : codec_(nullptr), codec_ctx_(nullptr) {
     if (!codec_) codec_ = avcodec_find_encoder(codec_id);
     if (!codec_) throw std::runtime_error("Encoder: Cannot find codec");
 
-    codec_ctx_ = av::CodecContextPtr(avcodec_alloc_context3(codec_));
+    codec_ctx_ = av::CodecContextUPtr(avcodec_alloc_context3(codec_));
     if (!codec_ctx_) throw std::runtime_error("Encoder: Failed to allocated memory for AVCodecContext");
 }
 
@@ -30,8 +30,8 @@ bool Encoder::sendFrame(const AVFrame *frame) const {
     return true;
 }
 
-av::PacketPtr Encoder::getPacket() const {
-    av::PacketPtr packet(av_packet_alloc());
+av::PacketUPtr Encoder::getPacket() const {
+    av::PacketUPtr packet(av_packet_alloc());
     if (!packet) throw std::runtime_error("Encoder: failed to allocate packet");
 
     int ret = avcodec_receive_packet(codec_ctx_.get(), packet.get());

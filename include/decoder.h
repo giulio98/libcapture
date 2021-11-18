@@ -6,7 +6,7 @@
 
 class Decoder {
     AVCodec *codec_;
-    av::CodecContextPtr codec_ctx_;
+    av::CodecContextUPtr codec_ctx_;
 
 public:
     /**
@@ -27,7 +27,7 @@ public:
      * @return a frame if it was possible to get it, nullptr if the decoder had nothing to write
      * because it is empty or flushed
      */
-    av::FramePtr getFrame() const;
+    av::FrameUPtr getFrame() const;
 
     const AVCodecContext *getCodecContext() const;
 };

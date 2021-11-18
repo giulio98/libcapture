@@ -12,7 +12,7 @@ AudioConverter::AudioConverter(const AVCodecContext *in_codec_ctx, const AVCodec
     out_sample_fmt_ = out_codec_ctx->sample_fmt;
     codec_ctx_time_base_ = out_codec_ctx->time_base;
 
-    ctx_ = av::SwrContextPtr(swr_alloc_set_opts(nullptr, av_get_default_channel_layout(out_channels_), out_sample_fmt_,
+    ctx_ = av::SwrContextUPtr(swr_alloc_set_opts(nullptr, av_get_default_channel_layout(out_channels_), out_sample_fmt_,
                                                 out_sample_rate_, av_get_default_channel_layout(in_codec_ctx->channels),
                                                 in_codec_ctx->sample_fmt, in_codec_ctx->sample_rate, 0, nullptr));
     if (!ctx_) throw std::runtime_error("AudioConverter: failed to allocate context");
@@ -20,7 +20,7 @@ AudioConverter::AudioConverter(const AVCodecContext *in_codec_ctx, const AVCodec
     if (swr_init(ctx_.get()) < 0) throw std::runtime_error("AudioConverter: failed to initialize context");
 
     fifo_buf_ =
-        av::AudioFifoPtr(av_audio_fifo_alloc(out_sample_fmt_, out_channels_, out_sample_rate_ * fifo_duration_));
+        av::AudioFifoUPtr(av_audio_fifo_alloc(out_sample_fmt_, out_channels_, out_sample_rate_ * fifo_duration_));
     if (!fifo_buf_) throw std::runtime_error("AudioConverter: failed to allocate FIFO buffer");
 }
 
@@ -51,11 +51,11 @@ bool AudioConverter::sendFrame(const AVFrame *frame) const {
     return true;
 }
 
-av::FramePtr AudioConverter::getFrame(int64_t frame_number) const {
+av::FrameUPtr AudioConverter::getFrame(int64_t frame_number) const {
     /* not enough samples to build a frame */
     if (av_audio_fifo_size(fifo_buf_.get()) < out_frame_size_) return nullptr;
 
-    av::FramePtr out_frame(av_frame_alloc());
+    av::FrameUPtr out_frame(av_frame_alloc());
     if (!out_frame) throw std::runtime_error("AudioConverter: failed to allocate internal frame");
 
     out_frame->nb_samples = out_frame_size_;

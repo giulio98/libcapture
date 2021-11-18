@@ -6,7 +6,7 @@
 #include "common.h"
 
 class Demuxer {
-    av::InFormatContextPtr fmt_ctx_;
+    av::InFormatContextUPtr fmt_ctx_;
     AVInputFormat *fmt_;
     std::string device_name_;
     std::map<std::string, std::string> options_;
@@ -29,7 +29,7 @@ public:
      * Read a packet from the input device and return it together with its type
      * @return a packet and its type if it was possible to read it, nullptr if the demuxer had nothing to read
      */
-    std::pair<av::PacketPtr, av::DataType> readPacket() const;
+    std::pair<av::PacketUPtr, av::DataType> readPacket() const;
 
     void flush() const;
 

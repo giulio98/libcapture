@@ -198,7 +198,7 @@ void ScreenRecorder::estimateFramerate() {
 #endif
 }
 
-void ScreenRecorder::processConvertedFrame(av::FramePtr frame, av::DataType frame_type) {
+void ScreenRecorder::processConvertedFrame(av::FrameUPtr frame, av::DataType frame_type) {
     const Encoder *encoder;
 
     if (frame_type == av::DataType::video) {
@@ -222,7 +222,7 @@ void ScreenRecorder::processConvertedFrame(av::FramePtr frame, av::DataType fram
     }
 }
 
-void ScreenRecorder::processVideoPacket(av::PacketPtr packet) {
+void ScreenRecorder::processVideoPacket(av::PacketUPtr packet) {
 #if DURATION_LOGGING
     DurationLogger dl("Video packet processed in ");
 #endif
@@ -242,7 +242,7 @@ void ScreenRecorder::processVideoPacket(av::PacketPtr packet) {
     }
 }
 
-void ScreenRecorder::processAudioPacket(av::PacketPtr packet) {
+void ScreenRecorder::processAudioPacket(av::PacketUPtr packet) {
 #if DURATION_LOGGING
     DurationLogger dl("Audio packet processed in ");
 #endif

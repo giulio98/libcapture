@@ -9,8 +9,8 @@ class AudioConverter {
     int out_frame_size_;
     int out_sample_rate_;
     AVSampleFormat out_sample_fmt_;
-    av::SwrContextPtr ctx_;
-    av::AudioFifoPtr fifo_buf_;
+    av::SwrContextUPtr ctx_;
+    av::AudioFifoUPtr fifo_buf_;
     int fifo_duration_;
     AVRational codec_ctx_time_base_;
     AVRational stream_time_base_;
@@ -32,5 +32,5 @@ public:
      * @return a new converted frame if it was possible to build it, nullptr if the internal buffer didn't have
      * enough samples to build a frame
      */
-    av::FramePtr getFrame(int64_t frame_number) const;
+    av::FrameUPtr getFrame(int64_t frame_number) const;
 };

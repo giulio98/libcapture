@@ -8,7 +8,7 @@
 class Encoder {
 protected:
     AVCodec *codec_;
-    av::CodecContextPtr codec_ctx_;
+    av::CodecContextUPtr codec_ctx_;
 
     Encoder(AVCodecID codec_id);
 
@@ -27,7 +27,7 @@ public:
      * @return a packet if it was possible to get it, nullptr if the encoder had nothing to write
      * because it is empty or flushed
      */
-    av::PacketPtr getPacket() const;
+    av::PacketUPtr getPacket() const;
 
     const AVCodecContext *getCodecContext() const;
 };

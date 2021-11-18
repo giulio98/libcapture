@@ -20,7 +20,7 @@ void Demuxer::openInput() {
         auto dict = av::map2dict(options_);
         int err = avformat_open_input(&fmt_ctx, device_name_.c_str(), fmt_, dict ? &dict : nullptr);
         if (dict) av_dict_free(&dict);
-        fmt_ctx_ = av::InFormatContextPtr(fmt_ctx);
+        fmt_ctx_ = av::InFormatContextUPtr(fmt_ctx);
         if (err) throw std::runtime_error("Demuxer: Cannot open input format");
     }
 
@@ -39,7 +39,7 @@ void Demuxer::openInput() {
 
 void Demuxer::closeInput() {
     if (!fmt_ctx_) throw std::runtime_error("Demuxer: input is not open");
-    fmt_ctx_ = av::InFormatContextPtr(nullptr);
+    fmt_ctx_ = av::InFormatContextUPtr(nullptr);
     video_stream_ = nullptr;
     audio_stream_ = nullptr;
 }
@@ -56,10 +56,10 @@ const AVCodecParameters *Demuxer::getAudioParams() const {
     return audio_stream_->codecpar;
 }
 
-std::pair<av::PacketPtr, av::DataType> Demuxer::readPacket() const {
+std::pair<av::PacketUPtr, av::DataType> Demuxer::readPacket() const {
     if (!fmt_ctx_) throw std::runtime_error("Demuxer: input is not open");
 
-    av::PacketPtr packet(av_packet_alloc());
+    av::PacketUPtr packet(av_packet_alloc());
     if (!packet) throw std::runtime_error("Demuxer: failed to allocate packet");
 
     int ret = av_read_frame(fmt_ctx_.get(), packet.get());

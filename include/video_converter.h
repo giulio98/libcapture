@@ -8,7 +8,7 @@ class VideoConverter {
     int out_width_;
     int out_height_;
     AVPixelFormat out_pix_fmt_;
-    av::SwsContextPtr ctx_;
+    av::SwsContextUPtr ctx_;
     AVRational codec_ctx_time_base_;
     AVRational stream_time_base_;
 
@@ -22,5 +22,5 @@ public:
      * @param frame_number the sequence number of the frame to use to compute the PTS
      * @return a new converted frame
      */
-    av::FramePtr convertFrame(const AVFrame *in_frame, int64_t frame_number) const;
+    av::FrameUPtr convertFrame(const AVFrame *in_frame, int64_t frame_number) const;
 };

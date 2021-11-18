@@ -33,14 +33,14 @@ extern "C" {
 namespace av {
 enum class DataType { none, audio, video };
 
-using PacketPtr = std::unique_ptr<AVPacket, DeleterPP<av_packet_free>>;
-using FramePtr = std::unique_ptr<AVFrame, DeleterPP<av_frame_free>>;
-using InFormatContextPtr = std::unique_ptr<AVFormatContext, DeleterPP<avformat_close_input>>;
-using FormatContextPtr = std::unique_ptr<AVFormatContext, DeleterP<avformat_free_context>>;
-using CodecContextPtr = std::unique_ptr<AVCodecContext, DeleterPP<avcodec_free_context>>;
-using SwsContextPtr = std::unique_ptr<SwsContext, DeleterP<sws_freeContext>>;
-using SwrContextPtr = std::unique_ptr<SwrContext, DeleterPP<swr_free>>;
-using AudioFifoPtr = std::unique_ptr<AVAudioFifo, DeleterP<av_audio_fifo_free>>;
+using PacketUPtr = std::unique_ptr<AVPacket, DeleterPP<av_packet_free>>;
+using FrameUPtr = std::unique_ptr<AVFrame, DeleterPP<av_frame_free>>;
+using InFormatContextUPtr = std::unique_ptr<AVFormatContext, DeleterPP<avformat_close_input>>;
+using FormatContextUPtr = std::unique_ptr<AVFormatContext, DeleterP<avformat_free_context>>;
+using CodecContextUPtr = std::unique_ptr<AVCodecContext, DeleterPP<avcodec_free_context>>;
+using SwsContextUPtr = std::unique_ptr<SwsContext, DeleterP<sws_freeContext>>;
+using SwrContextUPtr = std::unique_ptr<SwrContext, DeleterPP<swr_free>>;
+using AudioFifoUPtr = std::unique_ptr<AVAudioFifo, DeleterP<av_audio_fifo_free>>;
 
 inline AVDictionary *map2dict(const std::map<std::string, std::string> &map) {
     AVDictionary *dict = nullptr;

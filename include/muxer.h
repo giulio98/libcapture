@@ -6,7 +6,7 @@
 #include "common.h"
 
 class Muxer {
-    av::FormatContextPtr fmt_ctx_;
+    av::FormatContextUPtr fmt_ctx_;
     std::string filename_;
     const AVStream *video_stream_;
     const AVStream *audio_stream_;
@@ -46,7 +46,7 @@ public:
      * @param packet the packet to write. If nullptr, the output queue will be flushed
      * @param packet_type the type of the packet (audio or video)
      */
-    void writePacket(av::PacketPtr packet, av::DataType packet_type) const;
+    void writePacket(av::PacketUPtr packet, av::DataType packet_type) const;
 
     /**
      * Print informations
