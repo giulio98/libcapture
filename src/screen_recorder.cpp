@@ -65,6 +65,7 @@ void ScreenRecorder::initInput() {
 #ifdef LINUX
         audio_demuxer_ =
             std::unique_ptr<Demuxer>(new Demuxer(in_audio_fmt_name_, "default", std::map<std::string, std::string>()));
+        audio_demuxer_->openInput();
         auto params = audio_demuxer_->getAudioParams();
 #else
         auto params = demuxer_->getAudioParams();

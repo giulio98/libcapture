@@ -12,7 +12,14 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ecfd7b11-5954-426a-92f9-90b4cd3bf90d" name="Changes" comment="" />
+    <list default="true" id="ecfd7b11-5954-426a-92f9-90b4cd3bf90d" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake-build-cmakeliststxt/CMakeFiles/screen-recorder.dir/CXX.includecache" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-cmakeliststxt/CMakeFiles/screen-recorder.dir/CXX.includecache" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake-build-cmakeliststxt/CMakeFiles/screen-recorder.dir/src/screen_recorder.cpp.o" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-cmakeliststxt/CMakeFiles/screen-recorder.dir/src/screen_recorder.cpp.o" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake-build-cmakeliststxt/Testing/Temporary/LastTest.log" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-cmakeliststxt/Testing/Temporary/LastTest.log" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmake-build-cmakeliststxt/screen-recorder" beforeDir="false" afterPath="$PROJECT_DIR$/cmake-build-cmakeliststxt/screen-recorder" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/screen_recorder.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/screen_recorder.cpp" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -71,11 +78,37 @@
       <updated>1637233800394</updated>
       <workItem from="1637233809500" duration="167000" />
       <workItem from="1637234067176" duration="1194000" />
-      <workItem from="1637235381661" duration="59000" />
+      <workItem from="1637235381661" duration="661000" />
     </task>
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/src/screen_recorder.cpp</url>
+          <line>311</line>
+          <option name="timeStamp" value="3" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/src/screen_recorder.cpp</url>
+          <line>320</line>
+          <option name="timeStamp" value="4" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/src/demuxer.cpp</url>
+          <line>16</line>
+          <option name="timeStamp" value="5" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/src/demuxer.cpp</url>
+          <line>41</line>
+          <option name="timeStamp" value="6" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>
