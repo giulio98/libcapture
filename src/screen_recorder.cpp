@@ -326,11 +326,11 @@ void ScreenRecorder::captureFrames() {
 #ifdef LINUX
 
         auto [packet, packet_type] = demuxer_->readPacket();
-        if (packet) processVideoPacket(packet);
+        if (packet) processVideoPacket(std::move(packet));
 
         if (capture_audio_) {
             auto [audio_packet, audio_packet_type] = audio_demuxer_->readPacket();
-            if (audio_packet) processAudioPacket(audio_packet);
+            if (audio_packet) processAudioPacket(std::move(audio_packet));
         }
 
 #else  // macOS
