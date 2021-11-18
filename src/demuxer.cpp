@@ -5,12 +5,11 @@ Demuxer::Demuxer(const std::string &fmt_name, const std::string &device_name,
     : fmt_ctx_(nullptr),
       fmt_(nullptr),
       device_name_(device_name),
-      options_dict_(nullptr),
+      options_(options),
       video_stream_(nullptr),
       audio_stream_(nullptr) {
     fmt_ = av_find_input_format(fmt_name.c_str());
     if (!fmt_) throw std::runtime_error("Demuxer: Cannot find input format");
-    options_dict_ = av::map2dict(options);
 }
 
 void Demuxer::openInput() {
@@ -18,10 +17,10 @@ void Demuxer::openInput() {
 
     {
         AVFormatContext *fmt_ctx = nullptr;
-        auto dict = options_dict_.release();
+        auto dict = av::map2dict(options_).release();
         int err = avformat_open_input(&fmt_ctx, device_name_.c_str(), fmt_, dict ? &dict : nullptr);
+        if (dict) av_dict_free(&dict);
         fmt_ctx_ = av::InFormatContextPtr(fmt_ctx);
-        options_dict_ = av::DictionaryPtr(dict);
         if (err) throw std::runtime_error("Demuxer: Cannot open input format");
     }
 

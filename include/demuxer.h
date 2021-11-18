@@ -9,7 +9,7 @@ class Demuxer {
     av::InFormatContextPtr fmt_ctx_;
     AVInputFormat *fmt_;
     std::string device_name_;
-    av::DictionaryPtr options_dict_;
+    std::map<std::string, std::string> options_;
     const AVStream *video_stream_;
     const AVStream *audio_stream_;
 
