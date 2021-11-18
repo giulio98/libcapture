@@ -12,7 +12,7 @@ Encoder::Encoder(AVCodecID codec_id) : codec_(nullptr), codec_ctx_(nullptr) {
 }
 
 void Encoder::open(const std::map<std::string, std::string> &options) {
-    auto dict = av::map2dict(options);
+    auto dict = av::map2dict(options).release();
     int err = avcodec_open2(codec_ctx_.get(), codec_, dict ? &dict : nullptr);
     if (dict) av_dict_free(&dict);
     if (err) throw std::runtime_error("Encoder: Failed to initialize Codec Context");

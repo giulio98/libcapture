@@ -17,7 +17,7 @@ void Demuxer::openInput() {
 
     {
         AVFormatContext *fmt_ctx = nullptr;
-        auto dict = av::map2dict(options_);
+        auto dict = av::map2dict(options_).release();
         int err = avformat_open_input(&fmt_ctx, device_name_.c_str(), fmt_, dict ? &dict : nullptr);
         if (dict) av_dict_free(&dict);
         fmt_ctx_ = av::InFormatContextUPtr(fmt_ctx);

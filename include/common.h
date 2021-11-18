@@ -41,8 +41,9 @@ using CodecContextUPtr = std::unique_ptr<AVCodecContext, DeleterPP<avcodec_free_
 using SwsContextUPtr = std::unique_ptr<SwsContext, DeleterP<sws_freeContext>>;
 using SwrContextUPtr = std::unique_ptr<SwrContext, DeleterPP<swr_free>>;
 using AudioFifoUPtr = std::unique_ptr<AVAudioFifo, DeleterP<av_audio_fifo_free>>;
+using DictionaryUPtr = std::unique_ptr<AVDictionary, DeleterPP<av_dict_free>>;
 
-inline AVDictionary *map2dict(const std::map<std::string, std::string> &map) {
+inline DictionaryUPtr map2dict(const std::map<std::string, std::string> &map) {
     AVDictionary *dict = nullptr;
     for (const auto &[key, val] : map) {
         if (av_dict_set(&dict, key.c_str(), val.c_str(), 0) < 0) {
@@ -50,7 +51,7 @@ inline AVDictionary *map2dict(const std::map<std::string, std::string> &map) {
             throw std::runtime_error("Cannot set " + key + "in dictionary");
         }
     }
-    return dict;
+    return DictionaryUPtr(dict);
 }
 
 }  // namespace av
