@@ -20,7 +20,7 @@ public:
      * @param packet the packet to send to the decoder. It can be nullptr to flush the decoder
      * @return true if the packet has been correctly sent, false if the decoder could not receive it
      */
-    bool sendPacket(std::shared_ptr<const AVPacket> packet) const;
+    bool sendPacket(const AVPacket *packet) const;
 
     /**
      * Get a converted Frame from the decoder

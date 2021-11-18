@@ -14,8 +14,8 @@ Decoder::Decoder(const AVCodecParameters *params) : codec_(nullptr), codec_ctx_(
         throw std::runtime_error("Decoder: Unable to open the av codec");
 }
 
-bool Decoder::sendPacket(std::shared_ptr<const AVPacket> packet) const {
-    int ret = avcodec_send_packet(codec_ctx_.get(), packet.get());
+bool Decoder::sendPacket(const AVPacket *packet) const {
+    int ret = avcodec_send_packet(codec_ctx_.get(), packet);
     if (ret == AVERROR(EAGAIN)) {
         return false;
     } else if (ret == AVERROR_EOF) {

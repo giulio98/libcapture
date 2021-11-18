@@ -62,9 +62,9 @@ class ScreenRecorder {
     /* Counter of times in which the estimated framerate is lower than the specified one */
     int dropped_frame_counter_;
 
-    void processVideoPacket(std::shared_ptr<const AVPacket> packet);
+    void processVideoPacket(av::PacketPtr packet);
 
-    void processAudioPacket(std::shared_ptr<const AVPacket> packet);
+    void processAudioPacket(av::PacketPtr packet);
 
     void processConvertedFrame(std::shared_ptr<const AVFrame> frame, av::DataType audio_video);
 

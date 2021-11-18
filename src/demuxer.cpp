@@ -56,9 +56,10 @@ const AVCodecParameters *Demuxer::getAudioParams() const {
     return audio_stream_->codecpar;
 }
 
-std::pair<std::shared_ptr<const AVPacket>, av::DataType> Demuxer::readPacket() const {
+std::pair<av::PacketPtr, av::DataType> Demuxer::readPacket() const {
     if (!fmt_ctx_) throw std::runtime_error("Demuxer: input is not open");
-    std::shared_ptr<AVPacket> packet(av_packet_alloc(), DeleterPP<av_packet_free>());
+
+    auto packet = av::PacketPtr(av_packet_alloc());
     if (!packet) throw std::runtime_error("Demuxer: failed to allocate packet");
 
     int ret = av_read_frame(fmt_ctx_.get(), packet.get());
@@ -74,7 +75,7 @@ std::pair<std::shared_ptr<const AVPacket>, av::DataType> Demuxer::readPacket() c
         throw std::runtime_error("Demuxer: unknown packet stream index");
     }
 
-    return std::make_pair(packet, packet_type);
+    return std::make_pair(std::move(packet), packet_type);
 }
 
 void Demuxer::flush() const {
