@@ -21,7 +21,7 @@ public:
 
     /**
      * Send a frame to convert
-     * @return true if the conversion was successful, false, if the internal
+     * @return true if the conversion was successful, false if the internal
      * buffer didn't have enough space to copy the input samples
      */
     bool sendFrame(const AVFrame *frame) const;
