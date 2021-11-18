@@ -1,0 +1,3 @@
+/home/giulio/Documenti/GitHub/PDS_project_/cmake-build-cmakeliststxt/CMakeFiles/rebuild_cache.dir
+/home/giulio/Documenti/GitHub/PDS_project_/cmake-build-cmakeliststxt/CMakeFiles/edit_cache.dir
+/home/giulio/Documenti/GitHub/PDS_project_/cmake-build-cmakeliststxt/CMakeFiles/screen-recorder.dir
