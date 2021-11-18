@@ -50,16 +50,6 @@ void Muxer::addAudioStream(const AVCodecContext *codec_ctx) {
     audio_codec_time_base_ = codec_ctx->time_base;
 }
 
-const AVCodecParameters *Muxer::getVideoParams() const {
-    if (!video_stream_) throw std::runtime_error("Muxer: Video stream not present");
-    return video_stream_->codecpar;
-}
-
-const AVCodecParameters *Muxer::getAudioParams() const {
-    if (!audio_stream_) throw std::runtime_error("Muxer: Audio stream not present");
-    return audio_stream_->codecpar;
-}
-
 void Muxer::openFile() {
     if (file_opened_) throw std::runtime_error("Muxer: cannot open file, file has already been opened");
     if (file_closed_) throw std::runtime_error("Muxer: cannot re-open file, file has already been closed");

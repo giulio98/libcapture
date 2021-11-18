@@ -24,10 +24,6 @@ public:
 
     void addAudioStream(const AVCodecContext *codec_ctx);
 
-    const AVCodecParameters *getVideoParams() const;
-
-    const AVCodecParameters *getAudioParams() const;
-
     /**
      * Open the file and write the header
      */
