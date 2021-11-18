@@ -12,11 +12,11 @@ int main() {
 
     std::cout << "Recording to " << file1 << std::endl;
     screen_record.start(file1, 30, true);
-    std::this_thread::sleep_for(20000ms);
+    std::this_thread::sleep_for(5000ms);
     screen_record.pause();
-    std::this_thread::sleep_for(2000ms);
+    std::this_thread::sleep_for(5000ms);
     screen_record.resume();
-    std::this_thread::sleep_for(20000ms);
+    std::this_thread::sleep_for(5000ms);
     screen_record.stop();
     std::cout << "Recording to " << file1 << " completed" << std::endl;
 
