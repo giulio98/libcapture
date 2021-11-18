@@ -57,41 +57,39 @@ void ScreenRecorder::initInput() {
     demux_options.insert({"capture_cursor", "0"});
 #endif
 
-    demuxer_ = std::unique_ptr<Demuxer>(new Demuxer(in_fmt_name_, device_name.str(), demux_options));
+    demuxer_ = std::make_unique<Demuxer>(in_fmt_name_, device_name.str(), demux_options);
     demuxer_->openInput();
 
-    video_decoder_ = std::unique_ptr<Decoder>(new Decoder(demuxer_->getVideoParams()));
+    video_decoder_ = std::make_unique<Decoder>(demuxer_->getVideoParams());
+
     if (capture_audio_) {
 #ifdef LINUX
-        audio_demuxer_ =
-            std::unique_ptr<Demuxer>(new Demuxer(in_audio_fmt_name_, "default", std::map<std::string, std::string>()));
+        audio_demuxer_ = std::make_unique<Demuxer>(in_audio_fmt_name_, "default", std::map<std::string, std::string>());
         audio_demuxer_->openInput();
         auto params = audio_demuxer_->getAudioParams();
 #else
         auto params = demuxer_->getAudioParams();
 #endif
-        audio_decoder_ = std::unique_ptr<Decoder>(new Decoder(params));
+        audio_decoder_ = std::make_unique<Decoder>(params);
     }
 }
 
 void ScreenRecorder::initOutput() {
-    muxer_ = std::unique_ptr<Muxer>(new Muxer(output_file_));
+    muxer_ = std::make_unique<Muxer>(output_file_);
 
-    video_encoder_ = std::unique_ptr<VideoEncoder>(
-        new VideoEncoder(out_video_codec_id_, video_encoder_options_, muxer_->getGlobalHeaderFlags(),
-                         demuxer_->getVideoParams(), out_video_pix_fmt_, video_framerate_));
+    video_encoder_ =
+        std::make_unique<VideoEncoder>(out_video_codec_id_, video_encoder_options_, muxer_->getGlobalHeaderFlags(),
+                                       demuxer_->getVideoParams(), out_video_pix_fmt_, video_framerate_);
+    muxer_->addVideoStream(video_encoder_->getCodecContext());
+
     if (capture_audio_) {
 #ifdef LINUX
         auto params = audio_demuxer_->getAudioParams();
 #else
         auto params = demuxer_->getAudioParams();
 #endif
-        audio_encoder_ = std::unique_ptr<AudioEncoder>(
-            new AudioEncoder(out_audio_codec_id_, audio_encoder_options_, muxer_->getGlobalHeaderFlags(), params));
-    }
-
-    muxer_->addVideoStream(video_encoder_->getCodecContext());
-    if (capture_audio_) {
+        audio_encoder_ = std::make_unique<AudioEncoder>(out_audio_codec_id_, audio_encoder_options_,
+                                                        muxer_->getGlobalHeaderFlags(), params);
         muxer_->addAudioStream(audio_encoder_->getCodecContext());
     }
 
@@ -99,12 +97,12 @@ void ScreenRecorder::initOutput() {
 }
 
 void ScreenRecorder::initConverters() {
-    video_converter_ = std::unique_ptr<VideoConverter>(new VideoConverter(
-        video_decoder_->getCodecContext(), video_encoder_->getCodecContext(), muxer_->getVideoTimeBase()));
+    video_converter_ = std::make_unique<VideoConverter>(video_decoder_->getCodecContext(),
+                                                        video_encoder_->getCodecContext(), muxer_->getVideoTimeBase());
 
     if (capture_audio_) {
-        audio_converter_ = std::unique_ptr<AudioConverter>(new AudioConverter(
-            audio_decoder_->getCodecContext(), audio_encoder_->getCodecContext(), muxer_->getAudioTimeBase()));
+        audio_converter_ = std::make_unique<AudioConverter>(
+            audio_decoder_->getCodecContext(), audio_encoder_->getCodecContext(), muxer_->getAudioTimeBase());
     }
 }
 
