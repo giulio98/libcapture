@@ -94,7 +94,7 @@ void Muxer::closeFile() {
     file_closed_ = true;
 }
 
-void Muxer::writePacket(std::shared_ptr<AVPacket> packet, av::DataType packet_type) const {
+void Muxer::writePacket(av::PacketPtr packet, av::DataType packet_type) const {
     if (!file_opened_) throw std::runtime_error("Muxer: cannot write packet, file has not been opened");
     if (file_closed_) throw std::runtime_error("Muxer: cannot write packet, file has already been closed");
 

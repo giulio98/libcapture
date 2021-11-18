@@ -66,7 +66,7 @@ class ScreenRecorder {
 
     void processAudioPacket(av::PacketPtr packet);
 
-    void processConvertedFrame(std::shared_ptr<const AVFrame> frame, av::DataType audio_video);
+    void processConvertedFrame(av::FramePtr frame, av::DataType audio_video);
 
     void flushPipelines();
 

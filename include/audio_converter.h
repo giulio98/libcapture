@@ -24,7 +24,7 @@ public:
      * @return true if the conversion was successful, false, if the internal
      * buffer didn't have enough space to copy the input samples
      */
-    bool sendFrame(std::shared_ptr<const AVFrame> frame) const;
+    bool sendFrame(const AVFrame *frame) const;
 
     /**
      * Get a converted frame
@@ -32,5 +32,5 @@ public:
      * @return a new converted frame if it was possible to build it, nullptr if the internal buffer didn't have
      * enough samples to build a frame
      */
-    std::shared_ptr<const AVFrame> getFrame(int64_t frame_number) const;
+    av::FramePtr getFrame(int64_t frame_number) const;
 };

@@ -46,7 +46,7 @@ public:
      * @param packet the packet to write. If nullptr, the output queue will be flushed
      * @param packet_type the type of the packet (audio or video)
      */
-    void writePacket(std::shared_ptr<AVPacket> packet, av::DataType packet_type) const;
+    void writePacket(av::PacketPtr packet, av::DataType packet_type) const;
 
     /**
      * Print informations

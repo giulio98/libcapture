@@ -27,7 +27,7 @@ public:
      * @return a frame if it was possible to get it, nullptr if the decoder had nothing to write
      * because it is empty or flushed
      */
-    std::shared_ptr<const AVFrame> getFrame() const;
+    av::FramePtr getFrame() const;
 
     const AVCodecContext *getCodecContext() const;
 };

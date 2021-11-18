@@ -17,11 +17,10 @@ VideoConverter::VideoConverter(const AVCodecContext *in_codec_ctx, const AVCodec
     if (!ctx_) throw std::runtime_error("VideoConverter: failed to allocate context");
 }
 
-std::shared_ptr<const AVFrame> VideoConverter::convertFrame(std::shared_ptr<const AVFrame> in_frame,
-                                                            int64_t frame_number) const {
+av::FramePtr VideoConverter::convertFrame(const AVFrame *in_frame, int64_t frame_number) const {
     if (!in_frame) throw std::runtime_error("VideoConverter: in_frame is not allocated");
 
-    std::shared_ptr<AVFrame> out_frame(av_frame_alloc(), DeleterPP<av_frame_free>());
+    av::FramePtr out_frame(av_frame_alloc());
     if (!out_frame) throw std::runtime_error("VideoConverter: failed to allocate frame");
 
     out_frame->width = out_width_;

@@ -198,7 +198,7 @@ void ScreenRecorder::estimateFramerate() {
 #endif
 }
 
-void ScreenRecorder::processConvertedFrame(std::shared_ptr<const AVFrame> frame, av::DataType frame_type) {
+void ScreenRecorder::processConvertedFrame(av::FramePtr frame, av::DataType frame_type) {
     const Encoder *encoder;
 
     if (frame_type == av::DataType::video) {
@@ -212,12 +212,12 @@ void ScreenRecorder::processConvertedFrame(std::shared_ptr<const AVFrame> frame,
 
     bool encoder_received = false;
     while (!encoder_received) {
-        encoder_received = encoder->sendFrame(frame);
+        encoder_received = encoder->sendFrame(frame.get());
 
         while (true) {
             auto packet = encoder->getPacket();
             if (!packet) break;
-            muxer_->writePacket(packet, frame_type);
+            muxer_->writePacket(std::move(packet), frame_type);
         }
     }
 }
@@ -235,9 +235,9 @@ void ScreenRecorder::processVideoPacket(av::PacketPtr packet) {
             auto in_frame = video_decoder_->getFrame();
             if (!in_frame) break;
 
-            auto out_frame = video_converter_->convertFrame(in_frame, video_frame_counter_++);
+            auto out_frame = video_converter_->convertFrame(in_frame.get(), video_frame_counter_++);
 
-            processConvertedFrame(out_frame, av::DataType::video);
+            processConvertedFrame(std::move(out_frame), av::DataType::video);
         }
     }
 }
@@ -257,7 +257,7 @@ void ScreenRecorder::processAudioPacket(av::PacketPtr packet) {
 
             bool converter_received = false;
             while (!converter_received) {
-                converter_received = audio_converter_->sendFrame(in_frame);
+                converter_received = audio_converter_->sendFrame(in_frame.get());
 
                 while (true) {
                     auto out_frame = audio_converter_->getFrame(audio_frame_counter_);
@@ -265,7 +265,7 @@ void ScreenRecorder::processAudioPacket(av::PacketPtr packet) {
 
                     audio_frame_counter_++;
 
-                    processConvertedFrame(out_frame, av::DataType::audio);
+                    processConvertedFrame(std::move(out_frame), av::DataType::audio);
                 }
             }
         }

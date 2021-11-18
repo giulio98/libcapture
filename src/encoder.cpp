@@ -18,8 +18,8 @@ void Encoder::open(const std::map<std::string, std::string> &options) {
     if (err) throw std::runtime_error("Encoder: Failed to initialize Codec Context");
 }
 
-bool Encoder::sendFrame(std::shared_ptr<const AVFrame> frame) const {
-    int ret = avcodec_send_frame(codec_ctx_.get(), frame.get());
+bool Encoder::sendFrame(const AVFrame *frame) const {
+    int ret = avcodec_send_frame(codec_ctx_.get(), frame);
     if (ret == AVERROR(EAGAIN)) {
         return false;
     } else if (ret == AVERROR_EOF) {
@@ -30,8 +30,8 @@ bool Encoder::sendFrame(std::shared_ptr<const AVFrame> frame) const {
     return true;
 }
 
-std::shared_ptr<AVPacket> Encoder::getPacket() const {
-    std::shared_ptr<AVPacket> packet(av_packet_alloc(), DeleterPP<av_packet_free>());
+av::PacketPtr Encoder::getPacket() const {
+    av::PacketPtr packet(av_packet_alloc());
     if (!packet) throw std::runtime_error("Encoder: failed to allocate packet");
 
     int ret = avcodec_receive_packet(codec_ctx_.get(), packet.get());
