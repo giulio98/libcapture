@@ -40,8 +40,7 @@ void ScreenRecorder::initInput() {
     std::map<std::string, std::string> demux_options;
 
 #ifdef LINUX
-    std::string display = getenv("DISPLAY");
-    device_name << display << ".0+" << video_offset_x_ << "," << video_offset_y_;
+    device_name << getenv("DISPLAY") << ".0+" << video_offset_x_ << "," << video_offset_y_;
 #else
     device_name << "1:";
     if (capture_audio_) device_name << "0";
