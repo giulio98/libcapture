@@ -62,11 +62,11 @@ class ScreenRecorder {
     /* Counter of times in which the estimated framerate is lower than the specified one */
     int dropped_frame_counter_;
 
-    void processVideoPacket(av::PacketUPtr packet);
+    void processVideoPacket(const AVPacket *packet);
 
-    void processAudioPacket(av::PacketUPtr packet);
+    void processAudioPacket(const AVPacket *packet);
 
-    void processConvertedFrame(av::FrameUPtr frame, av::DataType audio_video);
+    void processConvertedFrame(const AVFrame *frame, av::DataType audio_video);
 
     void flushPipelines();
 
