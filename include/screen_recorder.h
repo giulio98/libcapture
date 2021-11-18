@@ -41,8 +41,8 @@ class ScreenRecorder {
     std::unique_ptr<Muxer> muxer_;
     std::unique_ptr<Decoder> video_decoder_;
     std::unique_ptr<Decoder> audio_decoder_;
-    std::shared_ptr<VideoEncoder> video_encoder_;
-    std::shared_ptr<AudioEncoder> audio_encoder_;
+    std::unique_ptr<VideoEncoder> video_encoder_;
+    std::unique_ptr<AudioEncoder> audio_encoder_;
     std::unique_ptr<VideoConverter> video_converter_;
     std::unique_ptr<AudioConverter> audio_converter_;
 

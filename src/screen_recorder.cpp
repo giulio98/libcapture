@@ -58,12 +58,14 @@ void ScreenRecorder::initInput() {
 #endif
 
     demuxer_ = std::unique_ptr<Demuxer>(new Demuxer(in_fmt_name_, device_name.str(), demux_options));
+    demuxer_->openInput();
 
     video_decoder_ = std::unique_ptr<Decoder>(new Decoder(demuxer_->getVideoParams()));
     if (capture_audio_) {
 #ifdef LINUX
         audio_demuxer_ =
             std::unique_ptr<Demuxer>(new Demuxer(in_audio_fmt_name_, "default", std::map<std::string, std::string>()));
+        audio_demuxer_->openInput();
         auto params = audio_demuxer_->getAudioParams();
 #else
         auto params = demuxer_->getAudioParams();
@@ -75,7 +77,7 @@ void ScreenRecorder::initInput() {
 void ScreenRecorder::initOutput() {
     muxer_ = std::unique_ptr<Muxer>(new Muxer(output_file_));
 
-    video_encoder_ = std::shared_ptr<VideoEncoder>(
+    video_encoder_ = std::unique_ptr<VideoEncoder>(
         new VideoEncoder(out_video_codec_id_, video_encoder_options_, muxer_->getGlobalHeaderFlags(),
                          demuxer_->getVideoParams(), out_video_pix_fmt_, video_framerate_));
     if (capture_audio_) {
@@ -84,7 +86,7 @@ void ScreenRecorder::initOutput() {
 #else
         auto params = demuxer_->getAudioParams();
 #endif
-        audio_encoder_ = std::shared_ptr<AudioEncoder>(
+        audio_encoder_ = std::unique_ptr<AudioEncoder>(
             new AudioEncoder(out_audio_codec_id_, audio_encoder_options_, muxer_->getGlobalHeaderFlags(), params));
     }
 
@@ -197,13 +199,13 @@ void ScreenRecorder::estimateFramerate() {
 }
 
 void ScreenRecorder::processConvertedFrame(std::shared_ptr<const AVFrame> frame, av::DataType frame_type) {
-    std::shared_ptr<Encoder> encoder;
+    const Encoder *encoder;
 
     if (frame_type == av::DataType::video) {
-        encoder = video_encoder_;
+        encoder = video_encoder_.get();
         if (video_frame_counter_ % video_framerate_ == 0) estimateFramerate();
     } else if (frame_type == av::DataType::audio) {
-        encoder = audio_encoder_;
+        encoder = audio_encoder_.get();
     } else {
         throw std::runtime_error("frame type is unknown");
     }
@@ -300,15 +302,27 @@ void ScreenRecorder::captureFrames() {
     while (true) {
         {
             std::unique_lock<std::mutex> ul{mutex_};
-            auto pause_start_time = paused_ ? av_gettime() : 0;
+
+            int64_t pause_start_time = 0;
+
+            if (paused_) {
+                pause_start_time = av_gettime();
+#ifdef LINUX
+                demuxer_->closeInput();
+                if (capture_audio_) audio_demuxer_->closeInput();
+#endif
+            }
+
             cv_.wait(ul, [this]() { return !paused_; });
+
             if (pause_start_time) {
 #ifdef LINUX
-                demuxer_->flush();
-                if (capture_audio_) audio_demuxer_->flush();
+                demuxer_->openInput();
+                if (capture_audio_) audio_demuxer_->openInput();
 #endif
                 start_time_ += (av_gettime() - pause_start_time);
             }
+
             if (stop_capture_) break;
         }
 
