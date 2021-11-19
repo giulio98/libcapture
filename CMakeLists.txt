@@ -3,6 +3,11 @@ project(screen-recorder)
 
 set(CMAKE_CXX_STANDARD 20)
 
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+
+find_package(FFmpeg REQUIRED COMPONENTS AVCODEC AVFORMAT AVUTIL SWSCALE)
+
+
 IF (WIN32)
     MESSAGE(STATUS "Platform is Windows")
     add_definitions(-DWINDOWS)
@@ -20,17 +25,7 @@ ELSEIF (UNIX)
     link_directories(${X11_LIBRARIES})
 ENDIF ()
 
-find_package(PkgConfig REQUIRED)
 
-pkg_check_modules(LIBAV REQUIRED IMPORTED_TARGET
-    libavdevice
-    libavfilter
-    libavformat
-    libavcodec
-    libswresample
-    libswscale
-    libavutil
-)
 
 add_executable(screen-recorder
     src/main.cpp
@@ -57,7 +52,15 @@ add_executable(screen-recorder
     include/audio_converter.h
 )
 
-target_link_libraries(screen-recorder PkgConfig::LIBAV)
+set_target_properties(screen-recorder PROPERTIES 
+    WIN32_EXECUTABLE $<PLATFORM_ID:Windows>
+    C_STANDARD 99
+)
+
+target_link_libraries (screen-recorder
+$<$<BOOL:${MINGW}>:mingw32>
+FFmpeg::FFmpeg)
+
 
 IF(LINUX)
 target_link_libraries(screen-recorder ${X11_LIBRARIES})
