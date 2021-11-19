@@ -24,7 +24,7 @@ public:
      * @return true if the conversion was successful, false if the internal
      * buffer didn't have enough space to copy the input samples
      */
-    bool sendFrame(const AVFrame *frame);
+    bool sendFrame(const AVFrame *frame, int64_t pts_offset = 0);
 
     /**
      * Get a converted frame
@@ -32,5 +32,5 @@ public:
      * @return a new converted frame if it was possible to build it, nullptr if the internal buffer didn't have
      * enough samples to build a frame
      */
-    av::FrameUPtr getFrame(int64_t pts_offset = 0);
+    av::FrameUPtr getFrame();
 };
