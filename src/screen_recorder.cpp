@@ -28,7 +28,7 @@ ScreenRecorder::ScreenRecorder() {
     in_fmt_name_ = "avfoundation";
 #endif
     video_encoder_options_.insert({"preset", "ultrafast"});
-    internal_time_base_ = (AVRational){1, MILLION};
+    internal_time_base_ = (AVRational){1, 90000};
     avdevice_register_all();
 }
 
@@ -264,10 +264,10 @@ void ScreenRecorder::processAudioPacket(const AVPacket *packet) {
 
             bool converter_received = false;
             while (!converter_received) {
-                converter_received = audio_converter_->sendFrame(in_frame.get());
+                converter_received = audio_converter_->sendFrame(in_frame.get(), audio_pts_offset_);
 
                 while (true) {
-                    auto out_frame = audio_converter_->getFrame(audio_pts_offset_);
+                    auto out_frame = audio_converter_->getFrame();
                     if (!out_frame) break;
 
                     processConvertedFrame(out_frame.get(), av::DataType::audio);
@@ -296,6 +296,9 @@ void ScreenRecorder::flushPipelines() {
 
 /* function to capture and store data in frames by allocating required memory and auto deallocating the memory.   */
 void ScreenRecorder::captureFrames() {
+    av::PacketUPtr packet;
+    av::DataType packet_type;
+
     /* start counting for PTS */
     video_frame_counter_ = 0;
     audio_frame_counter_ = 0;
@@ -315,42 +318,27 @@ void ScreenRecorder::captureFrames() {
 
             if (paused_) {
                 pause_start_time = av_gettime();
-#ifdef LINUX
-                demuxer_->closeInput();
-                if (capture_audio_) audio_demuxer_->closeInput();
-#endif
             }
 
             cv_.wait(ul, [this]() { return !paused_; });
 
             if (pause_start_time) {
-#ifdef LINUX
-                demuxer_->openInput();
-                if (capture_audio_) audio_demuxer_->openInput();
-#endif
                 int64_t pause_duration = av_gettime() - pause_start_time;
                 start_time_ += pause_duration;
-                video_pts_offset_ += pause_duration;
-                // audio_pts_offset_ += pause_duration;
             }
 
             if (stop_capture_) break;
+
+            auto [new_packet, new_packet_type] = demuxer_->readPacket();
+            if (!new_packet) continue;
+            if (pause_start_time) {
+                int64_t offset_increment = new_packet->pts - (packet->pts + 1000);  // Very hacky
+                video_pts_offset_ += offset_increment;
+                audio_pts_offset_ += offset_increment;
+            }
+            packet = std::move(new_packet);
+            packet_type = new_packet_type;
         }
-
-#ifdef LINUX
-
-        auto [packet, packet_type] = demuxer_->readPacket();
-        if (packet) processVideoPacket(packet.get()));
-
-        if (capture_audio_) {
-            auto [audio_packet, audio_packet_type] = audio_demuxer_->readPacket();
-            if (audio_packet) processAudioPacket(audio_packet.get()));
-        }
-
-#else  // macOS
-
-        auto [packet, packet_type] = demuxer_->readPacket();
-        if (!packet) continue;
 
         if (packet_type == av::DataType::video) {
             processVideoPacket(packet.get());
@@ -359,8 +347,6 @@ void ScreenRecorder::captureFrames() {
         } else {
             throw std::runtime_error("Unknown packet received from demuxer");
         }
-
-#endif
     }
 
     flushPipelines();
