@@ -64,9 +64,7 @@ class ScreenRecorder {
 
     AVRational internal_time_base_;
 
-    int64_t video_pts_offset_;
-
-    int64_t audio_pts_offset_;
+    int64_t pts_offset_;
 
     void processVideoPacket(const AVPacket *packet);
 

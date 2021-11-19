@@ -238,7 +238,7 @@ void ScreenRecorder::processVideoPacket(const AVPacket *packet) {
 
             video_frame_counter_++;
 
-            auto out_frame = video_converter_->convertFrame(in_frame.get(), video_pts_offset_);
+            auto out_frame = video_converter_->convertFrame(in_frame.get(), pts_offset_);
 
             processConvertedFrame(out_frame.get(), av::DataType::video);
         }
@@ -260,7 +260,7 @@ void ScreenRecorder::processAudioPacket(const AVPacket *packet) {
 
             bool converter_received = false;
             while (!converter_received) {
-                converter_received = audio_converter_->sendFrame(in_frame.get(), video_pts_offset_);
+                converter_received = audio_converter_->sendFrame(in_frame.get(), pts_offset_);
 
                 while (true) {
                     auto out_frame = audio_converter_->getFrame();
@@ -299,8 +299,7 @@ void ScreenRecorder::captureFrames() {
     video_frame_counter_ = 0;
     audio_frame_counter_ = 0;
 
-    video_pts_offset_ = -1;
-    audio_pts_offset_ = -1;
+    pts_offset_ = -1;
 
     /* start counting for fps estimation */
     dropped_frame_counter_ = -1;  // wait for an extra second at the beginning to allow the framerate to stabilize
@@ -335,17 +334,15 @@ void ScreenRecorder::captureFrames() {
                     packet_duration = av_rescale_q(1, (AVRational){1, video_framerate_}, internal_time_base_);
                 }
                 int64_t offset_increment = new_packet->pts - (packet->pts + packet_duration);  // Very hacky
-                video_pts_offset_ += offset_increment;
-                audio_pts_offset_ += offset_increment;
+                pts_offset_ += offset_increment;
             }
             packet = std::move(new_packet);
             packet_type = new_packet_type;
         }
 
         if (packet_type == av::DataType::video) {
-            if (video_pts_offset_ == -1) video_pts_offset_ = packet->pts;
+            if (pts_offset_ == -1) pts_offset_ = packet->pts;
             processVideoPacket(packet.get());
-            if (audio_pts_offset_ == -1) audio_pts_offset_ = packet->pts;
         } else if (capture_audio_ && (packet_type == av::DataType::audio)) {
             processAudioPacket(packet.get());
         } else {
