@@ -11,17 +11,20 @@ class AudioConverter {
     AVSampleFormat out_sample_fmt_;
     av::SwrContextUPtr ctx_;
     av::AudioFifoUPtr fifo_buf_;
-    int fifo_duration_;
+    AVRational in_time_base_;
+    AVRational out_time_base_;
+    int64_t next_pts_;
+    int64_t fifo_duration_;
 
 public:
-    AudioConverter(const AVCodecContext *in_codec_ctx, const AVCodecContext *out_codec_ctx);
+    AudioConverter(const AVCodecContext *in_codec_ctx, const AVCodecContext *out_codec_ctx, AVRational in_time_base);
 
     /**
      * Send a frame to convert
      * @return true if the conversion was successful, false if the internal
      * buffer didn't have enough space to copy the input samples
      */
-    bool sendFrame(const AVFrame *frame) const;
+    bool sendFrame(const AVFrame *frame);
 
     /**
      * Get a converted frame
@@ -29,5 +32,5 @@ public:
      * @return a new converted frame if it was possible to build it, nullptr if the internal buffer didn't have
      * enough samples to build a frame
      */
-    av::FrameUPtr getFrame(int64_t frame_number) const;
+    av::FrameUPtr getFrame(int64_t pts_offset = 0);
 };

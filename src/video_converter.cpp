@@ -1,13 +1,15 @@
 #include "../include/video_converter.h"
 
-VideoConverter::VideoConverter(const AVCodecContext *in_codec_ctx, const AVCodecContext *out_codec_ctx)
-    : ctx_(nullptr) {
+VideoConverter::VideoConverter(const AVCodecContext *in_codec_ctx, const AVCodecContext *out_codec_ctx,
+                               AVRational in_time_base)
+    : ctx_(nullptr), in_time_base_(in_time_base) {
     if (!in_codec_ctx) throw std::runtime_error("VideoConverter: in_codec_ctx is NULL");
     if (!out_codec_ctx) throw std::runtime_error("VideoConverter: out_codec_ctx is NULL");
 
     out_width_ = out_codec_ctx->width;
     out_height_ = out_codec_ctx->height;
     out_pix_fmt_ = out_codec_ctx->pix_fmt;
+    out_time_base_ = out_codec_ctx->time_base;
 
     ctx_ =
         av::SwsContextUPtr(sws_getContext(in_codec_ctx->width, in_codec_ctx->height, in_codec_ctx->pix_fmt, out_width_,
@@ -15,7 +17,7 @@ VideoConverter::VideoConverter(const AVCodecContext *in_codec_ctx, const AVCodec
     if (!ctx_) throw std::runtime_error("VideoConverter: failed to allocate context");
 }
 
-av::FrameUPtr VideoConverter::convertFrame(const AVFrame *in_frame, int64_t frame_number) const {
+av::FrameUPtr VideoConverter::convertFrame(const AVFrame *in_frame, int64_t pts_offset) const {
     if (!in_frame) throw std::runtime_error("VideoConverter: in_frame is not allocated");
 
     av::FrameUPtr out_frame(av_frame_alloc());
@@ -31,7 +33,7 @@ av::FrameUPtr VideoConverter::convertFrame(const AVFrame *in_frame, int64_t fram
                   out_frame->linesize) < 0)
         throw std::runtime_error("VideoEncoder: failed to convert frame");
 
-    out_frame->pts = frame_number;
+    out_frame->pts = av_rescale_q(in_frame->pts - pts_offset, in_time_base_, out_time_base_);
 
     return out_frame;
 }

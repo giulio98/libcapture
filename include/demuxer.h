@@ -12,10 +12,11 @@ class Demuxer {
     std::map<std::string, std::string> options_;
     const AVStream *video_stream_;
     const AVStream *audio_stream_;
+    AVRational out_time_base_;
 
 public:
     Demuxer(const std::string &fmt_name, const std::string &device_name,
-            const std::map<std::string, std::string> &options);
+            const std::map<std::string, std::string> &options, AVRational out_time_base);
 
     void openInput();
 

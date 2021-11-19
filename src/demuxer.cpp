@@ -1,13 +1,14 @@
 #include "../include/demuxer.h"
 
 Demuxer::Demuxer(const std::string &fmt_name, const std::string &device_name,
-                 const std::map<std::string, std::string> &options)
+                 const std::map<std::string, std::string> &options, AVRational out_time_base)
     : fmt_ctx_(nullptr),
       fmt_(nullptr),
       device_name_(device_name),
       options_(options),
       video_stream_(nullptr),
-      audio_stream_(nullptr) {
+      audio_stream_(nullptr),
+      out_time_base_(out_time_base) {
     fmt_ = av_find_input_format(fmt_name.c_str());
     if (!fmt_) throw std::runtime_error("Demuxer: Cannot find input format");
 }
@@ -69,8 +70,10 @@ std::pair<av::PacketUPtr, av::DataType> Demuxer::readPacket() const {
     av::DataType packet_type;
     if (video_stream_ && packet->stream_index == video_stream_->index) {
         packet_type = av::DataType::video;
+        av_packet_rescale_ts(packet.get(), video_stream_->time_base, out_time_base_);
     } else if (audio_stream_ && packet->stream_index == audio_stream_->index) {
         packet_type = av::DataType::audio;
+        av_packet_rescale_ts(packet.get(), audio_stream_->time_base, out_time_base_);
     } else {
         throw std::runtime_error("Demuxer: unknown packet stream index");
     }

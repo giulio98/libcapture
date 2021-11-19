@@ -62,6 +62,12 @@ class ScreenRecorder {
     /* Counter of times in which the estimated framerate is lower than the specified one */
     int dropped_frame_counter_;
 
+    AVRational internal_time_base_;
+
+    int64_t video_pts_offset_;
+
+    int64_t audio_pts_offset_;
+
     void processVideoPacket(const AVPacket *packet);
 
     void processAudioPacket(const AVPacket *packet);

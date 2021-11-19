@@ -15,6 +15,8 @@
 #define DURATION_LOGGING 0
 #define FRAMERATE_LOGGING 1
 
+#define MILLION 1000000
+
 ScreenRecorder::ScreenRecorder() {
     out_video_pix_fmt_ = AV_PIX_FMT_YUV420P;
     out_video_codec_id_ = AV_CODEC_ID_H264;
@@ -26,6 +28,7 @@ ScreenRecorder::ScreenRecorder() {
     in_fmt_name_ = "avfoundation";
 #endif
     video_encoder_options_.insert({"preset", "ultrafast"});
+    internal_time_base_ = (AVRational){1, MILLION};
     avdevice_register_all();
 }
 
@@ -56,14 +59,15 @@ void ScreenRecorder::initInput() {
     demux_options.insert({"capture_cursor", "0"});
 #endif
 
-    demuxer_ = std::make_unique<Demuxer>(in_fmt_name_, device_name.str(), demux_options);
+    demuxer_ = std::make_unique<Demuxer>(in_fmt_name_, device_name.str(), demux_options, internal_time_base_);
     demuxer_->openInput();
 
     video_decoder_ = std::make_unique<Decoder>(demuxer_->getVideoParams());
 
     if (capture_audio_) {
 #ifdef LINUX
-        audio_demuxer_ = std::make_unique<Demuxer>(in_audio_fmt_name_, "default", std::map<std::string, std::string>());
+        audio_demuxer_ = std::make_unique<Demuxer>(in_audio_fmt_name_, "default", std::map<std::string, std::string>(),
+                                                   internal_time_base_);
         audio_demuxer_->openInput();
         auto params = audio_demuxer_->getAudioParams();
 #else
@@ -96,12 +100,12 @@ void ScreenRecorder::initOutput() {
 }
 
 void ScreenRecorder::initConverters() {
-    video_converter_ =
-        std::make_unique<VideoConverter>(video_decoder_->getCodecContext(), video_encoder_->getCodecContext());
+    video_converter_ = std::make_unique<VideoConverter>(video_decoder_->getCodecContext(),
+                                                        video_encoder_->getCodecContext(), internal_time_base_);
 
     if (capture_audio_) {
-        audio_converter_ =
-            std::make_unique<AudioConverter>(audio_decoder_->getCodecContext(), audio_encoder_->getCodecContext());
+        audio_converter_ = std::make_unique<AudioConverter>(audio_decoder_->getCodecContext(),
+                                                            audio_encoder_->getCodecContext(), internal_time_base_);
     }
 }
 
@@ -182,7 +186,7 @@ void ScreenRecorder::resume() {
 }
 
 void ScreenRecorder::estimateFramerate() {
-    auto estimated_framerate = 1000000 * video_frame_counter_ / (av_gettime() - start_time_);
+    auto estimated_framerate = MILLION * video_frame_counter_ / (av_gettime() - start_time_);
 #if FRAMERATE_LOGGING
     std::cout << "Estimated framerate: " << estimated_framerate << " fps" << std::endl;
 #else
@@ -232,7 +236,11 @@ void ScreenRecorder::processVideoPacket(const AVPacket *packet) {
             auto in_frame = video_decoder_->getFrame();
             if (!in_frame) break;
 
-            auto out_frame = video_converter_->convertFrame(in_frame.get(), video_frame_counter_++);
+            video_frame_counter_++;
+
+            if (video_pts_offset_ == -1) video_pts_offset_ = in_frame->pts;
+
+            auto out_frame = video_converter_->convertFrame(in_frame.get(), video_pts_offset_);
 
             processConvertedFrame(out_frame.get(), av::DataType::video);
         }
@@ -252,15 +260,15 @@ void ScreenRecorder::processAudioPacket(const AVPacket *packet) {
             auto in_frame = audio_decoder_->getFrame();
             if (!in_frame) break;
 
+            if (audio_pts_offset_ == -1) audio_pts_offset_ = in_frame->pts;
+
             bool converter_received = false;
             while (!converter_received) {
                 converter_received = audio_converter_->sendFrame(in_frame.get());
 
                 while (true) {
-                    auto out_frame = audio_converter_->getFrame(audio_frame_counter_);
+                    auto out_frame = audio_converter_->getFrame(audio_pts_offset_);
                     if (!out_frame) break;
-
-                    audio_frame_counter_++;
 
                     processConvertedFrame(out_frame.get(), av::DataType::audio);
                 }
@@ -292,6 +300,9 @@ void ScreenRecorder::captureFrames() {
     video_frame_counter_ = 0;
     audio_frame_counter_ = 0;
 
+    video_pts_offset_ = -1;
+    audio_pts_offset_ = -1;
+
     /* start counting for fps estimation */
     dropped_frame_counter_ = -1;  // wait for an extra second at the beginning to allow the framerate to stabilize
     start_time_ = av_gettime();
@@ -317,7 +328,10 @@ void ScreenRecorder::captureFrames() {
                 demuxer_->openInput();
                 if (capture_audio_) audio_demuxer_->openInput();
 #endif
-                start_time_ += (av_gettime() - pause_start_time);
+                int64_t pause_duration = av_gettime() - pause_start_time;
+                start_time_ += pause_duration;
+                video_pts_offset_ += pause_duration;
+                // audio_pts_offset_ += pause_duration;
             }
 
             if (stop_capture_) break;
