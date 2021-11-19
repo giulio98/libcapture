@@ -238,8 +238,6 @@ void ScreenRecorder::processVideoPacket(const AVPacket *packet) {
 
             video_frame_counter_++;
 
-            if (video_pts_offset_ == -1) video_pts_offset_ = in_frame->pts;
-
             auto out_frame = video_converter_->convertFrame(in_frame.get(), video_pts_offset_);
 
             processConvertedFrame(out_frame.get(), av::DataType::video);
@@ -260,11 +258,9 @@ void ScreenRecorder::processAudioPacket(const AVPacket *packet) {
             auto in_frame = audio_decoder_->getFrame();
             if (!in_frame) break;
 
-            if (audio_pts_offset_ == -1) audio_pts_offset_ = in_frame->pts;
-
             bool converter_received = false;
             while (!converter_received) {
-                converter_received = audio_converter_->sendFrame(in_frame.get(), audio_pts_offset_);
+                converter_received = audio_converter_->sendFrame(in_frame.get(), video_pts_offset_);
 
                 while (true) {
                     auto out_frame = audio_converter_->getFrame();
@@ -332,7 +328,13 @@ void ScreenRecorder::captureFrames() {
             auto [new_packet, new_packet_type] = demuxer_->readPacket();
             if (!new_packet) continue;
             if (pause_start_time) {
-                int64_t offset_increment = new_packet->pts - (packet->pts + 1000);  // Very hacky
+                int64_t packet_duration;
+                if (packet_type == av::DataType::audio) {
+                    packet_duration = packet->duration;
+                } else {
+                    packet_duration = av_rescale_q(1, (AVRational){1, video_framerate_}, internal_time_base_);
+                }
+                int64_t offset_increment = new_packet->pts - (packet->pts + packet_duration);  // Very hacky
                 video_pts_offset_ += offset_increment;
                 audio_pts_offset_ += offset_increment;
             }
@@ -341,7 +343,9 @@ void ScreenRecorder::captureFrames() {
         }
 
         if (packet_type == av::DataType::video) {
+            if (video_pts_offset_ == -1) video_pts_offset_ = packet->pts;
             processVideoPacket(packet.get());
+            if (audio_pts_offset_ == -1) audio_pts_offset_ = packet->pts;
         } else if (capture_audio_ && (packet_type == av::DataType::audio)) {
             processAudioPacket(packet.get());
         } else {

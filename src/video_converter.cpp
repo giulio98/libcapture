@@ -17,7 +17,7 @@ VideoConverter::VideoConverter(const AVCodecContext *in_codec_ctx, const AVCodec
     if (!ctx_) throw std::runtime_error("VideoConverter: failed to allocate context");
 }
 
-av::FrameUPtr VideoConverter::convertFrame(const AVFrame *in_frame, int64_t pts_offset) const {
+av::FrameUPtr VideoConverter::convertFrame(const AVFrame *in_frame, int64_t pts_offset)  {
     if (!in_frame) throw std::runtime_error("VideoConverter: in_frame is not allocated");
 
     av::FrameUPtr out_frame(av_frame_alloc());
@@ -34,6 +34,8 @@ av::FrameUPtr VideoConverter::convertFrame(const AVFrame *in_frame, int64_t pts_
         throw std::runtime_error("VideoEncoder: failed to convert frame");
 
     out_frame->pts = av_rescale_q(in_frame->pts - pts_offset, in_time_base_, out_time_base_);
+
+    last_pts_ = out_frame->pts;
 
     return out_frame;
 }
