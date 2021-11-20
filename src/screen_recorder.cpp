@@ -333,33 +333,40 @@ void ScreenRecorder::captureFrames() {
 #endif
         }
 
+        /* Make sure we don't continue with just empty packets or wrong types */
 #ifdef MACOS
         if (!packet) continue;
         if (packet_type == av::DataType::none) throw std::runtime_error("Unknown packet received from demuxer");
 #else
         if (!packet && !audio_packet) continue;
-        if (packet_type != av::DataType::video) throw std::runtime_error("Unknown packet received from video demuxer");
-        if (audio_packet_type != av::DataType::audio)
+        if (packet && packet_type != av::DataType::video)
+            throw std::runtime_error("Unknown packet received from video demuxer");
+        if (audio_packet && audio_packet_type != av::DataType::audio)
             throw std::runtime_error("Unknown packet received from audio demuxer");
 #endif
 
-        /* If we're recovering froma pause */
+        /* If we're recovering from a pause */
         if (pause_ts != invalidTs) {
             start_time_ += av_gettime() - pause_ts;
-            /* Adjust the pts offset the remove the pause duration */
+
+            /* Adjust the pts offset to remove the pause duration */
             if (pts_offset_ != invalidTs) {
                 /**
                  * If we were able to record something before the pause, try to estimate the pause duration
                  * using the last estimated pts, otherwise do nothing
                  */
 #ifdef MACOS
-                if (packet_type == av::DataType::video) {
+                if ((packet_type == av::DataType::video) && (next_video_pts != invalidTs)) {
 #else
-                if (packet) {
+                if (packet && (next_video_pts != invalidTs)) {
 #endif
-                    if (next_video_pts != invalidTs) pts_offset_ += packet->pts - next_video_pts;
-                } else { /* we can't have invalid informations because of the checks above */
-                    if (next_audio_pts != invalidTs) pts_offset_ += packet->pts - next_audio_pts;
+                    pts_offset_ += packet->pts - next_video_pts;
+                } else if (next_audio_pts != invalidTs) {
+#ifdef MACOS
+                    pts_offset_ += packet->pts - next_audio_pts;
+#else
+                    pts_offset_ += audio_packet->pts - next_audio_pts;
+#endif
                 }
             }
         }
@@ -380,7 +387,7 @@ void ScreenRecorder::captureFrames() {
 #else
         }
 
-        if (audio_packet && (pts_offset_ != invalidTs)) {
+        if (audio_packet && (pts_offset_ != invalidTs)) {
             next_audio_pts = audio_packet->pts + audio_packet->duration;
             processAudioPacket(audio_packet.get());
         }
