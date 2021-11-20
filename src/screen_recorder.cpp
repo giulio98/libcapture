@@ -389,7 +389,7 @@ void ScreenRecorder::captureFrames() {
         }
 
         if (capture_audio_ && audio_packet) {
-            if (packet_type != av::DataType::audio)
+            if (audio_packet_type != av::DataType::audio)
                 throw std::runtime_error("Unknown packet received from audio demuxer");
 
             if (pause_ts != invalidTs) {
@@ -409,7 +409,7 @@ void ScreenRecorder::captureFrames() {
 
             if (pts_offset_ != invalidTs) {
                 next_audio_pts = audio_packet->pts + audio_packet->duration;
-                processVideoPacket(audio_packet.get());
+                processAudioPacket(audio_packet.get());
             }
         }
 #endif
