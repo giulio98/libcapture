@@ -336,81 +336,53 @@ void ScreenRecorder::captureFrames() {
 #ifdef MACOS
         if (!packet) continue;
         if (packet_type == av::DataType::none) throw std::runtime_error("Unknown packet received from demuxer");
+#else
+        if (!packet && !audio_packet) continue;
+        if (packet_type != av::DataType::video) throw std::runtime_error("Unknown packet received from video demuxer");
+        if (audio_packet_type != av::DataType::audio)
+            throw std::runtime_error("Unknown packet received from audio demuxer");
+#endif
 
+        /* If we're recovering froma pause */
         if (pause_ts != invalidTs) {
+            start_time_ += av_gettime() - pause_ts;
+            /* Adjust the pts offset the remove the pause duration */
             if (pts_offset_ != invalidTs) {
                 /**
                  * If we were able to record something before the pause, try to estimate the pause duration
                  * using the last estimated pts, otherwise do nothing
                  */
-                int64_t estimated_pts = packet->pts;
-                if ((packet_type == av::DataType::video) && (next_video_pts != invalidTs)) {
-                    estimated_pts = next_video_pts;
-                } else if ((packet_type == av::DataType::audio) && (next_audio_pts != invalidTs)) {
-                    estimated_pts = next_audio_pts;
+#ifdef MACOS
+                if (packet_type == av::DataType::video) {
+#else
+                if (packet) {
+#endif
+                    if (next_video_pts != invalidTs) pts_offset_ += packet->pts - next_video_pts;
+                } else { /* we can't have invalid informations because of the checks above */
+                    if (next_audio_pts != invalidTs) pts_offset_ += packet->pts - next_audio_pts;
                 }
-                pts_offset_ += packet->pts - estimated_pts;
             }
-            start_time_ += av_gettime() - pause_ts;
         }
 
+#ifdef MACOS
         if (packet_type == av::DataType::video) {
+#else
+        if (packet) {
+#endif
             if (pts_offset_ == invalidTs) pts_offset_ = packet->pts;
             next_video_pts = packet->pts + av_rescale_q(1, (AVRational){1, video_framerate_}, time_base_);
             processVideoPacket(packet.get());
+#ifdef MACOS
         } else if (capture_audio_ && (pts_offset_ != invalidTs)) {
             next_audio_pts = packet->pts + packet->duration;
             processAudioPacket(packet.get());
         }
 #else
-        if (packet) {
-            if (packet_type != av::DataType::video)
-                throw std::runtime_error("Unknown packet received from video demuxer");
-
-            if (pause_ts != invalidTs) {
-                if (pts_offset_ != invalidTs) {
-                    /**
-                     * If we were able to record something before the pause, try to estimate the pause duration
-                     * using the last estimated pts, otherwise do nothing
-                     */
-                    int64_t estimated_pts = packet->pts;
-                    if (next_video_pts != invalidTs) {
-                        estimated_pts = next_video_pts;
-                    }
-                    pts_offset_ += packet->pts - estimated_pts;
-                }
-                start_time_ += av_gettime() - pause_ts;
-                pause_ts = invalidTs;
-            }
-
-            if (pts_offset_ == invalidTs) pts_offset_ = packet->pts;
-            next_video_pts = packet->pts + av_rescale_q(1, (AVRational){1, video_framerate_}, time_base_);
-            processVideoPacket(packet.get());
         }
 
-        if (capture_audio_ && audio_packet) {
-            if (audio_packet_type != av::DataType::audio)
-                throw std::runtime_error("Unknown packet received from audio demuxer");
-
-            if (pause_ts != invalidTs) {
-                if (pts_offset_ != invalidTs) {
-                    /**
-                     * If we were able to record something before the pause, try to estimate the pause duration
-                     * using the last estimated pts, otherwise do nothing
-                     */
-                    int64_t estimated_pts = audio_packet->pts;
-                    if (next_audio_pts != invalidTs) {
-                        estimated_pts = next_audio_pts;
-                    }
-                    pts_offset_ += audio_packet->pts - estimated_pts;
-                }
-                start_time_ += av_gettime() - pause_ts;
-            }
-
-            if (pts_offset_ != invalidTs) {
-                next_audio_pts = audio_packet->pts + audio_packet->duration;
-                processAudioPacket(audio_packet.get());
-            }
+        if (audio_packet && (pts_offset_ != invalidTs)) {
+            next_audio_pts = audio_packet->pts + audio_packet->duration;
+            processAudioPacket(audio_packet.get());
         }
 #endif
     }
