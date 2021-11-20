@@ -329,7 +329,7 @@ void ScreenRecorder::captureFrames() {
 
             std::tie(packet, packet_type) = demuxer_->readPacket();
 #ifndef MACOS
-            if (capture_audio) std::tie(audio_packet, audio_packet_type) = audio_demuxer_->readPacket();
+            if (capture_audio_) std::tie(audio_packet, audio_packet_type) = audio_demuxer_->readPacket();
 #endif
         }
 
@@ -388,7 +388,7 @@ void ScreenRecorder::captureFrames() {
             processVideoPacket(packet.get());
         }
 
-        if (capture_audio && audio_packet) {
+        if (capture_audio_ && audio_packet) {
             if (packet_type != av::DataType::audio)
                 throw std::runtime_error("Unknown packet received from audio demuxer");
 
