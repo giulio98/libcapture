@@ -13,7 +13,7 @@ struct DeleterP {
     }
 };
 
-/**
+/*
  * Wrapper template for a deleter function that accept a pointer-to-pointer to the struct to free
  * "auto" will accept any signature for the "deleter" function (e.g. void (*deleter)(StructPtr **)),
  * creating a different struct for each one of them at compile-time

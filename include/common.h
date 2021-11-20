@@ -3,8 +3,10 @@
 #include <map>
 #include <memory>
 #include <string>
-
+#include <Windows.h>
+#include <stdexcept>
 #include "deleter.h"
+
 
 /* FFMPEG LIBRARIES */
 extern "C" {
