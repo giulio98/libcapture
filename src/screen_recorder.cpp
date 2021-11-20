@@ -336,7 +336,8 @@ void ScreenRecorder::captureFrames() {
         /* Make sure we don't continue with just empty packets or wrong types */
 #ifdef MACOS
         if (!packet) continue;
-        if (packet_type == av::DataType::none) throw std::runtime_error("Unknown packet received from demuxer");
+        if ((packet_type == av::DataType::none) || (!capture_audio_ && (packet_type == av::DataType::audio)))
+            throw std::runtime_error("Unknown packet received from demuxer");
 #else
         if (!packet && !audio_packet) continue;
         if (packet && packet_type != av::DataType::video)
@@ -345,7 +346,7 @@ void ScreenRecorder::captureFrames() {
             throw std::runtime_error("Unknown packet received from audio demuxer");
 #endif
 
-        /* If we're recovering from a pause */
+        /* If we're restarting after a pause */
         if (pause_ts != invalidTs) {
             start_time_ += av_gettime() - pause_ts;
 
@@ -358,14 +359,13 @@ void ScreenRecorder::captureFrames() {
 #ifdef MACOS
                 if ((packet_type == av::DataType::video) && (next_video_pts != invalidTs)) {
                     pts_offset_ += packet->pts - next_video_pts;
-                } else if (next_audio_pts != invalidTs) {
+                } else if ((packet_type == av::DataType::audio) && (next_audio_pts != invalidTs)) {
                     pts_offset_ += packet->pts - next_audio_pts;
                 }
 #else
-                if ((!audio_packet || (packet && (packet->pts < audio_packet->pts))) && (next_video_pts != invalidTs)) {
+                if (packet && (next_video_pts != invalidTs)) {
                     pts_offset_ += packet->pts - next_video_pts;
-                } else if ((!packet || (audio_packet && (audio_packet->pts < packet->pts))) &&
-                           (next_audio_pts != invalidTs)) {
+                } else if (audio_packet && (next_audio_pts != invalidTs)) {
                     pts_offset_ += audio_packet->pts - next_audio_pts;
                 }
 #endif
@@ -381,7 +381,7 @@ void ScreenRecorder::captureFrames() {
             next_video_pts = packet->pts + av_rescale_q(1, (AVRational){1, video_framerate_}, time_base_);
             processVideoPacket(packet.get());
 #ifdef MACOS
-        } else if (capture_audio_ && (pts_offset_ != invalidTs)) {
+        } else if (pts_offset_ != invalidTs) {
             next_audio_pts = packet->pts + packet->duration;
             processAudioPacket(packet.get());
         }
