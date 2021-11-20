@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "screen_recorder.h"
+#include "../include/screen_recorder.h"
 
 using namespace std;
 

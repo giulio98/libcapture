@@ -9,12 +9,12 @@ include(FetchContent)
 IF(WIN32)
     add_library(FFmpeg::FFmpeg INTERFACE IMPORTED)
     set_target_properties(FFmpeg::FFmpeg PROPERTIES
-            INTERFACE_LINK_DIRECTORIES "${screen-recorder_SOURCE_DIR}/lib/"
-            INTERFACE_INCLUDE_DIRECTORIES "${screen-recorder_SOURCE_DIR}/include/"
+            INTERFACE_LINK_DIRECTORIES "${screen-recorder_SOURCE_DIR}/lib"
+            INTERFACE_INCLUDE_DIRECTORIES "${screen-recorder_SOURCE_DIR}/include"
             INTERFACE_LINK_LIBRARIES "avdevice;avfilter;avformat;avcodec;swresample;swscale;avutil;"
             )
     set(FFMPEG_DLLS avdevice-58.dll avfilter-7.dll avformat-58.dll avcodec-58.dll swresample-3.dll swscale-5.dll avutil-56.dll)
-    list(TRANSFORM FFMPEG_DLLS PREPEND "${screen-recorder_SOURCE_DIR}/bin/")
+    list(TRANSFORM FFMPEG_DLLS PREPEND "${screen-recorder_SOURCE_DIR}/bin")
 ENDIF()
 
 
@@ -74,10 +74,6 @@ add_executable(
         include/video_converter.h
         include/audio_converter.h
 )
-set_target_properties(screen-recorder PROPERTIES
-        WIN32_EXECUTABLE $<PLATFORM_ID:Windows>
-        C_STANDARD 99
-        )
 target_link_libraries(screen-recorder PRIVATE FFmpeg::FFmpeg)
 
 IF(LINUX)

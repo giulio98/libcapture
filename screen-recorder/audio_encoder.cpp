@@ -1,4 +1,4 @@
-#include "audio_encoder.h"
+#include "../include/audio_encoder.h"
 
 AudioEncoder::AudioEncoder(AVCodecID codec_id, const std::map<std::string, std::string> &options,
                            int global_header_flags, const AVCodecParameters *params)

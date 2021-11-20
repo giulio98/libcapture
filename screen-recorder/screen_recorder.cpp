@@ -1,4 +1,4 @@
-#include "screen_recorder.h"
+#include "../include/screen_recorder.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -10,7 +10,7 @@
 
 #include <sstream>
 
-#include "duration_logger.h"
+#include "../include/duration_logger.h"
 
 #define DURATION_LOGGING 0
 #define FRAMERATE_LOGGING 1

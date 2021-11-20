@@ -1,4 +1,4 @@
-#include "video_encoder.h"
+#include "../include/video_encoder.h"
 
 VideoEncoder::VideoEncoder(AVCodecID codec_id, const std::map<std::string, std::string>& options,
     int global_header_flags, const AVCodecParameters* params, AVPixelFormat pix_fmt,
