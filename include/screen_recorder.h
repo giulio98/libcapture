@@ -15,6 +15,9 @@
 #include "video_encoder.h"
 
 class ScreenRecorder {
+    /* invalid timestamp */
+    static const int64_t invalidTs = -1;
+
     bool capture_audio_;
 
     int video_offset_x_;
@@ -62,7 +65,7 @@ class ScreenRecorder {
     /* Counter of times in which the estimated framerate is lower than the specified one */
     int dropped_frame_counter_;
 
-    AVRational internal_time_base_;
+    AVRational time_base_;
 
     int64_t pts_offset_;
 

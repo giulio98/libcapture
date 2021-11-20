@@ -2,7 +2,7 @@
 
 AudioConverter::AudioConverter(const AVCodecContext *in_codec_ctx, const AVCodecContext *out_codec_ctx,
                                AVRational in_time_base)
-    : ctx_(nullptr), fifo_buf_(nullptr), in_time_base_(in_time_base), next_pts_(-1), fifo_duration_(0) {
+    : ctx_(nullptr), fifo_buf_(nullptr), in_time_base_(in_time_base), next_pts_(invalidNextPts), fifo_duration_(0) {
     if (!in_codec_ctx) throw std::runtime_error("AudioConverter: in_codec_ctx is NULL");
     if (!out_codec_ctx) throw std::runtime_error("AudioConverter: out_codec_ctx is NULL");
 
@@ -28,7 +28,7 @@ bool AudioConverter::sendFrame(const AVFrame *frame, int64_t pts_offset) {
     if (!frame) throw std::runtime_error("AudioConverter: frame is not allocated");
     if (av_audio_fifo_space(fifo_buf_.get()) < frame->nb_samples) return false;
 
-    if (next_pts_ == -1) next_pts_ = frame->pts - pts_offset;
+    if (next_pts_ == invalidNextPts) next_pts_ = frame->pts - pts_offset;
 
     uint8_t **buf = nullptr;
 
@@ -43,7 +43,7 @@ bool AudioConverter::sendFrame(const AVFrame *frame, int64_t pts_offset) {
         if (av_audio_fifo_write(fifo_buf_.get(), (void **)buf, frame->nb_samples) < 0)
             throw std::runtime_error("AudioConverter: failed to write to fifo");
 
-        fifo_duration_ = frame->pts + frame->pkt_duration - pts_offset - next_pts_;
+        fifo_duration_ = frame->pts - pts_offset + frame->pkt_duration - next_pts_;
 
         if (**buf) av_freep(&buf[0]);
 
@@ -64,6 +64,7 @@ av::FrameUPtr AudioConverter::getFrame() {
     av::FrameUPtr out_frame(av_frame_alloc());
     if (!out_frame) throw std::runtime_error("AudioConverter: failed to allocate internal frame");
 
+    out_frame->pts = av_rescale_q(next_pts_, in_time_base_, out_time_base_);
     out_frame->nb_samples = out_frame_size_;
     out_frame->channels = out_channels_;
     out_frame->channel_layout = av_get_default_channel_layout(out_channels_);
@@ -75,11 +76,14 @@ av::FrameUPtr AudioConverter::getFrame() {
     if (av_audio_fifo_read(fifo_buf_.get(), (void **)out_frame->data, out_frame_size_) < 0)
         throw std::runtime_error("AudioConverter: failed to read data into frame");
 
-    out_frame->pts = av_rescale_q(next_pts_, in_time_base_, out_time_base_);
-    int64_t ts_increment = fifo_duration_ * out_frame_size_ / initial_fifo_size;
-    next_pts_ += ts_increment;
-    fifo_duration_ -= ts_increment;
-    if (fifo_duration_ < 0) fifo_duration_ = 0;
+    if (av_audio_fifo_size(fifo_buf_.get()) == 0) {  // Empty buffer
+        next_pts_ = invalidNextPts;
+        fifo_duration_ = 0;
+    } else {
+        int64_t ts_increment = fifo_duration_ * out_frame_size_ / initial_fifo_size;
+        next_pts_ += ts_increment;
+        fifo_duration_ -= ts_increment;
+    }
 
     return out_frame;
 }

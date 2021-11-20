@@ -5,6 +5,7 @@
 #include "common.h"
 
 class AudioConverter {
+    static const int64_t invalidNextPts = -1;
     int out_channels_;
     int out_frame_size_;
     int out_sample_rate_;

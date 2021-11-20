@@ -28,7 +28,7 @@ ScreenRecorder::ScreenRecorder() {
     in_fmt_name_ = "avfoundation";
 #endif
     video_encoder_options_.insert({"preset", "ultrafast"});
-    internal_time_base_ = (AVRational){1, 90000};
+    time_base_ = (AVRational){1, 90000};
     avdevice_register_all();
 }
 
@@ -59,15 +59,15 @@ void ScreenRecorder::initInput() {
     demux_options.insert({"capture_cursor", "0"});
 #endif
 
-    demuxer_ = std::make_unique<Demuxer>(in_fmt_name_, device_name.str(), demux_options, internal_time_base_);
+    demuxer_ = std::make_unique<Demuxer>(in_fmt_name_, device_name.str(), demux_options, time_base_);
     demuxer_->openInput();
 
     video_decoder_ = std::make_unique<Decoder>(demuxer_->getVideoParams());
 
     if (capture_audio_) {
 #ifdef LINUX
-        audio_demuxer_ = std::make_unique<Demuxer>(in_audio_fmt_name_, "default", std::map<std::string, std::string>(),
-                                                   internal_time_base_);
+        audio_demuxer_ =
+            std::make_unique<Demuxer>(in_audio_fmt_name_, "default", std::map<std::string, std::string>(), time_base_);
         audio_demuxer_->openInput();
         auto params = audio_demuxer_->getAudioParams();
 #else
@@ -101,11 +101,11 @@ void ScreenRecorder::initOutput() {
 
 void ScreenRecorder::initConverters() {
     video_converter_ = std::make_unique<VideoConverter>(video_decoder_->getCodecContext(),
-                                                        video_encoder_->getCodecContext(), internal_time_base_);
+                                                        video_encoder_->getCodecContext(), time_base_);
 
     if (capture_audio_) {
         audio_converter_ = std::make_unique<AudioConverter>(audio_decoder_->getCodecContext(),
-                                                            audio_encoder_->getCodecContext(), internal_time_base_);
+                                                            audio_encoder_->getCodecContext(), time_base_);
     }
 }
 
@@ -292,61 +292,59 @@ void ScreenRecorder::flushPipelines() {
 
 /* function to capture and store data in frames by allocating required memory and auto deallocating the memory.   */
 void ScreenRecorder::captureFrames() {
-    av::PacketUPtr packet;
-    av::DataType packet_type;
+    int64_t next_video_pts = invalidTs;
+    int64_t next_audio_pts = invalidTs;
+    pts_offset_ = invalidTs;
 
-    /* start counting for PTS */
     video_frame_counter_ = 0;
     audio_frame_counter_ = 0;
-
-    pts_offset_ = -1;
 
     /* start counting for fps estimation */
     dropped_frame_counter_ = -1;  // wait for an extra second at the beginning to allow the framerate to stabilize
     start_time_ = av_gettime();
 
     while (true) {
+        av::PacketUPtr packet;
+        av::DataType packet_type;
+        int64_t pause_ts = invalidTs;
+
         {
             std::unique_lock<std::mutex> ul{mutex_};
-
-            int64_t pause_start_time = 0;
-
-            if (paused_) {
-                pause_start_time = av_gettime();
-            }
+            if (paused_) pause_ts = av_gettime();
 
             cv_.wait(ul, [this]() { return !paused_; });
-
-            if (pause_start_time) {
-                int64_t pause_duration = av_gettime() - pause_start_time;
-                start_time_ += pause_duration;
-            }
-
             if (stop_capture_) break;
 
-            auto [new_packet, new_packet_type] = demuxer_->readPacket();
-            if (!new_packet) continue;
-            if (pause_start_time) {
-                int64_t packet_duration;
-                if (packet_type == av::DataType::audio) {
-                    packet_duration = packet->duration;
-                } else {
-                    packet_duration = av_rescale_q(1, (AVRational){1, video_framerate_}, internal_time_base_);
+            std::tie(packet, packet_type) = demuxer_->readPacket();
+        }
+
+        if (!packet) continue;
+        if (packet_type == av::DataType::none) throw std::runtime_error("Unknown packet received from demuxer");
+
+        if (pause_ts != invalidTs) {
+            if (pts_offset_ != invalidTs) {
+                /**
+                 * If we were able to record something before the pause, try to estimate the pause duration
+                 * using the last estimated pts, otherwise do nothing
+                 */
+                int64_t estimated_pts = packet->pts;
+                if ((packet_type == av::DataType::video) && (next_video_pts != invalidTs)) {
+                    estimated_pts = next_video_pts;
+                } else if ((packet_type == av::DataType::audio) && (next_audio_pts != invalidTs)) {
+                    estimated_pts = next_audio_pts;
                 }
-                int64_t offset_increment = new_packet->pts - (packet->pts + packet_duration);  // Very hacky
-                pts_offset_ += offset_increment;
+                pts_offset_ += packet->pts - estimated_pts;
             }
-            packet = std::move(new_packet);
-            packet_type = new_packet_type;
+            start_time_ += av_gettime() - pause_ts;
         }
 
         if (packet_type == av::DataType::video) {
-            if (pts_offset_ == -1) pts_offset_ = packet->pts;
+            if (pts_offset_ == invalidTs) pts_offset_ = packet->pts;
+            next_video_pts = packet->pts + av_rescale_q(1, (AVRational){1, video_framerate_}, time_base_);
             processVideoPacket(packet.get());
-        } else if (capture_audio_ && (packet_type == av::DataType::audio)) {
+        } else if (capture_audio_ && (pts_offset_ != invalidTs)) {
+            next_audio_pts = packet->pts + packet->duration;
             processAudioPacket(packet.get());
-        } else {
-            throw std::runtime_error("Unknown packet received from demuxer");
         }
     }
 
