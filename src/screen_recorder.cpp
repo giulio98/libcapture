@@ -357,17 +357,18 @@ void ScreenRecorder::captureFrames() {
                  */
 #ifdef MACOS
                 if ((packet_type == av::DataType::video) && (next_video_pts != invalidTs)) {
-#else
-                if (packet && (next_video_pts != invalidTs)) {
-#endif
                     pts_offset_ += packet->pts - next_video_pts;
                 } else if (next_audio_pts != invalidTs) {
-#ifdef MACOS
                     pts_offset_ += packet->pts - next_audio_pts;
-#else
-                    pts_offset_ += audio_packet->pts - next_audio_pts;
-#endif
                 }
+#else
+                if ((!audio_packet || (packet && (packet->pts < audio_packet->pts))) && (next_video_pts != invalidTs)) {
+                    pts_offset_ += packet->pts - next_video_pts;
+                } else if ((!packet || (audio_packet && (audio_packet->pts < packet->pts))) &&
+                           (next_audio_pts != invalidTs)) {
+                    pts_offset_ += audio_packet->pts - next_audio_pts;
+                }
+#endif
             }
         }
 
