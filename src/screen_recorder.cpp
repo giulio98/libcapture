@@ -172,6 +172,10 @@ void ScreenRecorder::stop() {
 void ScreenRecorder::pause() {
     std::unique_lock<std::mutex> ul{mutex_};
     if (stop_capture_) return;
+#ifndef MACOS
+    demuxer_->closeInput();
+    if (capture_audio_) audio_demuxer_->closeInput();
+#endif
     paused_ = true;
     std::cout << "Recording paused" << std::endl;
     cv_.notify_all();
@@ -180,6 +184,10 @@ void ScreenRecorder::pause() {
 void ScreenRecorder::resume() {
     std::unique_lock<std::mutex> ul{mutex_};
     if (stop_capture_) return;
+#ifndef MACOS
+    demuxer_->openInput();
+    if (capture_audio_) audio_demuxer_->openInput();
+#endif
     paused_ = false;
     std::cout << "Recording resumed" << std::endl;
     cv_.notify_all();
@@ -307,6 +315,10 @@ void ScreenRecorder::captureFrames() {
         av::PacketUPtr packet;
         av::DataType packet_type;
         int64_t pause_ts = invalidTs;
+#ifndef MACOS
+        av::PacketUPtr audio_packet;
+        av::DataType audio_packet_type;
+#endif
 
         {
             std::unique_lock<std::mutex> ul{mutex_};
@@ -316,8 +328,12 @@ void ScreenRecorder::captureFrames() {
             if (stop_capture_) break;
 
             std::tie(packet, packet_type) = demuxer_->readPacket();
+#ifndef MACOS
+            if (capture_audio) std::tie(audio_packet, audio_packet_type) = audio_demuxer_->readPacket();
+#endif
         }
 
+#ifdef MACOS
         if (!packet) continue;
         if (packet_type == av::DataType::none) throw std::runtime_error("Unknown packet received from demuxer");
 
@@ -346,6 +362,57 @@ void ScreenRecorder::captureFrames() {
             next_audio_pts = packet->pts + packet->duration;
             processAudioPacket(packet.get());
         }
+#else
+        if (packet) {
+            if (packet_type != av::DataType::video)
+                throw std::runtime_error("Unknown packet received from video demuxer");
+
+            if (pause_ts != invalidTs) {
+                if (pts_offset_ != invalidTs) {
+                    /**
+                     * If we were able to record something before the pause, try to estimate the pause duration
+                     * using the last estimated pts, otherwise do nothing
+                     */
+                    int64_t estimated_pts = packet->pts;
+                    if (next_video_pts != invalidTs) {
+                        estimated_pts = next_video_pts;
+                    }
+                    pts_offset_ += packet->pts - estimated_pts;
+                }
+                start_time_ += av_gettime() - pause_ts;
+                pause_ts = invalidTs;
+            }
+
+            if (pts_offset_ == invalidTs) pts_offset_ = packet->pts;
+            next_video_pts = packet->pts + av_rescale_q(1, (AVRational){1, video_framerate_}, time_base_);
+            processVideoPacket(packet.get());
+        }
+
+        if (capture_audio && audio_packet) {
+            if (packet_type != av::DataType::audio)
+                throw std::runtime_error("Unknown packet received from audio demuxer");
+
+            if (pause_ts != invalidTs) {
+                if (pts_offset_ != invalidTs) {
+                    /**
+                     * If we were able to record something before the pause, try to estimate the pause duration
+                     * using the last estimated pts, otherwise do nothing
+                     */
+                    int64_t estimated_pts = audio_packet->pts;
+                    if (next_audio_pts != invalidTs) {
+                        estimated_pts = next_audio_pts;
+                    }
+                    pts_offset_ += audio_packet->pts - estimated_pts;
+                }
+                start_time_ += av_gettime() - pause_ts;
+            }
+
+            if (pts_offset_ != invalidTs) {
+                next_audio_pts = audio_packet->pts + audio_packet->duration;
+                processVideoPacket(audio_packet.get());
+            }
+        }
+#endif
     }
 
     flushPipelines();
