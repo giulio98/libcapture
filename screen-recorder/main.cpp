@@ -12,7 +12,7 @@ int main() {
 
     std::cout << "Recording to " << file1 << std::endl;
     screen_record.start(file1, 25, true);
-    std::this_thread::sleep_for(5000ms);
+    std::this_thread::sleep_for(20000ms);
     screen_record.pause();
     std::this_thread::sleep_for(5000ms);
     screen_record.resume();
