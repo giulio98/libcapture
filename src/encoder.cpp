@@ -2,7 +2,7 @@
 
 Encoder::Encoder(AVCodecID codec_id) : codec_(nullptr), codec_ctx_(nullptr) {
 #ifdef MACOS
-    if (codec_id == AV_CODEC_ID_H264) codec_ = avcodec_find_encoder_by_name("h264_videotoolbox");
+    // if (codec_id == AV_CODEC_ID_H264) codec_ = avcodec_find_encoder_by_name("h264_videotoolbox");
 #endif
     if (!codec_) codec_ = avcodec_find_encoder(codec_id);
     if (!codec_) throw std::runtime_error("Encoder: Cannot find codec");
