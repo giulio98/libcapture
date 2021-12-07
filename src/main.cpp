@@ -2,36 +2,58 @@
 
 #include "../include/screen_recorder.h"
 
-using namespace std;
+int main(int argc, char **argv) {
+    std::string output_file("output.mp4");
+    int framerate = 30;
+    bool capture_audio = true;
+    std::mutex m;
+    std::condition_variable cv;
+    bool pause = false;
+    bool resume = false;
+    bool stop = false;
 
-/* driver function to run the application */
-int main() {
-    ScreenRecorder screen_record;
-    std::string file1 = "../media/output1.mp4";
-    std::string file2 = "../media/output2.mp4";
+    if (argc == 3) {
+        output_file = argv[1];
+        framerate = atoi(argv[2]);
+    } else if (argc != 1) {
+        std::cerr << "Usage: " << argv[0] << "[output_file] [framerate]" << std::endl;
+        return 1;
+    }
 
-    std::cout << "Recording to " << file1 << std::endl;
-    screen_record.start(file1, 25, true);
-    std::this_thread::sleep_for(5000ms);
-    screen_record.pause();
-    std::this_thread::sleep_for(5000ms);
-    screen_record.resume();
-    std::this_thread::sleep_for(5000ms);
-    screen_record.stop();
-    std::cout << "Recording to " << file1 << " completed" << std::endl;
+    ScreenRecorder sc;
 
-    std::this_thread::sleep_for(1000ms);
-    std::cout << std::endl;
+    std::thread worker([&]() {
+        sc.start(output_file, framerate, capture_audio);
+        while (true) {
+            std::unique_lock ul(m);
+            cv.wait(ul, [&]() { return pause || resume || stop; });
+            if (stop) {
+                sc.stop();
+                break;
+            } else if (pause) {
+                sc.pause();
+                pause = false;
+            } else if (resume) {
+                sc.resume();
+                resume = false;
+            }
+        }
+    });
 
-    std::cout << "Recording to " << file2 << std::endl;
-    screen_record.start(file2, 30, false);
-    std::this_thread::sleep_for(5000ms);
-    screen_record.pause();
-    std::this_thread::sleep_for(1000ms);
-    screen_record.stop();
-    std::cout << "Recording to " << file2 << " completed" << std::endl;
+    while (!stop) {
+        int input = getchar();
+        std::unique_lock ul(m);
+        if (input == 'p') {
+            pause = true;
+        } else if (input == 'r') {
+            resume = true;
+        } else if (input == 's') {
+            stop = true;
+        }
+        cv.notify_one();
+    }
 
-    std::cout << std::endl << "Program executed successfully" << std::endl;
+    if (worker.joinable()) worker.join();
 
     return 0;
 }
