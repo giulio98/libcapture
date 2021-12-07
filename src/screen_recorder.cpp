@@ -171,6 +171,7 @@ void ScreenRecorder::stop() {
 
 void ScreenRecorder::pause() {
     std::unique_lock<std::mutex> ul{mutex_};
+    if (paused_) return;
     if (stop_capture_) return;
 #ifndef MACOS
     demuxer_->closeInput();
@@ -183,6 +184,7 @@ void ScreenRecorder::pause() {
 
 void ScreenRecorder::resume() {
     std::unique_lock<std::mutex> ul{mutex_};
+    if (!paused_) return;
     if (stop_capture_) return;
 #ifndef MACOS
     demuxer_->openInput();
