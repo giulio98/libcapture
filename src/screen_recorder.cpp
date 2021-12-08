@@ -220,6 +220,7 @@ void ScreenRecorder::processConvertedFrame(const AVFrame *frame, av::DataType fr
         while (true) {
             auto packet = encoder->getPacket();
             if (!packet) break;
+            std::unique_lock<std::mutex> ul{mutex_};
             muxer_->writePacket(std::move(packet), frame_type);
         }
     }
@@ -298,11 +299,55 @@ void ScreenRecorder::flushPipelines() {
     muxer_->writePacket(nullptr, av::DataType::none);
 }
 
+#ifndef MACOS
+void ScreenRecorder::captureAudioFrames() {
+    int64_t next_pts = invalidTs;
+    audio_pts_offset_ = invalidTs;
+
+    while (true) {
+        int64_t pause_ts = invalidTs;
+        {
+            std::unique_lock<std::mutex> ul{mutex_};
+            if (paused_) {
+                pause_ts = av_gettime();
+                audio_demuxer_->closeInput();
+            }
+
+            cv_.wait(ul, [this]() { return !paused_; });
+            if (stop_capture_) break;
+
+            if (pause_ts != invalidTs) audio_demuxer_->openInput();
+        }
+
+        auto [packet, packet_type] = audio_demuxer_->readPacket();
+        if (!packet) continue;
+
+        /* If we're restarting after a pause */
+        if ((pause_ts != invalidTs) && (audio_pts_offset_ != invalidTs) && (next_pts != invalidTs)) {
+            audio_pts_offset_ += packet->pts - next_pts;
+        }
+
+        if (packet_type == av::DataType::audio) {
+            if (audio_pts_offset_ == invalidTs) audio_pts_offset_ = packet->pts;
+            next_pts = packet->pts + packet->duration;
+            processAudioPacket(packet.get());
+        } else {
+            throw std::runtime_error("Unknown packet received from audio demuxer");
+        }
+    }
+}
+#endif
+
 /* function to capture and store data in frames by allocating required memory and auto deallocating the memory.   */
 void ScreenRecorder::captureFrames() {
     int64_t next_video_pts = invalidTs;
-    int64_t next_audio_pts = invalidTs;
     int64_t video_pkt_duration = av_rescale_q(1, (AVRational){1, video_framerate_}, time_base_);
+#ifdef MACOS
+    int64_t next_audio_pts = invalidTs;
+#else
+    std::thread audio_capturer;
+#endif
+
     pts_offset_ = invalidTs;
 
     video_frame_counter_ = 0;
@@ -311,6 +356,10 @@ void ScreenRecorder::captureFrames() {
     /* start counting for fps estimation */
     dropped_frame_counter_ = -1;  // wait for an extra second at the beginning to allow the framerate to stabilize
     start_time_ = av_gettime();
+
+#ifndef MACOS
+    if (capture_audio_) audio_capturer = std::thread([this]() { captureAudioFrames(); });
+#endif
 
     while (true) {
         int64_t pause_ts = invalidTs;
@@ -366,6 +415,10 @@ void ScreenRecorder::captureFrames() {
             throw std::runtime_error("Unknown packet received from demuxer");
         }
     }
+
+#ifndef MACOS
+    if (audio_capturer.joinable()) audio_capturer.join();
+#endif
 
     flushPipelines();
 }

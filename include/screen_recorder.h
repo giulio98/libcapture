@@ -83,6 +83,10 @@ class ScreenRecorder {
 
     void captureFrames();
 
+#ifndef MACOS
+    void captureAudioFrames();
+#endif
+
     int selectArea();
 
     void initInput();
