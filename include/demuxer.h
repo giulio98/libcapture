@@ -33,5 +33,5 @@ public:
 
     void flush() const;
 
-    void dumpInfo() const;
+    void dumpInfo(int index) const;
 };

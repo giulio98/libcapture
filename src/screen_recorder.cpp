@@ -107,9 +107,9 @@ void ScreenRecorder::initConverters() {
 
 void ScreenRecorder::printInfo() {
     std::cout << "########## Streams Info ##########" << std::endl;
-    demuxer_->dumpInfo();
+    demuxer_->dumpInfo(0);
 #ifdef LINUX
-    if (capture_audio_) audio_demuxer_->dumpInfo();
+    if (capture_audio_) audio_demuxer_->dumpInfo(1);
 #endif
     muxer_->dumpInfo();
     std::cout << "Video framerate: " << video_framerate_ << " fps";

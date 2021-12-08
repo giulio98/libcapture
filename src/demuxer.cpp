@@ -83,7 +83,7 @@ void Demuxer::flush() const {
     if (avformat_flush(fmt_ctx_.get()) < 0) throw std::runtime_error("Demuxer: failed to flush");
 }
 
-void Demuxer::dumpInfo() const {
+void Demuxer::dumpInfo(int index) const {
     if (!fmt_ctx_) throw std::runtime_error("Demuxer: input is not open");
-    av_dump_format(fmt_ctx_.get(), 0, device_name_.c_str(), 0);
+    av_dump_format(fmt_ctx_.get(), index, device_name_.c_str(), 0);
 }
