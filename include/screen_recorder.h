@@ -70,7 +70,7 @@ class ScreenRecorder {
 
     void flushPipelines();
 
-    void captureFrames(const Demuxer *demuxer, bool handle_time);
+    void captureFrames(Demuxer *demuxer, bool handle_time);
 
     void capture();
 

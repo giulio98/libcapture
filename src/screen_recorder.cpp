@@ -283,7 +283,7 @@ void ScreenRecorder::flushPipelines() {
     muxer_->writePacket(nullptr, av::DataType::none);
 }
 
-void ScreenRecorder::captureFrames(const Demuxer *demuxer, bool handle_time) {
+void ScreenRecorder::captureFrames(Demuxer *demuxer, bool handle_time) {
     while (true) {
         {
             std::unique_lock<std::mutex> ul{mutex_};
