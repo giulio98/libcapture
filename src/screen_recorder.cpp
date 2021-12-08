@@ -125,27 +125,20 @@ void ScreenRecorder::start(const std::string &output_file, int framerate, bool c
     stop_capture_ = false;
     paused_ = false;
 
-    try {
-        if (selectArea()) throw std::runtime_error("Failed to select area");
-        initInput();
-        initOutput();
-        initConverters();
-        printInfo();
+    if (selectArea()) throw std::runtime_error("Failed to select area");
+    initInput();
+    initOutput();
+    initConverters();
+    printInfo();
 
-        recorder_thread_ = std::thread([this]() {
-            std::cout << "Recording..." << std::endl;
-            try {
-                capture();
-            } catch (const std::exception &e) {
-                std::cerr << "\nERROR: " << e.what() << ", terminating..." << std::endl;
-                exit(1);
-            }
-        });
-
-    } catch (const std::exception &e) {
-        std::cerr << "\nERROR: " << e.what() << ", terminating..." << std::endl;
-        exit(1);
-    }
+    recorder_thread_ = std::thread([this]() {
+        std::cout << "Recording..." << std::endl;
+        try {
+            capture();
+        } catch (...) {
+            recorder_e_ptr_ = std::current_exception();
+        }
+    });
 }
 
 void ScreenRecorder::stop() {
@@ -157,6 +150,7 @@ void ScreenRecorder::stop() {
     }
 
     if (recorder_thread_.joinable()) recorder_thread_.join();
+    if (recorder_e_ptr_) std::rethrow_exception(recorder_e_ptr_);
 
     muxer_->closeFile();
 }
@@ -324,6 +318,7 @@ void ScreenRecorder::captureFrames(Demuxer *demuxer, bool handle_time) {
 void ScreenRecorder::capture() {
 #ifndef MACOS
     std::thread audio_capturer;
+    std::exception_ptr e_ptr;
 #endif
 
     /* start counting for PTS */
@@ -335,13 +330,22 @@ void ScreenRecorder::capture() {
     start_time_ = av_gettime();
 
 #ifndef MACOS
-    if (capture_audio_) audio_capturer = std::thread([this]() { captureFrames(audio_demuxer_.get(), false); });
+    if (capture_audio_) {
+        audio_capturer = std::thread([this, &e_ptr]() {
+            try {
+                captureFrames(audio_demuxer_.get());
+            } catch (...) {
+                e_ptr = std::current_exception();
+            }
+        });
+    }
 #endif
 
     captureFrames(demuxer_.get(), true);
 
 #ifndef MACOS
     if (audio_capturer.joinable()) audio_capturer.join();
+    if (e_ptr) std::rethrow_exception(e_ptr);
 #endif
 
     flushPipelines();

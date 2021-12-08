@@ -48,44 +48,57 @@ int main(int argc, char **argv) {
         return 1;
     }
 
-    ScreenRecorder sc;
+    try {
+        ScreenRecorder sc;
 
-    std::thread worker([&]() {
-        sc.start(output_file, framerate, capture_audio);
-        while (true) {
-            std::unique_lock ul(m);
-            cv.wait(ul, [&]() { return pause || resume || stop; });
-            if (stop) {
-                sc.stop();
-                break;
-            } else if (pause) {
-                sc.pause();
-                pause = false;
-            } else if (resume) {
-                sc.resume();
-                resume = false;
+        std::exception_ptr e_ptr;
+
+        std::thread worker([&]() {
+            try {
+                sc.start(output_file, framerate, capture_audio);
+                while (true) {
+                    std::unique_lock ul(m);
+                    cv.wait(ul, [&]() { return pause || resume || stop; });
+                    if (stop) {
+                        sc.stop();
+                        break;
+                    } else if (pause) {
+                        sc.pause();
+                        pause = false;
+                    } else if (resume) {
+                        sc.resume();
+                        resume = false;
+                    }
+                }
+            } catch (...) {
+                e_ptr = std::current_exception();
             }
-        }
-    });
+        });
 
-    while (!stop) {
-        int input = getchar();
-        std::unique_lock ul(m);
-        if (input == 'p') {
-            pause = true;
-        } else if (input == 'r') {
-            resume = true;
-        } else if (input == 's') {
-            stop = true;
-        } else {
-            if (input != 10)  // ignore CR
-                std::cerr << "Unknown option, possible options are: p[ause], r[esume], s[top]" << std::endl;
-            continue;
+        while (!stop) {
+            int input = getchar();
+            std::unique_lock ul(m);
+            if (input == 'p') {
+                pause = true;
+            } else if (input == 'r') {
+                resume = true;
+            } else if (input == 's') {
+                stop = true;
+            } else {
+                if (input != 10)  // ignore CR
+                    std::cerr << "Unknown option, possible options are: p[ause], r[esume], s[top]" << std::endl;
+                continue;
+            }
+            cv.notify_one();
         }
-        cv.notify_one();
+
+        if (worker.joinable()) worker.join();
+        if (e_ptr) std::rethrow_exception(e_ptr);
+
+    } catch (const std::exception &e) {
+        std::cerr << "ERROR: " << e.what() << std::endl;
+        return 1;
     }
-
-    if (worker.joinable()) worker.join();
 
     return 0;
 }
