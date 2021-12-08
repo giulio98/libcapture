@@ -127,19 +127,15 @@ void ScreenRecorder::start(const std::string &output_file, int framerate, bool c
 
     try {
         if (selectArea()) throw std::runtime_error("Failed to select area");
-
         initInput();
-
         initOutput();
-
         initConverters();
-
         printInfo();
 
         recorder_thread_ = std::thread([this]() {
             std::cout << "Recording..." << std::endl;
             try {
-                this->captureFrames();
+                capture();
             } catch (const std::exception &e) {
                 std::cerr << "\nERROR: " << e.what() << ", terminating..." << std::endl;
                 exit(1);
@@ -287,35 +283,45 @@ void ScreenRecorder::flushPipelines() {
     muxer_->writePacket(nullptr, av::DataType::none);
 }
 
-#ifndef MACOS
-void ScreenRecorder::captureAudioFrames() {
+void ScreenRecorder::captureFrames(const Demuxer *demuxer, bool handle_time) {
     while (true) {
         {
             std::unique_lock<std::mutex> ul{mutex_};
             bool handle_pause = paused_;
+            int64_t pause_start_time;
 
-            if (handle_pause) audio_demuxer_->closeInput();
+            if (handle_pause) {
+                if (handle_time) pause_start_time = av_gettime();
+#ifndef MACOS
+                demuxer->closeInput();
+#endif
+            }
 
             cv_.wait(ul, [this]() { return !paused_; });
             if (stop_capture_) break;
 
-            if (handle_pause) audio_demuxer_->openInput();
+            if (handle_pause) {
+#ifndef MACOS
+                demuxer->openInput();
+#endif
+                if (handle_time) start_time_ += (av_gettime() - pause_start_time);
+            }
         }
 
-        auto [packet, packet_type] = audio_demuxer_->readPacket();
+        auto [packet, packet_type] = demuxer->readPacket();
         if (!packet) continue;
 
-        if (packet_type == av::DataType::audio) {
+        if (packet_type == av::DataType::video) {
+            processVideoPacket(packet.get());
+        } else if (capture_audio_ && (packet_type == av::DataType::audio)) {
             processAudioPacket(packet.get());
         } else {
-            throw std::runtime_error("Unknown packet received from audio demuxer");
+            throw std::runtime_error("Unknown packet received from demuxer");
         }
     }
 }
-#endif
 
-/* function to capture and store data in frames by allocating required memory and auto deallocating the memory.   */
-void ScreenRecorder::captureFrames() {
+void ScreenRecorder::capture() {
 #ifndef MACOS
     std::thread audio_capturer;
 #endif
@@ -329,46 +335,10 @@ void ScreenRecorder::captureFrames() {
     start_time_ = av_gettime();
 
 #ifndef MACOS
-    if (capture_audio_) audio_capturer = std::thread([this]() { captureAudioFrames(); });
+    if (capture_audio_) audio_capturer = std::thread([this]() { captureFrames(audio_demuxer_.get(), false); });
 #endif
 
-    while (true) {
-        {
-            std::unique_lock<std::mutex> ul{mutex_};
-            bool handle_pause = paused_;
-            int64_t pause_start_time;
-
-            if (handle_pause) {
-                pause_start_time = av_gettime();
-#ifndef MACOS
-                demuxer_->closeInput();
-#endif
-            }
-
-            cv_.wait(ul, [this]() { return !paused_; });
-            if (stop_capture_) break;
-
-            if (handle_pause) {
-#ifndef MACOS
-                demuxer_->openInput();
-#endif
-                start_time_ += (av_gettime() - pause_start_time);
-            }
-        }
-
-        auto [packet, packet_type] = demuxer_->readPacket();
-        if (!packet) continue;
-
-        if (packet_type == av::DataType::video) {
-            processVideoPacket(packet.get());
-#ifdef MACOS
-        } else if (capture_audio_ && (packet_type == av::DataType::audio)) {
-            processAudioPacket(packet.get());
-#endif
-        } else {
-            throw std::runtime_error("Unknown packet received from demuxer");
-        }
-    }
+    captureFrames(demuxer_.get(), true);
 
 #ifndef MACOS
     if (audio_capturer.joinable()) audio_capturer.join();

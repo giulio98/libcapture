@@ -70,11 +70,9 @@ class ScreenRecorder {
 
     void flushPipelines();
 
-    void captureFrames();
+    void captureFrames(const Demuxer *demuxer, bool handle_time);
 
-#ifndef MACOS
-    void captureAudioFrames();
-#endif
+    void capture();
 
     int selectArea();
 
