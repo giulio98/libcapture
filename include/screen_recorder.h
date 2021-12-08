@@ -52,8 +52,6 @@ class ScreenRecorder {
     /* Thread responsible for recording video and audio */
     std::thread recorder_thread_;
 
-    std::exception_ptr recorder_e_ptr_;
-
     /* Counter of video frames used to compute PTSs */
     int64_t video_frame_counter_;
     /* Counter of audio frames used to compute PTSs */

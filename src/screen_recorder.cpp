@@ -135,8 +135,9 @@ void ScreenRecorder::start(const std::string &output_file, int framerate, bool c
         std::cout << "Recording..." << std::endl;
         try {
             capture();
-        } catch (...) {
-            recorder_e_ptr_ = std::current_exception();
+        } catch (const std::exception &e) {
+            std::cerr << "Fatal error during capturing: " << e.what() << ", terminating..." << std::endl;
+            exit(1);
         }
     });
 }
@@ -145,12 +146,10 @@ void ScreenRecorder::stop() {
     {
         std::unique_lock<std::mutex> ul{mutex_};
         stop_capture_ = true;
-        paused_ = false;
         cv_.notify_all();
     }
 
     if (recorder_thread_.joinable()) recorder_thread_.join();
-    if (recorder_e_ptr_) std::rethrow_exception(recorder_e_ptr_);
 
     muxer_->closeFile();
 }
@@ -291,7 +290,7 @@ void ScreenRecorder::captureFrames(Demuxer *demuxer, bool handle_time) {
 #endif
             }
 
-            cv_.wait(ul, [this]() { return !paused_; });
+            cv_.wait(ul, [this]() { return (!paused_ || stop_capture_); });
             if (stop_capture_) break;
 
             if (handle_pause) {
@@ -336,6 +335,8 @@ void ScreenRecorder::capture() {
                 captureFrames(audio_demuxer_.get());
             } catch (...) {
                 e_ptr = std::current_exception();
+                std::unique_lock<std::mutex> ul{mutex_};
+                stop_capture_ = true;
             }
         });
     }

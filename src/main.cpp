@@ -51,8 +51,6 @@ int main(int argc, char **argv) {
     try {
         ScreenRecorder sc;
 
-        std::exception_ptr e_ptr;
-
         std::thread worker([&]() {
             try {
                 sc.start(output_file, framerate, capture_audio);
@@ -70,8 +68,9 @@ int main(int argc, char **argv) {
                         resume = false;
                     }
                 }
-            } catch (...) {
-                e_ptr = std::current_exception();
+            } catch (const std::exception &e) {
+                std::cerr << "ERROR: " << e.what() << std::endl;
+                exit(1);
             }
         });
 
@@ -93,7 +92,6 @@ int main(int argc, char **argv) {
         }
 
         if (worker.joinable()) worker.join();
-        if (e_ptr) std::rethrow_exception(e_ptr);
 
     } catch (const std::exception &e) {
         std::cerr << "ERROR: " << e.what() << std::endl;
