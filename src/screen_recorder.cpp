@@ -291,31 +291,30 @@ void ScreenRecorder::flushPipelines() {
 void ScreenRecorder::captureFrames() {
 #ifndef MACOS
     std::thread audio_capturer;
-    auto capture_audio =
-        [this]() {
-            while (true) {
-                {
-                    std::unique_lock<std::mutex> ul{mutex_};
-                    bool resuming_from_pause = paused_;
+    auto capture_audio = [this]() {
+        while (true) {
+            {
+                std::unique_lock<std::mutex> ul{mutex_};
+                bool resuming_from_pause = paused_;
 
-                    if (paused_) audio_demuxer_->closeInput();
+                if (paused_) audio_demuxer_->closeInput();
 
-                    cv_.wait(ul, [this]() { return !paused_; });
-                    if (stop_capture_) break;
+                cv_.wait(ul, [this]() { return !paused_; });
+                if (stop_capture_) break;
 
-                    if (resuming_from_pause) audio_demuxer_->openInput();
-                }
+                if (resuming_from_pause) audio_demuxer_->openInput();
+            }
 
-                auto [packet, packet_type] = audio_demuxer_->readPacket();
-                if (!packet) continue;
+            auto [packet, packet_type] = audio_demuxer_->readPacket();
+            if (!packet) continue;
 
-                if (packet_type == av::DataType::audio) {
-                    processAudioPacket(packet.get());
-                } else {
-                    throw std::runtime_error("Unknown packet received from audio demuxer");
-                }
+            if (packet_type == av::DataType::audio) {
+                processAudioPacket(packet.get());
+            } else {
+                throw std::runtime_error("Unknown packet received from audio demuxer");
             }
         }
+    };
 #endif
 
     /* start counting for PTS */
@@ -327,9 +326,7 @@ void ScreenRecorder::captureFrames() {
     start_time_ = av_gettime();
 
 #ifndef MACOS
-    if (capture_audio_) {
-        audio_capturer = std::thread(capture_audio_);
-    }
+    if (capture_audio_) audio_capturer = std::thread(capture_audio);
 #endif
 
     while (true) {
