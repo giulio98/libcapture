@@ -29,5 +29,5 @@ public:
      * @return a new converted frame if it was possible to build it, nullptr if the internal buffer didn't have
      * enough samples to build a frame
      */
-    av::FrameUPtr getFrame(int64_t frame_number) const;
+    av::FrameUPtr getFrame(int64_t frame_number = 0) const;
 };
