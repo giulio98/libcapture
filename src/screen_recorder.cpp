@@ -214,7 +214,7 @@ void ScreenRecorder::processConvertedFrame(const AVFrame *frame, av::DataType fr
         while (true) {
             auto packet = encoder->getPacket();
             if (!packet) break;
-            std::unique_lock ul(mutex_);
+            std::unique_lock<std::mutex> ul{mutex_};
             muxer_->writePacket(std::move(packet), frame_type);
         }
     }
@@ -295,14 +295,14 @@ void ScreenRecorder::captureFrames() {
         while (true) {
             {
                 std::unique_lock<std::mutex> ul{mutex_};
-                bool resuming_from_pause = paused_;
+                bool handle_pause = paused_;
 
-                if (paused_) audio_demuxer_->closeInput();
+                if (handle_pause) audio_demuxer_->closeInput();
 
                 cv_.wait(ul, [this]() { return !paused_; });
                 if (stop_capture_) break;
 
-                if (resuming_from_pause) audio_demuxer_->openInput();
+                if (handle_pause) audio_demuxer_->openInput();
             }
 
             auto [packet, packet_type] = audio_demuxer_->readPacket();
@@ -332,9 +332,10 @@ void ScreenRecorder::captureFrames() {
     while (true) {
         {
             std::unique_lock<std::mutex> ul{mutex_};
-            int64_t pause_start_time = -1;
+            bool handle_pause = paused_;
+            int64_t pause_start_time;
 
-            if (paused_) {
+            if (handle_pause) {
                 pause_start_time = av_gettime();
 #ifndef MACOS
                 demuxer_->closeInput();
@@ -344,7 +345,7 @@ void ScreenRecorder::captureFrames() {
             cv_.wait(ul, [this]() { return !paused_; });
             if (stop_capture_) break;
 
-            if (pause_start_time >= 0) {
+            if (handle_pause) {
 #ifndef MACOS
                 demuxer_->openInput();
 #endif
