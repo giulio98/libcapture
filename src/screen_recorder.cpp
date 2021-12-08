@@ -334,8 +334,6 @@ void ScreenRecorder::captureFrames() {
         auto [packet, packet_type] = demuxer_->readPacket();
         if (!packet) continue;
 
-        if (pts_offset_ == invalidTs) pts_offset_ = packet->pts;
-
         /* If we're restarting after a pause */
         if (pause_ts != invalidTs) {
             /* Adjust the pts offset to remove the pause duration */
@@ -356,12 +354,13 @@ void ScreenRecorder::captureFrames() {
         }
 
         if (packet_type == av::DataType::video) {
+            if (pts_offset_ == invalidTs) pts_offset_ = packet->pts;
             next_video_pts = packet->pts + video_pkt_duration;
             processVideoPacket(packet.get());
 #ifdef MACOS
         } else if (packet_type == av::DataType::audio) {
             next_audio_pts = packet->pts + packet->duration;
-            processAudioPacket(packet.get());
+            if (pts_offset_ != invalidTs) processAudioPacket(packet.get());
 #endif
         } else {
             throw std::runtime_error("Unknown packet received from demuxer");
