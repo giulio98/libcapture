@@ -69,6 +69,10 @@ class ScreenRecorder {
 
     int64_t pts_offset_;
 
+#ifndef MACOS
+    int64_t audio_pts_offset_;
+#endif
+
     void processVideoPacket(const AVPacket *packet);
 
     void processAudioPacket(const AVPacket *packet);

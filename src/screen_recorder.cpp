@@ -269,7 +269,11 @@ void ScreenRecorder::processAudioPacket(const AVPacket *packet) {
             auto in_frame = audio_decoder_->getFrame();
             if (!in_frame) break;
 
+#ifdef MACOS
             in_frame->pts -= pts_offset_;
+#else
+            in_frame->pts -= audio_pts_offset_;
+#endif
 
             bool converter_received = false;
             while (!converter_received) {
