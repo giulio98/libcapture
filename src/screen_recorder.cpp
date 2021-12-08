@@ -160,15 +160,18 @@ void ScreenRecorder::stop() {
         cv_.notify_all();
     }
 
-    if (recorder_thread_.joinable() == true) recorder_thread_.join();
+    if (recorder_thread_.joinable()) recorder_thread_.join();
 
     muxer_->closeFile();
 }
 
 void ScreenRecorder::pause() {
     std::unique_lock<std::mutex> ul{mutex_};
-    if (paused_) return;
-    if (stop_capture_) return;
+    if (paused_ || stop_capture_) return;
+#ifndef MACOS
+    demuxer_->closeInput();
+    if (capture_audio_) audio_demuxer_->closeInput();
+#endif
     paused_ = true;
     std::cout << "Recording paused" << std::endl;
     cv_.notify_all();
@@ -176,8 +179,11 @@ void ScreenRecorder::pause() {
 
 void ScreenRecorder::resume() {
     std::unique_lock<std::mutex> ul{mutex_};
-    if (!paused_) return;
-    if (stop_capture_) return;
+    if (!paused_ || stop_capture_) return;
+#ifndef MACOS
+    demuxer_->openInput();
+    if (capture_audio_) audio_demuxer_->openInput();
+#endif
     paused_ = false;
     std::cout << "Recording resumed" << std::endl;
     cv_.notify_all();
@@ -299,45 +305,31 @@ void ScreenRecorder::captureFrames() {
     start_time_ = av_gettime();
 
     while (true) {
+        av::PacketUPtr packet;
+        av::DataType packet_type;
+#ifndef MACOS
+        av::PacketUPtr audio_packet;
+        av::DataType audio_packet_type;
+#endif
+
         {
             std::unique_lock<std::mutex> ul{mutex_};
-
             int64_t pause_start_time = 0;
-
-            if (paused_) {
-                pause_start_time = av_gettime();
-#ifdef LINUX
-                demuxer_->closeInput();
-                if (capture_audio_) audio_demuxer_->closeInput();
-#endif
-            }
+            if (paused_) pause_start_time = av_gettime();
 
             cv_.wait(ul, [this]() { return !paused_; });
-
-            if (pause_start_time) {
-#ifdef LINUX
-                demuxer_->openInput();
-                if (capture_audio_) audio_demuxer_->openInput();
-#endif
-                start_time_ += (av_gettime() - pause_start_time);
-            }
-
             if (stop_capture_) break;
+
+            if (pause_start_time) start_time_ += (av_gettime() - pause_start_time);
+
+            std::tie(packet, packet_type) = demuxer_->readPacket();
+#ifndef MACOS
+            if (capture_audio_) std::tie(audio_packet, audio_packet_type) = audio_demuxer_->readPacket();
+#endif
         }
 
-#ifdef LINUX
+#ifdef MACOS
 
-        auto [packet, packet_type] = demuxer_->readPacket();
-        if (packet) processVideoPacket(packet.get()));
-
-        if (capture_audio_) {
-            auto [audio_packet, audio_packet_type] = audio_demuxer_->readPacket();
-            if (audio_packet) processAudioPacket(audio_packet.get()));
-        }
-
-#else  // macOS
-
-        auto [packet, packet_type] = demuxer_->readPacket();
         if (!packet) continue;
 
         if (packet_type == av::DataType::video) {
@@ -346,6 +338,20 @@ void ScreenRecorder::captureFrames() {
             processAudioPacket(packet.get());
         } else {
             throw std::runtime_error("Unknown packet received from demuxer");
+        }
+
+#else
+
+        if (packet) {
+            if (packet_type != av::DataType::video)
+                throw std::runtime_error("Unknown packet received from video demuxer");
+            processVideoPacket(packet.get()));
+        }
+
+        if (audio_packet) {
+            if (audio_packet_type != av::DataType::audio)
+                throw std::runtime_error("Unknown packet received from audio demuxer");
+            processAudioPacket(audio_packet.get()));
         }
 
 #endif
