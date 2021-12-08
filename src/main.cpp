@@ -5,7 +5,7 @@
 #include "../include/screen_recorder.h"
 
 std::tuple<int, std::string, bool> get_params(std::vector<std::string> args) {
-    int framerate = 30;
+    int framerate = 25;
     std::string output_file = "output.mp4";
     bool capture_audio = true;
 
