@@ -25,7 +25,7 @@ public:
      * @return true if the conversion was successful, false if the internal
      * buffer didn't have enough space to copy the input samples
      */
-    bool sendFrame(const AVFrame *frame, int64_t pts_offset = 0);
+    bool sendFrame(const AVFrame *frame);
 
     /**
      * Get a converted frame

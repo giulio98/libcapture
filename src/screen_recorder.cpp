@@ -246,9 +246,10 @@ void ScreenRecorder::processVideoPacket(const AVPacket *packet) {
             auto in_frame = video_decoder_->getFrame();
             if (!in_frame) break;
 
-            video_frame_counter_++;
+            in_frame->pts -= pts_offset_;
+            auto out_frame = video_converter_->convertFrame(in_frame.get());
 
-            auto out_frame = video_converter_->convertFrame(in_frame.get(), pts_offset_);
+            video_frame_counter_++;
 
             processConvertedFrame(out_frame.get(), av::DataType::video);
         }
@@ -268,9 +269,11 @@ void ScreenRecorder::processAudioPacket(const AVPacket *packet) {
             auto in_frame = audio_decoder_->getFrame();
             if (!in_frame) break;
 
+            in_frame->pts -= pts_offset_;
+
             bool converter_received = false;
             while (!converter_received) {
-                converter_received = audio_converter_->sendFrame(in_frame.get(), pts_offset_);
+                converter_received = audio_converter_->sendFrame(in_frame.get());
 
                 while (true) {
                     auto out_frame = audio_converter_->getFrame();

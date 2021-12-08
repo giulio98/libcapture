@@ -24,11 +24,11 @@ AudioConverter::AudioConverter(const AVCodecContext *in_codec_ctx, const AVCodec
     if (!fifo_buf_) throw std::runtime_error("AudioConverter: failed to allocate FIFO buffer");
 }
 
-bool AudioConverter::sendFrame(const AVFrame *frame, int64_t pts_offset) {
+bool AudioConverter::sendFrame(const AVFrame *frame) {
     if (!frame) throw std::runtime_error("AudioConverter: frame is not allocated");
     if (av_audio_fifo_space(fifo_buf_.get()) < frame->nb_samples) return false;
 
-    if (next_pts_ == invalidNextPts) next_pts_ = frame->pts - pts_offset;
+    if (next_pts_ == invalidNextPts) next_pts_ = frame->pts;
 
     uint8_t **buf = nullptr;
 
@@ -43,7 +43,7 @@ bool AudioConverter::sendFrame(const AVFrame *frame, int64_t pts_offset) {
         if (av_audio_fifo_write(fifo_buf_.get(), (void **)buf, frame->nb_samples) < 0)
             throw std::runtime_error("AudioConverter: failed to write to fifo");
 
-        fifo_duration_ = frame->pts - pts_offset + frame->pkt_duration - next_pts_;
+        fifo_duration_ = frame->pts + frame->pkt_duration - next_pts_;
 
         if (**buf) av_freep(&buf[0]);
 

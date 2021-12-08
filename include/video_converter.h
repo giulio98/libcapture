@@ -21,5 +21,5 @@ public:
      * @param frame_number the sequence number of the frame to use to compute the PTS
      * @return a new converted frame
      */
-    av::FrameUPtr convertFrame(const AVFrame *in_frame, int64_t pts_offset = 0);
+    av::FrameUPtr convertFrame(const AVFrame *in_frame);
 };
