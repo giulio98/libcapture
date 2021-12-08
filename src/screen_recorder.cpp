@@ -21,7 +21,7 @@ ScreenRecorder::ScreenRecorder() {
     out_audio_codec_id_ = AV_CODEC_ID_AAC;
 #ifdef LINUX
     in_fmt_name_ = "x11grab";
-    in_audio_fmt_name_ = "pulse";
+    in_audio_fmt_name_ = "alsa";
 #else
     in_fmt_name_ = "avfoundation";
 #endif
@@ -63,7 +63,7 @@ void ScreenRecorder::initInput() {
 
     if (capture_audio_) {
 #ifdef LINUX
-        audio_demuxer_ = std::make_unique<Demuxer>(in_audio_fmt_name_, "default", std::map<std::string, std::string>());
+        audio_demuxer_ = std::make_unique<Demuxer>(in_audio_fmt_name_, "hw:0,0", std::map<std::string, std::string>());
         audio_demuxer_->openInput();
         auto params = audio_demuxer_->getAudioParams();
 #else
