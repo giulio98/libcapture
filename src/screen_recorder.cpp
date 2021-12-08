@@ -304,6 +304,7 @@ void ScreenRecorder::flushPipelines() {
 void ScreenRecorder::captureFrames() {
     int64_t next_video_pts = invalidTs;
     int64_t next_audio_pts = invalidTs;
+    int64_t video_pkt_duration = av_rescale_q(1, (AVRational){1, video_framerate_}, time_base_);
     pts_offset_ = invalidTs;
 
     video_frame_counter_ = 0;
@@ -380,7 +381,7 @@ void ScreenRecorder::captureFrames() {
         if (packet) {
 #endif
             if (pts_offset_ == invalidTs) pts_offset_ = packet->pts;
-            next_video_pts = packet->pts + av_rescale_q(1, (AVRational){1, video_framerate_}, time_base_);
+            next_video_pts = packet->pts + video_pkt_duration;
             processVideoPacket(packet.get());
 #ifdef MACOS
         } else if (pts_offset_ != invalidTs) {
