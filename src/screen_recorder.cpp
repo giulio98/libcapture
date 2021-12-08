@@ -168,10 +168,6 @@ void ScreenRecorder::stop() {
 void ScreenRecorder::pause() {
     std::unique_lock<std::mutex> ul{mutex_};
     if (paused_ || stop_capture_) return;
-#ifndef MACOS
-    demuxer_->closeInput();
-    if (capture_audio_) audio_demuxer_->closeInput();
-#endif
     paused_ = true;
     std::cout << "Recording paused" << std::endl;
     cv_.notify_all();
@@ -180,10 +176,6 @@ void ScreenRecorder::pause() {
 void ScreenRecorder::resume() {
     std::unique_lock<std::mutex> ul{mutex_};
     if (!paused_ || stop_capture_) return;
-#ifndef MACOS
-    demuxer_->openInput();
-    if (capture_audio_) audio_demuxer_->openInput();
-#endif
     paused_ = false;
     std::cout << "Recording resumed" << std::endl;
     cv_.notify_all();
@@ -222,6 +214,7 @@ void ScreenRecorder::processConvertedFrame(const AVFrame *frame, av::DataType fr
         while (true) {
             auto packet = encoder->getPacket();
             if (!packet) break;
+            std::unique_lock ul(mutex_);
             muxer_->writePacket(std::move(packet), frame_type);
         }
     }
@@ -296,6 +289,35 @@ void ScreenRecorder::flushPipelines() {
 
 /* function to capture and store data in frames by allocating required memory and auto deallocating the memory.   */
 void ScreenRecorder::captureFrames() {
+#ifndef MACOS
+    std::thread audio_capturer;
+    auto capture_audio =
+        [this]() {
+            while (true) {
+                {
+                    std::unique_lock<std::mutex> ul{mutex_};
+                    bool resuming_from_pause = paused_;
+
+                    if (paused_) audio_demuxer_->closeInput();
+
+                    cv_.wait(ul, [this]() { return !paused_; });
+                    if (stop_capture_) break;
+
+                    if (resuming_from_pause) audio_demuxer_->openInput();
+                }
+
+                auto [packet, packet_type] = audio_demuxer_->readPacket();
+                if (!packet) continue;
+
+                if (packet_type == av::DataType::audio) {
+                    processAudioPacket(packet.get());
+                } else {
+                    throw std::runtime_error("Unknown packet received from audio demuxer");
+                }
+            }
+        }
+#endif
+
     /* start counting for PTS */
     video_frame_counter_ = 0;
     audio_frame_counter_ = 0;
@@ -304,58 +326,52 @@ void ScreenRecorder::captureFrames() {
     dropped_frame_counter_ = -1;  // wait for an extra second at the beginning to allow the framerate to stabilize
     start_time_ = av_gettime();
 
-    while (true) {
-        av::PacketUPtr packet;
-        av::DataType packet_type;
 #ifndef MACOS
-        av::PacketUPtr audio_packet;
-        av::DataType audio_packet_type;
+    if (capture_audio_) {
+        audio_capturer = std::thread(capture_audio_);
+    }
 #endif
 
+    while (true) {
         {
             std::unique_lock<std::mutex> ul{mutex_};
-            int64_t pause_start_time = 0;
-            if (paused_) pause_start_time = av_gettime();
+            int64_t pause_start_time = -1;
+
+            if (paused_) {
+                pause_start_time = av_gettime();
+#ifndef MACOS
+                demuxer_->closeInput();
+#endif
+            }
 
             cv_.wait(ul, [this]() { return !paused_; });
             if (stop_capture_) break;
 
-            if (pause_start_time) start_time_ += (av_gettime() - pause_start_time);
-
-            std::tie(packet, packet_type) = demuxer_->readPacket();
+            if (pause_start_time >= 0) {
 #ifndef MACOS
-            if (capture_audio_) std::tie(audio_packet, audio_packet_type) = audio_demuxer_->readPacket();
+                demuxer_->openInput();
 #endif
+                start_time_ += (av_gettime() - pause_start_time);
+            }
         }
 
-#ifdef MACOS
-
+        auto [packet, packet_type] = demuxer_->readPacket();
         if (!packet) continue;
 
         if (packet_type == av::DataType::video) {
             processVideoPacket(packet.get());
+#ifdef MACOS
         } else if (capture_audio_ && (packet_type == av::DataType::audio)) {
             processAudioPacket(packet.get());
+#endif
         } else {
             throw std::runtime_error("Unknown packet received from demuxer");
         }
-
-#else
-
-        if (packet) {
-            if (packet_type != av::DataType::video)
-                throw std::runtime_error("Unknown packet received from video demuxer");
-            processVideoPacket(packet.get()));
-        }
-
-        if (audio_packet) {
-            if (audio_packet_type != av::DataType::audio)
-                throw std::runtime_error("Unknown packet received from audio demuxer");
-            processAudioPacket(audio_packet.get()));
-        }
-
-#endif
     }
+
+#ifndef MACOS
+    if (audio_capturer.joinable()) audio_capturer.join();
+#endif
 
     flushPipelines();
 }
