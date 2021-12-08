@@ -39,7 +39,7 @@ void Demuxer::openInput() {
 
 void Demuxer::closeInput() {
     if (!fmt_ctx_) throw std::runtime_error("Demuxer: input is not open");
-    fmt_ctx_ = av::InFormatContextUPtr(nullptr);
+    fmt_ctx_ = nullptr;
     video_stream_ = nullptr;
     audio_stream_ = nullptr;
 }
