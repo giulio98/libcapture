@@ -173,10 +173,6 @@ void ScreenRecorder::pause() {
     std::unique_lock<std::mutex> ul{mutex_};
     if (paused_) return;
     if (stop_capture_) return;
-#ifndef MACOS
-    demuxer_->closeInput();
-    if (capture_audio_) audio_demuxer_->closeInput();
-#endif
     paused_ = true;
     std::cout << "Recording paused" << std::endl;
     cv_.notify_all();
@@ -186,10 +182,6 @@ void ScreenRecorder::resume() {
     std::unique_lock<std::mutex> ul{mutex_};
     if (!paused_) return;
     if (stop_capture_) return;
-#ifndef MACOS
-    demuxer_->openInput();
-    if (capture_audio_) audio_demuxer_->openInput();
-#endif
     paused_ = false;
     std::cout << "Recording resumed" << std::endl;
     cv_.notify_all();
@@ -250,7 +242,6 @@ void ScreenRecorder::processVideoPacket(const AVPacket *packet) {
             auto out_frame = video_converter_->convertFrame(in_frame.get());
 
             video_frame_counter_++;
-
             processConvertedFrame(out_frame.get(), av::DataType::video);
         }
     }
@@ -322,87 +313,59 @@ void ScreenRecorder::captureFrames() {
     start_time_ = av_gettime();
 
     while (true) {
-        av::PacketUPtr packet;
-        av::DataType packet_type;
         int64_t pause_ts = invalidTs;
-#ifndef MACOS
-        av::PacketUPtr audio_packet;
-        av::DataType audio_packet_type;
-#endif
-
         {
             std::unique_lock<std::mutex> ul{mutex_};
-            if (paused_) pause_ts = av_gettime();
+            if (paused_) {
+                pause_ts = av_gettime();
+#ifndef MACOS
+                demuxer_->closeInput();
+#endif
+            }
 
             cv_.wait(ul, [this]() { return !paused_; });
             if (stop_capture_) break;
 
-            std::tie(packet, packet_type) = demuxer_->readPacket();
 #ifndef MACOS
-            if (capture_audio_) std::tie(audio_packet, audio_packet_type) = audio_demuxer_->readPacket();
+            if (pause_ts != invalidTs) demuxer_->openInput();
 #endif
         }
 
-        /* Make sure we don't continue with just empty packets or wrong types */
-#ifdef MACOS
+        auto [packet, packet_type] = demuxer_->readPacket();
         if (!packet) continue;
-        if ((packet_type == av::DataType::none) || (!capture_audio_ && (packet_type == av::DataType::audio)))
-            throw std::runtime_error("Unknown packet received from demuxer");
-#else
-        if (!packet && !audio_packet) continue;
-        if (packet && packet_type != av::DataType::video)
-            throw std::runtime_error("Unknown packet received from video demuxer");
-        if (audio_packet && audio_packet_type != av::DataType::audio)
-            throw std::runtime_error("Unknown packet received from audio demuxer");
-#endif
+
+        if (pts_offset_ == invalidTs) pts_offset_ = packet->pts;
 
         /* If we're restarting after a pause */
         if (pause_ts != invalidTs) {
-            start_time_ += av_gettime() - pause_ts;
-
             /* Adjust the pts offset to remove the pause duration */
             if (pts_offset_ != invalidTs) {
                 /**
                  * If we were able to record something before the pause, try to estimate the pause duration
                  * using the last estimated pts, otherwise do nothing
                  */
-#ifdef MACOS
                 if ((packet_type == av::DataType::video) && (next_video_pts != invalidTs)) {
                     pts_offset_ += packet->pts - next_video_pts;
+#ifdef MACOS
                 } else if ((packet_type == av::DataType::audio) && (next_audio_pts != invalidTs)) {
                     pts_offset_ += packet->pts - next_audio_pts;
-                }
-#else
-                if (packet && (next_video_pts != invalidTs)) {
-                    pts_offset_ += packet->pts - next_video_pts;
-                } else if (audio_packet && (next_audio_pts != invalidTs)) {
-                    pts_offset_ += audio_packet->pts - next_audio_pts;
-                }
 #endif
+                }
             }
+            start_time_ += av_gettime() - pause_ts;
         }
 
-#ifdef MACOS
         if (packet_type == av::DataType::video) {
-#else
-        if (packet) {
-#endif
-            if (pts_offset_ == invalidTs) pts_offset_ = packet->pts;
             next_video_pts = packet->pts + video_pkt_duration;
             processVideoPacket(packet.get());
 #ifdef MACOS
-        } else if (pts_offset_ != invalidTs) {
+        } else if (packet_type == av::DataType::audio) {
             next_audio_pts = packet->pts + packet->duration;
             processAudioPacket(packet.get());
-        }
-#else
-        }
-
-        if (audio_packet && (pts_offset_ != invalidTs)) {
-            next_audio_pts = audio_packet->pts + audio_packet->duration;
-            processAudioPacket(audio_packet.get());
-        }
 #endif
+        } else {
+            throw std::runtime_error("Unknown packet received from demuxer");
+        }
     }
 
     flushPipelines();
