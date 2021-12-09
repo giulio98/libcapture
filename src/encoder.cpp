@@ -1,4 +1,4 @@
-#include "../include/encoder.h"
+#include "include/encoder.h"
 
 Encoder::Encoder(AVCodecID codec_id) : codec_(nullptr), codec_ctx_(nullptr) {
 #ifdef MACOS

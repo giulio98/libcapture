@@ -1,4 +1,4 @@
-#include "../include/screen_recorder.h"
+#include "include/screen_recorder.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -10,7 +10,7 @@
 
 #include <sstream>
 
-#include "../include/duration_logger.h"
+#include "include/duration_logger.h"
 
 #define DURATION_LOGGING 0
 #define FRAMERATE_LOGGING 1
@@ -21,10 +21,14 @@ ScreenRecorder::ScreenRecorder() {
     out_audio_codec_id_ = AV_CODEC_ID_AAC;
 #ifdef LINUX
     in_fmt_name_ = "x11grab";
-    in_audio_fmt_name_ = "alsa";
+    in_audio_fmt_name_ = "pulse";
+#elif _WIN32
+    in_fmt_name_ = "gdigrab";
+    in_audio_fmt_name_ = "dshow";
 #else
     in_fmt_name_ = "avfoundation";
 #endif
+
     video_encoder_options_.insert({"preset", "ultrafast"});
     avdevice_register_all();
 }
@@ -35,12 +39,17 @@ ScreenRecorder::~ScreenRecorder() {
 
 void ScreenRecorder::initInput() {
     std::stringstream device_name;
+    std::stringstream device_name_audio;
     std::stringstream video_size;
     std::stringstream framerate;
     std::map<std::string, std::string> demux_options;
 
 #ifdef LINUX
     device_name << getenv("DISPLAY") << ".0+" << video_offset_x_ << "," << video_offset_y_;
+    device_name_audio << "hw:0,0";
+#elif _WIN32
+    device_name << "desktop";
+    device_name_audio << "audio=Gruppo microfoni (Realtek High Definition Audio(SST))";
 #else
     device_name << "1:";
     if (capture_audio_) device_name << "0";
@@ -50,7 +59,7 @@ void ScreenRecorder::initInput() {
 
     demux_options.insert({"video_size", video_size.str()});
     demux_options.insert({"framerate", framerate.str()});
-#ifdef LINUX
+#ifndef MACOS
     demux_options.insert({"show_region", "1"});
 #else
     demux_options.insert({"capture_cursor", "0"});
@@ -62,8 +71,8 @@ void ScreenRecorder::initInput() {
     video_decoder_ = std::make_unique<Decoder>(demuxer_->getVideoParams());
 
     if (capture_audio_) {
-#ifdef LINUX
-        audio_demuxer_ = std::make_unique<Demuxer>(in_audio_fmt_name_, "hw:0,0", std::map<std::string, std::string>());
+#ifndef MACOS
+        audio_demuxer_ = std::make_unique<Demuxer>(in_audio_fmt_name_, device_name_audio.str(), std::map<std::string, std::string>());
         audio_demuxer_->openInput();
         auto params = audio_demuxer_->getAudioParams();
 #else
@@ -82,7 +91,7 @@ void ScreenRecorder::initOutput() {
     muxer_->addVideoStream(video_encoder_->getCodecContext());
 
     if (capture_audio_) {
-#ifdef LINUX
+#ifndef MACOS
         auto params = audio_demuxer_->getAudioParams();
 #else
         auto params = demuxer_->getAudioParams();
@@ -108,7 +117,7 @@ void ScreenRecorder::initConverters() {
 void ScreenRecorder::printInfo() {
     std::cout << "########## Streams Info ##########" << std::endl;
     demuxer_->dumpInfo(0);
-#ifdef LINUX
+#ifndef MACOS
     if (capture_audio_) audio_demuxer_->dumpInfo(1);
 #endif
     muxer_->dumpInfo();

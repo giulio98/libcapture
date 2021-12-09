@@ -1,4 +1,4 @@
-#include "../include/muxer.h"
+#include "include/muxer.h"
 
 #include <iostream>
 

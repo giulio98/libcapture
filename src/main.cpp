@@ -1,8 +1,8 @@
 #include <iostream>
 #include <string>
 #include <vector>
-
-#include "../include/screen_recorder.h"
+#include <windows.h>
+#include "include/screen_recorder.h"
 
 std::tuple<int, std::string, bool> get_params(std::vector<std::string> args) {
     int framerate = 25;

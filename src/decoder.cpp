@@ -1,4 +1,4 @@
-#include "../include/decoder.h"
+#include "include/decoder.h"
 
 Decoder::Decoder(const AVCodecParameters *params) : codec_(nullptr), codec_ctx_(nullptr) {
     codec_ = avcodec_find_decoder(params->codec_id);

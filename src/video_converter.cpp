@@ -1,4 +1,4 @@
-#include "../include/video_converter.h"
+#include "include/video_converter.h"
 
 VideoConverter::VideoConverter(const AVCodecContext *in_codec_ctx, const AVCodecContext *out_codec_ctx)
     : ctx_(nullptr) {

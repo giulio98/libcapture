@@ -1,4 +1,4 @@
-#include "../include/demuxer.h"
+#include "include/demuxer.h"
 
 Demuxer::Demuxer(const std::string &fmt_name, const std::string &device_name,
                  const std::map<std::string, std::string> &options)
