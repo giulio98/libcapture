@@ -5,3 +5,9 @@ build
 cmake-build-cmakeliststxt
 *.mp4
 *.mkv
+*.dll
+*.lib
+*.def
+include
+lib
+out
