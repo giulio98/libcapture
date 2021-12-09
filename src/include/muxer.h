@@ -10,13 +10,13 @@ class Muxer {
     std::string filename_;
     const AVStream *video_stream_;
     const AVStream *audio_stream_;
-    AVRational video_codec_time_base_;
-    AVRational audio_codec_time_base_;
+    AVRational video_codec_time_base_{};
+    AVRational audio_codec_time_base_{};
     bool file_opened_;
     bool file_closed_;
 
 public:
-    Muxer(const std::string &filename);
+    Muxer(std::string filename);
 
     ~Muxer();
 

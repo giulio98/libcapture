@@ -13,7 +13,7 @@ public:
      * Create a new decoder
      * @param params the parameters to use to initialize the decoder
      */
-    Decoder(const AVCodecParameters *params);
+    explicit Decoder(const AVCodecParameters *params);
 
     /**
      * Send a packet to the decoder
@@ -27,7 +27,7 @@ public:
      * @return a frame if it was possible to get it, nullptr if the decoder had nothing to write
      * because it is empty or flushed
      */
-    av::FrameUPtr getFrame() const;
+    [[nodiscard]] av::FrameUPtr getFrame() const;
 
-    const AVCodecContext *getCodecContext() const;
+    [[nodiscard]] const AVCodecContext *getCodecContext() const;
 };

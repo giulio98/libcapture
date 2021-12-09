@@ -1,16 +1,17 @@
 #include "include/muxer.h"
 
 #include <iostream>
+#include <utility>
 
-Muxer::Muxer(const std::string &filename)
+Muxer::Muxer(std::string filename)
     : fmt_ctx_(nullptr),
-      filename_(filename),
+      filename_(std::move(filename)),
       video_stream_(nullptr),
       audio_stream_(nullptr),
       file_opened_(false),
       file_closed_(false) {
     AVFormatContext *fmt_ctx = nullptr;
-    if (avformat_alloc_output_context2(&fmt_ctx, NULL, NULL, filename_.c_str()) < 0)
+    if (avformat_alloc_output_context2(&fmt_ctx, nullptr, nullptr, filename_.c_str()) < 0)
         throw std::runtime_error("Failed to allocate output format context");
     fmt_ctx_ = av::FormatContextUPtr(fmt_ctx);
 }
@@ -28,7 +29,7 @@ void Muxer::addVideoStream(const AVCodecContext *codec_ctx) {
     if (file_opened_) throw std::runtime_error("Muxer: cannot add a new stream, file has already been opened");
     if (video_stream_) throw std::runtime_error("Muxer: Video stream already added");
 
-    video_stream_ = avformat_new_stream(fmt_ctx_.get(), NULL);
+    video_stream_ = avformat_new_stream(fmt_ctx_.get(), nullptr);
     if (!video_stream_) throw std::runtime_error("Muxer: Failed to create a new video stream");
 
     if (avcodec_parameters_from_context(video_stream_->codecpar, codec_ctx) < 0)
@@ -41,7 +42,7 @@ void Muxer::addAudioStream(const AVCodecContext *codec_ctx) {
     if (file_opened_) throw std::runtime_error("Muxer: cannot add a new stream, file has already been opened");
     if (audio_stream_) throw std::runtime_error("Muxer: Audio stream already added");
 
-    audio_stream_ = avformat_new_stream(fmt_ctx_.get(), NULL);
+    audio_stream_ = avformat_new_stream(fmt_ctx_.get(), nullptr);
     if (!audio_stream_) throw std::runtime_error("Muxer: Failed to create a new audio stream");
 
     if (avcodec_parameters_from_context(audio_stream_->codecpar, codec_ctx) < 0)

@@ -4,6 +4,7 @@
 
 #include <iostream>
 #include <string>
+#include <utility>
 
 class DurationLogger {
     std::string msg_;
@@ -11,7 +12,7 @@ class DurationLogger {
     bool new_line_;
 
 public:
-    DurationLogger(const std::string &msg, bool new_line = true) : msg_(msg), new_line_(new_line) {
+    explicit DurationLogger(std::string msg, bool new_line = true) : msg_(std::move(msg)), new_line_(new_line) {
         start_time_ = av_gettime();
     }
 

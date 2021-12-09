@@ -1,11 +1,11 @@
 #include "include/demuxer.h"
 
-Demuxer::Demuxer(const std::string &fmt_name, const std::string &device_name,
-                 const std::map<std::string, std::string> &options)
+Demuxer::Demuxer(const std::string &fmt_name, std::string device_name,
+                 std::map<std::string, std::string> options)
     : fmt_ctx_(nullptr),
       fmt_(nullptr),
-      device_name_(device_name),
-      options_(options),
+      device_name_(std::move(device_name)),
+      options_(std::move(options)),
       video_stream_(nullptr),
       audio_stream_(nullptr) {
     fmt_ = av_find_input_format(fmt_name.c_str());

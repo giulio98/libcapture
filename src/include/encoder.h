@@ -10,7 +10,7 @@ protected:
     AVCodec *codec_;
     av::CodecContextUPtr codec_ctx_;
 
-    Encoder(AVCodecID codec_id);
+    explicit Encoder(AVCodecID codec_id);
 
     void open(const std::map<std::string, std::string> &options);
 
@@ -27,7 +27,7 @@ public:
      * @return a packet if it was possible to get it, nullptr if the encoder had nothing to write
      * because it is empty or flushed
      */
-    av::PacketUPtr getPacket() const;
+    [[nodiscard]] av::PacketUPtr getPacket() const;
 
-    const AVCodecContext *getCodecContext() const;
+    [[nodiscard]] const AVCodecContext *getCodecContext() const;
 };

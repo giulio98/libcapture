@@ -1,7 +1,7 @@
 #include "include/screen_recorder.h"
 
-#include <stdio.h>
-#include <stdlib.h>
+#include <cstdio>
+#include <cstdlib>
 
 #ifdef LINUX
 #include <X11/Xlib.h>
@@ -30,6 +30,7 @@ ScreenRecorder::ScreenRecorder() {
 #endif
 
     video_encoder_options_.insert({"preset", "ultrafast"});
+
     avdevice_register_all();
 }
 
@@ -134,7 +135,7 @@ void ScreenRecorder::start(const std::string &output_file, int framerate, bool c
     stop_capture_ = false;
     paused_ = false;
 
-    if (selectArea()) throw std::runtime_error("Failed to select area");
+    selectArea();
     initInput();
     initOutput();
     initConverters();
@@ -179,7 +180,7 @@ void ScreenRecorder::resume() {
     cv_.notify_all();
 }
 
-void ScreenRecorder::estimateFramerate() {
+void ScreenRecorder::estimateFramerate() const {
     auto estimated_framerate = 1000000 * video_frame_counter_ / (av_gettime() - start_time_);
 #if FRAMERATE_LOGGING
     std::cout << "Estimated framerate: " << estimated_framerate << " fps" << std::endl;

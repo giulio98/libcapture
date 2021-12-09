@@ -1,7 +1,6 @@
 #include <iostream>
 #include <string>
 #include <vector>
-#include <windows.h>
 #include "include/screen_recorder.h"
 
 std::tuple<int, std::string, bool> get_params(std::vector<std::string> args) {
@@ -39,7 +38,7 @@ int main(int argc, char **argv) {
     try {
         std::vector<std::string> args;
         for (int i = 1; i < argc; i++) {
-            args.push_back(argv[i]);
+            args.emplace_back(argv[i]);
         }
         std::tie(framerate, output_file, capture_audio) = get_params(args);
     } catch (const std::exception &e) {
