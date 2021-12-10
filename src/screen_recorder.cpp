@@ -1,6 +1,5 @@
 #include <screen_recorder.h>
 
-#include <cstdio>
 #include <cstdlib>
 #include <sstream>
 #include <stdexcept>

@@ -2,7 +2,6 @@
 
 #include <iostream>
 #include <stdexcept>
-#include <utility>
 
 Muxer::Muxer(std::string filename)
     : fmt_ctx_(nullptr),

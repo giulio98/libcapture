@@ -46,10 +46,11 @@ using DictionaryUPtr = std::unique_ptr<AVDictionary, DeleterPP<av_dict_free>>;
 
 inline DictionaryUPtr map2dict(const std::map<std::string, std::string> &map) {
     AVDictionary *dict = nullptr;
-    for (const auto &[key, val] : map) {
-        if (av_dict_set(&dict, key.c_str(), val.c_str(), 0) < 0) {
+    std::map<std::basic_string<char>, std::basic_string<char>>::iterator it;
+    for (const auto& v : map) {
+        if (av_dict_set(&dict, v.first.c_str(), v.second.c_str(), 0) < 0) {
             if (dict) av_dict_free(&dict);
-            throw std::runtime_error("Cannot set " + key + "in dictionary");
+            throw std::runtime_error("Cannot set " + v.first + "in dictionary");
         }
     }
     return DictionaryUPtr(dict);
