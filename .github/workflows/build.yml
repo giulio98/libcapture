@@ -47,7 +47,7 @@ jobs:
           allowUpdates: true
           artifactErrorsFailBuild: true
           prerelease: true
-          removeArtifacts: false
+          removeArtifacts: true
           tag: latest
           commit: main
           name: "Development Build"
