@@ -7,10 +7,12 @@ LIST(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 
+include(FetchContent)
+
 IF (WIN32)
     MESSAGE(STATUS "Platform is Windows")
     add_definitions(-DWINDOWS)
-    if(NOT MSVC)
+    IF(NOT MSVC)
         find_package(FFmpeg REQUIRED COMPONENTS AVCODEC AVFORMAT AVUTIL SWSCALE)
     ELSE()
         FetchContent_Declare(
