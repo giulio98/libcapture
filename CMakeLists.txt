@@ -101,6 +101,18 @@ IF(WIN32)
                 $<TARGET_FILE_DIR:screen-recorder>
                 )
     ENDIF()
+    if(MSVC)
+        set(INSTALL_DIR ".")
+        install(TARGETS screen-recorder RUNTIME DESTINATION ${INSTALL_DIR})
+
+        set(CPACK_PACKAGE_DIRECTORY dist)
+        set(CPACK_GENERATOR WIX ZIP)
+        set(CPACK_PACKAGE_NAME ScreenRecorder)
+        set(CPACK_PACKAGE_EXECUTABLES screen-recorder ScreenRecorder)
+        set(CPACK_PACKAGE_INSTALL_DIRECTORY ${CPACK_PACKAGE_NAME})
+
+        include(CPack)
+    endif()
 ENDIF()
 
 IF(NOT WIN32)
