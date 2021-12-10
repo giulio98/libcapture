@@ -39,6 +39,7 @@ jobs:
         run: |
           cd build
           cpack
+
       - name: Publish
         if: runner.os == 'Windows' && github.ref == 'refs/heads/main'
         uses: ncipollo/release-action@v1.8.10
@@ -52,3 +53,10 @@ jobs:
           commit: main
           name: "Development Build"
           artifacts: "${{github.workspace}}/build/dist/*.*"
+      
+      - name: Upload Artifacts
+        if: runner.os == 'Linux' || runner.os == 'macOS'
+        uses: actions/upload-artifact@v2
+        with:
+          name: screen-recorder
+          path: bin
