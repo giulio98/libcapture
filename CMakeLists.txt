@@ -3,7 +3,7 @@ project(screen-recorder)
 
 set(CMAKE_CXX_STANDARD 20)
 
-set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/ffmpeg/bin)
+set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 
 
 add_executable(screen-recorder
@@ -36,7 +36,10 @@ IF(WIN32)
             INTERFACE_LINK_DIRECTORIES "${screen-recorder_SOURCE_DIR}/ffmpeg/lib/"
             INTERFACE_INCLUDE_DIRECTORIES "${screen-recorder_SOURCE_DIR}/ffmpeg/include/"
             INTERFACE_LINK_LIBRARIES "avdevice;avfilter;avformat;avcodec;swresample;swscale;avutil;"
+
         )
+        file(COPY ${screen-recorder_SOURCE_DIR}/ffmpeg/bin/
+                DESTINATION ${PROJECT_SOURCE_DIR}/bin)
     ELSE()
         INCLUDE(FetchContent)
         FetchContent_Declare(
