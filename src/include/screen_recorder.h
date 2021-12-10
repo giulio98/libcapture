@@ -66,11 +66,11 @@ class ScreenRecorder {
 
     void processAudioPacket(const AVPacket *packet);
 
-    void processConvertedFrame(const AVFrame *frame, av::DataType audio_video);
+    void processConvertedFrame(const AVFrame *frame, av::DataType frame_type);
 
     void flushPipelines();
 
-    void captureFrames(Demuxer *demuxer, bool handle_time = false);
+    void captureFrames(Demuxer *demuxer, bool handle_start_time = false);
 
     void capture();
 

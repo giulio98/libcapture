@@ -73,7 +73,8 @@ void ScreenRecorder::initInput() {
 
     if (capture_audio_) {
 #ifndef MACOS
-        audio_demuxer_ = std::make_unique<Demuxer>(in_audio_fmt_name_, device_name_audio.str(), std::map<std::string, std::string>());
+        audio_demuxer_ = std::make_unique<Demuxer>(in_audio_fmt_name_, device_name_audio.str(),
+                                                   std::map<std::string, std::string>());
         audio_demuxer_->openInput();
         auto params = audio_demuxer_->getAudioParams();
 #else
@@ -286,7 +287,7 @@ void ScreenRecorder::flushPipelines() {
     muxer_->writePacket(nullptr, av::DataType::none);
 }
 
-void ScreenRecorder::captureFrames(Demuxer *demuxer, bool handle_time) {
+void ScreenRecorder::captureFrames(Demuxer *demuxer, bool handle_start_time) {
     while (true) {
         {
             std::unique_lock<std::mutex> ul{mutex_};
@@ -294,7 +295,7 @@ void ScreenRecorder::captureFrames(Demuxer *demuxer, bool handle_time) {
             int64_t pause_start_time;
 
             if (handle_pause) {
-                if (handle_time) pause_start_time = av_gettime();
+                if (handle_start_time) pause_start_time = av_gettime();
 #ifndef MACOS
                 demuxer->closeInput();
 #endif
@@ -307,7 +308,7 @@ void ScreenRecorder::captureFrames(Demuxer *demuxer, bool handle_time) {
 #ifndef MACOS
                 demuxer->openInput();
 #endif
-                if (handle_time) start_time_ += (av_gettime() - pause_start_time);
+                if (handle_start_time) start_time_ += (av_gettime() - pause_start_time);
             }
         }
 
