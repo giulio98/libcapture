@@ -86,33 +86,10 @@ add_executable(screen-recorder
 )
 
 IF(WIN32)
-    set_target_properties(screen-recorder
-            PROPERTIES
-            WIN32_EXECUTABLE $<PLATFORM_ID:Windows>
-            C_STANDARD 99
-            )
     target_link_libraries(screen-recorder PRIVATE
             $<$<BOOL:${MINGW}>:mingw32>
             FFmpeg::FFmpeg)
-    IF(MSVC)
-        add_custom_command(TARGET screen-recorder POST_BUILD
-                COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                ${FFMPEG_DLLS}
-                $<TARGET_FILE_DIR:screen-recorder>
-                )
-    ENDIF()
-    if(MSVC)
-        set(INSTALL_DIR ".")
-        install(TARGETS screen-recorder RUNTIME DESTINATION ${INSTALL_DIR})
 
-        set(CPACK_PACKAGE_DIRECTORY dist)
-        set(CPACK_GENERATOR WIX ZIP)
-        set(CPACK_PACKAGE_NAME ScreenRecorder)
-        set(CPACK_PACKAGE_EXECUTABLES screen-recorder ScreenRecorder)
-        set(CPACK_PACKAGE_INSTALL_DIRECTORY ${CPACK_PACKAGE_NAME})
-
-        include(CPack)
-    endif()
 ENDIF()
 
 IF(NOT WIN32)
