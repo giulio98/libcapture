@@ -1,8 +1,9 @@
-#include "include/muxer.h"
+#include "muxer.h"
 
 #include <iostream>
-#include <utility>
 #include <stdexcept>
+#include <utility>
+
 Muxer::Muxer(std::string filename)
     : fmt_ctx_(nullptr),
       filename_(std::move(filename)),

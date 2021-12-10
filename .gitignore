@@ -1,14 +1,14 @@
 .DS_Store
 .idea
 .vscode
+bin
 build
 cmake-build-cmakeliststxt
+ffmpeg
+
 *.mp4
 *.mkv
 *.dll
 *.lib
 *.def
-include
-lib
-out
 *.exe

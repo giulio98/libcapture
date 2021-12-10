@@ -1,7 +1,8 @@
-#include "include/screen_recorder.h"
+#include <screen_recorder.h>
 
 #include <cstdio>
 #include <cstdlib>
+#include <sstream>
 #include <stdexcept>
 
 #ifdef LINUX
@@ -9,9 +10,7 @@
 #include <X11/cursorfont.h>
 #endif
 
-#include <sstream>
-
-#include "include/duration_logger.h"
+#include "duration_logger.h"
 
 #define DURATION_LOGGING 0
 #define FRAMERATE_LOGGING 1

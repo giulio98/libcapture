@@ -1,4 +1,5 @@
-#include "include/audio_converter.h"
+#include "audio_converter.h"
+
 #include <stdexcept>
 
 AudioConverter::AudioConverter(const AVCodecContext *in_codec_ctx, const AVCodecContext *out_codec_ctx)
