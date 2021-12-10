@@ -23,7 +23,7 @@ jobs:
 
       - name: Install Dependencies macOS
         if: runner.os == 'macOS'
-        run: brew install cmake ffmpeg
+        run: sudo port install cmake ffmpeg
 
       - name: Checkout
         uses: actions/checkout@v2
