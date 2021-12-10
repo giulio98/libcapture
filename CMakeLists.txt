@@ -13,7 +13,13 @@ IF (WIN32)
     MESSAGE(STATUS "Platform is Windows")
     add_definitions(-DWINDOWS)
     IF(NOT MSVC)
-        find_package(FFmpeg REQUIRED COMPONENTS AVCODEC AVFORMAT AVUTIL SWSCALE)
+        add_library(FFmpeg::FFmpeg INTERFACE IMPORTED)
+        set_target_properties(FFmpeg::FFmpeg
+                PROPERTIES
+                INTERFACE_LINK_DIRECTORIES "${screen-recorder_SOURCE_DIR}/lib/"
+                INTERFACE_INCLUDE_DIRECTORIES "${screen-recorder_SOURCE_DIR}/include/"
+                INTERFACE_LINK_LIBRARIES "avdevice;avfilter;avformat;avcodec;swresample;swscale;avutil;"
+                )
     ELSE()
         FetchContent_Declare(
                 FFmpeg
