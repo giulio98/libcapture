@@ -86,7 +86,7 @@ add_executable(screen-recorder
 )
 
 IF(WIN32)
-    set_target_properties(live-paper
+    set_target_properties(screen-recorder
             PROPERTIES
             WIN32_EXECUTABLE $<PLATFORM_ID:Windows>
             C_STANDARD 99
