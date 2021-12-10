@@ -74,8 +74,6 @@ class ScreenRecorder {
 
     void capture();
 
-    int selectArea();
-
     void initInput();
 
     void initOutput();
@@ -98,4 +96,6 @@ public:
     void pause();
 
     void resume();
+
+    int selectArea();
 };
