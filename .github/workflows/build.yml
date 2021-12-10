@@ -14,12 +14,16 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        os: [ubuntu-latest, windows-latest, macos-latest]
 
     steps:
       - name: Install Dependencies Linux
         if: runner.os == 'Linux'
         run: sudo apt-get -yq update && sudo apt-get -yq install cmake libsdl2-dev libavcodec-dev libavfilter-dev libpostproc-dev libavformat-dev libavutil-dev  libswresample-dev libswscale-dev libavdevice-dev
+
+      - name: Install Dependencies macOS
+        if: runner.os == 'macOS'
+        run: brew install cmake ffmpeg
 
       - name: Checkout
         uses: actions/checkout@v2
