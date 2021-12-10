@@ -3,6 +3,7 @@
 #include <map>
 #include <memory>
 #include <string>
+#include <stdexcept>
 
 #include "deleter.h"
 

@@ -2,6 +2,7 @@
 
 #include <cstdio>
 #include <cstdlib>
+#include <stdexcept>
 
 #ifdef LINUX
 #include <X11/Xlib.h>

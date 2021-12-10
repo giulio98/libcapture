@@ -2,7 +2,7 @@
 
 #include <iostream>
 #include <utility>
-
+#include <stdexcept>
 Muxer::Muxer(std::string filename)
     : fmt_ctx_(nullptr),
       filename_(std::move(filename)),
