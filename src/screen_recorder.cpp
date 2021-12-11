@@ -70,8 +70,8 @@ void ScreenRecorder::initInput() {
         HKEY hkey;
         DWORD dwDisposition;
         if (RegCreateKeyEx(HKEY_CURRENT_USER, TEXT("Software\\screen-capture-recorder"),
-                           0, NULL, 0,
-                           KEY_WRITE, NULL,
+                           0, nullptr, 0,
+                           KEY_WRITE, nullptr,
                            &hkey, &dwDisposition) == ERROR_SUCCESS) {
             DWORD dwType, dwSize;
             dwType = REG_DWORD;
@@ -234,10 +234,8 @@ void ScreenRecorder::processConvertedFrame(const AVFrame *frame, av::DataType fr
     if (frame_type == av::DataType::video) {
         encoder = video_encoder_.get();
         if (video_frame_counter_ % video_framerate_ == 0) estimateFramerate();
-    } else if (frame_type == av::DataType::audio) {
-        encoder = audio_encoder_.get();
     } else {
-        throw std::runtime_error("frame type is unknown");
+        encoder = audio_encoder_.get();
     }
 
     bool encoder_received = false;
@@ -329,7 +327,7 @@ void ScreenRecorder::captureFrames(Demuxer *demuxer, bool handle_start_time) {
 
             if (handle_pause) {
                 if (handle_start_time) pause_start_time = av_gettime();
-#ifdef LINUX
+#ifndef MACOS
                 demuxer->closeInput();
 #endif
             }
@@ -338,7 +336,7 @@ void ScreenRecorder::captureFrames(Demuxer *demuxer, bool handle_start_time) {
             if (stop_capture_) break;
 
             if (handle_pause) {
-#ifdef LINUX
+#ifndef MACOS
                 demuxer->openInput();
 #endif
                 if (handle_start_time) start_time_ += (av_gettime() - pause_start_time);
@@ -512,6 +510,19 @@ int ScreenRecorder::selectArea() {
 
     XCloseDisplay(disp);
 
+#elif _WIN32
+    video_width_ = 360;
+    video_height_ = 710;
+    video_offset_x_ = video_offset_y_ = 50;
+    int x1, y1, x2, y2;
+    x1 = GetSystemMetrics(SM_XVIRTUALSCREEN);
+    y1 = GetSystemMetrics(SM_YVIRTUALSCREEN);
+    x2 = GetSystemMetrics(SM_CXVIRTUALSCREEN);
+    y2 = GetSystemMetrics(SM_CYVIRTUALSCREEN);
+    if(video_width_ > x2 - x1)
+        video_width_ = x2 - video_offset_x_;
+    if(video_height_ > y2 - y1)
+        video_height_ = y2 - video_offset_y_;
 #else
     video_width_ = 1920;
     video_height_ = 1080;
