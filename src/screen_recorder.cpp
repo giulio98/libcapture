@@ -1,5 +1,4 @@
 #include <screen_recorder.h>
-
 #include <cstdlib>
 #include <sstream>
 #include <stdexcept>
@@ -7,6 +6,12 @@
 #ifdef LINUX
 #include <X11/Xlib.h>
 #include <X11/cursorfont.h>
+#endif
+
+#ifdef _WIN32
+#include <windows.h>
+#include <winreg.h>
+#include <string>
 #endif
 
 #include "duration_logger.h"
@@ -61,6 +66,31 @@ void ScreenRecorder::initInput() {
 #ifndef _WIN32
     demux_options.insert({"video_size", video_size.str()});
     demux_options.insert({"framerate", framerate.str()});
+#else
+        HKEY hkey;
+        DWORD dwDisposition;
+        if (RegCreateKeyEx(HKEY_CURRENT_USER, TEXT("Software\\screen-capture-recorder"),
+                           0, NULL, 0,
+                           KEY_WRITE, NULL,
+                           &hkey, &dwDisposition) == ERROR_SUCCESS) {
+            DWORD dwType, dwSize;
+            dwType = REG_DWORD;
+            dwSize = sizeof(DWORD);
+            DWORD rofl = video_width_;
+            RegSetValueEx(hkey, TEXT("capture_width"), 0, dwType, (PBYTE)&rofl, dwSize);
+            rofl = video_height_;
+            RegSetValueEx(hkey, TEXT("capture_height"), 0, dwType, (PBYTE)&rofl, dwSize);
+            rofl = video_offset_x_;
+            RegSetValueEx(hkey, TEXT("start_x"), 0, dwType, (PBYTE)&rofl, dwSize);
+            rofl = video_offset_y_;
+            RegSetValueEx(hkey, TEXT("start_y"), 0, dwType, (PBYTE)&rofl, dwSize);
+            rofl = video_framerate_;
+            RegSetValueEx(hkey, TEXT("default_max_fps"), 0, dwType, (PBYTE)&rofl, dwSize);
+            RegCloseKey(hkey);
+        }
+
+
+
 #endif
 
 #ifdef LINUX
@@ -485,6 +515,7 @@ int ScreenRecorder::selectArea() {
 #else
     video_width_ = 1920;
     video_height_ = 1080;
+    /*TO DO adjust width and heught based on resolution*/
     video_offset_x_ = video_offset_y_ = 0;
 #endif
 
