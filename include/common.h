@@ -2,8 +2,8 @@
 
 #include <map>
 #include <memory>
-#include <string>
 #include <stdexcept>
+#include <string>
 
 #include "deleter.h"
 

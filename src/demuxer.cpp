@@ -1,8 +1,8 @@
-#include "include/demuxer.h"
+#include "demuxer.h"
+
 #include <stdexcept>
 
-Demuxer::Demuxer(const std::string &fmt_name, std::string device_name,
-                 std::map<std::string, std::string> options)
+Demuxer::Demuxer(const std::string &fmt_name, std::string device_name, std::map<std::string, std::string> options)
     : fmt_ctx_(nullptr),
       fmt_(nullptr),
       device_name_(std::move(device_name)),

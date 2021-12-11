@@ -16,7 +16,7 @@ class Muxer {
     bool file_closed_;
 
 public:
-    Muxer(std::string filename);
+    explicit Muxer(std::string filename);
 
     ~Muxer();
 

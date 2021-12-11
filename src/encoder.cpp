@@ -1,4 +1,5 @@
-#include "include/encoder.h"
+#include "encoder.h"
+
 #include <stdexcept>
 
 Encoder::Encoder(AVCodecID codec_id) : codec_(nullptr), codec_ctx_(nullptr) {

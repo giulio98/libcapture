@@ -1,7 +1,7 @@
-#include "include/screen_recorder.h"
+#include <screen_recorder.h>
 
-#include <cstdio>
 #include <cstdlib>
+#include <sstream>
 #include <stdexcept>
 
 #ifdef LINUX
@@ -9,9 +9,7 @@
 #include <X11/cursorfont.h>
 #endif
 
-#include <sstream>
-
-#include "include/duration_logger.h"
+#include "duration_logger.h"
 
 #define DURATION_LOGGING 0
 #define FRAMERATE_LOGGING 1
@@ -20,12 +18,12 @@ ScreenRecorder::ScreenRecorder() {
     out_video_pix_fmt_ = AV_PIX_FMT_YUV420P;
     out_video_codec_id_ = AV_CODEC_ID_H264;
     out_audio_codec_id_ = AV_CODEC_ID_AAC;
+
 #ifdef LINUX
     in_fmt_name_ = "x11grab";
     in_audio_fmt_name_ = "pulse";
 #elif _WIN32
-    in_fmt_name_ = "gdigrab";
-    in_audio_fmt_name_ = "dshow";
+    in_fmt_name_ = "dshow";
 #else
     in_fmt_name_ = "avfoundation";
 #endif
@@ -50,18 +48,22 @@ void ScreenRecorder::initInput() {
     device_name << getenv("DISPLAY") << ".0+" << video_offset_x_ << "," << video_offset_y_;
     device_name_audio << "hw:0,0";
 #elif _WIN32
-    device_name << "desktop";
-    device_name_audio << "audio=Gruppo microfoni (Realtek High Definition Audio(SST))";
+    device_name << "audio=Gruppo microfoni (Realtek High Definition Audio(SST)):";
+    if (capture_audio_) device_name << "video=screen-capture-recorder";
 #else
     device_name << "1:";
     if (capture_audio_) device_name << "0";
 #endif
+
     video_size << video_width_ << "x" << video_height_;
     framerate << video_framerate_;
 
+#ifndef _WIN32
     demux_options.insert({"video_size", video_size.str()});
     demux_options.insert({"framerate", framerate.str()});
-#ifndef MACOS
+#endif
+
+#ifdef LINUX
     demux_options.insert({"show_region", "1"});
 #else
     demux_options.insert({"capture_cursor", "0"});
@@ -73,7 +75,7 @@ void ScreenRecorder::initInput() {
     video_decoder_ = std::make_unique<Decoder>(demuxer_->getVideoParams());
 
     if (capture_audio_) {
-#ifndef MACOS
+#ifdef LINUX
         audio_demuxer_ = std::make_unique<Demuxer>(in_audio_fmt_name_, device_name_audio.str(),
                                                    std::map<std::string, std::string>());
         audio_demuxer_->openInput();
@@ -94,7 +96,7 @@ void ScreenRecorder::initOutput() {
     muxer_->addVideoStream(video_encoder_->getCodecContext());
 
     if (capture_audio_) {
-#ifndef MACOS
+#ifdef LINUX
         auto params = audio_demuxer_->getAudioParams();
 #else
         auto params = demuxer_->getAudioParams();
@@ -120,7 +122,7 @@ void ScreenRecorder::initConverters() {
 void ScreenRecorder::printInfo() {
     std::cout << "########## Streams Info ##########" << std::endl;
     demuxer_->dumpInfo(0);
-#ifndef MACOS
+#ifdef LINUX
     if (capture_audio_) audio_demuxer_->dumpInfo(1);
 #endif
     muxer_->dumpInfo();
@@ -297,7 +299,7 @@ void ScreenRecorder::captureFrames(Demuxer *demuxer, bool handle_start_time) {
 
             if (handle_pause) {
                 if (handle_start_time) pause_start_time = av_gettime();
-#ifndef MACOS
+#ifdef LINUX
                 demuxer->closeInput();
 #endif
             }
@@ -306,7 +308,7 @@ void ScreenRecorder::captureFrames(Demuxer *demuxer, bool handle_start_time) {
             if (stop_capture_) break;
 
             if (handle_pause) {
-#ifndef MACOS
+#ifdef LINUX
                 demuxer->openInput();
 #endif
                 if (handle_start_time) start_time_ += (av_gettime() - pause_start_time);
@@ -327,7 +329,7 @@ void ScreenRecorder::captureFrames(Demuxer *demuxer, bool handle_start_time) {
 }
 
 void ScreenRecorder::capture() {
-#ifndef MACOS
+#ifdef LINUX
     std::thread audio_capturer;
     std::exception_ptr e_ptr;
 #endif
@@ -340,7 +342,7 @@ void ScreenRecorder::capture() {
     dropped_frame_counter_ = -1;  // wait for an extra second at the beginning to allow the framerate to stabilize
     start_time_ = av_gettime();
 
-#ifndef MACOS
+#ifdef LINUX
     if (capture_audio_) {
         audio_capturer = std::thread([this, &e_ptr]() {
             try {
@@ -356,7 +358,7 @@ void ScreenRecorder::capture() {
 
     captureFrames(demuxer_.get(), true);
 
-#ifndef MACOS
+#ifdef LINUX
     if (audio_capturer.joinable()) audio_capturer.join();
     if (e_ptr) std::rethrow_exception(e_ptr);
 #endif

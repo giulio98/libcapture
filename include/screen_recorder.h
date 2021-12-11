@@ -34,7 +34,7 @@ class ScreenRecorder {
 
     std::string in_fmt_name_;
     std::unique_ptr<Demuxer> demuxer_;
-#ifndef MACOS
+#ifdef LINUX
     std::string in_audio_fmt_name_;
     std::unique_ptr<Demuxer> audio_demuxer_;
 #endif
@@ -74,8 +74,6 @@ class ScreenRecorder {
 
     void capture();
 
-    int selectArea();
-
     void initInput();
 
     void initOutput();
@@ -98,4 +96,6 @@ public:
     void pause();
 
     void resume();
+
+    int selectArea();
 };
