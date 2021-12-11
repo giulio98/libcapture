@@ -57,12 +57,11 @@ void ScreenRecorder::initInput() {
 
     video_size << video_width_ << "x" << video_height_;
     framerate << video_framerate_;
-    
+
 #ifndef _WIN32
     demux_options.insert({"video_size", video_size.str()});
     demux_options.insert({"framerate", framerate.str()});
 #endif
-
 
 #ifdef LINUX
     demux_options.insert({"show_region", "1"});
