@@ -18,6 +18,7 @@ ScreenRecorder::ScreenRecorder() {
     out_video_pix_fmt_ = AV_PIX_FMT_YUV420P;
     out_video_codec_id_ = AV_CODEC_ID_H264;
     out_audio_codec_id_ = AV_CODEC_ID_AAC;
+
 #ifdef LINUX
     in_fmt_name_ = "x11grab";
     in_audio_fmt_name_ = "pulse";
@@ -53,8 +54,10 @@ void ScreenRecorder::initInput() {
     device_name << "1:";
     if (capture_audio_) device_name << "0";
 #endif
+
     video_size << video_width_ << "x" << video_height_;
     framerate << video_framerate_;
+    
 #ifndef _WIN32
     demux_options.insert({"video_size", video_size.str()});
     demux_options.insert({"framerate", framerate.str()});
