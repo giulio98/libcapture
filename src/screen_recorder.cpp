@@ -45,30 +45,28 @@ ScreenRecorder::~ScreenRecorder() {
 }
 
 void ScreenRecorder::initInput() {
-    std::stringstream device_name;
-    std::stringstream device_name_audio;
-    std::stringstream video_size;
-    std::stringstream framerate;
+    std::stringstream device_name_ss;
+    std::stringstream audio_device_name_ss;
+    std::stringstream video_size_ss;
+    std::stringstream framerate_ss;
     std::map<std::string, std::string> demuxer_options;
 
 #ifdef LINUX
-    device_name << getenv("DISPLAY") << ".0+" << video_offset_x_ << "," << video_offset_y_;
-    device_name_audio << "hw:0,0";
+    device_name_ss << getenv("DISPLAY") << ".0+" << video_offset_x_ << "," << video_offset_y_;
+    audio_device_name_ss << "hw:0,0";
 #elif _WIN32
-    device_name << "audio=Gruppo microfoni (Realtek High Definition Audio(SST)):";
-    if (capture_audio_) device_name << "video=screen-capture-recorder";
+    device_name_ss << "audio=Gruppo microfoni (Realtek High Definition Audio(SST)):";
+    if (capture_audio_) device_name_ss << "video=screen-capture-recorder";
 #else
-    device_name << "1:";
-    if (capture_audio_) device_name << "0";
+    device_name_ss << "1:";
+    if (capture_audio_) device_name_ss << "0";
 #endif
 
-    video_size << video_width_ << "x" << video_height_;
-    framerate << video_framerate_;
+    video_size_ss << video_width_ << "x" << video_height_;
+    framerate_ss << video_framerate_;
 
-#ifndef _WIN32
-    demuxer_options.insert({"video_size", video_size.str()});
-    demuxer_options.insert({"framerate", framerate.str()});
-#else
+#ifdef _WIN32
+
     HKEY hkey;
     DWORD dwDisposition;
     if (RegCreateKeyEx(HKEY_CURRENT_USER, TEXT("Software\\screen-capture-recorder"), 0, nullptr, 0, KEY_WRITE, nullptr,
@@ -89,22 +87,28 @@ void ScreenRecorder::initInput() {
         RegCloseKey(hkey);
     }
 
-#endif
+#else
+
+    demuxer_options.insert({"video_size", video_size_ss.str()});
+    demuxer_options.insert({"framerate", framerate_ss.str()});
 
 #ifdef LINUX
     demuxer_options.insert({"show_region", "1"});
-#else
+#else  // macOS
+    demuxer_options.insert({"pixel_format", "uyvy422"});
     demuxer_options.insert({"capture_cursor", "0"});
 #endif
 
-    demuxer_ = std::make_unique<Demuxer>(in_fmt_name_, device_name.str(), demuxer_options);
+#endif
+
+    demuxer_ = std::make_unique<Demuxer>(in_fmt_name_, device_name_ss.str(), demuxer_options);
     demuxer_->openInput();
 
     video_decoder_ = std::make_unique<Decoder>(demuxer_->getVideoParams());
 
     if (capture_audio_) {
 #ifdef LINUX
-        audio_demuxer_ = std::make_unique<Demuxer>(in_audio_fmt_name_, device_name_audio.str(),
+        audio_demuxer_ = std::make_unique<Demuxer>(in_audio_fmt_name_, audio_device_name_ss.str(),
                                                    std::map<std::string, std::string>());
         audio_demuxer_->openInput();
         auto params = audio_demuxer_->getAudioParams();
