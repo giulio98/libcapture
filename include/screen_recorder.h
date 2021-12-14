@@ -62,6 +62,8 @@ class ScreenRecorder {
     /* Counter of times in which the estimated framerate is lower than the specified one */
     int dropped_frame_counter_{};
 
+    void setVideoSize(int width, int height, int offset_x, int offset_y);
+
     void processVideoPacket(const AVPacket *packet);
 
     void processAudioPacket(const AVPacket *packet);
@@ -89,7 +91,8 @@ public:
 
     ~ScreenRecorder();
 
-    void start(const std::string &output_file, int framerate, bool capture_audio);
+    void start(const std::string &output_file, int video_width, int video_height, int video_offset_x,
+               int video_offset_y, int framerate, bool capture_audio);
 
     void stop();
 

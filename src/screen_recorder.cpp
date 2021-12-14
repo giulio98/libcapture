@@ -51,21 +51,13 @@ void ScreenRecorder::initInput() {
     std::stringstream framerate_ss;
     std::map<std::string, std::string> demuxer_options;
 
-#ifdef LINUX
-    device_name_ss << getenv("DISPLAY") << ".0+" << video_offset_x_ << "," << video_offset_y_;
-    audio_device_name_ss << "hw:0,0";
-#elif _WIN32
-    device_name_ss << "audio=Gruppo microfoni (Realtek High Definition Audio(SST)):";
-    if (capture_audio_) device_name_ss << "video=screen-capture-recorder";
-#else
-    device_name_ss << "1:";
-    if (capture_audio_) device_name_ss << "0";
-#endif
-
-    video_size_ss << video_width_ << "x" << video_height_;
+    // video_size_ss << video_width_ << "x" << video_height_;
     framerate_ss << video_framerate_;
 
 #ifdef _WIN32
+
+    device_name_ss << "audio=Gruppo microfoni (Realtek High Definition Audio(SST)):";
+    if (capture_audio_) device_name_ss << "video=screen-capture-recorder";
 
     HKEY hkey;
     DWORD dwDisposition;
@@ -89,14 +81,22 @@ void ScreenRecorder::initInput() {
 
 #else
 
-    demuxer_options.insert({"video_size", video_size_ss.str()});
+    // demuxer_options.insert({"video_size", video_size_ss.str()});
     demuxer_options.insert({"framerate", framerate_ss.str()});
 
 #ifdef LINUX
+
     demuxer_options.insert({"show_region", "1"});
+    device_name_ss << getenv("DISPLAY") << ".0+" << video_offset_x_ << "," << video_offset_y_;
+    audio_device_name_ss << "hw:0,0";
+
 #else  // macOS
+
     demuxer_options.insert({"pixel_format", "uyvy422"});
     demuxer_options.insert({"capture_cursor", "0"});
+    device_name_ss << "1:";
+    if (capture_audio_) device_name_ss << "0";
+
 #endif
 
 #endif
@@ -165,18 +165,39 @@ void ScreenRecorder::printInfo() {
     std::cout << std::endl;
 }
 
-void ScreenRecorder::start(const std::string &output_file, int framerate, bool capture_audio) {
-    output_file_ = output_file;
-    video_framerate_ = framerate;
-    capture_audio_ = capture_audio;
-    stop_capture_ = false;
-    paused_ = false;
+void ScreenRecorder::setVideoSize(int width, int height, int offset_x, int offset_y) {
+    auto video_params = demuxer_->getVideoParams();
 
-    selectArea();
+    if ((width < 0) || (height < 0)) throw std::runtime_error("video width and height must be >= 0");
+    if ((offset_x < 0) || (offset_y < 0)) throw std::runtime_error("video offsets must be >= 0");
+
+    video_width_ = width ? width : video_params->width;
+    video_height_ = height ? height : video_params->height;
+    video_offset_x_ = offset_x;
+    video_offset_y_ = offset_y;
+
+    if ((video_offset_x_ + video_width_) > video_params->width)
+        throw std::runtime_error("maximum width exceeds the display's one");
+    if ((video_offset_y_ + video_height_) > video_params->height)
+        throw std::runtime_error("maximum height exceeds the display's one");
+}
+
+void ScreenRecorder::start(const std::string &output_file, int video_width, int video_height, int video_offset_x,
+                           int video_offset_y, int framerate, bool capture_audio) {
+    output_file_ = output_file;
+    capture_audio_ = capture_audio;
+
+    if (framerate <= 0) throw std::runtime_error("Video framerate must be a positive number");
+    video_framerate_ = framerate;
+
     initInput();
+    setVideoSize(video_width, video_height, video_offset_x, video_offset_y);
     initOutput();
     initConverters();
     printInfo();
+
+    stop_capture_ = false;
+    paused_ = false;
 
     recorder_thread_ = std::thread([this]() {
         std::cout << "Recording..." << std::endl;
