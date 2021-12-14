@@ -9,7 +9,7 @@ class AudioConverter {
     int out_frame_size_;
     int out_sample_rate_;
     AVSampleFormat out_sample_fmt_;
-    av::SwrContextUPtr ctx_;
+    av::SwrContextUPtr swr_ctx_;
     av::AudioFifoUPtr fifo_buf_;
     int fifo_duration_;
 

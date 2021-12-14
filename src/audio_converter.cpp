@@ -3,7 +3,7 @@
 #include <stdexcept>
 
 AudioConverter::AudioConverter(const AVCodecContext *in_codec_ctx, const AVCodecContext *out_codec_ctx)
-    : ctx_(nullptr), fifo_buf_(nullptr), fifo_duration_(1) {
+    : swr_ctx_(nullptr), fifo_buf_(nullptr), fifo_duration_(1) {
     if (!in_codec_ctx) throw std::runtime_error("AudioConverter: in_codec_ctx is NULL");
     if (!out_codec_ctx) throw std::runtime_error("AudioConverter: out_codec_ctx is NULL");
 
@@ -12,13 +12,13 @@ AudioConverter::AudioConverter(const AVCodecContext *in_codec_ctx, const AVCodec
     out_sample_rate_ = out_codec_ctx->sample_rate;
     out_sample_fmt_ = out_codec_ctx->sample_fmt;
 
-    ctx_ =
+    swr_ctx_ =
         av::SwrContextUPtr(swr_alloc_set_opts(nullptr, av_get_default_channel_layout(out_channels_), out_sample_fmt_,
                                               out_sample_rate_, av_get_default_channel_layout(in_codec_ctx->channels),
                                               in_codec_ctx->sample_fmt, in_codec_ctx->sample_rate, 0, nullptr));
-    if (!ctx_) throw std::runtime_error("AudioConverter: failed to allocate context");
+    if (!swr_ctx_) throw std::runtime_error("AudioConverter: failed to allocate context");
 
-    if (swr_init(ctx_.get()) < 0) throw std::runtime_error("AudioConverter: failed to initialize context");
+    if (swr_init(swr_ctx_.get()) < 0) throw std::runtime_error("AudioConverter: failed to initialize context");
 
     fifo_buf_ =
         av::AudioFifoUPtr(av_audio_fifo_alloc(out_sample_fmt_, out_channels_, out_sample_rate_ * fifo_duration_));
@@ -35,8 +35,8 @@ bool AudioConverter::sendFrame(const AVFrame *frame) const {
         if (av_samples_alloc_array_and_samples(&buf, nullptr, out_channels_, frame->nb_samples, out_sample_fmt_, 0) < 0)
             throw std::runtime_error("AudioConverter: failed to alloc samples by av_samples_alloc_array_and_samples.");
 
-        if (swr_convert(ctx_.get(), buf, frame->nb_samples, (const uint8_t **)frame->extended_data, frame->nb_samples) <
-            0)
+        if (swr_convert(swr_ctx_.get(), buf, frame->nb_samples, (const uint8_t **)frame->extended_data,
+                        frame->nb_samples) < 0)
             throw std::runtime_error("AudioConverter: failed to convert samples");
 
         if (av_audio_fifo_write(fifo_buf_.get(), (void **)buf, frame->nb_samples) < 0)
