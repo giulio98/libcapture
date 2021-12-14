@@ -129,8 +129,9 @@ void ScreenRecorder::initOutput() {
 #else
         auto params = demuxer_->getAudioParams();
 #endif
-        audio_encoder_ = std::make_unique<AudioEncoder>(out_audio_codec_id_, audio_encoder_options_,
-                                                        muxer_->getGlobalHeaderFlags(), params);
+        audio_encoder_ =
+            std::make_unique<AudioEncoder>(out_audio_codec_id_, audio_encoder_options_, muxer_->getGlobalHeaderFlags(),
+                                           params->channels, params->sample_rate);
         muxer_->addAudioStream(audio_encoder_->getCodecContext());
     }
 
