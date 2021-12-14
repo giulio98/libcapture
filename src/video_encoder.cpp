@@ -1,11 +1,10 @@
 #include "video_encoder.h"
 
 VideoEncoder::VideoEncoder(AVCodecID codec_id, const std::map<std::string, std::string> &options,
-                           int global_header_flags, const AVCodecParameters *params, AVPixelFormat pix_fmt,
-                           int framerate)
+                           int global_header_flags, int width, int height, AVPixelFormat pix_fmt, int framerate)
     : Encoder(codec_id) {
-    codec_ctx_->width = params->width;
-    codec_ctx_->height = params->height;
+    codec_ctx_->width = width;
+    codec_ctx_->height = height;
     codec_ctx_->pix_fmt = pix_fmt;
     codec_ctx_->gop_size = 2 * framerate;
     codec_ctx_->framerate.num = framerate;
