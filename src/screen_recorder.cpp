@@ -49,7 +49,7 @@ void ScreenRecorder::initInput() {
     std::stringstream device_name_audio;
     std::stringstream video_size;
     std::stringstream framerate;
-    std::map<std::string, std::string> demux_options;
+    std::map<std::string, std::string> demuxer_options;
 
 #ifdef LINUX
     device_name << getenv("DISPLAY") << ".0+" << video_offset_x_ << "," << video_offset_y_;
@@ -66,8 +66,8 @@ void ScreenRecorder::initInput() {
     framerate << video_framerate_;
 
 #ifndef _WIN32
-    demux_options.insert({"video_size", video_size.str()});
-    demux_options.insert({"framerate", framerate.str()});
+    demuxer_options.insert({"video_size", video_size.str()});
+    demuxer_options.insert({"framerate", framerate.str()});
 #else
     HKEY hkey;
     DWORD dwDisposition;
@@ -92,12 +92,12 @@ void ScreenRecorder::initInput() {
 #endif
 
 #ifdef LINUX
-    demux_options.insert({"show_region", "1"});
+    demuxer_options.insert({"show_region", "1"});
 #else
-    demux_options.insert({"capture_cursor", "0"});
+    demuxer_options.insert({"capture_cursor", "0"});
 #endif
 
-    demuxer_ = std::make_unique<Demuxer>(in_fmt_name_, device_name.str(), demux_options);
+    demuxer_ = std::make_unique<Demuxer>(in_fmt_name_, device_name.str(), demuxer_options);
     demuxer_->openInput();
 
     video_decoder_ = std::make_unique<Decoder>(demuxer_->getVideoParams());
