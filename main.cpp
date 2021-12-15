@@ -21,7 +21,7 @@ std::tuple<int, int, int, int> parse_video_size(const std::string &str) {
         if (delim_pos == std::string::npos) throw std::runtime_error("Wrong video-size format");
         width = std::stoi(video_size.substr(0, delim_pos));
         height = std::stoi(video_size.substr(delim_pos + 1));
-        if ((width < 0) || (height < 0)) throw std::runtime_error("width and height must be not-negative numbers");
+        if (width < 0 || height < 0) throw std::runtime_error("width and height must be not-negative numbers");
     }
 
     if (main_delim_pos != std::string::npos) {
@@ -30,7 +30,7 @@ std::tuple<int, int, int, int> parse_video_size(const std::string &str) {
         if (delim_pos == std::string::npos) throw std::runtime_error("Wrong offsets");
         off_x = std::stoi(offsets.substr(0, delim_pos));
         off_y = std::stoi(offsets.substr(delim_pos + 1));
-        if ((off_x < 0) || (off_y < 0)) throw std::runtime_error("offsets must be not-negative numbers");
+        if (off_x < 0 || off_y < 0) throw std::runtime_error("offsets must be not-negative numbers");
     }
 
     return std::make_tuple(width, height, off_x, off_y);
