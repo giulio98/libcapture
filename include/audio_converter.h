@@ -15,6 +15,11 @@ class AudioConverter : public Converter {
     int fifo_duration_;
 
 public:
+    /**
+     * Create a new audio converter
+     * @param in_codec_ctx the codec context containing the input params (from the decoder)
+     * @param out_codec_ctx the codec context containing the output params (from the encoder)
+     */
     AudioConverter(const AVCodecContext *in_codec_ctx, const AVCodecContext *out_codec_ctx);
 
     /**

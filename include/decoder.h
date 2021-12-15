@@ -29,5 +29,9 @@ public:
      */
     [[nodiscard]] av::FrameUPtr getFrame() const;
 
+    /**
+     * Access the internal codec context
+     * @return an observer pointer to access the codec context
+     */
     [[nodiscard]] const AVCodecContext *getCodecContext() const;
 };

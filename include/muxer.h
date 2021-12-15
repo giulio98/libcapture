@@ -16,21 +16,37 @@ class Muxer {
     bool file_closed_;
 
 public:
+    /**
+     * Create a new muxer
+     * @param filename the name of the output file
+     */
     explicit Muxer(std::string filename);
 
     ~Muxer();
 
+    /**
+     * Add a video stream to the muxer.
+     * WARNING: This function must be called before opening the file with openFile()
+     * @param codec_ctx a codec context containing the video parameters
+     */
     void addVideoStream(const AVCodecContext *codec_ctx);
 
+    /**
+     * Add an audio stream to the muxer.
+     * WARNING: This function must be called before opening the file with openFile()
+     * @param codec_ctx a codec context containing the audio parameters
+     */
     void addAudioStream(const AVCodecContext *codec_ctx);
 
     /**
      * Open the file and write the header
+     * WARNING: After calling this function, it won't be possible to add streams to the muxer
      */
     void openFile();
 
     /**
      * Write the trailer and close the file
+     * WARNING: After calling this function, it won't be possible to open the file again
      */
     void closeFile();
 
@@ -42,9 +58,13 @@ public:
     void writePacket(av::PacketUPtr packet, av::DataType packet_type) const;
 
     /**
-     * Print informations
+     * Print informations about the streams
      */
     void dumpInfo() const;
 
+    /**
+     * Get the global header flags of the output format
+     * @return the global header flags
+     */
     int getGlobalHeaderFlags() const;
 };
