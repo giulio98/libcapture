@@ -17,9 +17,9 @@ VideoConverter::VideoConverter(const AVCodecContext *in_codec_ctx, const AVCodec
     out_height_ = out_codec_ctx->height;
     out_pix_fmt_ = out_codec_ctx->pix_fmt;
 
-    sws_ctx_ = av::SwsContextUPtr(sws_getContext(in_width_, in_height_, in_codec_ctx->pix_fmt, in_width_, in_height_,
+    scale_ctx_ = av::SwsContextUPtr(sws_getContext(in_width_, in_height_, in_codec_ctx->pix_fmt, in_width_, in_height_,
                                                  out_pix_fmt_, SWS_BICUBIC, nullptr, nullptr, nullptr));
-    if (!sws_ctx_) throw_error("failed to allocate context");
+    if (!scale_ctx_) throw_error("failed to allocate context");
 
     filter_graph_ = av::FilterGraphUPtr(avfilter_graph_alloc());
     if (!filter_graph_) throw_error("failed to allocate filter graph");
@@ -101,7 +101,7 @@ bool VideoConverter::sendFrame(const AVFrame *in_frame) const {
     converted_frame->format = out_pix_fmt_;
     if (av_frame_get_buffer(converted_frame.get(), 0)) throw_error("failed to allocate frame data");
 
-    if (sws_scale(sws_ctx_.get(), in_frame->data, in_frame->linesize, 0, in_height_, converted_frame->data,
+    if (sws_scale(scale_ctx_.get(), in_frame->data, in_frame->linesize, 0, in_height_, converted_frame->data,
                   converted_frame->linesize) < 0)
         throw_error("failed to convert frame");
 
