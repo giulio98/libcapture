@@ -47,48 +47,31 @@ ScreenRecorder::~ScreenRecorder() {
 void ScreenRecorder::initInput() {
     std::stringstream device_name_ss;
     std::stringstream audio_device_name_ss;
-    std::stringstream video_size_ss;
-    std::stringstream framerate_ss;
     std::map<std::string, std::string> demuxer_options;
 
-    // video_size_ss << video_width_ << "x" << video_height_;
-    framerate_ss << video_framerate_;
+    {
+        std::stringstream framerate_ss;
+        framerate_ss << video_framerate_;
+        demuxer_options.insert({"framerate", framerate_ss.str()});
+    }
 
-#ifdef _WIN32
+#if defined(_WIN32)
 
     device_name_ss << "audio=Gruppo microfoni (Realtek High Definition Audio(SST)):";
     if (capture_audio_) device_name_ss << "video=screen-capture-recorder";
 
-    HKEY hkey;
-    DWORD dwDisposition;
-    if (RegCreateKeyEx(HKEY_CURRENT_USER, TEXT("Software\\screen-capture-recorder"), 0, nullptr, 0, KEY_WRITE, nullptr,
-                       &hkey, &dwDisposition) == ERROR_SUCCESS) {
-        DWORD dwType, dwSize;
-        dwType = REG_DWORD;
-        dwSize = sizeof(DWORD);
-        DWORD rofl = video_width_;
-        RegSetValueEx(hkey, TEXT("capture_width"), 0, dwType, (PBYTE)&rofl, dwSize);
-        rofl = video_height_;
-        RegSetValueEx(hkey, TEXT("capture_height"), 0, dwType, (PBYTE)&rofl, dwSize);
-        rofl = video_offset_x_;
-        RegSetValueEx(hkey, TEXT("start_x"), 0, dwType, (PBYTE)&rofl, dwSize);
-        rofl = video_offset_y_;
-        RegSetValueEx(hkey, TEXT("start_y"), 0, dwType, (PBYTE)&rofl, dwSize);
-        rofl = video_framerate_;
-        RegSetValueEx(hkey, TEXT("default_max_fps"), 0, dwType, (PBYTE)&rofl, dwSize);
-        RegCloseKey(hkey);
+#elif defined(LINUX)
+
+    {
+        std::stringstream video_size_ss;
+        video_size_ss << video_width_ << "x" << video_height_;
+        demuxer_options.insert({"video_size", video_size_ss.str()});
     }
-
-#else
-
-    // demuxer_options.insert({"video_size", video_size_ss.str()});
-    demuxer_options.insert({"framerate", framerate_ss.str()});
-
-#ifdef LINUX
-
     demuxer_options.insert({"show_region", "1"});
     device_name_ss << getenv("DISPLAY") << ".0+" << video_offset_x_ << "," << video_offset_y_;
     audio_device_name_ss << "hw:0,0";
+    /* set the offsets to 0 since they won't be used for cropping */
+    video_offset_x_ = video_offset_y_ = 0;
 
 #else  // macOS
 
@@ -99,11 +82,8 @@ void ScreenRecorder::initInput() {
 
 #endif
 
-#endif
-
     demuxer_ = std::make_unique<Demuxer>(in_fmt_name_, device_name_ss.str(), demuxer_options);
     demuxer_->openInput();
-
     video_decoder_ = std::make_unique<Decoder>(demuxer_->getVideoParams());
 
     if (capture_audio_) {
@@ -165,20 +145,37 @@ void ScreenRecorder::printInfo() {
     std::cout << std::endl;
 }
 
-void ScreenRecorder::setVideoSize(int width, int height, int offset_x, int offset_y) {
-    auto video_params = demuxer_->getVideoParams();
-
+void ScreenRecorder::setVideoParams(int width, int height, int offset_x, int offset_y, int framerate) {
+    if (framerate <= 0) throw std::runtime_error("Video framerate must be a positive number");
     if ((width < 0) || (height < 0)) throw std::runtime_error("video width and height must be >= 0");
     if ((offset_x < 0) || (offset_y < 0)) throw std::runtime_error("video offsets must be >= 0");
 
-    video_width_ = width ? width : video_params->width;
-    video_height_ = height ? height : video_params->height;
+    if (width % 2) {
+        std::cerr << "Specified width is not an even number, it will be increased by 1" << std::endl;
+        width++;
+    }
+
+    if (height % 2) {
+        std::cerr << "Specified height is not an even number, it will be increased by 1" << std::endl;
+        height++;
+    }
+
+    video_framerate_ = framerate;
+    video_width_ = width;
+    video_height_ = height;
     video_offset_x_ = offset_x;
     video_offset_y_ = offset_y;
+}
 
-    if ((video_offset_x_ + video_width_) > video_params->width)
+void ScreenRecorder::checkVideoSize() {
+    auto params = demuxer_->getVideoParams();
+
+    if (!video_width_) video_width_ = params->width;
+    if (!video_height_) video_height_ = params->height;
+
+    if ((video_offset_x_ + video_width_) > params->width)
         throw std::runtime_error("maximum width exceeds the display's one");
-    if ((video_offset_y_ + video_height_) > video_params->height)
+    if ((video_offset_y_ + video_height_) > params->height)
         throw std::runtime_error("maximum height exceeds the display's one");
 }
 
@@ -187,14 +184,15 @@ void ScreenRecorder::start(const std::string &output_file, int video_width, int 
     output_file_ = output_file;
     capture_audio_ = capture_audio;
 
-    if (framerate <= 0) throw std::runtime_error("Video framerate must be a positive number");
-    video_framerate_ = framerate;
-
+    setVideoParams(video_width, video_height, video_offset_x, video_offset_y, framerate);
     initInput();
-    setVideoSize(video_width, video_height, video_offset_x, video_offset_y);
+    checkVideoSize();
     initOutput();
     initConverters();
+
+    std::cout << std::endl;
     printInfo();
+    std::cout << std::endl;
 
     stop_capture_ = false;
     paused_ = false;
@@ -423,141 +421,4 @@ void ScreenRecorder::capture() {
 #endif
 
     flushPipelines();
-}
-
-int ScreenRecorder::selectArea() {
-#ifdef LINUX
-    XEvent ev;
-    Display *disp = NULL;
-    Screen *scr = NULL;
-    Window root = 0;
-    Cursor cursor, cursor2;
-    XGCValues gcval;
-    GC gc;
-    int rx = 0, ry = 0, rw = 0, rh = 0;
-    int rect_x = 0, rect_y = 0, rect_w = 0, rect_h = 0;
-    int btn_pressed = 0, done = 0;
-    int threshold = 10;
-
-    std::cout << "Select the area to record (click to select all the display)" << std::endl;
-
-    disp = XOpenDisplay(NULL);
-    if (!disp) return EXIT_FAILURE;
-
-    scr = ScreenOfDisplay(disp, DefaultScreen(disp));
-
-    root = RootWindow(disp, XScreenNumberOfScreen(scr));
-
-    cursor = XCreateFontCursor(disp, XC_left_ptr);
-    cursor2 = XCreateFontCursor(disp, XC_lr_angle);
-
-    gcval.foreground = XWhitePixel(disp, 0);
-    gcval.function = GXxor;
-    gcval.background = XBlackPixel(disp, 0);
-    gcval.plane_mask = gcval.background ^ gcval.foreground;
-    gcval.subwindow_mode = IncludeInferiors;
-
-    gc = XCreateGC(disp, root, GCFunction | GCForeground | GCBackground | GCSubwindowMode, &gcval);
-
-    /* this XGrab* stuff makes XPending true ? */
-    if ((XGrabPointer(disp, root, False, ButtonMotionMask | ButtonPressMask | ButtonReleaseMask, GrabModeAsync,
-                      GrabModeAsync, root, cursor, CurrentTime) != GrabSuccess))
-        printf("couldn't grab pointer:");
-
-    if ((XGrabKeyboard(disp, root, False, GrabModeAsync, GrabModeAsync, CurrentTime) != GrabSuccess))
-        printf("couldn't grab keyboard:");
-
-    while (!done) {
-        while (!done && XPending(disp)) {
-            XNextEvent(disp, &ev);
-            switch (ev.type) {
-                case MotionNotify:
-                    /* this case is purely for drawing rect on screen */
-                    if (btn_pressed) {
-                        if (rect_w) {
-                            /* re-draw the last rect to clear it */
-                            // XDrawRectangle(disp, root, gc, rect_x, rect_y, rect_w, rect_h);
-                        } else {
-                            /* Change the cursor to show we're selecting a region */
-                            XChangeActivePointerGrab(disp, ButtonMotionMask | ButtonReleaseMask, cursor2, CurrentTime);
-                        }
-                        rect_x = rx;
-                        rect_y = ry;
-                        rect_w = ev.xmotion.x - rect_x;
-                        rect_h = ev.xmotion.y - rect_y;
-
-                        if (rect_w < 0) {
-                            rect_x += rect_w;
-                            rect_w = 0 - rect_w;
-                        }
-                        if (rect_h < 0) {
-                            rect_y += rect_h;
-                            rect_h = 0 - rect_h;
-                        }
-                        /* draw rectangle */
-                        // XDrawRectangle(disp, root, gc, rect_x, rect_y, rect_w, rect_h);
-                        XFlush(disp);
-                    }
-                    break;
-                case ButtonPress:
-                    btn_pressed = 1;
-                    rx = ev.xbutton.x;
-                    ry = ev.xbutton.y;
-                    break;
-                case ButtonRelease:
-                    done = 1;
-                    break;
-            }
-        }
-    }
-    /* clear the drawn rectangle */
-    if (rect_w) {
-        // XDrawRectangle(disp, root, gc, rect_x, rect_y, rect_w, rect_h);
-        XFlush(disp);
-    }
-    rw = ev.xbutton.x - rx;
-    rh = ev.xbutton.y - ry;
-    /* cursor moves backwards */
-    if (rw < 0) {
-        rx += rw;
-        rw = 0 - rw;
-    }
-    if (rh < 0) {
-        ry += rh;
-        rh = 0 - rh;
-    }
-
-    if (rw < threshold || rh < threshold) {
-        video_width_ = scr->width;
-        video_height_ = scr->height;
-        video_offset_x_ = 0;
-        video_offset_y_ = 0;
-    } else {
-        video_width_ = rw;
-        video_height_ = rh;
-        video_offset_x_ = rx;
-        video_offset_y_ = ry;
-    }
-
-    XCloseDisplay(disp);
-
-#elif _WIN32
-    video_width_ = 360;
-    video_height_ = 710;
-    video_offset_x_ = video_offset_y_ = 50;
-    int x1, y1, x2, y2;
-    x1 = GetSystemMetrics(SM_XVIRTUALSCREEN);
-    y1 = GetSystemMetrics(SM_YVIRTUALSCREEN);
-    x2 = GetSystemMetrics(SM_CXVIRTUALSCREEN);
-    y2 = GetSystemMetrics(SM_CYVIRTUALSCREEN);
-    if (video_width_ > x2 - x1) video_width_ = x2 - video_offset_x_;
-    if (video_height_ > y2 - y1) video_height_ = y2 - video_offset_y_;
-#else
-    video_width_ = 800;
-    video_height_ = 600;
-    /*TO DO adjust width and heught based on resolution*/
-    video_offset_x_ = video_offset_y_ = 30;
-#endif
-
-    return 0;
 }

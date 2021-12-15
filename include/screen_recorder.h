@@ -62,7 +62,9 @@ class ScreenRecorder {
     /* Counter of times in which the estimated framerate is lower than the specified one */
     int dropped_frame_counter_{};
 
-    void setVideoSize(int width, int height, int offset_x, int offset_y);
+    void setVideoParams(int width, int height, int offset_x, int offset_y, int framerate);
+
+    void checkVideoSize();
 
     void processVideoPacket(const AVPacket *packet);
 
