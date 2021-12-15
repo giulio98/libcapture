@@ -10,7 +10,7 @@ class AudioConverter : public Converter {
     int out_frame_size_;
     int out_sample_rate_;
     AVSampleFormat out_sample_fmt_;
-    av::SwrContextUPtr swr_ctx_;
+    av::SwrContextUPtr resample_ctx_;
     av::AudioFifoUPtr fifo_buf_;
     int fifo_duration_;
 
