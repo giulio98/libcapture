@@ -51,7 +51,8 @@ std::tuple<int, int, int, int, int, std::string, bool> get_params(std::vector<st
         } else if (*it == "-video_size") {
             if (++it == args.end()) throw std::runtime_error("Wrong args");
             std::tie(width, height, off_x, off_y) = parse_video_size(*it);
-            std::cout << "Parsed video size: " << width << "x" << height << " " << off_x << "," << off_y << std::endl;
+            std::cout << "Parsed video size: " << width << "x" << height << std::endl;
+            std::cout << "Parsed video offset: " << off_x << "," << off_y << std::endl;
         } else if (*it == "-f") {
             if (++it == args.end()) throw std::runtime_error("Wrong args");
             framerate = std::stoi(*it);
