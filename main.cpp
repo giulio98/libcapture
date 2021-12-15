@@ -21,7 +21,7 @@ std::tuple<int, int, int, int> parse_video_size(const std::string &str) {
         if (delim_pos == std::string::npos) throw std::runtime_error("Wrong video-size format");
         width = std::stoi(video_size.substr(0, delim_pos));
         height = std::stoi(video_size.substr(delim_pos + 1));
-        if ((width <= 0) || (height <= 0)) throw std::runtime_error("width and height must be positive numbers");
+        if ((width < 0) || (height < 0)) throw std::runtime_error("width and height must be not-negative numbers");
     }
 
     if (main_delim_pos != std::string::npos) {
