@@ -19,7 +19,7 @@
 #include "duration_logger.h"
 
 #define DURATION_LOGGING 0
-#define FRAMERATE_LOGGING 1
+#define FRAMERATE_LOGGING 0
 
 ScreenRecorder::ScreenRecorder() {
     out_video_pix_fmt_ = AV_PIX_FMT_YUV420P;
