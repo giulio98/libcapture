@@ -236,7 +236,7 @@ void ScreenRecorder::resume() {
     cv_.notify_all();
 }
 
-void ScreenRecorder::estimateFramerate() const {
+void ScreenRecorder::estimateFramerate() {
     auto estimated_framerate = 1000000 * video_frame_counter_ / (av_gettime() - start_time_);
 #if FRAMERATE_LOGGING
     std::cout << "Estimated framerate: " << estimated_framerate << " fps" << std::endl;

@@ -86,7 +86,7 @@ class ScreenRecorder {
 
     void printInfo();
 
-    void estimateFramerate() const;
+    void estimateFramerate();
 
 public:
     ScreenRecorder();
