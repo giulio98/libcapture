@@ -147,16 +147,16 @@ void ScreenRecorder::printInfo() {
 
 void ScreenRecorder::setVideoParams(int width, int height, int offset_x, int offset_y, int framerate) {
     if (framerate <= 0) throw std::runtime_error("Video framerate must be a positive number");
-    if ((width < 0) || (height < 0)) throw std::runtime_error("video width and height must be >= 0");
-    if ((offset_x < 0) || (offset_y < 0)) throw std::runtime_error("video offsets must be >= 0");
+    if (width < 0 || height < 0) throw std::runtime_error("video width and height must be >= 0");
+    if (offset_x < 0 || offset_y < 0) throw std::runtime_error("video offsets must be >= 0");
 
     if (width % 2) {
-        std::cerr << "Specified width is not an even number, it will be increased by 1" << std::endl;
+        std::cerr << "WARNING: the specified width is not an even number (it will be increased by 1)" << std::endl;
         width++;
     }
 
     if (height % 2) {
-        std::cerr << "Specified height is not an even number, it will be increased by 1" << std::endl;
+        std::cerr << "WARNING: the specified height is not an even number (it will be increased by 1)" << std::endl;
         height++;
     }
 
