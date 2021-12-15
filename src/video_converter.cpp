@@ -5,8 +5,8 @@
 
 static void throw_error(std::string msg) { throw std::runtime_error("Video Converter: " + msg); }
 
-VideoConverter::VideoConverter(const AVCodecContext *in_codec_ctx, const AVCodecContext *out_codec_ctx,
-                               int offset_x, int offset_y)
+VideoConverter::VideoConverter(const AVCodecContext *in_codec_ctx, const AVCodecContext *out_codec_ctx, int offset_x,
+                               int offset_y)
     : offset_x_(offset_x), offset_y_(offset_y), buffersrc_ctx_(nullptr), buffersink_ctx_(nullptr) {
     if (!in_codec_ctx) throw_error("in_codec_ctx is NULL");
     if (!out_codec_ctx) throw_error("out_codec_ctx is NULL");
@@ -71,8 +71,7 @@ VideoConverter::VideoConverter(const AVCodecContext *in_codec_ctx, const AVCodec
             outputs->next = nullptr;
 
             std::stringstream filter_name_ss;
-            filter_name_ss << "crop=" << out_width_ << ":" << out_height_ << ":" << offset_x_ << ":"
-                           << offset_y_;
+            filter_name_ss << "crop=" << out_width_ << ":" << out_height_ << ":" << offset_x_ << ":" << offset_y_;
 
             if (avfilter_graph_parse_ptr(filter_graph_.get(), filter_name_ss.str().c_str(), &inputs, &outputs,
                                          nullptr) < 0)
@@ -91,7 +90,7 @@ VideoConverter::VideoConverter(const AVCodecContext *in_codec_ctx, const AVCodec
     if (avfilter_graph_config(filter_graph_.get(), nullptr) < 0) throw_error("failed to configure the filter graph");
 }
 
-void VideoConverter::sendFrame(const AVFrame *in_frame) const {
+bool VideoConverter::sendFrame(const AVFrame *in_frame) const {
     if (!in_frame) throw_error("in_frame is not allocated");
 
     av::FrameUPtr converted_frame(av_frame_alloc());
@@ -107,6 +106,8 @@ void VideoConverter::sendFrame(const AVFrame *in_frame) const {
         throw_error("failed to convert frame");
 
     if (av_buffersrc_add_frame(buffersrc_ctx_, converted_frame.get())) throw_error("failed to add frame to filter");
+
+    return true;
 }
 
 av::FrameUPtr VideoConverter::getFrame(int64_t frame_number) const {

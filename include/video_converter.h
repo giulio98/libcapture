@@ -3,8 +3,9 @@
 #include <memory>
 
 #include "common.h"
+#include "converter.h"
 
-class VideoConverter {
+class VideoConverter : public Converter {
     int in_width_;
     int in_height_;
     int out_width_;
@@ -18,18 +19,18 @@ class VideoConverter {
     AVFilterContext *buffersink_ctx_;
 
 public:
-    VideoConverter(const AVCodecContext *in_codec_ctx, const AVCodecContext *out_codec_ctx, int offset_x,
-                   int offset_y);
+    VideoConverter(const AVCodecContext *in_codec_ctx, const AVCodecContext *out_codec_ctx, int offset_x, int offset_y);
 
-    // /**
-    //  * Convert a frame
-    //  * @param in_frame the frame to convert
-    //  * @param frame_number the sequence number of the frame to use to compute the PTS
-    //  * @return a new converted frame
-    //  */
-    // av::FrameUPtr convertFrame(const AVFrame *in_frame, int64_t frame_number = 0) const;
+    /**
+     * Send a frame to convert
+     * @return always true, the return type is only for compatibility reasons
+     */
+    bool sendFrame(const AVFrame *frame) const;
 
-    void sendFrame(const AVFrame *frame) const;
-
+    /**
+     * Get a converted frame
+     * @param frame_number the sequence number of the frame to use to compute the PTS
+     * @return a new converted frame if it was possible to build it, nullptr otherwise
+     */
     av::FrameUPtr getFrame(int64_t frame_number = 0) const;
 };

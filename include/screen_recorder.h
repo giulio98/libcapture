@@ -66,11 +66,9 @@ class ScreenRecorder {
 
     void checkVideoSize();
 
-    void processVideoPacket(const AVPacket *packet);
+    void processPacket(const AVPacket *packet, av::DataType data_type);
 
-    void processAudioPacket(const AVPacket *packet);
-
-    void processConvertedFrame(const AVFrame *frame, av::DataType frame_type);
+    void processConvertedFrame(const AVFrame *frame, av::DataType data_type);
 
     void flushPipelines();
 

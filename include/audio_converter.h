@@ -3,8 +3,9 @@
 #include <memory>
 
 #include "common.h"
+#include "converter.h"
 
-class AudioConverter {
+class AudioConverter : public Converter {
     int out_channels_;
     int out_frame_size_;
     int out_sample_rate_;
@@ -29,5 +30,5 @@ public:
      * @return a new converted frame if it was possible to build it, nullptr if the internal buffer didn't have
      * enough samples to build a frame
      */
-    [[nodiscard]] av::FrameUPtr getFrame(int64_t frame_number = 0) const;
+    av::FrameUPtr getFrame(int64_t frame_number = 0) const;
 };
