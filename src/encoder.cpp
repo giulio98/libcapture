@@ -15,9 +15,9 @@ Encoder::Encoder(AVCodecID codec_id) : codec_(nullptr), codec_ctx_(nullptr) {
 
 void Encoder::open(const std::map<std::string, std::string> &options) {
     auto dict = av::map2dict(options).release();
-    int err = avcodec_open2(codec_ctx_.get(), codec_, dict ? &dict : nullptr);
+    int ret = avcodec_open2(codec_ctx_.get(), codec_, dict ? &dict : nullptr);
     if (dict) av_dict_free(&dict);
-    if (err) throw std::runtime_error("Encoder: Failed to initialize Codec Context");
+    if (ret) throw std::runtime_error("Encoder: Failed to initialize Codec Context");
 }
 
 bool Encoder::sendFrame(const AVFrame *frame) const {
@@ -42,7 +42,7 @@ av::PacketUPtr Encoder::getPacket() const {
     } else if (ret < 0) {
         throw std::runtime_error("Encoder: Failed to receive frame from decoder");
     }
-    
+
     return packet;
 }
 
