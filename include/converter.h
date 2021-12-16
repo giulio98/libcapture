@@ -4,9 +4,9 @@
 
 class Converter {
 public:
-    Converter(){};
+    Converter() = default;
 
-    virtual ~Converter(){};
+    virtual ~Converter() = default;
 
     /**
      * Send a frame to convert
@@ -19,5 +19,5 @@ public:
      * @param frame_number the sequence number of the frame to use to compute the PTS
      * @return a new converted frame if it was possible to build it, nullptr otherwise
      */
-    virtual av::FrameUPtr getFrame(int64_t frame_number = 0) const = 0;
+    [[nodiscard]] virtual av::FrameUPtr getFrame(int64_t frame_number = 0) const = 0;
 };

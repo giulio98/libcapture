@@ -66,5 +66,5 @@ public:
      * Get the global header flags of the output format
      * @return the global header flags
      */
-    int getGlobalHeaderFlags() const;
+    [[nodiscard]] int getGlobalHeaderFlags() const;
 };

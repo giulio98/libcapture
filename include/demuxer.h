@@ -36,20 +36,20 @@ public:
      * Access the video stream parameters
      * @return an observer pointer to access the parameters
      */
-    const AVCodecParameters *getVideoParams() const;
+    [[nodiscard]] const AVCodecParameters *getVideoParams() const;
 
     /**
      * Access the audio stream parameters
      * @return an observer pointer to access the parameters
      */
-    const AVCodecParameters *getAudioParams() const;
+    [[nodiscard]] const AVCodecParameters *getAudioParams() const;
 
     /**
      * Read a packet from the input device and return it together with its type
      * @return a packet and its type if it was possible to read it, nullptr and av::DataType::none if the demuxer had
      * nothing to read
      */
-    std::pair<av::PacketUPtr, av::DataType> readPacket() const;
+    [[nodiscard]] std::pair<av::PacketUPtr, av::DataType> readPacket() const;
 
     /**
      * Print informations about the streams
