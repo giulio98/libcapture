@@ -42,6 +42,7 @@ av::PacketUPtr Encoder::getPacket() const {
     } else if (ret < 0) {
         throw std::runtime_error("Encoder: Failed to receive frame from decoder");
     }
+    
     return packet;
 }
 
