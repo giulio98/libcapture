@@ -28,7 +28,7 @@ ScreenRecorder::ScreenRecorder() {
 
 #ifdef LINUX
     in_fmt_name_ = "x11grab";
-    in_audio_fmt_name_ = "pulse";
+    in_audio_fmt_name_ = "alsa";
 #elif _WIN32
     in_fmt_name_ = "dshow";
 #else
