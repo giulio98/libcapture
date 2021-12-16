@@ -146,7 +146,7 @@ int main(int argc, char **argv) {
                     }
                 }
             } catch (const std::exception &e) {
-                std::cerr << "ERROR: " << e.what() << std::endl;
+                std::cerr << e.what() << ", terminating..." << std::endl;
                 exit(1);
             }
         });
@@ -171,7 +171,7 @@ int main(int argc, char **argv) {
         if (worker.joinable()) worker.join();
 
     } catch (const std::exception &e) {
-        std::cerr << "ERROR: " << e.what() << std::endl;
+        std::cerr << e.what() << ", terminating..." << std::endl;
         return 1;
     }
 

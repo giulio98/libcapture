@@ -184,11 +184,17 @@ void ScreenRecorder::start(const std::string &output_file, int video_width, int 
     output_file_ = output_file;
     capture_audio_ = capture_audio;
 
-    setVideoParams(video_width, video_height, video_offset_x, video_offset_y, framerate);
-    initInput();
-    checkVideoSize();
-    initOutput();
-    initConverters();
+    try {
+        setVideoParams(video_width, video_height, video_offset_x, video_offset_y, framerate);
+        initInput();
+        checkVideoSize();
+        initOutput();
+        initConverters();
+    } catch (const std::exception &e) {
+        std::string details(e.what());
+        throw std::runtime_error("Error during initialization of video-recorder's internal structures (" + details +
+                                 ")");
+    }
 
     std::cout << std::endl;
     printInfo();
@@ -202,7 +208,7 @@ void ScreenRecorder::start(const std::string &output_file, int video_width, int 
         try {
             capture();
         } catch (const std::exception &e) {
-            std::cerr << "Fatal error during capturing: " << e.what() << ", terminating..." << std::endl;
+            std::cerr << "Fatal error during capturing (" << e.what() << "), terminating..." << std::endl;
             exit(1);
         }
     });
