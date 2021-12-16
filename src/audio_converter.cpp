@@ -4,8 +4,7 @@
 
 static void throw_error(const std::string &msg) { throw std::runtime_error("Audio Converter: " + msg); }
 
-AudioConverter::AudioConverter(const AVCodecContext *in_codec_ctx, const AVCodecContext *out_codec_ctx)
-    : resample_ctx_(nullptr), fifo_buf_(nullptr) {
+AudioConverter::AudioConverter(const AVCodecContext *in_codec_ctx, const AVCodecContext *out_codec_ctx) {
     if (!in_codec_ctx) throw_error("in_codec_ctx is NULL");
     if (!out_codec_ctx) throw_error("out_codec_ctx is NULL");
 

@@ -5,8 +5,7 @@
 static void throw_error(const std::string &msg) { throw std::runtime_error("Demuxer: " + msg); }
 
 Demuxer::Demuxer(const std::string &fmt_name, std::string device_name, std::map<std::string, std::string> options)
-    : fmt_ctx_(nullptr),
-      fmt_(nullptr),
+    : fmt_(nullptr),
       device_name_(std::move(device_name)),
       options_(std::move(options)),
       video_stream_(nullptr),

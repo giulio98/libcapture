@@ -4,7 +4,7 @@
 
 static void throw_error(const std::string &msg) { throw std::runtime_error("Decoder:" + msg); }
 
-Decoder::Decoder(const AVCodecParameters *params) : codec_(nullptr), codec_ctx_(nullptr) {
+Decoder::Decoder(const AVCodecParameters *params) : codec_(nullptr) {
     codec_ = avcodec_find_decoder(params->codec_id);
     if (!codec_) throw_error("cannot find codec");
 

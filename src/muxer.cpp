@@ -6,8 +6,7 @@
 static void throw_error(const std::string &msg) { throw std::runtime_error("Muxer: " + msg); }
 
 Muxer::Muxer(std::string filename)
-    : fmt_ctx_(nullptr),
-      filename_(std::move(filename)),
+    : filename_(std::move(filename)),
       video_stream_(nullptr),
       audio_stream_(nullptr),
       file_opened_(false),
