@@ -3,7 +3,7 @@
 #include <sstream>
 #include <stdexcept>
 
-static void throw_error(std::string msg) { throw std::runtime_error("Video Converter: " + msg); }
+static void throw_error(const std::string &msg) { throw std::runtime_error("Video Converter: " + msg); }
 
 VideoConverter::VideoConverter(const AVCodecContext *in_codec_ctx, const AVCodecContext *out_codec_ctx, int offset_x,
                                int offset_y)
@@ -18,7 +18,7 @@ VideoConverter::VideoConverter(const AVCodecContext *in_codec_ctx, const AVCodec
     out_pix_fmt_ = out_codec_ctx->pix_fmt;
 
     scale_ctx_ = av::SwsContextUPtr(sws_getContext(in_width_, in_height_, in_codec_ctx->pix_fmt, in_width_, in_height_,
-                                                 out_pix_fmt_, SWS_BICUBIC, nullptr, nullptr, nullptr));
+                                                   out_pix_fmt_, SWS_BICUBIC, nullptr, nullptr, nullptr));
     if (!scale_ctx_) throw_error("failed to allocate context");
 
     filter_graph_ = av::FilterGraphUPtr(avfilter_graph_alloc());
