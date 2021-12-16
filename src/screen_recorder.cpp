@@ -1,4 +1,5 @@
 #include <screen_recorder.h>
+
 #include <cstdlib>
 #include <sstream>
 #include <stdexcept>
@@ -11,6 +12,7 @@
 #ifdef _WIN32
 #include <windows.h>
 #include <winreg.h>
+
 #include <string>
 #endif
 
@@ -67,29 +69,25 @@ void ScreenRecorder::initInput() {
     demux_options.insert({"video_size", video_size.str()});
     demux_options.insert({"framerate", framerate.str()});
 #else
-        HKEY hkey;
-        DWORD dwDisposition;
-        if (RegCreateKeyEx(HKEY_CURRENT_USER, TEXT("Software\\screen-capture-recorder"),
-                           0, nullptr, 0,
-                           KEY_WRITE, nullptr,
-                           &hkey, &dwDisposition) == ERROR_SUCCESS) {
-            DWORD dwType, dwSize;
-            dwType = REG_DWORD;
-            dwSize = sizeof(DWORD);
-            DWORD rofl = video_width_;
-            RegSetValueEx(hkey, TEXT("capture_width"), 0, dwType, (PBYTE)&rofl, dwSize);
-            rofl = video_height_;
-            RegSetValueEx(hkey, TEXT("capture_height"), 0, dwType, (PBYTE)&rofl, dwSize);
-            rofl = video_offset_x_;
-            RegSetValueEx(hkey, TEXT("start_x"), 0, dwType, (PBYTE)&rofl, dwSize);
-            rofl = video_offset_y_;
-            RegSetValueEx(hkey, TEXT("start_y"), 0, dwType, (PBYTE)&rofl, dwSize);
-            rofl = video_framerate_;
-            RegSetValueEx(hkey, TEXT("default_max_fps"), 0, dwType, (PBYTE)&rofl, dwSize);
-            RegCloseKey(hkey);
-        }
-
-
+    HKEY hkey;
+    DWORD dwDisposition;
+    if (RegCreateKeyEx(HKEY_CURRENT_USER, TEXT("Software\\screen-capture-recorder"), 0, nullptr, 0, KEY_WRITE, nullptr,
+                       &hkey, &dwDisposition) == ERROR_SUCCESS) {
+        DWORD dwType, dwSize;
+        dwType = REG_DWORD;
+        dwSize = sizeof(DWORD);
+        DWORD rofl = video_width_;
+        RegSetValueEx(hkey, TEXT("capture_width"), 0, dwType, (PBYTE)&rofl, dwSize);
+        rofl = video_height_;
+        RegSetValueEx(hkey, TEXT("capture_height"), 0, dwType, (PBYTE)&rofl, dwSize);
+        rofl = video_offset_x_;
+        RegSetValueEx(hkey, TEXT("start_x"), 0, dwType, (PBYTE)&rofl, dwSize);
+        rofl = video_offset_y_;
+        RegSetValueEx(hkey, TEXT("start_y"), 0, dwType, (PBYTE)&rofl, dwSize);
+        rofl = video_framerate_;
+        RegSetValueEx(hkey, TEXT("default_max_fps"), 0, dwType, (PBYTE)&rofl, dwSize);
+        RegCloseKey(hkey);
+    }
 
 #endif
 
@@ -519,10 +517,8 @@ int ScreenRecorder::selectArea() {
     y1 = GetSystemMetrics(SM_YVIRTUALSCREEN);
     x2 = GetSystemMetrics(SM_CXVIRTUALSCREEN);
     y2 = GetSystemMetrics(SM_CYVIRTUALSCREEN);
-    if(video_width_ > x2 - x1)
-        video_width_ = x2 - video_offset_x_;
-    if(video_height_ > y2 - y1)
-        video_height_ = y2 - video_offset_y_;
+    if (video_width_ > x2 - x1) video_width_ = x2 - video_offset_x_;
+    if (video_height_ > y2 - y1) video_height_ = y2 - video_offset_y_;
 #else
     video_width_ = 1920;
     video_height_ = 1080;
