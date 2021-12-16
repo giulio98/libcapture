@@ -5,7 +5,7 @@
 static void throw_error(const std::string &msg) { throw std::runtime_error("Audio Converter: " + msg); }
 
 AudioConverter::AudioConverter(const AVCodecContext *in_codec_ctx, const AVCodecContext *out_codec_ctx)
-    : resample_ctx_(nullptr), fifo_buf_(nullptr), fifo_duration_(1) {
+    : resample_ctx_(nullptr), fifo_buf_(nullptr) {
     if (!in_codec_ctx) throw_error("in_codec_ctx is NULL");
     if (!out_codec_ctx) throw_error("out_codec_ctx is NULL");
 
@@ -18,12 +18,13 @@ AudioConverter::AudioConverter(const AVCodecContext *in_codec_ctx, const AVCodec
         av::SwrContextUPtr(swr_alloc_set_opts(nullptr, av_get_default_channel_layout(out_channels_), out_sample_fmt_,
                                               out_sample_rate_, av_get_default_channel_layout(in_codec_ctx->channels),
                                               in_codec_ctx->sample_fmt, in_codec_ctx->sample_rate, 0, nullptr));
-    if (!resample_ctx_) throw_error("failed to allocate context");
+    if (!resample_ctx_) throw_error("failed to allocate the resampling context");
 
-    if (swr_init(resample_ctx_.get()) < 0) throw_error("failed to initialize context");
+    if (swr_init(resample_ctx_.get()) < 0) throw_error("failed to initialize the resampling context");
 
+    int fifo_duration = 1;  // maximum duration of the FIFO buffer, in seconds
     fifo_buf_ =
-        av::AudioFifoUPtr(av_audio_fifo_alloc(out_sample_fmt_, out_channels_, out_sample_rate_ * fifo_duration_));
+        av::AudioFifoUPtr(av_audio_fifo_alloc(out_sample_fmt_, out_channels_, out_sample_rate_ * fifo_duration));
     if (!fifo_buf_) throw_error("failed to allocate FIFO buffer");
 }
 

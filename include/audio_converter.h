@@ -12,7 +12,6 @@ class AudioConverter : public Converter {
     AVSampleFormat out_sample_fmt_;
     av::SwrContextUPtr resample_ctx_;
     av::AudioFifoUPtr fifo_buf_;
-    int fifo_duration_;
 
 public:
     /**
