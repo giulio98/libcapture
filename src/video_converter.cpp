@@ -52,18 +52,16 @@ VideoConverter::VideoConverter(const AVCodecContext *in_codec_ctx, const AVCodec
 
     {
         /* Endpoints for the filter graph. */
-        AVFilterInOut *inputs = nullptr;
-        AVFilterInOut *outputs = nullptr;
+        AVFilterInOut *inputs = avfilter_inout_alloc();
+        AVFilterInOut *outputs = avfilter_inout_alloc();
 
         try {
-            inputs = avfilter_inout_alloc();
             if (!inputs) throw_error("failed to allocate filter inputs");
             inputs->name = av_strdup("out");
             inputs->filter_ctx = buffersink_ctx_;
             inputs->pad_idx = 0;
             inputs->next = nullptr;
 
-            outputs = avfilter_inout_alloc();
             if (!outputs) throw_error("failed to allocate filter outputs");
             outputs->name = av_strdup("in");
             outputs->filter_ctx = buffersrc_ctx_;
@@ -80,7 +78,7 @@ VideoConverter::VideoConverter(const AVCodecContext *in_codec_ctx, const AVCodec
             if (inputs) avfilter_inout_free(&inputs);
             if (outputs) avfilter_inout_free(&outputs);
 
-        } catch (const std::exception &e) {
+        } catch (...) {
             if (inputs) avfilter_inout_free(&inputs);
             if (outputs) avfilter_inout_free(&outputs);
             throw;
@@ -90,18 +88,18 @@ VideoConverter::VideoConverter(const AVCodecContext *in_codec_ctx, const AVCodec
     if (avfilter_graph_config(filter_graph_.get(), nullptr) < 0) throw_error("failed to configure the filter graph");
 }
 
-bool VideoConverter::sendFrame(const AVFrame *in_frame) const {
-    if (!in_frame) throw_error("in_frame is not allocated");
+bool VideoConverter::sendFrame(const AVFrame *frame) const {
+    if (!frame) throw_error("sent frame is not allocated");
 
     av::FrameUPtr converted_frame(av_frame_alloc());
-    if (!converted_frame) throw_error("failed to allocate frame");
+    if (!converted_frame) throw_error("failed to allocate internal frame");
 
     converted_frame->width = in_width_;
     converted_frame->height = in_height_;
     converted_frame->format = out_pix_fmt_;
     if (av_frame_get_buffer(converted_frame.get(), 0)) throw_error("failed to allocate frame data");
 
-    if (sws_scale(scale_ctx_.get(), in_frame->data, in_frame->linesize, 0, in_height_, converted_frame->data,
+    if (sws_scale(scale_ctx_.get(), frame->data, frame->linesize, 0, in_height_, converted_frame->data,
                   converted_frame->linesize) < 0)
         throw_error("failed to convert frame");
 

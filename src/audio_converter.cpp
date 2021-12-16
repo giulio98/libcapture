@@ -46,7 +46,7 @@ bool AudioConverter::sendFrame(const AVFrame *frame) const {
 
         if (**buf) av_freep(&buf[0]);
 
-    } catch (const std::exception &e) {
+    } catch (...) {
         if (**buf) av_freep(&buf[0]);
         throw;
     }
@@ -58,20 +58,20 @@ av::FrameUPtr AudioConverter::getFrame(int64_t frame_number) const {
     /* not enough samples to build a frame */
     if (av_audio_fifo_size(fifo_buf_.get()) < out_frame_size_) return nullptr;
 
-    av::FrameUPtr out_frame(av_frame_alloc());
-    if (!out_frame) throw_error("failed to allocate internal frame");
+    av::FrameUPtr frame(av_frame_alloc());
+    if (!frame) throw_error("failed to allocate internal frame");
 
-    out_frame->nb_samples = out_frame_size_;
-    out_frame->channels = out_channels_;
-    out_frame->channel_layout = av_get_default_channel_layout(out_channels_);
-    out_frame->format = out_sample_fmt_;
-    out_frame->sample_rate = out_sample_rate_;
-    if (av_frame_get_buffer(out_frame.get(), 0)) throw_error("failed to allocate frame data");
+    frame->nb_samples = out_frame_size_;
+    frame->channels = out_channels_;
+    frame->channel_layout = av_get_default_channel_layout(out_channels_);
+    frame->format = out_sample_fmt_;
+    frame->sample_rate = out_sample_rate_;
+    if (av_frame_get_buffer(frame.get(), 0)) throw_error("failed to allocate frame data");
 
-    if (av_audio_fifo_read(fifo_buf_.get(), (void **)out_frame->data, out_frame_size_) < 0)
+    if (av_audio_fifo_read(fifo_buf_.get(), (void **)frame->data, out_frame_size_) < 0)
         throw_error("failed to read data into frame");
 
-    out_frame->pts = frame_number * out_frame_size_;
+    frame->pts = frame_number * out_frame_size_;
 
-    return out_frame;
+    return frame;
 }
