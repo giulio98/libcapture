@@ -44,10 +44,16 @@ bool AudioConverter::sendFrame(const AVFrame *frame) const {
         if (av_audio_fifo_write(fifo_buf_.get(), (void **)buf, frame->nb_samples) < 0)
             throw_error("failed to write to fifo");
 
-        if (**buf) av_freep(&buf[0]);
+        if (buf) {
+            av_freep(&buf[0]);
+            free(buf);
+        }
 
     } catch (...) {
-        if (**buf) av_freep(&buf[0]);
+        if (buf) {
+            av_freep(&buf[0]);
+            free(buf);
+        }
         throw;
     }
 
