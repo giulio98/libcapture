@@ -82,7 +82,7 @@ class ScreenRecorder {
 
     void initConverters();
 
-    void printInfo();
+    void printInfo() const;
 
     void estimateFramerate();
 

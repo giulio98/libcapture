@@ -132,7 +132,7 @@ void ScreenRecorder::initConverters() {
     }
 }
 
-void ScreenRecorder::printInfo() {
+void ScreenRecorder::printInfo() const {
     std::cout << "########## Streams Info ##########" << std::endl;
     demuxer_->dumpInfo(0);
 #ifdef LINUX
