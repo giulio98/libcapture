@@ -2,7 +2,7 @@
 
 #include <stdexcept>
 
-static void throw_error(const std::string &msg) { throw std::runtime_error(" Encoder: " + msg); }
+static void throw_error(const std::string &msg) { throw std::runtime_error("Encoder: " + msg); }
 
 Encoder::Encoder(AVCodecID codec_id) : codec_(nullptr), codec_ctx_(nullptr) {
 #ifdef MACOS
