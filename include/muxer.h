@@ -39,13 +39,13 @@ public:
     void addAudioStream(const AVCodecContext *codec_ctx);
 
     /**
-     * Open the file and write the header
+     * Open the file and write the header.
      * WARNING: After calling this function, it won't be possible to add streams to the muxer
      */
     void openFile();
 
     /**
-     * Write the trailer and close the file
+     * Write the trailer and close the file.
      * WARNING: After calling this function, it won't be possible to open the file again
      */
     void closeFile();
