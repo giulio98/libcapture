@@ -19,11 +19,12 @@ void Demuxer::openInput() {
 
     {
         AVFormatContext *fmt_ctx = nullptr;
-        auto dict = av::map2dict(options_).release();
-        int err = avformat_open_input(&fmt_ctx, device_name_.c_str(), fmt_, dict ? &dict : nullptr);
-        if (dict) av_dict_free(&dict);
+        av::DictionaryUPtr dict = av::map2dict(options_);
+        AVDictionary *dict_raw = dict.release();
+        int ret = avformat_open_input(&fmt_ctx, device_name_.c_str(), fmt_, dict_raw ? &dict_raw : nullptr);
+        dict = av::DictionaryUPtr(dict_raw);
         fmt_ctx_ = av::InFormatContextUPtr(fmt_ctx);
-        if (err) throw_error("cannot open input format");
+        if (ret) throw_error("cannot open input format");
     }
 
     if (avformat_find_stream_info(fmt_ctx_.get(), nullptr) < 0) throw_error("Failed to find stream info");

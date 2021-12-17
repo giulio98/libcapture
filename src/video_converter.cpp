@@ -90,11 +90,8 @@ av::FrameUPtr VideoConverter::getFrame(int64_t frame_number) const {
     if (!frame) throw_error("failed to allocate frame");
 
     int ret = av_buffersink_get_frame(buffersink_ctx_, frame.get());
-    if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) {
-        return nullptr;
-    } else if (ret < 0) {
-        throw_error("failed to receive frame from filter");
-    }
+    if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) return nullptr;
+    if (ret < 0) throw_error("failed to receive frame from filter");
 
     frame->pts = frame_number;
 

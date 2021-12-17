@@ -19,13 +19,9 @@ Decoder::Decoder(const AVCodecParameters *params) : codec_(nullptr) {
 
 bool Decoder::sendPacket(const AVPacket *packet) const {
     int ret = avcodec_send_packet(codec_ctx_.get(), packet);
-    if (ret == AVERROR(EAGAIN)) {
-        return false;
-    } else if (ret == AVERROR_EOF) {
-        throw_error("has already been flushed");
-    } else if (ret < 0) {
-        throw_error("failed to send packet to decoder");
-    }
+    if (ret == AVERROR(EAGAIN)) return false;
+    if (ret == AVERROR_EOF) throw_error("has already been flushed");
+    if (ret < 0) throw_error("failed to send packet to decoder");
     return true;
 }
 
@@ -34,11 +30,8 @@ av::FrameUPtr Decoder::getFrame() const {
     if (!frame) throw_error("failed to allocate frame");
 
     int ret = avcodec_receive_frame(codec_ctx_.get(), frame.get());
-    if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) {
-        return nullptr;
-    } else if (ret < 0) {
-        throw_error("failed to receive frame from decoder");
-    }
+    if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) return nullptr;
+    if (ret < 0) throw_error("failed to receive frame from decoder");
     return frame;
 }
 
