@@ -50,13 +50,12 @@ bool AudioConverter::sendFrame(const AVFrame *frame) const {
 
         if (av_audio_fifo_write(fifo_buf_.get(), (void **)buf, frame->nb_samples) < 0)
             throw_error("failed to write to fifo");
-
-        cleanup();
-
     } catch (...) {
         cleanup();
         throw;
     }
+
+    cleanup();
 
     return true;
 }

@@ -61,23 +61,20 @@ VideoConverter::VideoConverter(const AVCodecContext *in_codec_ctx, const AVCodec
             inputs->pad_idx = 0;
             inputs->next = nullptr;
 
-            {
-                std::stringstream filter_spec_ss;
-                filter_spec_ss << "format=" << out_codec_ctx->pix_fmt;
-                filter_spec_ss << ",";
-                filter_spec_ss << "crop=" << out_codec_ctx->width << ":" << out_codec_ctx->height << ":" << offset_x
-                               << ":" << offset_y;
-                if (avfilter_graph_parse_ptr(filter_graph_.get(), filter_spec_ss.str().c_str(), &inputs, &outputs,
-                                             nullptr) < 0)
-                    throw_error("failed to parse pointers");
-            }
-
-            cleanup();
-
+            std::stringstream filter_spec_ss;
+            filter_spec_ss << "format=" << out_codec_ctx->pix_fmt;
+            filter_spec_ss << ",";
+            filter_spec_ss << "crop=" << out_codec_ctx->width << ":" << out_codec_ctx->height << ":" << offset_x << ":"
+                           << offset_y;
+            if (avfilter_graph_parse_ptr(filter_graph_.get(), filter_spec_ss.str().c_str(), &inputs, &outputs,
+                                         nullptr) < 0)
+                throw_error("failed to parse pointers");
         } catch (...) {
             cleanup();
             throw;
         }
+
+        cleanup();
     }
 
     if (avfilter_graph_config(filter_graph_.get(), nullptr) < 0) throw_error("failed to configure the filter graph");
