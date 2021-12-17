@@ -23,19 +23,18 @@ VideoConverter::VideoConverter(const AVCodecContext *in_codec_ctx, const AVCodec
         args_ss << ":pixel_aspect=" << in_codec_ctx->sample_aspect_ratio.num << "/"
                 << in_codec_ctx->sample_aspect_ratio.den;
 
-        const AVFilter *buffersrc = avfilter_get_by_name("buffer");
-        if (!buffersrc) throw_error("failed to find src filter definition");
-        if (avfilter_graph_create_filter(&buffersrc_ctx_, buffersrc, "in", args_ss.str().c_str(), nullptr,
+        const AVFilter *filter = avfilter_get_by_name("buffer");
+        if (!filter) throw_error("failed to find src filter definition");
+        if (avfilter_graph_create_filter(&buffersrc_ctx_, filter, "in", args_ss.str().c_str(), nullptr,
                                          filter_graph_.get()) < 0)
             throw_error("failed to create src filter");
     }
 
     {
         /* buffer sink set-up */
-        const AVFilter *buffersink = avfilter_get_by_name("buffersink");
-        if (!buffersink) throw_error("failed to find sink filter definition");
-        if (avfilter_graph_create_filter(&buffersink_ctx_, buffersink, "out", nullptr, nullptr, filter_graph_.get()) <
-            0)
+        const AVFilter *filter = avfilter_get_by_name("buffersink");
+        if (!filter) throw_error("failed to find sink filter definition");
+        if (avfilter_graph_create_filter(&buffersink_ctx_, filter, "out", nullptr, nullptr, filter_graph_.get()) < 0)
             throw_error("failed to create sink filter");
     }
 
