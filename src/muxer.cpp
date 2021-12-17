@@ -13,7 +13,7 @@ Muxer::Muxer(std::string filename)
       file_closed_(false) {
     AVFormatContext *fmt_ctx = nullptr;
     if (avformat_alloc_output_context2(&fmt_ctx, nullptr, nullptr, filename_.c_str()) < 0)
-        throw std::runtime_error("failed to allocate output format context");
+        throw_error("failed to allocate output format context");
     fmt_ctx_ = av::FormatContextUPtr(fmt_ctx);
 }
 

@@ -22,9 +22,9 @@ bool Decoder::sendPacket(const AVPacket *packet) const {
     if (ret == AVERROR(EAGAIN)) {
         return false;
     } else if (ret == AVERROR_EOF) {
-        throw std::runtime_error("has already been flushed");
+        throw_error("has already been flushed");
     } else if (ret < 0) {
-        throw std::runtime_error("failed to send packet to decoder");
+        throw_error("failed to send packet to decoder");
     }
     return true;
 }
