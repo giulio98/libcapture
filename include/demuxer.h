@@ -16,9 +16,9 @@ class Demuxer {
 public:
     /**
      * Create a new demuxer
-     * @param fmt_name the name of the input format
-     * @param device_name the name of the device to open
-     * @param options a map containing the options to use when opening the input device
+     * @param fmt_name      the name of the input format
+     * @param device_name   the name of the device to open
+     * @param options       a map containing the options to use when opening the input device
      */
     Demuxer(const std::string &fmt_name, std::string device_name, std::map<std::string, std::string> options);
 

@@ -52,8 +52,8 @@ public:
 
     /**
      * Write a packet to the output file
-     * @param packet the packet to write. If nullptr, the output queue will be flushed
-     * @param packet_type the type of the packet (audio or video)
+     * @param packet        the packet to write. If nullptr, the output queue will be flushed
+     * @param packet_type   the type of the packet (audio or video)
      */
     void writePacket(av::PacketUPtr packet, av::DataType packet_type) const;
 

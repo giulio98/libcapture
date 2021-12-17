@@ -16,7 +16,7 @@ class AudioConverter : public Converter {
 public:
     /**
      * Create a new audio converter
-     * @param in_codec_ctx the codec context containing the input params (from the decoder)
+     * @param in_codec_ctx  the codec context containing the input params (from the decoder)
      * @param out_codec_ctx the codec context containing the output params (from the encoder)
      */
     AudioConverter(const AVCodecContext *in_codec_ctx, const AVCodecContext *out_codec_ctx);
@@ -30,7 +30,7 @@ public:
 
     /**
      * Get a converted frame
-     * @param frame_number the sequence number of the frame to use to compute the PTS
+     * @param frame_number the frame's sequence number to use to compute the PTS
      * @return a new converted frame if it was possible to build it, nullptr if the internal buffer didn't have
      * enough samples to build a frame
      */

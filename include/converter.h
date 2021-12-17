@@ -16,7 +16,7 @@ public:
 
     /**
      * Get a converted frame
-     * @param frame_number the sequence number of the frame to use to compute the PTS
+     * @param frame_number the frame's sequence number to use to compute the PTS
      * @return a new converted frame if it was possible to build it, nullptr otherwise
      */
     [[nodiscard]] virtual av::FrameUPtr getFrame(int64_t frame_number = 0) const = 0;
