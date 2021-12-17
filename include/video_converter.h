@@ -9,14 +9,6 @@
  * @details convert video frames to the output pix format and crop them
  */
 class VideoConverter : public Converter {
-    int in_width_;
-    int in_height_;
-    int out_width_;
-    int out_height_;
-    int offset_x_;
-    int offset_y_;
-    AVPixelFormat out_pix_fmt_;
-    av::SwsContextUPtr scale_ctx_;
     av::FilterGraphUPtr filter_graph_;
     AVFilterContext *buffersrc_ctx_;
     AVFilterContext *buffersink_ctx_;

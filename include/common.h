@@ -39,7 +39,6 @@ using FrameUPtr = std::unique_ptr<AVFrame, DeleterPP<av_frame_free>>;
 using InFormatContextUPtr = std::unique_ptr<AVFormatContext, DeleterPP<avformat_close_input>>;
 using FormatContextUPtr = std::unique_ptr<AVFormatContext, DeleterP<avformat_free_context>>;
 using CodecContextUPtr = std::unique_ptr<AVCodecContext, DeleterPP<avcodec_free_context>>;
-using SwsContextUPtr = std::unique_ptr<SwsContext, DeleterP<sws_freeContext>>;
 using SwrContextUPtr = std::unique_ptr<SwrContext, DeleterPP<swr_free>>;
 using FilterGraphUPtr = std::unique_ptr<AVFilterGraph, DeleterPP<avfilter_graph_free>>;
 using AudioFifoUPtr = std::unique_ptr<AVAudioFifo, DeleterP<av_audio_fifo_free>>;
