@@ -43,6 +43,10 @@ VideoConverter::VideoConverter(const AVCodecContext *in_codec_ctx, const AVCodec
         /* Endpoints for the filter graph. */
         AVFilterInOut *outputs = avfilter_inout_alloc();
         AVFilterInOut *inputs = avfilter_inout_alloc();
+        auto cleanup = [&outputs, &inputs]() {
+            if (outputs) avfilter_inout_free(&outputs);
+            if (inputs) avfilter_inout_free(&inputs);
+        };
 
         try {
             if (!outputs) throw_error("failed to allocate filter outputs");
@@ -68,12 +72,10 @@ VideoConverter::VideoConverter(const AVCodecContext *in_codec_ctx, const AVCodec
                     throw_error("failed to parse pointers");
             }
 
-            if (outputs) avfilter_inout_free(&outputs);
-            if (inputs) avfilter_inout_free(&inputs);
+            cleanup();
 
         } catch (...) {
-            if (outputs) avfilter_inout_free(&outputs);
-            if (inputs) avfilter_inout_free(&inputs);
+            cleanup();
             throw;
         }
     }
