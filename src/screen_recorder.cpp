@@ -298,7 +298,7 @@ void ScreenRecorder::processPacket(const AVPacket *packet, av::DataType data_typ
         throw std::runtime_error("Packet of unknown type received");
     }
 
-    auto &frame_counter = (data_type == av::DataType::audio) ? audio_frame_counter_ : video_frame_counter_;
+    int64_t &frame_counter = (data_type == av::DataType::audio) ? audio_frame_counter_ : video_frame_counter_;
 
     bool decoder_received = false;
     while (!decoder_received) {

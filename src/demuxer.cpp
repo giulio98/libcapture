@@ -41,7 +41,7 @@ void Demuxer::openInput() {
 
 void Demuxer::closeInput() {
     if (!fmt_ctx_) throw_error("input is not open");
-    fmt_ctx_ = nullptr;
+    fmt_ctx_.reset();
     video_stream_ = nullptr;
     audio_stream_ = nullptr;
 }
