@@ -66,7 +66,7 @@ VideoConverter::VideoConverter(const AVCodecContext *in_codec_ctx, const AVCodec
                                            nullptr);
         outputs = av::FilterInOutUPtr(outputs_raw);
         inputs = av::FilterInOutUPtr(inputs_raw);
-        if (ret) throw_error("failed to parse pointers");
+        if (ret < 0) throw_error("failed to parse pointers");
     }
 
     if (avfilter_graph_config(filter_graph_.get(), nullptr) < 0) throw_error("failed to configure the filter graph");
