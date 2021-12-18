@@ -55,5 +55,5 @@ public:
      * Print informations about the streams
      * @param index the index to print for this device
      */
-    void dumpInfo(int index) const;
+    void dumpInfo(int index = 0) const;
 };
