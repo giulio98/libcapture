@@ -48,15 +48,45 @@ void ScreenRecorder::initInput() {
     std::stringstream device_name_ss;
     std::stringstream audio_device_name_ss;
     std::map<std::string, std::string> demuxer_options;
-
+#ifndef _WIN32
     {
         std::stringstream framerate_ss;
         framerate_ss << video_framerate_;
         demuxer_options.insert({"framerate", framerate_ss.str()});
     }
+#endif
 
 #if defined(_WIN32)
-
+    {
+        int x1, y1, x2, y2, resolution_width, resolution_height;
+        x1 = GetSystemMetrics(SM_XVIRTUALSCREEN);
+        y1 = GetSystemMetrics(SM_YVIRTUALSCREEN);
+        x2 = GetSystemMetrics(SM_CXVIRTUALSCREEN);
+        y2 = GetSystemMetrics(SM_CYVIRTUALSCREEN);
+        resolution_width = x2 - x1;
+        resolution_height = y2 - y1;
+        demuxer_options.insert({"rtbufsize", "1024M"});
+        HKEY hkey;
+        DWORD dwDisposition;
+        if (RegCreateKeyEx(HKEY_CURRENT_USER, TEXT("Software\\screen-capture-recorder"), 0, nullptr, 0, KEY_WRITE,
+                           nullptr,
+                           &hkey, &dwDisposition) == ERROR_SUCCESS) {
+            DWORD dwType, dwSize;
+            dwType = REG_DWORD;
+            dwSize = sizeof(DWORD);
+            DWORD rofl = video_framerate_;
+            RegSetValueEx(hkey, TEXT("default_max_fps"), 0, dwType, (PBYTE) &rofl, dwSize);
+            rofl = resolution_width;
+            RegSetValueEx(hkey, TEXT("capture_width"), 0, dwType, (PBYTE)&rofl, dwSize);
+            rofl = resolution_height;
+            RegSetValueEx(hkey, TEXT("capture_height"), 0, dwType, (PBYTE)&rofl, dwSize);
+            rofl = 0;
+            RegSetValueEx(hkey, TEXT("start_x"), 0, dwType, (PBYTE)&rofl, dwSize);
+            rofl = 0;
+            RegSetValueEx(hkey, TEXT("start_y"), 0, dwType, (PBYTE)&rofl, dwSize);
+            RegCloseKey(hkey);
+        }
+    }
     device_name_ss << "audio=Gruppo microfoni (Realtek High Definition Audio(SST)):";
     if (capture_audio_) device_name_ss << "video=screen-capture-recorder";
 

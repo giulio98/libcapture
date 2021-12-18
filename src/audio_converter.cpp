@@ -35,7 +35,9 @@ bool AudioConverter::sendFrame(const AVFrame *frame) const {
     auto cleanup = [&buf]() {
         if (buf) {
             av_freep(&buf[0]);
+#ifndef _WIN32
             free(buf);
+#endif
             buf = nullptr;
         }
     };
