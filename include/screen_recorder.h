@@ -99,6 +99,4 @@ public:
     void pause();
 
     void resume();
-
-    int selectArea();
 };
