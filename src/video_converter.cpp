@@ -40,40 +40,33 @@ VideoConverter::VideoConverter(const AVCodecContext *in_codec_ctx, const AVCodec
 
     {
         /* Endpoints for the filter graph. */
-        AVFilterInOut *outputs = avfilter_inout_alloc();
-        AVFilterInOut *inputs = avfilter_inout_alloc();
-        auto cleanup = [&outputs, &inputs]() {
-            if (outputs) avfilter_inout_free(&outputs);
-            if (inputs) avfilter_inout_free(&inputs);
-        };
+        av::FilterInOutUPtr outputs(avfilter_inout_alloc());
+        if (!outputs) throw_error("failed to allocate filter outputs");
+        outputs->name = av_strdup("in");
+        outputs->filter_ctx = buffersrc_ctx_;
+        outputs->pad_idx = 0;
+        outputs->next = nullptr;
 
-        try {
-            if (!outputs) throw_error("failed to allocate filter outputs");
-            outputs->name = av_strdup("in");
-            outputs->filter_ctx = buffersrc_ctx_;
-            outputs->pad_idx = 0;
-            outputs->next = nullptr;
+        av::FilterInOutUPtr inputs(avfilter_inout_alloc());
+        if (!inputs) throw_error("failed to allocate filter inputs");
+        inputs->name = av_strdup("out");
+        inputs->filter_ctx = buffersink_ctx_;
+        inputs->pad_idx = 0;
+        inputs->next = nullptr;
 
-            if (!inputs) throw_error("failed to allocate filter inputs");
-            inputs->name = av_strdup("out");
-            inputs->filter_ctx = buffersink_ctx_;
-            inputs->pad_idx = 0;
-            inputs->next = nullptr;
+        std::stringstream filter_spec_ss;
+        filter_spec_ss << "format=" << out_codec_ctx->pix_fmt;
+        filter_spec_ss << ",";
+        filter_spec_ss << "crop=" << out_codec_ctx->width << ":" << out_codec_ctx->height << ":" << offset_x << ":"
+                       << offset_y;
 
-            std::stringstream filter_spec_ss;
-            filter_spec_ss << "format=" << out_codec_ctx->pix_fmt;
-            filter_spec_ss << ",";
-            filter_spec_ss << "crop=" << out_codec_ctx->width << ":" << out_codec_ctx->height << ":" << offset_x << ":"
-                           << offset_y;
-            if (avfilter_graph_parse_ptr(filter_graph_.get(), filter_spec_ss.str().c_str(), &inputs, &outputs,
-                                         nullptr) < 0)
-                throw_error("failed to parse pointers");
-        } catch (...) {
-            cleanup();
-            throw;
-        }
-
-        cleanup();
+        AVFilterInOut *outputs_raw = outputs.release();
+        AVFilterInOut *inputs_raw = inputs.release();
+        int ret = avfilter_graph_parse_ptr(filter_graph_.get(), filter_spec_ss.str().c_str(), &inputs_raw, &outputs_raw,
+                                           nullptr);
+        outputs = av::FilterInOutUPtr(outputs_raw);
+        inputs = av::FilterInOutUPtr(inputs_raw);
+        if (ret) throw_error("failed to parse pointers");
     }
 
     if (avfilter_graph_config(filter_graph_.get(), nullptr) < 0) throw_error("failed to configure the filter graph");
