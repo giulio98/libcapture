@@ -66,11 +66,13 @@ std::tuple<std::string, std::string, int, int, int, int, int, std::string, bool>
             if (++it == args.end()) throw std::runtime_error("Wrong args");
             video_device.str(std::string());
             video_device << *it;
+            capture_audio = false;
         }
         else if(*it == "-device_audio"){
             if (++it == args.end()) throw std::runtime_error("Wrong args");
             audio_device.str(std::string());
             audio_device << *it;
+            capture_audio = true;
         }
         else if (*it == "-video_size") {
             if (++it == args.end()) throw std::runtime_error("Wrong args");
@@ -83,12 +85,11 @@ std::tuple<std::string, std::string, int, int, int, int, int, std::string, bool>
         } else if (*it == "-o") {
             if (++it == args.end()) throw std::runtime_error("Wrong args");
             output_file = *it;
-        } else if (*it == "-mute") {
-            capture_audio = false;
-        } else {
+        }else {
             throw std::runtime_error("Unknown arg: " + *it);
         }
     }
+
     return std::make_tuple(video_device.str(), audio_device.str(), width, height, off_x, off_y, framerate, output_file, capture_audio);
 }
 
@@ -117,7 +118,7 @@ int main(int argc, char **argv) {
         if (msg != "") std::cerr << "ERROR: " << msg << std::endl;
         std::cerr
             << "Usage: " << argv[0]
-            << "[-device_video <device_name>] [-device_audio <device_name>] [-video_size <width>x<height>:<offset_x>,<offset_y>] [-f framerate] [-o output_file] [-mute] [-h]"
+            << " [-device_video <device_name>] [-device_audio <device_name>] [-video_size <width>x<height>:<offset_x>,<offset_y>] [-f framerate] [-o output_file] [-h]"
             << std::endl;
         return 1;
     }
