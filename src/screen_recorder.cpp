@@ -119,14 +119,14 @@ void ScreenRecorder::initInput() {
 
 #endif
 
-    demuxer_ = std::make_unique<Demuxer>(in_fmt_name_, device_name_ss.str(), demuxer_options);
+    demuxer_ = std::make_unique<Demuxer>(in_fmt_name_, device_name_, demuxer_options);
     demuxer_->openInput();
     video_decoder_ = std::make_unique<Decoder>(demuxer_->getVideoParams());
 
     if (capture_audio_) {
 #ifdef LINUX
-        audio_demuxer_ = std::make_unique<Demuxer>(in_audio_fmt_name_, audio_device_name_ss.str(),
-                                                   std::map<std::string, std::string>());
+        audio_demuxer_ =
+            std::make_unique<Demuxer>(in_audio_fmt_name_, audio_device_name_, std::map<std::string, std::string>());
         audio_demuxer_->openInput();
         auto params = audio_demuxer_->getAudioParams();
 #else
@@ -182,26 +182,46 @@ void ScreenRecorder::printInfo() const {
     std::cout << std::endl;
 }
 
-void ScreenRecorder::setVideoParams(int width, int height, int offset_x, int offset_y, int framerate) {
+void ScreenRecorder::setParams(const std::string &video_device, const std::string &audio_device,
+                               const std::string &output_file, int video_width, int video_height, int video_offset_x,
+                               int video_offset_y, int framerate) {
     if (framerate <= 0) throw std::runtime_error("Video framerate must be a positive number");
-    if (width < 0 || height < 0) throw std::runtime_error("video width and height must be >= 0");
-    if (offset_x < 0 || offset_y < 0) throw std::runtime_error("video offsets must be >= 0");
+    if (video_width < 0 || video_height < 0) throw std::runtime_error("video width and height must be >= 0");
+    if (video_offset_x < 0 || video_offset_y < 0) throw std::runtime_error("video offsets must be >= 0");
+    if (video_device == "") throw std::runtime_error("video device not specified");
+    if (output_file == "") throw std::runtime_error("output file not specified");
 
-    if (width % 2) {
+    if (video_width % 2) {
         std::cerr << "WARNING: the specified width is not an even number (it will be increased by 1)" << std::endl;
-        width++;
+        video_width++;
     }
 
-    if (height % 2) {
+    if (video_height % 2) {
         std::cerr << "WARNING: the specified height is not an even number (it will be increased by 1)" << std::endl;
-        height++;
+        video_height++;
     }
 
+    capture_audio_ = !(audio_device == "");
+
+    std::stringstream device_name_ss;
+#if defined(_WIN32)
+    if (capture_audio) device_name_ss << "audio=" << audio_device << ":";
+    device_name_ss << "video=" << video_device;
+#elif defined(LINUX)
+    device_name_ss << video_device;  // getenv("DISPLAY") << ".0+" << video_offset_x_ << "," << video_offset_y_
+    if (capture_audio) audio_device_name_ = audio_device;  // hw:0,0
+#else  // macOS
+    device_name_ss << video_device << ":";               // 1
+    if (capture_audio_) device_name_ss << audio_device;  // 0
+#endif
+    device_name_ = device_name_ss.str();
+
+    output_file_ = output_file;
     video_framerate_ = framerate;
-    video_width_ = width;
-    video_height_ = height;
-    video_offset_x_ = offset_x;
-    video_offset_y_ = offset_y;
+    video_width_ = video_width;
+    video_height_ = video_height;
+    video_offset_x_ = video_offset_x;
+    video_offset_y_ = video_offset_y;
 }
 
 void ScreenRecorder::checkVideoSize() {
@@ -218,26 +238,10 @@ void ScreenRecorder::checkVideoSize() {
 
 void ScreenRecorder::start(const std::string &video_device, const std::string &audio_device,
                            const std::string &output_file, int video_width, int video_height, int video_offset_x,
-                           int video_offset_y, int framerate, bool capture_audio) {
-    output_file_ = output_file;
-    capture_audio_ = capture_audio;
-#if defined(_WIN32)
-    if (capture_audio)
-        device_name_ss << "audio=" << audio_device << ":"
-                       << "video=" << video_device;
-    else
-        device_name_ss << "video=" << video_device;
-#elif defined(LINUX)
-    device_name_ss << video_device;  // getenv("DISPLAY") << ".0+" << video_offset_x_ << "," << video_offset_y_
-    if (capture_audio)
-        audio_device_name_ss << audio_device  // hw:0,0
-#else  // MacOs
-    device_name_ss << video_device << ":";               // 1
-    if (capture_audio_) device_name_ss << audio_device;  // 0
-#endif
-
+                           int video_offset_y, int framerate) {
     try {
-        setVideoParams(video_width, video_height, video_offset_x, video_offset_y, framerate);
+        setParams(video_device, audio_device, output_file, video_width, video_height, video_offset_x, video_offset_y,
+                  framerate);
         initInput();
         checkVideoSize();
         initOutput();

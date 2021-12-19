@@ -23,8 +23,10 @@ class ScreenRecorder {
     int video_width_{};
     int video_height_{};
     int video_framerate_{};
-    std::stringstream device_name_ss;
-    std::stringstream audio_device_name_ss;
+    std::string device_name_;
+#ifdef LINUX
+    std::string audio_device_name_;
+#endif
     AVPixelFormat out_video_pix_fmt_;
     AVCodecID out_video_codec_id_;
     AVCodecID out_audio_codec_id_;
@@ -65,7 +67,8 @@ class ScreenRecorder {
     /* Counter of times in which the estimated framerate is lower than the specified one */
     int dropped_frame_counter_{};
 
-    void setVideoParams(int width, int height, int offset_x, int offset_y, int framerate);
+    void setParams(const std::string &video_device, const std::string &audio_device, const std::string &output_file,
+                   int video_width, int video_height, int video_offset_x, int video_offset_y, int framerate);
 
     void checkVideoSize();
 
@@ -97,8 +100,7 @@ public:
     ~ScreenRecorder();
 
     void start(const std::string &video_device, const std::string &audio_device, const std::string &output_file,
-               int video_width, int video_height, int video_offset_x, int video_offset_y, int framerate,
-               bool capture_audio);
+               int video_width, int video_height, int video_offset_x, int video_offset_y, int framerate);
 
     void stop();
 

@@ -1,3 +1,4 @@
+#include <filesystem>
 #include <iostream>
 #include <stdexcept>
 #include <string>
@@ -36,67 +37,87 @@ std::tuple<int, int, int, int> parse_video_size(const std::string &str) {
     return std::make_tuple(width, height, off_x, off_y);
 }
 
-std::tuple<std::string, std::string, int, int, int, int, int, std::string, bool> get_params(std::vector<std::string> args) {
+std::tuple<std::string, std::string, int, int, int, int, int, std::string> get_params(std::vector<std::string> args) {
     int width = 0;
     int height = 0;
     int off_x = 0;
     int off_y = 0;
     int framerate = 25;
-    std::stringstream video_device;
-    std::stringstream audio_device;
-    std::string output_file = "output.mp4";
-    bool capture_audio = true;
+    std::string video_device;
+    std::string audio_device;
+    std::string output_file;
 
 #if defined(_WIN32)
-    video_device << "screen-capture-recorder";
-    audio_device << "Gruppo microfoni (Realtek High Definition Audio(SST))";
+    video_device = "screen-capture-recorder";
+    audio_device = "Gruppo microfoni (Realtek High Definition Audio(SST))";
 #elif defined(LINUX)
-    video_device << getenv("DISPLAY") << ".0+" << off_x << "," << off_y;
-    audio_device << "hw:0,0";
+    {
+        std::stringstream ss;
+        ss << getenv("DISPLAY") << ".0+" << off_x << "," << off_y;
+        video_device = ss.str();
+    }
+    audio_device = "hw:0,0";
 #else
-    video_device << "1";
-    audio_device << "0";
+    video_device = "1";
+    audio_device = "0";
 #endif
+
+    bool video_device_set = false;
+    bool audio_device_set = false;
+    bool video_size_set = false;
+    bool framerate_set = false;
+    bool output_set = false;
+    std::string wrong_args_msg("Wrong arguments");
 
     for (auto it = args.begin(); it != args.end(); it++) {
         if (*it == "-h") {
             throw std::runtime_error("");
-        }
-        else if (*it == "-device_video"){
-            if (++it == args.end()) throw std::runtime_error("Wrong args");
-            video_device.str(std::string());
-            video_device << *it;
-            capture_audio = false;
-        }
-        else if(*it == "-device_audio"){
-            if (++it == args.end()) throw std::runtime_error("Wrong args");
-            audio_device.str(std::string());
-            audio_device << *it;
-            capture_audio = true;
-        }
-        else if (*it == "-video_size") {
-            if (++it == args.end()) throw std::runtime_error("Wrong args");
+        } else if (*it == "-video_device") {
+            if (video_device_set || ++it == args.end()) throw std::runtime_error(wrong_args_msg);
+            video_device = *it;
+            video_device_set = true;
+        } else if (*it == "-audio_device") {
+            if (audio_device_set || ++it == args.end()) throw std::runtime_error(wrong_args_msg);
+            audio_device = *it;
+            audio_device_set = true;
+        } else if (*it == "-video_size") {
+            if (video_size_set || ++it == args.end()) throw std::runtime_error(wrong_args_msg);
             std::tie(width, height, off_x, off_y) = parse_video_size(*it);
             std::cout << "Parsed video size: " << width << "x" << height << std::endl;
             std::cout << "Parsed video offset: " << off_x << "," << off_y << std::endl;
+            video_size_set = true;
         } else if (*it == "-f") {
-            if (++it == args.end()) throw std::runtime_error("Wrong args");
+            if (framerate_set || ++it == args.end()) throw std::runtime_error(wrong_args_msg);
             framerate = std::stoi(*it);
+            framerate_set = true;
         } else if (*it == "-o") {
-            if (++it == args.end()) throw std::runtime_error("Wrong args");
+            if (output_set || ++it == args.end()) throw std::runtime_error(wrong_args_msg);
             output_file = *it;
-        }else {
+            output_set = true;
+        } else {
             throw std::runtime_error("Unknown arg: " + *it);
         }
     }
 
-    return std::make_tuple(video_device.str(), audio_device.str(), width, height, off_x, off_y, framerate, output_file, capture_audio);
+    std::cout << "Video device: " << video_device << std::endl;
+    std::cout << "Audio device: " << audio_device;
+    if (audio_device == "none") {
+        audio_device = "";
+        std::cout << " (mute)";
+    }
+    std::cout << std::endl;
+
+    if (!output_set) {
+        output_file = "output.mp4";
+        std::cout << "No output file specified, saving to " << output_file << std::endl;
+    }
+
+    return std::make_tuple(video_device, audio_device, width, height, off_x, off_y, framerate, output_file);
 }
 
 int main(int argc, char **argv) {
     int framerate;
     std::string output_file;
-    bool capture_audio;
     std::mutex m;
     std::condition_variable cv;
     bool pause = false;
@@ -111,17 +132,26 @@ int main(int argc, char **argv) {
         for (int i = 1; i < argc; i++) {
             args.emplace_back(argv[i]);
         }
-        std::tie(video_device, audio_device, video_width, video_height, video_offset_x, video_offset_y, framerate, output_file, capture_audio)
-        =get_params(args);
+        std::tie(video_device, audio_device, video_width, video_height, video_offset_x, video_offset_y, framerate,
+                 output_file) = get_params(args);
     } catch (const std::exception &e) {
         std::string msg(e.what());
         if (msg != "") std::cerr << "ERROR: " << msg << std::endl;
-        std::cerr
-            << "Usage: " << argv[0]
-            << " [-device_video <device_name>] [-device_audio <device_name>] [-video_size <width>x<height>:<offset_x>,<offset_y>] [-f framerate] [-o output_file] [-h]"
-            << std::endl;
+        std::cerr << "Usage: " << argv[0];
+        std::cerr << " [-video_device <device_name>] [-audio_device <device_name>|none]";
+        std::cerr << " [-video_size <width>x<height>:<offset_x>,<offset_y>]";
+        std::cerr << " [-f framerate] [-o output_file] [-h]";
+        std::cerr << std::endl;
         return 1;
     }
+
+    if (std::filesystem::exists(output_file)) {
+        std::string answer;
+        std::cout << "The output file " << output_file << " already exists, override it? [y/N] ";
+        std::getline(std::cin, answer);
+        if (answer != "y" && answer != "Y") return 0;
+    }
+    std::cout << std::endl;  // seprate client printing from the rest
 
     // try {
     //     while (true) {
@@ -155,8 +185,8 @@ int main(int argc, char **argv) {
 
         std::thread worker([&]() {
             try {
-                sc.start(video_device, audio_device, output_file, video_width, video_height, video_offset_x, video_offset_y, framerate,
-                         capture_audio);
+                sc.start(video_device, audio_device, output_file, video_width, video_height, video_offset_x,
+                         video_offset_y, framerate);
                 while (true) {
                     std::unique_lock ul(m);
                     cv.wait(ul, [&]() { return pause || resume || stop; });
