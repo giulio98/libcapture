@@ -89,6 +89,8 @@ class ScreenRecorder {
 
     void estimateFramerate();
 
+    void setDisplayResolution() const;
+
 public:
     ScreenRecorder();
 
@@ -102,4 +104,6 @@ public:
     void pause();
 
     void resume();
+
+
 };
