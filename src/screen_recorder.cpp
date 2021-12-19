@@ -45,6 +45,7 @@ ScreenRecorder::~ScreenRecorder() {
 }
 
 void ScreenRecorder::setDisplayResolution() const {
+#ifdef WINDOWS
     int x1, y1, x2, y2, resolution_width, resolution_height;
     x1 = GetSystemMetrics(SM_XVIRTUALSCREEN);
     y1 = GetSystemMetrics(SM_YVIRTUALSCREEN);
@@ -73,6 +74,7 @@ void ScreenRecorder::setDisplayResolution() const {
     } else {
         throw std::runtime_error("Error opening key");
     }
+#endif
 }
 
 void ScreenRecorder::initInput() {
