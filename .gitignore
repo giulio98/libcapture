@@ -1,6 +1,7 @@
 .DS_Store
 .idea
 .vscode
+.vs
 bin
 build
 cmake-build-cmakeliststxt
@@ -12,3 +13,4 @@ ffmpeg
 *.lib
 *.def
 *.exe
+CMakeSettings.json

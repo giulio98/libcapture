@@ -36,19 +36,43 @@ std::tuple<int, int, int, int> parse_video_size(const std::string &str) {
     return std::make_tuple(width, height, off_x, off_y);
 }
 
-std::tuple<int, int, int, int, int, std::string, bool> get_params(std::vector<std::string> args) {
+std::tuple<std::string, std::string, int, int, int, int, int, std::string, bool> get_params(std::vector<std::string> args) {
     int width = 0;
     int height = 0;
     int off_x = 0;
     int off_y = 0;
     int framerate = 25;
+    std::stringstream video_device;
+    std::stringstream audio_device;
     std::string output_file = "output.mp4";
     bool capture_audio = true;
+
+#if defined(_WIN32)
+    video_device << "screen-capture-recorder";
+    audio_device << "Gruppo microfoni (Realtek High Definition Audio(SST))";
+#elif defined(LINUX)
+    video_device << getenv("DISPLAY") << ".0+" << off_x << "," << off_y;
+    audio_device << "hw:0,0";
+#else
+    video_device << "1";
+    audio_device << "0";
+#endif
 
     for (auto it = args.begin(); it != args.end(); it++) {
         if (*it == "-h") {
             throw std::runtime_error("");
-        } else if (*it == "-video_size") {
+        }
+        else if (*it == "-device_video"){
+            if (++it == args.end()) throw std::runtime_error("Wrong args");
+            video_device.str(std::string());
+            video_device << *it;
+        }
+        else if(*it == "-device_audio"){
+            if (++it == args.end()) throw std::runtime_error("Wrong args");
+            audio_device.str(std::string());
+            audio_device << *it;
+        }
+        else if (*it == "-video_size") {
             if (++it == args.end()) throw std::runtime_error("Wrong args");
             std::tie(width, height, off_x, off_y) = parse_video_size(*it);
             std::cout << "Parsed video size: " << width << "x" << height << std::endl;
@@ -65,8 +89,7 @@ std::tuple<int, int, int, int, int, std::string, bool> get_params(std::vector<st
             throw std::runtime_error("Unknown arg: " + *it);
         }
     }
-
-    return std::make_tuple(width, height, off_x, off_y, framerate, output_file, capture_audio);
+    return std::make_tuple(video_device.str(), audio_device.str(), width, height, off_x, off_y, framerate, output_file, capture_audio);
 }
 
 int main(int argc, char **argv) {
@@ -79,20 +102,22 @@ int main(int argc, char **argv) {
     bool resume = false;
     bool stop = false;
     int video_width, video_height, video_offset_x, video_offset_y;
+    std::string video_device;
+    std::string audio_device;
 
     try {
         std::vector<std::string> args;
         for (int i = 1; i < argc; i++) {
             args.emplace_back(argv[i]);
         }
-        std::tie(video_width, video_height, video_offset_x, video_offset_y, framerate, output_file, capture_audio) =
-            get_params(args);
+        std::tie(video_device, audio_device, video_width, video_height, video_offset_x, video_offset_y, framerate, output_file, capture_audio)
+        =get_params(args);
     } catch (const std::exception &e) {
         std::string msg(e.what());
         if (msg != "") std::cerr << "ERROR: " << msg << std::endl;
         std::cerr
             << "Usage: " << argv[0]
-            << " [-video_size <width>x<height>:<offset_x>,<offset_y>] [-f framerate] [-o output_file] [-mute] [-h]"
+            << "[-device_video <device_name>] [-device_audio <device_name>] [-video_size <width>x<height>:<offset_x>,<offset_y>] [-f framerate] [-o output_file] [-mute] [-h]"
             << std::endl;
         return 1;
     }
@@ -129,7 +154,7 @@ int main(int argc, char **argv) {
 
         std::thread worker([&]() {
             try {
-                sc.start(output_file, video_width, video_height, video_offset_x, video_offset_y, framerate,
+                sc.start(video_device, audio_device, output_file, video_width, video_height, video_offset_x, video_offset_y, framerate,
                          capture_audio);
                 while (true) {
                     std::unique_lock ul(m);

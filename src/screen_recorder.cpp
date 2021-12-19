@@ -45,8 +45,6 @@ ScreenRecorder::~ScreenRecorder() {
 }
 
 void ScreenRecorder::initInput() {
-    std::stringstream device_name_ss;
-    std::stringstream audio_device_name_ss;
     std::map<std::string, std::string> demuxer_options;
 #ifndef _WIN32
     {
@@ -86,9 +84,14 @@ void ScreenRecorder::initInput() {
             RegSetValueEx(hkey, TEXT("start_y"), 0, dwType, (PBYTE)&rofl, dwSize);
             RegCloseKey(hkey);
         }
+        else {
+            throw std::runtime_error("Error opening key");
+        }
     }
+    /*
     device_name_ss << "audio=Gruppo microfoni (Realtek High Definition Audio(SST)):";
     if (capture_audio_) device_name_ss << "video=screen-capture-recorder";
+     */
 
 #elif defined(LINUX)
 
@@ -98,8 +101,10 @@ void ScreenRecorder::initInput() {
         demuxer_options.insert({"video_size", video_size_ss.str()});
     }
     demuxer_options.insert({"show_region", "1"});
+    /*
     device_name_ss << getenv("DISPLAY") << ".0+" << video_offset_x_ << "," << video_offset_y_;
     audio_device_name_ss << "hw:0,0";
+     */
     /* set the offsets to 0 since they won't be used for cropping */
     video_offset_x_ = video_offset_y_ = 0;
 
@@ -107,8 +112,10 @@ void ScreenRecorder::initInput() {
 
     demuxer_options.insert({"pixel_format", "uyvy422"});
     demuxer_options.insert({"capture_cursor", "0"});
+    /*
     device_name_ss << "1:";
     if (capture_audio_) device_name_ss << "0";
+     */
 
 #endif
 
@@ -209,10 +216,23 @@ void ScreenRecorder::checkVideoSize() {
         throw std::runtime_error("maximum height exceeds the display's one");
 }
 
-void ScreenRecorder::start(const std::string &output_file, int video_width, int video_height, int video_offset_x,
+void ScreenRecorder::start(const std::string &video_device, const std::string &audio_device, const std::string &output_file, int video_width, int video_height, int video_offset_x,
                            int video_offset_y, int framerate, bool capture_audio) {
     output_file_ = output_file;
     capture_audio_ = capture_audio;
+#if defined(_WIN32)
+    if(capture_audio)
+        device_name_ss << "audio=" << audio_device << ":" << "video=" << video_device;
+    else
+        device_name_ss << "video=" << video_device;
+#elif defined(LINUX)
+    device_name_ss << video_device; //getenv("DISPLAY") << ".0+" << video_offset_x_ << "," << video_offset_y_
+    if(capture_audio)
+        audio_device_name_ss << audio_device //hw:0,0
+#else //MacOs
+    device_name_ss << video_device << ":"; // 1
+    if (capture_audio_) device_name_ss << audio_device; //0
+#endif
 
     try {
         setVideoParams(video_width, video_height, video_offset_x, video_offset_y, framerate);

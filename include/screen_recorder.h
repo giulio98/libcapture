@@ -4,6 +4,7 @@
 #include <memory>
 #include <mutex>
 #include <thread>
+#include <sstream>
 
 #include "audio_converter.h"
 #include "audio_encoder.h"
@@ -22,6 +23,8 @@ class ScreenRecorder {
     int video_width_{};
     int video_height_{};
     int video_framerate_{};
+    std::stringstream device_name_ss;
+    std::stringstream audio_device_name_ss;
     AVPixelFormat out_video_pix_fmt_;
     AVCodecID out_video_codec_id_;
     AVCodecID out_audio_codec_id_;
@@ -91,7 +94,7 @@ public:
 
     ~ScreenRecorder();
 
-    void start(const std::string &output_file, int video_width, int video_height, int video_offset_x,
+    void start(const std::string &video_device,const std::string &audio_device, const std::string &output_file, int video_width, int video_height, int video_offset_x,
                int video_offset_y, int framerate, bool capture_audio);
 
     void stop();
