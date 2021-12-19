@@ -3,8 +3,8 @@
 #include <condition_variable>
 #include <memory>
 #include <mutex>
-#include <thread>
 #include <sstream>
+#include <thread>
 
 #include "audio_converter.h"
 #include "audio_encoder.h"
@@ -96,14 +96,13 @@ public:
 
     ~ScreenRecorder();
 
-    void start(const std::string &video_device,const std::string &audio_device, const std::string &output_file, int video_width, int video_height, int video_offset_x,
-               int video_offset_y, int framerate, bool capture_audio);
+    void start(const std::string &video_device, const std::string &audio_device, const std::string &output_file,
+               int video_width, int video_height, int video_offset_x, int video_offset_y, int framerate,
+               bool capture_audio);
 
     void stop();
 
     void pause();
 
     void resume();
-
-
 };

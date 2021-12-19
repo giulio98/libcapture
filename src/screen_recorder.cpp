@@ -44,7 +44,7 @@ ScreenRecorder::~ScreenRecorder() {
     if (recorder_thread_.joinable()) recorder_thread_.join();
 }
 
-void ScreenRecorder::setDisplayResolution () const {
+void ScreenRecorder::setDisplayResolution() const {
     int x1, y1, x2, y2, resolution_width, resolution_height;
     x1 = GetSystemMetrics(SM_XVIRTUALSCREEN);
     y1 = GetSystemMetrics(SM_YVIRTUALSCREEN);
@@ -54,14 +54,13 @@ void ScreenRecorder::setDisplayResolution () const {
     resolution_height = y2 - y1;
     HKEY hkey;
     DWORD dwDisposition;
-    if (RegCreateKeyEx(HKEY_CURRENT_USER, TEXT("Software\\screen-capture-recorder"), 0, nullptr, 0, KEY_WRITE,
-                       nullptr,
+    if (RegCreateKeyEx(HKEY_CURRENT_USER, TEXT("Software\\screen-capture-recorder"), 0, nullptr, 0, KEY_WRITE, nullptr,
                        &hkey, &dwDisposition) == ERROR_SUCCESS) {
         DWORD dwType, dwSize;
         dwType = REG_DWORD;
         dwSize = sizeof(DWORD);
         DWORD rofl = video_framerate_;
-        RegSetValueEx(hkey, TEXT("default_max_fps"), 0, dwType, (PBYTE) &rofl, dwSize);
+        RegSetValueEx(hkey, TEXT("default_max_fps"), 0, dwType, (PBYTE)&rofl, dwSize);
         rofl = resolution_width;
         RegSetValueEx(hkey, TEXT("capture_width"), 0, dwType, (PBYTE)&rofl, dwSize);
         rofl = resolution_height;
@@ -71,27 +70,26 @@ void ScreenRecorder::setDisplayResolution () const {
         rofl = 0;
         RegSetValueEx(hkey, TEXT("start_y"), 0, dwType, (PBYTE)&rofl, dwSize);
         RegCloseKey(hkey);
-    }
-    else {
+    } else {
         throw std::runtime_error("Error opening key");
     }
-
 }
 
 void ScreenRecorder::initInput() {
     std::map<std::string, std::string> demuxer_options;
-#ifndef _WIN32
+
+#ifdef _WIN32
+    setDisplayResolution();
+    demuxer_options.insert({"rtbufsize", "1024M"});
+#else
+
     {
         std::stringstream framerate_ss;
         framerate_ss << video_framerate_;
         demuxer_options.insert({"framerate", framerate_ss.str()});
     }
-#endif
 
-#if defined(_WIN32)
-    setDisplayResolution();
-    demuxer_options.insert({"rtbufsize", "1024M"});
-#elif defined(LINUX)
+#ifdef LINUX
 
     {
         std::stringstream video_size_ss;
@@ -102,7 +100,7 @@ void ScreenRecorder::initInput() {
     /*
     device_name_ss << getenv("DISPLAY") << ".0+" << video_offset_x_ << "," << video_offset_y_;
     audio_device_name_ss << "hw:0,0";
-     */
+    */
     /* set the offsets to 0 since they won't be used for cropping */
     video_offset_x_ = video_offset_y_ = 0;
 
@@ -113,7 +111,9 @@ void ScreenRecorder::initInput() {
     /*
     device_name_ss << "1:";
     if (capture_audio_) device_name_ss << "0";
-     */
+    */
+
+#endif
 
 #endif
 
@@ -214,22 +214,24 @@ void ScreenRecorder::checkVideoSize() {
         throw std::runtime_error("maximum height exceeds the display's one");
 }
 
-void ScreenRecorder::start(const std::string &video_device, const std::string &audio_device, const std::string &output_file, int video_width, int video_height, int video_offset_x,
+void ScreenRecorder::start(const std::string &video_device, const std::string &audio_device,
+                           const std::string &output_file, int video_width, int video_height, int video_offset_x,
                            int video_offset_y, int framerate, bool capture_audio) {
     output_file_ = output_file;
     capture_audio_ = capture_audio;
 #if defined(_WIN32)
-    if(capture_audio)
-        device_name_ss << "audio=" << audio_device << ":" << "video=" << video_device;
+    if (capture_audio)
+        device_name_ss << "audio=" << audio_device << ":"
+                       << "video=" << video_device;
     else
         device_name_ss << "video=" << video_device;
 #elif defined(LINUX)
-    device_name_ss << video_device; //getenv("DISPLAY") << ".0+" << video_offset_x_ << "," << video_offset_y_
-    if(capture_audio)
-        audio_device_name_ss << audio_device //hw:0,0
-#else //MacOs
-    device_name_ss << video_device << ":"; // 1
-    if (capture_audio_) device_name_ss << audio_device; //0
+    device_name_ss << video_device;  // getenv("DISPLAY") << ".0+" << video_offset_x_ << "," << video_offset_y_
+    if (capture_audio)
+        audio_device_name_ss << audio_device  // hw:0,0
+#else  // MacOs
+    device_name_ss << video_device << ":";               // 1
+    if (capture_audio_) device_name_ss << audio_device;  // 0
 #endif
 
     try {
