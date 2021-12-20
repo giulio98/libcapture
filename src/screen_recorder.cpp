@@ -201,11 +201,11 @@ void ScreenRecorder::setParams(const std::string &video_device, const std::strin
         video_height++;
     }
 
-    capture_audio_ = !(audio_device == "");
+    capture_audio_ = !(audio_device.empty());
 
     std::stringstream device_name_ss;
 #if defined(_WIN32)
-    if (capture_audio) device_name_ss << "audio=" << audio_device << ":";
+    if (capture_audio_) device_name_ss << "audio=" << audio_device << ":";
     device_name_ss << "video=" << video_device;
 #elif defined(LINUX)
     device_name_ss << video_device;  // getenv("DISPLAY") << ".0+" << video_offset_x_ << "," << video_offset_y_
