@@ -485,10 +485,15 @@ void ScreenRecorder::capture() {
 }
 
 void ScreenRecorder::listAvailableDevices() {
+    std::string dummy_device_name;
     std::map<std::string, std::string> options;
     options.insert({"list_devices", "true"});
 
-    auto demuxer = std::make_unique<Demuxer>(in_fmt_name_, "", options);
+#ifdef WINDOWS
+    dummy_device_name = "dummy";
+#endif
+
+    auto demuxer = std::make_unique<Demuxer>(in_fmt_name_, dummy_device_name, options);
     try {
         std::cout << "Available devices:" << std::endl;
         demuxer->openInput();
