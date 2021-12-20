@@ -490,10 +490,10 @@ void ScreenRecorder::listAvailableDevices() {
     dummy_device_name = "dummy";
 #endif
 
-    auto demuxer = std::make_unique<Demuxer>(in_fmt_name_, dummy_device_name, options);
+    Demuxer demuxer(in_fmt_name_, dummy_device_name, options);
     try {
         std::cout << "Available devices:" << std::endl;
-        demuxer->openInput();
+        demuxer.openInput();
     } catch (...) {
         std::cout << std::endl;
     }
