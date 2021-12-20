@@ -109,11 +109,8 @@ public:
 
     void resume();
 
-<<<<<<< Updated upstream
     void listAvailableDevices();
-=======
 #ifdef WINDOWS
     static std::vector<std::string> getInputAudioDevices() ;
 #endif
->>>>>>> Stashed changes
 };
