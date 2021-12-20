@@ -14,6 +14,7 @@
 #include "muxer.h"
 #include "video_converter.h"
 #include "video_encoder.h"
+#include <vector>
 
 class ScreenRecorder {
     bool capture_audio_{};
@@ -91,9 +92,9 @@ class ScreenRecorder {
     void printInfo() const;
 
     void estimateFramerate();
-
+#ifdef WINDOWS
     void setDisplayResolution() const;
-
+#endif
 public:
     ScreenRecorder();
 
@@ -108,5 +109,11 @@ public:
 
     void resume();
 
+<<<<<<< Updated upstream
     void listAvailableDevices();
+=======
+#ifdef WINDOWS
+    static std::vector<std::string> getInputAudioDevices() ;
+#endif
+>>>>>>> Stashed changes
 };

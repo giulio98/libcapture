@@ -12,8 +12,8 @@
 #ifdef _WIN32
 #include <windows.h>
 #include <winreg.h>
-
 #include <string>
+#include <mmsystem.h>
 #endif
 
 #include "duration_logger.h"
@@ -43,9 +43,26 @@ ScreenRecorder::ScreenRecorder() {
 ScreenRecorder::~ScreenRecorder() {
     if (recorder_thread_.joinable()) recorder_thread_.join();
 }
-
-void ScreenRecorder::setDisplayResolution() const {
 #ifdef WINDOWS
+std::vector<std::string> ScreenRecorder::getInputAudioDevices()  {
+
+    UINT deviceCount = waveInGetNumDevs();
+    std::vector<std::string> audio_devices;
+    if ( deviceCount > 0 )
+    {
+        for ( int i = 0; i < deviceCount; i++ )
+        {
+            WAVEINCAPSW waveInCaps;
+            waveInGetDevCapsW( i, &waveInCaps, sizeof( WAVEINCAPS ) );
+            std::wstring ws(waveInCaps.szPname);
+            std::string str(ws.begin(),ws.end());
+            audio_devices.push_back(str);
+        }
+    }
+    return audio_devices;
+
+}
+void ScreenRecorder::setDisplayResolution() const {
     int x1, y1, x2, y2, resolution_width, resolution_height;
     x1 = GetSystemMetrics(SM_XVIRTUALSCREEN);
     y1 = GetSystemMetrics(SM_YVIRTUALSCREEN);
@@ -74,8 +91,10 @@ void ScreenRecorder::setDisplayResolution() const {
     } else {
         throw std::runtime_error("Error opening key");
     }
-#endif
+
+
 }
+#endif
 
 void ScreenRecorder::initInput() {
     std::map<std::string, std::string> demuxer_options;
