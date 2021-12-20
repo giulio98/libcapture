@@ -182,6 +182,7 @@ int main(int argc, char **argv) {
 
     try {
         ScreenRecorder sc;
+        sc.listAvailableDevices();
 
         std::thread worker([&]() {
             try {

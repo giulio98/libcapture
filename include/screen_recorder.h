@@ -107,4 +107,6 @@ public:
     void pause();
 
     void resume();
+
+    void listAvailableDevices();
 };

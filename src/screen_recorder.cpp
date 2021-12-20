@@ -464,3 +464,16 @@ void ScreenRecorder::capture() {
 
     flushPipelines();
 }
+
+void ScreenRecorder::listAvailableDevices() {
+    std::map<std::string, std::string> options;
+    options.insert({"list_devices", "true"});
+
+    auto demuxer = std::make_unique<Demuxer>(in_fmt_name_, "", options);
+    try {
+        std::cout << "Available devices:" << std::endl;
+        demuxer->openInput();
+    } catch (...) {
+        std::cout << std::endl;
+    }
+}
