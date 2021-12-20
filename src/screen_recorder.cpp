@@ -186,7 +186,7 @@ void ScreenRecorder::initConverters() {
 }
 
 void ScreenRecorder::printInfo() const {
-    std::cout << "########## Streams Info ##########" << std::endl;
+    std::cout << "##### Streams Info #####" << std::endl;
     demuxer_->dumpInfo();
 #ifdef LINUX
     if (capture_audio_) audio_demuxer_->dumpInfo(1);
