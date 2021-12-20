@@ -188,8 +188,8 @@ void ScreenRecorder::setParams(const std::string &video_device, const std::strin
     if (framerate <= 0) throw std::runtime_error("Video framerate must be a positive number");
     if (video_width < 0 || video_height < 0) throw std::runtime_error("video width and height must be >= 0");
     if (video_offset_x < 0 || video_offset_y < 0) throw std::runtime_error("video offsets must be >= 0");
-    if (video_device == "") throw std::runtime_error("video device not specified");
-    if (output_file == "") throw std::runtime_error("output file not specified");
+    if (video_device.empty()) throw std::runtime_error("video device not specified");
+    if (output_file.empty()) throw std::runtime_error("output file not specified");
 
     if (video_width % 2) {
         std::cerr << "WARNING: the specified width is not an even number (it will be increased by 1)" << std::endl;
@@ -201,20 +201,23 @@ void ScreenRecorder::setParams(const std::string &video_device, const std::strin
         video_height++;
     }
 
-    capture_audio_ = !(audio_device.empty());
+    /* capture_audio_ has to be set BEFORE device_name_ */
+    capture_audio_ = !audio_device.empty();
 
-    std::stringstream device_name_ss;
+    {
+        std::stringstream device_name_ss;
 #if defined(_WIN32)
-    if (capture_audio_) device_name_ss << "audio=" << audio_device << ":";
-    device_name_ss << "video=" << video_device;
+        if (capture_audio_) device_name_ss << "audio=" << audio_device << ":";
+        device_name_ss << "video=" << video_device;
 #elif defined(LINUX)
-    device_name_ss << video_device;  // getenv("DISPLAY") << ".0+" << video_offset_x_ << "," << video_offset_y_
-    if (capture_audio) audio_device_name_ = audio_device;  // hw:0,0
+        device_name_ss << video_device;  // getenv("DISPLAY") << ".0+" << video_offset_x_ << "," << video_offset_y_
+        if (capture_audio) audio_device_name_ = audio_device;  // hw:0,0
 #else  // macOS
-    device_name_ss << video_device << ":";               // 1
-    if (capture_audio_) device_name_ss << audio_device;  // 0
+        device_name_ss << video_device << ":";               // 1
+        if (capture_audio_) device_name_ss << audio_device;  // 0
 #endif
-    device_name_ = device_name_ss.str();
+        device_name_ = device_name_ss.str();
+    }
 
     output_file_ = output_file;
     video_framerate_ = framerate;
