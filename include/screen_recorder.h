@@ -5,6 +5,7 @@
 #include <mutex>
 #include <sstream>
 #include <thread>
+#include <vector>
 
 #include "audio_converter.h"
 #include "audio_encoder.h"
@@ -14,7 +15,6 @@
 #include "muxer.h"
 #include "video_converter.h"
 #include "video_encoder.h"
-#include <vector>
 
 class ScreenRecorder {
     bool capture_audio_{};
@@ -92,9 +92,11 @@ class ScreenRecorder {
     void printInfo() const;
 
     void estimateFramerate();
+
 #ifdef WINDOWS
     void setDisplayResolution() const;
 #endif
+
 public:
     ScreenRecorder();
 
@@ -110,7 +112,8 @@ public:
     void resume();
 
     void listAvailableDevices();
+
 #ifdef WINDOWS
-    static std::vector<std::string> getInputAudioDevices() ;
+    static std::vector<std::string> getInputAudioDevices();
 #endif
 };
