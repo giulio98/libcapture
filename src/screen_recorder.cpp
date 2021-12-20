@@ -18,6 +18,8 @@
 #endif
 
 #include "duration_logger.h"
+#include "log_callback_setter.h"
+#include "log_level_setter.h"
 
 #define DURATION_LOGGING 0
 #define FRAMERATE_LOGGING 0
@@ -39,6 +41,7 @@ ScreenRecorder::ScreenRecorder() {
     video_encoder_options_.insert({"preset", "ultrafast"});
 
     avdevice_register_all();
+    av_log_set_level(AV_LOG_PRINT_LEVEL);
 }
 
 ScreenRecorder::~ScreenRecorder() {
@@ -186,6 +189,7 @@ void ScreenRecorder::initConverters() {
 }
 
 void ScreenRecorder::printInfo() const {
+    LogLevelSetter lls(AV_LOG_INFO);
     std::cout << "##### Streams Info #####" << std::endl;
     demuxer_->dumpInfo();
 #ifdef LINUX
@@ -481,6 +485,26 @@ void ScreenRecorder::capture() {
     flushPipelines();
 }
 
+static void log_callback(void *avcl, int level, const char *fmt, va_list vl) {
+    char *buf = nullptr;
+    int buf_size = 50;
+    while (true) {
+        buf = (char *)malloc(buf_size * sizeof(char));
+        if (!buf) {
+            std::cerr << "Failed to allocate buf in log_callback" << std::endl;
+            return;
+        }
+        int print_prefix = 0;
+        int ret = av_log_format_line2(avcl, level, fmt, vl, buf, buf_size, &print_prefix);
+        if (ret < buf_size) break;
+        if (buf) free(buf);
+        buf = nullptr;
+        buf_size *= 2;
+    }
+    std::cout << buf;
+    if (buf) free(buf);
+};
+
 void ScreenRecorder::listAvailableDevices() {
     std::string dummy_device_name;
     std::map<std::string, std::string> options;
@@ -491,10 +515,13 @@ void ScreenRecorder::listAvailableDevices() {
 #endif
 
     Demuxer demuxer(in_fmt_name_, dummy_device_name, options);
-    try {
-        std::cout << "Available devices:" << std::endl;
-        demuxer.openInput();
-    } catch (...) {
-        std::cout << std::endl;
+    std::cout << "##### Available Devices #####" << std::endl;
+    {
+        LogCallbackSetter lcs(log_callback);
+        try {
+            demuxer.openInput();
+        } catch (...) {
+        }
     }
+    std::cout << std::endl;
 }
