@@ -154,33 +154,6 @@ int main(int argc, char **argv) {
         return 1;
     }
 
-    // try {
-    //     while (true) {
-    //         std::string answer;
-    //         std::cout << "Do you want to record just a portion of the display? [y/n] ";
-    //         std::cin >> answer;
-    //         if (answer == "y") {
-    //             std::cout << "Video width (0 for display size): ";
-    //             std::cin >> video_width;
-    //             std::cout << "Video height (0 for display size): ";
-    //             std::cin >> video_height;
-    //             std::cout << "Video x offset: ";
-    //             std::cin >> video_offset_x;
-    //             std::cout << "Video y offset: ";
-    //             std::cin >> video_offset_y;
-    //         } else if (answer == "n") {
-    //             video_width = video_height = video_offset_x = video_offset_y = 0;
-    //         } else {
-    //             std::cerr << "Wrong value, enter 'y' or 'n'" << std::endl;
-    //             continue;
-    //         }
-    //         break;
-    //     }
-    // } catch (const std::exception &e) {
-    //     std::cerr << "ERROR: " << e.what() << std::endl;
-    //     return 1;
-    // }
-
     try {
         ScreenRecorder sc;
 
