@@ -324,7 +324,7 @@ void ScreenRecorder::resume() {
 }
 
 void ScreenRecorder::estimateFramerate() {
-    auto estimated_framerate = 1000000 * video_frame_counter_ / (av_gettime() - start_time_);
+    auto estimated_framerate = 1000000 * frame_counters_[av::DataType::Video] / (av_gettime() - start_time_);
 #if FRAMERATE_LOGGING
     std::cout << "Estimated framerate: " << estimated_framerate << " fps" << std::endl;
 #else
@@ -340,12 +340,14 @@ void ScreenRecorder::estimateFramerate() {
 void ScreenRecorder::processConvertedFrame(const AVFrame *frame, av::DataType data_type) {
     if (!av::isDataTypeValid(data_type)) throw std::runtime_error("Invalid frame received for processing");
 
+    const Encoder *encoder = encoders_[data_type].get();
+
     bool encoder_received = false;
     while (!encoder_received) {
-        encoder_received = encoders_[data_type]->sendFrame(frame);
+        encoder_received = encoder->sendFrame(frame);
 
         while (true) {
-            auto packet = encoders_[data_type]->getPacket();
+            auto packet = encoder->getPacket();
             if (!packet) break;
             muxer_->writePacket(std::move(packet), data_type);
         }
@@ -358,22 +360,24 @@ void ScreenRecorder::processPacket(const AVPacket *packet, av::DataType data_typ
 #endif
     if (!av::isDataTypeValid(data_type)) throw std::runtime_error("Invalid packet received for processing");
 
-    int64_t &frame_counter = (data_type == av::DataType::Audio) ? audio_frame_counter_ : video_frame_counter_;
+    int64_t &frame_counter = frame_counters_[data_type];
+    const Decoder *decoder = decoders_[data_type].get();
+    const Converter *converter = converters_[data_type].get();
 
     bool decoder_received = false;
     while (!decoder_received) {
-        decoder_received = decoders_[data_type]->sendPacket(packet);
+        decoder_received = decoder->sendPacket(packet);
 
         while (true) {
-            auto frame = decoders_[data_type]->getFrame();
+            auto frame = decoder->getFrame();
             if (!frame) break;
 
             bool converter_received = false;
             while (!converter_received) {
-                converter_received = converters_[data_type]->sendFrame(frame.get());
+                converter_received = converter->sendFrame(frame.get());
 
                 while (true) {
-                    auto converted_frame = converters_[data_type]->getFrame(frame_counter);
+                    auto converted_frame = converter->getFrame(frame_counter);
                     if (!converted_frame) break;
 
                     frame_counter++;
@@ -456,8 +460,8 @@ void ScreenRecorder::processPackets(av::DataType data_type) {
 
 void ScreenRecorder::capture() {
     /* start counting for PTS */
-    video_frame_counter_ = 0;
-    audio_frame_counter_ = 0;
+    frame_counters_[av::DataType::Video] = 0;
+    frame_counters_[av::DataType::Audio] = 0;
 
     /* start counting for fps estimation */
     dropped_frame_counter_ = -1;  // wait for an extra second at the beginning to allow the framerate to stabilize
