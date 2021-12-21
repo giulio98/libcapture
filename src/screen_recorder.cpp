@@ -338,6 +338,8 @@ void ScreenRecorder::estimateFramerate() {
 }
 
 void ScreenRecorder::processConvertedFrame(const AVFrame *frame, av::DataType data_type) {
+    if (!av::isDataTypeValid(data_type)) throw std::runtime_error("Invalid frame received for processing");
+
     bool encoder_received = false;
     while (!encoder_received) {
         encoder_received = encoders_[data_type]->sendFrame(frame);
@@ -354,6 +356,8 @@ void ScreenRecorder::processPacket(const AVPacket *packet, av::DataType data_typ
 #if DURATION_LOGGING
     DurationLogger dl("Audio packet processed in ");
 #endif
+    if (!av::isDataTypeValid(data_type)) throw std::runtime_error("Invalid packet received for processing");
+
     int64_t &frame_counter = (data_type == av::DataType::Audio) ? audio_frame_counter_ : video_frame_counter_;
 
     bool decoder_received = false;
@@ -424,6 +428,8 @@ void ScreenRecorder::readPackets(Demuxer *demuxer, bool handle_start_time) {
         auto [packet, packet_type] = demuxer->readPacket();
         if (!packet) continue;
 
+        if (!av::isDataTypeValid(packet_type)) throw std::runtime_error("Invalid packet received from demuxer");
+
         std::unique_lock ul{m_};
         packets_queues_[packet_type].push_back(std::move(packet));
         queues_cv_[packet_type].notify_all();
@@ -431,7 +437,7 @@ void ScreenRecorder::readPackets(Demuxer *demuxer, bool handle_start_time) {
 }
 
 void ScreenRecorder::processPackets(av::DataType data_type) {
-    if (data_type == av::DataType::NumDataTypes) throw std::runtime_error("Invalid packets type specified");
+    if (!av::isDataTypeValid(data_type)) throw std::runtime_error("Invalid packet type specified for processing");
 
     std::deque<av::PacketUPtr> &queue = packets_queues_[data_type];
 

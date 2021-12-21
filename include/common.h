@@ -57,4 +57,8 @@ inline DictionaryUPtr map2dict(const std::map<std::string, std::string> &map) {
     return DictionaryUPtr(dict);
 }
 
+inline bool isDataTypeValid(DataType data_type) {
+    return (data_type == DataType::Audio || data_type == DataType::Video);
+}
+
 }  // namespace av
