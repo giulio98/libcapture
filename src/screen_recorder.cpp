@@ -110,14 +110,18 @@ void ScreenRecorder::initInput() {
         demuxer_options.insert({"framerate", framerate_ss.str()});
     }
 #ifdef LINUX
-    {
+    if (video_width_ && video_height_) {
         std::stringstream video_size_ss;
         video_size_ss << video_width_ << "x" << video_height_;
         demuxer_options.insert({"video_size", video_size_ss.str()});
     }
-    demuxer_options.insert({"show_region", "1"});
-    /* set the offsets to 0 since they won't be used for cropping */
-    video_offset_x_ = video_offset_y_ = 0;
+    if (video_offset_x_ || video_offset_y_) {
+        std::stringstream offset_ss;
+        offset_ss << "+" << video_offset_x_ << "," << video_offset_y_;
+        device_name_ += offset_ss.str();
+    }
+    demuxer_options.insert({"show_region", "0"});
+    video_offset_x_ = video_offset_y_ = 0;  // set the offsets to 0 since they won't be used for cropping
 #else  // macOS
     demuxer_options.insert({"pixel_format", "uyvy422"});
     demuxer_options.insert({"capture_cursor", "0"});
