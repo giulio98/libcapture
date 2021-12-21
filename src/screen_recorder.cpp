@@ -307,7 +307,9 @@ void ScreenRecorder::stopAndNotify() noexcept {
 
 void ScreenRecorder::stop() {
     stopAndNotify();
+    std::cout << "Recording stopped, waiting for video processing to complete...";
     if (recorder_thread_.joinable()) recorder_thread_.join();
+    std::cout << " done" << std::endl;
     muxer_->closeFile();
 }
 
