@@ -11,8 +11,6 @@
 
 #include "screen_recorder.h"
 
-int select_area();
-
 std::tuple<int, int, int, int> parse_video_size(const std::string &str) {
     int width = 0;
     int height = 0;
@@ -58,7 +56,7 @@ std::tuple<std::string, std::string, int, int, int, int, int, std::string> get_p
 #elif defined(LINUX)
     {
         std::stringstream ss;
-        ss << getenv("DISPLAY") << ".0+" << off_x << "," << off_y;
+        ss << getenv("DISPLAY") << ".0";
         video_device = ss.str();
     }
     audio_device = "hw:0,0";
@@ -240,11 +238,13 @@ int main(int argc, char **argv) {
     return 0;
 }
 
-int select_area() {
 #ifdef LINUX
+std::tuple<int, int, int, int> select_area() {
+    int video_width, video_height, video_offset_x, video_offset_y;
+
     XEvent ev;
-    Display *disp = NULL;
-    Screen *scr = NULL;
+    Display *disp = nullptr;
+    Screen *scr = nullptr;
     Window root = 0;
     Cursor cursor, cursor2;
     XGCValues gcval;
@@ -256,8 +256,8 @@ int select_area() {
 
     std::cout << "Select the area to record (click to select all the display)" << std::endl;
 
-    disp = XOpenDisplay(NULL);
-    if (!disp) return EXIT_FAILURE;
+    disp = XOpenDisplay(nullptr);
+    if (!disp) throw std::runtime_error("Failed to open the display");
 
     scr = ScreenOfDisplay(disp, DefaultScreen(disp));
 
@@ -343,20 +343,19 @@ int select_area() {
     }
 
     if (rw < threshold || rh < threshold) {
-        video_width_ = scr->width;
-        video_height_ = scr->height;
-        video_offset_x_ = 0;
-        video_offset_y_ = 0;
+        video_width = scr->width;
+        video_height = scr->height;
+        video_offset_x = 0;
+        video_offset_y = 0;
     } else {
-        video_width_ = rw;
-        video_height_ = rh;
-        video_offset_x_ = rx;
-        video_offset_y_ = ry;
+        video_width = rw;
+        video_height = rh;
+        video_offset_x = rx;
+        video_offset_y = ry;
     }
 
     XCloseDisplay(disp);
 
-#endif
-
-    return 0;
+    return std::make_tuple(video_width, video_height, video_offset_x, video_offset_y);
 }
+#endif
