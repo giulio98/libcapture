@@ -169,7 +169,7 @@ int main(int argc, char **argv) {
             std::getline(std::cin, answer);
             if (answer != "y" && answer != "Y") return 0;
         }
-        std::cout << std::endl;  // seprate client printing from the rest
+        std::cout << std::endl;  // separate client printing from the rest
 
         std::thread worker([&]() {
             try {
