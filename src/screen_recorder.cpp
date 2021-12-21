@@ -469,28 +469,32 @@ void ScreenRecorder::capture() {
 
     std::thread video_processor;
     std::thread audio_processor;
+    std::exception_ptr video_processor_e_ptr;
+    std::exception_ptr audio_processor_e_ptr;
 
-    auto processor_fn = [this](av::DataType data_type) {
+    auto processor_fn = [this](av::DataType data_type, std::exception_ptr &e_ptr) {
         try {
             processPackets(data_type);
         } catch (...) {
+            e_ptr = std::current_exception();
             stopAndNotify();
         }
     };
 
-    video_processor = std::thread(processor_fn, av::DataType::Video);
-    if (capture_audio_) audio_processor = std::thread(processor_fn, av::DataType::Audio);
+    video_processor = std::thread(processor_fn, av::DataType::Video, std::ref(video_processor_e_ptr));
+    if (capture_audio_)
+        audio_processor = std::thread(processor_fn, av::DataType::Audio, std::ref(audio_processor_e_ptr));
 
 #ifdef LINUX
-    std::thread audio_capturer;
-    std::exception_ptr e_ptr;
+    std::thread audio_reader;
+    std::exception_ptr audio_reader_e_ptr;
 
     if (capture_audio_) {
-        audio_capturer = std::thread([this, &e_ptr]() {
+        audio_reader = std::thread([this, &audio_reader_e_ptr]() {
             try {
                 readPackets(audio_demuxer_.get());
             } catch (...) {
-                e_ptr = std::current_exception();
+                audio_reader_e_ptr = std::current_exception();
                 stopAndNotify();
             }
         });
@@ -500,12 +504,16 @@ void ScreenRecorder::capture() {
     readPackets(demuxer_.get(), true);
 
 #ifdef LINUX
-    if (audio_capturer.joinable()) audio_capturer.join();
-    if (e_ptr) std::rethrow_exception(e_ptr);
+    if (audio_reader.joinable()) audio_reader.join();
 #endif
-
     if (video_processor.joinable()) video_processor.join();
     if (audio_processor.joinable()) audio_processor.join();
+
+#ifdef LINUX
+    if (audio_reader_e_ptr) std::rethrow_exception(audio_reader_e_ptr);
+#endif
+    if (video_processor_e_ptr) std::rethrow_exception(video_processor_e_ptr);
+    if (audio_processor_e_ptr) std::rethrow_exception(audio_processor_e_ptr);
 
     flushPipelines();
 }
