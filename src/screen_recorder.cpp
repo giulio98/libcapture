@@ -126,7 +126,7 @@ void ScreenRecorder::initInput() {
 
     demuxer_ = std::make_unique<Demuxer>(in_fmt_name_, device_name_, demuxer_options);
     demuxer_->openInput();
-    video_decoder_ = std::make_unique<Decoder>(demuxer_->getVideoParams());
+    decoders_[av::DataType::video] = std::make_unique<Decoder>(demuxer_->getVideoParams());
 
     if (capture_audio_) {
 #ifdef LINUX
@@ -137,17 +137,17 @@ void ScreenRecorder::initInput() {
 #else
         auto params = demuxer_->getAudioParams();
 #endif
-        audio_decoder_ = std::make_unique<Decoder>(params);
+        decoders_[av::DataType::audio] = std::make_unique<Decoder>(params);
     }
 }
 
 void ScreenRecorder::initOutput() {
     muxer_ = std::make_unique<Muxer>(output_file_);
 
-    video_encoder_ =
+    encoders_[av::DataType::video] =
         std::make_unique<VideoEncoder>(out_video_codec_id_, video_encoder_options_, muxer_->getGlobalHeaderFlags(),
                                        video_width_, video_height_, out_video_pix_fmt_, video_framerate_);
-    muxer_->addVideoStream(video_encoder_->getCodecContext());
+    muxer_->addVideoStream(encoders_[av::DataType::video]->getCodecContext());
 
     if (capture_audio_) {
 #ifdef LINUX
@@ -155,22 +155,23 @@ void ScreenRecorder::initOutput() {
 #else
         auto params = demuxer_->getAudioParams();
 #endif
-        audio_encoder_ =
+        encoders_[av::DataType::audio] =
             std::make_unique<AudioEncoder>(out_audio_codec_id_, audio_encoder_options_, muxer_->getGlobalHeaderFlags(),
                                            params->channels, params->sample_rate);
-        muxer_->addAudioStream(audio_encoder_->getCodecContext());
+        muxer_->addAudioStream(encoders_[av::DataType::audio]->getCodecContext());
     }
 
     muxer_->openFile();
 }
 
 void ScreenRecorder::initConverters() {
-    video_converter_ = std::make_unique<VideoConverter>(
-        video_decoder_->getCodecContext(), video_encoder_->getCodecContext(), video_offset_x_, video_offset_y_);
+    converters_[av::DataType::video] = std::make_unique<VideoConverter>(
+        decoders_[av::DataType::video]->getCodecContext(), encoders_[av::DataType::video]->getCodecContext(),
+        video_offset_x_, video_offset_y_);
 
     if (capture_audio_) {
-        audio_converter_ =
-            std::make_unique<AudioConverter>(audio_decoder_->getCodecContext(), audio_encoder_->getCodecContext());
+        converters_[av::DataType::audio] = std::make_unique<AudioConverter>(
+            decoders_[av::DataType::audio]->getCodecContext(), encoders_[av::DataType::audio]->getCodecContext());
     }
 }
 
@@ -296,8 +297,8 @@ void ScreenRecorder::stopAndNotify() noexcept {
     std::unique_lock<std::mutex> ul{m_};
     stop_capture_ = true;
     status_cv_.notify_all();
-    video_queue_cv_.notify_all();
-    audio_queue_cv_.notify_all();
+    queues_cv_[av::DataType::video].notify_all();
+    queues_cv_[av::DataType::audio].notify_all();
 }
 
 void ScreenRecorder::stop() {
@@ -337,23 +338,12 @@ void ScreenRecorder::estimateFramerate() {
 }
 
 void ScreenRecorder::processConvertedFrame(const AVFrame *frame, av::DataType data_type) {
-    const Encoder *encoder;
-
-    if (data_type == av::DataType::video) {
-        encoder = video_encoder_.get();
-        if (video_frame_counter_ % video_framerate_ == 0) estimateFramerate();
-    } else if (capture_audio_ && (data_type == av::DataType::audio)) {
-        encoder = audio_encoder_.get();
-    } else {
-        throw std::runtime_error("Frame of unknown type received");
-    }
-
     bool encoder_received = false;
     while (!encoder_received) {
-        encoder_received = encoder->sendFrame(frame);
+        encoder_received = encoders_[data_type]->sendFrame(frame);
 
         while (true) {
-            auto packet = encoder->getPacket();
+            auto packet = encoders_[data_type]->getPacket();
             if (!packet) break;
             muxer_->writePacket(std::move(packet), data_type);
         }
@@ -364,35 +354,22 @@ void ScreenRecorder::processPacket(const AVPacket *packet, av::DataType data_typ
 #if DURATION_LOGGING
     DurationLogger dl("Audio packet processed in ");
 #endif
-    const Decoder *decoder;
-    const Converter *converter;
-
-    if (data_type == av::DataType::video) {
-        decoder = video_decoder_.get();
-        converter = video_converter_.get();
-    } else if (capture_audio_ && (data_type == av::DataType::audio)) {
-        decoder = audio_decoder_.get();
-        converter = audio_converter_.get();
-    } else {
-        throw std::runtime_error("Packet of unknown type received");
-    }
-
     int64_t &frame_counter = (data_type == av::DataType::audio) ? audio_frame_counter_ : video_frame_counter_;
 
     bool decoder_received = false;
     while (!decoder_received) {
-        decoder_received = decoder->sendPacket(packet);
+        decoder_received = decoders_[data_type]->sendPacket(packet);
 
         while (true) {
-            auto frame = decoder->getFrame();
+            auto frame = decoders_[data_type]->getFrame();
             if (!frame) break;
 
             bool converter_received = false;
             while (!converter_received) {
-                converter_received = converter->sendFrame(frame.get());
+                converter_received = converters_[data_type]->sendFrame(frame.get());
 
                 while (true) {
-                    auto converted_frame = converter->getFrame(frame_counter);
+                    auto converted_frame = converters_[data_type]->getFrame(frame_counter);
                     if (!converted_frame) break;
 
                     frame_counter++;
@@ -447,25 +424,18 @@ void ScreenRecorder::readPackets(Demuxer *demuxer, bool handle_start_time) {
         auto [packet, packet_type] = demuxer->readPacket();
         if (!packet) continue;
 
-        if (packet_type == av::DataType::video) {
-            std::unique_lock ul{m_};
-            video_queue_.push_back(std::move(packet));
-            video_queue_cv_.notify_all();
-        } else if (capture_audio_ && (packet_type == av::DataType::audio)) {
-            std::unique_lock ul{m_};
-            audio_queue_.push_back(std::move(packet));
-            audio_queue_cv_.notify_all();
-        } else {
-            throw std::runtime_error("Unknown packet received from Demuxer");
-        }
+        std::unique_lock ul{m_};
+        packets_queues_[packet_type].push_back(std::move(packet));
+        queues_cv_[packet_type].notify_all();
     }
 }
 
 void ScreenRecorder::processPackets(av::DataType data_type) {
     if (data_type == av::DataType::none) throw std::runtime_error("No type specified for processor thread");
-    bool audio = (data_type == av::DataType::audio);
-    std::deque<av::PacketUPtr> &queue = audio ? audio_queue_ : video_queue_;
-    std::condition_variable &cv = audio ? audio_queue_cv_ : video_queue_cv_;
+
+    std::deque<av::PacketUPtr> &queue = packets_queues_[data_type];
+    std::condition_variable &cv = queues_cv_[data_type];
+
     while (true) {
         av::PacketUPtr packet;
         {

@@ -6,8 +6,6 @@
 
 #include "screen_recorder.h"
 
-
-
 int select_area();
 
 std::tuple<int, int, int, int> parse_video_size(const std::string &str) {
@@ -130,7 +128,6 @@ int main(int argc, char **argv) {
     std::string audio_device;
 
     try {
-
         std::vector<std::string> args;
         for (int i = 1; i < argc; i++) {
             args.emplace_back(argv[i]);
