@@ -295,7 +295,7 @@ void ScreenRecorder::start(const std::string &video_device, const std::string &a
 
 void ScreenRecorder::stop() {
     {
-        std::unique_lock<std::mutex> ul{mutex_};
+        std::unique_lock<std::mutex> ul{m_};
         stop_capture_ = true;
         cv_.notify_all();
     }
@@ -306,7 +306,7 @@ void ScreenRecorder::stop() {
 }
 
 void ScreenRecorder::pause() {
-    std::unique_lock<std::mutex> ul{mutex_};
+    std::unique_lock<std::mutex> ul{m_};
     if (paused_ || stop_capture_) return;
     paused_ = true;
     std::cout << "Recording paused" << std::endl;
@@ -314,7 +314,7 @@ void ScreenRecorder::pause() {
 }
 
 void ScreenRecorder::resume() {
-    std::unique_lock<std::mutex> ul{mutex_};
+    std::unique_lock<std::mutex> ul{m_};
     if (!paused_ || stop_capture_) return;
     paused_ = false;
     std::cout << "Recording resumed" << std::endl;
@@ -354,7 +354,7 @@ void ScreenRecorder::processConvertedFrame(const AVFrame *frame, av::DataType da
         while (true) {
             auto packet = encoder->getPacket();
             if (!packet) break;
-            std::unique_lock<std::mutex> ul{mutex_};
+            std::unique_lock<std::mutex> ul{m_};
             muxer_->writePacket(std::move(packet), data_type);
         }
     }
@@ -422,7 +422,7 @@ void ScreenRecorder::flushPipelines() {
 void ScreenRecorder::captureFrames(Demuxer *demuxer, bool handle_start_time) {
     while (true) {
         {
-            std::unique_lock<std::mutex> ul{mutex_};
+            std::unique_lock<std::mutex> ul{m_};
             bool handle_pause = paused_;
             int64_t pause_start_time;
 
@@ -468,7 +468,7 @@ void ScreenRecorder::capture() {
                 captureFrames(audio_demuxer_.get());
             } catch (...) {
                 e_ptr = std::current_exception();
-                std::unique_lock<std::mutex> ul{mutex_};
+                std::unique_lock<std::mutex> ul{m_};
                 stop_capture_ = true;
             }
         });

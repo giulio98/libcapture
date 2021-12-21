@@ -35,7 +35,7 @@ class ScreenRecorder {
 
     bool stop_capture_;
     bool paused_;
-    std::mutex mutex_;
+    std::mutex m_;
     std::condition_variable cv_;
 
     std::string in_fmt_name_;
