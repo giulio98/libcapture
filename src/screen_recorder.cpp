@@ -355,7 +355,6 @@ void ScreenRecorder::processConvertedFrame(const AVFrame *frame, av::DataType da
         while (true) {
             auto packet = encoder->getPacket();
             if (!packet) break;
-            std::unique_lock<std::mutex> ul{m_};
             muxer_->writePacket(std::move(packet), data_type);
         }
     }
