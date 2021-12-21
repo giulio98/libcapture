@@ -435,7 +435,7 @@ void ScreenRecorder::readPackets(Demuxer *demuxer, bool handle_start_time) {
         if (!av::isDataTypeValid(packet_type)) throw std::runtime_error("Invalid packet received from demuxer");
 
         std::unique_lock ul{m_};
-        packets_queues_[packet_type].push_back(std::move(packet));
+        packets_queues_[packet_type].push(std::move(packet));
         queues_cv_[packet_type].notify_all();
     }
 }
@@ -443,7 +443,7 @@ void ScreenRecorder::readPackets(Demuxer *demuxer, bool handle_start_time) {
 void ScreenRecorder::processPackets(av::DataType data_type) {
     if (!av::isDataTypeValid(data_type)) throw std::runtime_error("Invalid packet type specified for processing");
 
-    std::deque<av::PacketUPtr> &queue = packets_queues_[data_type];
+    auto &queue = packets_queues_[data_type];
 
     while (true) {
         av::PacketUPtr packet;
@@ -452,7 +452,7 @@ void ScreenRecorder::processPackets(av::DataType data_type) {
             queues_cv_[data_type].wait(ul, [this, &queue]() { return (!queue.empty() || stop_capture_); });
             if (queue.empty() && stop_capture_) break;
             packet = std::move(queue.front());
-            queue.pop_front();
+            queue.pop();
         }
         processPacket(packet.get(), data_type);
     }

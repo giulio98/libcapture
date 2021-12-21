@@ -2,9 +2,9 @@
 
 #include <array>
 #include <condition_variable>
-#include <deque>
 #include <memory>
 #include <mutex>
+#include <queue>
 #include <thread>
 #include <vector>
 
@@ -63,7 +63,7 @@ class ScreenRecorder {
     std::map<std::string, std::string> video_encoder_options_;
     std::map<std::string, std::string> audio_encoder_options_;
 
-    std::array<std::deque<av::PacketUPtr>, av::DataType::NumDataTypes> packets_queues_;
+    std::array<std::queue<av::PacketUPtr>, av::DataType::NumDataTypes> packets_queues_;
     std::array<std::condition_variable, av::DataType::NumDataTypes> queues_cv_;
 
     /* Counters of video and audio frames used to compute PTSs */
