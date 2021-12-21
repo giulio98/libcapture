@@ -17,13 +17,13 @@
 #include "video_encoder.h"
 
 class ScreenRecorder {
-    bool capture_audio_{};
+    bool capture_audio_;
 
-    int video_offset_x_{};
-    int video_offset_y_{};
-    int video_width_{};
-    int video_height_{};
-    int video_framerate_{};
+    int video_offset_x_;
+    int video_offset_y_;
+    int video_width_;
+    int video_height_;
+    int video_framerate_;
     std::string device_name_;
 #ifdef LINUX
     std::string audio_device_name_;
@@ -33,8 +33,8 @@ class ScreenRecorder {
     AVCodecID out_audio_codec_id_;
     std::string output_file_;
 
-    bool stop_capture_{};
-    bool paused_{};
+    bool stop_capture_;
+    bool paused_;
     std::mutex mutex_;
     std::condition_variable cv_;
 
@@ -59,14 +59,14 @@ class ScreenRecorder {
     std::thread recorder_thread_;
 
     /* Counter of video frames used to compute PTSs */
-    int64_t video_frame_counter_{};
+    int64_t video_frame_counter_;
     /* Counter of audio frames used to compute PTSs */
-    int64_t audio_frame_counter_{};
+    int64_t audio_frame_counter_;
 
     /* Recording start time */
-    int64_t start_time_{};
+    int64_t start_time_;
     /* Counter of times in which the estimated framerate is lower than the specified one */
-    int dropped_frame_counter_{};
+    int dropped_frame_counter_;
 
     void setParams(const std::string &video_device, const std::string &audio_device, const std::string &output_file,
                    int video_width, int video_height, int video_offset_x, int video_offset_y, int framerate);
