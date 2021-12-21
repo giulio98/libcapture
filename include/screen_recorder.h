@@ -1,6 +1,7 @@
 #pragma once
 
 #include <condition_variable>
+#include <deque>
 #include <memory>
 #include <mutex>
 #include <thread>
@@ -23,7 +24,7 @@ class ScreenRecorder {
     bool stop_capture_;
     bool paused_;
     std::mutex m_;
-    std::condition_variable cv_;
+    std::condition_variable status_cv_;
     std::thread recorder_thread_;  // thread responsible for recording video and audio
 
     /* Recording parameters */
@@ -64,6 +65,12 @@ class ScreenRecorder {
     std::map<std::string, std::string> video_encoder_options_;
     std::map<std::string, std::string> audio_encoder_options_;
 
+    std::deque<av::PacketUPtr> video_queue_;
+    std::deque<av::PacketUPtr> audio_queue_;
+
+    std::condition_variable video_queue_cv_;
+    std::condition_variable audio_queue_cv_;
+
     /* Counter of video frames used to compute PTSs */
     int64_t video_frame_counter_;
     /* Counter of audio frames used to compute PTSs */
@@ -84,7 +91,7 @@ class ScreenRecorder {
     /**
      * Adjust the ScreenRecorder video measures in case the whole display is recorder
      * and perform some basic validation.
-     * WARNING: This function has to called after initInput()
+     * WARNING: This function has to called after initInput() and before initOutput()
      */
     void adjustVideoSize();
 
@@ -95,7 +102,7 @@ class ScreenRecorder {
 
     /**
      * Initialize the encoders and the muxer.
-     * WARNING: This function must be called after initInput()
+     * WARNING: This function must be called after initInput() and adjustVideoSize()
      */
     void initOutput();
 
@@ -120,6 +127,11 @@ class ScreenRecorder {
      * handle the start_time)
      */
     void captureFrames(Demuxer *demuxer, bool handle_start_time = false);
+
+    /**
+     * Stop the capturing and notify all the CV
+     */
+    void stopAndNotify() noexcept;
 
     /**
      * Process an encoded packet (decode, convert, encode and write it)

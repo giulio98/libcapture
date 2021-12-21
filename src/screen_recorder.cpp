@@ -1,6 +1,7 @@
 #include <screen_recorder.h>
 
 #include <cstdlib>
+#include <future>
 #include <sstream>
 #include <stdexcept>
 
@@ -291,15 +292,17 @@ void ScreenRecorder::start(const std::string &video_device, const std::string &a
     });
 }
 
+void ScreenRecorder::stopAndNotify() noexcept {
+    std::unique_lock<std::mutex> ul{m_};
+    stop_capture_ = true;
+    status_cv_.notify_all();
+    video_queue_cv_.notify_all();
+    audio_queue_cv_.notify_all();
+}
+
 void ScreenRecorder::stop() {
-    {
-        std::unique_lock<std::mutex> ul{m_};
-        stop_capture_ = true;
-        cv_.notify_all();
-    }
-
+    stopAndNotify();
     if (recorder_thread_.joinable()) recorder_thread_.join();
-
     muxer_->closeFile();
 }
 
@@ -308,7 +311,7 @@ void ScreenRecorder::pause() {
     if (paused_ || stop_capture_) return;
     paused_ = true;
     std::cout << "Recording paused" << std::endl;
-    cv_.notify_all();
+    status_cv_.notify_all();
 }
 
 void ScreenRecorder::resume() {
@@ -316,7 +319,7 @@ void ScreenRecorder::resume() {
     if (!paused_ || stop_capture_) return;
     paused_ = false;
     std::cout << "Recording resumed" << std::endl;
-    cv_.notify_all();
+    status_cv_.notify_all();
 }
 
 void ScreenRecorder::estimateFramerate() {
@@ -431,7 +434,7 @@ void ScreenRecorder::captureFrames(Demuxer *demuxer, bool handle_start_time) {
 #endif
             }
 
-            cv_.wait(ul, [this]() { return (!paused_ || stop_capture_); });
+            status_cv_.wait(ul, [this]() { return (!paused_ || stop_capture_); });
             if (stop_capture_) break;
 
             if (handle_pause) {
@@ -443,7 +446,19 @@ void ScreenRecorder::captureFrames(Demuxer *demuxer, bool handle_start_time) {
         }
 
         auto [packet, packet_type] = demuxer->readPacket();
-        if (packet) processPacket(packet.get(), packet_type);
+        if (!packet) continue;
+
+        if (packet_type == av::DataType::video) {
+            std::unique_lock ul{m_};
+            video_queue_.push_back(std::move(packet));
+            video_queue_cv_.notify_all();
+        } else if (capture_audio_ && (packet_type == av::DataType::audio)) {
+            std::unique_lock ul{m_};
+            audio_queue_.push_back(std::move(packet));
+            audio_queue_cv_.notify_all();
+        } else {
+            throw std::runtime_error("Unknown packet received from Demuxer");
+        }
     }
 }
 
@@ -456,6 +471,34 @@ void ScreenRecorder::capture() {
     dropped_frame_counter_ = -1;  // wait for an extra second at the beginning to allow the framerate to stabilize
     start_time_ = av_gettime();
 
+    std::thread video_processor;
+    std::thread audio_processor;
+
+    auto process_fn = [this](av::DataType data_type) {
+        try {
+            if (data_type == av::DataType::none) throw std::runtime_error("No type specified for processor thread");
+            bool audio = (data_type == av::DataType::audio);
+            std::deque<av::PacketUPtr> &queue = audio ? audio_queue_ : video_queue_;
+            std::condition_variable &cv = audio ? audio_queue_cv_ : video_queue_cv_;
+            while (true) {
+                av::PacketUPtr packet;
+                {
+                    std::unique_lock ul{m_};
+                    cv.wait(ul, [this, &queue]() { return (!queue.empty() || stop_capture_); });
+                    if (queue.empty() && stop_capture_) break;
+                    packet = std::move(queue.front());
+                    queue.pop_front();
+                }
+                processPacket(packet.get(), data_type);
+            }
+        } catch (...) {
+            stopAndNotify();
+        }
+    };
+
+    video_processor = std::thread(process_fn, av::DataType::video);
+    if (capture_audio_) audio_processor = std::thread(process_fn, av::DataType::audio);
+
 #ifdef LINUX
     std::thread audio_capturer;
     std::exception_ptr e_ptr;
@@ -466,8 +509,7 @@ void ScreenRecorder::capture() {
                 captureFrames(audio_demuxer_.get());
             } catch (...) {
                 e_ptr = std::current_exception();
-                std::unique_lock<std::mutex> ul{m_};
-                stop_capture_ = true;
+                stopAndNotify();
             }
         });
     }
@@ -479,6 +521,9 @@ void ScreenRecorder::capture() {
     if (audio_capturer.joinable()) audio_capturer.join();
     if (e_ptr) std::rethrow_exception(e_ptr);
 #endif
+
+    if (video_processor.joinable()) video_processor.join();
+    if (audio_processor.joinable()) audio_processor.join();
 
     flushPipelines();
 }
