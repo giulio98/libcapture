@@ -5,11 +5,6 @@
 #include <sstream>
 #include <stdexcept>
 
-#ifdef LINUX
-#include <X11/Xlib.h>
-#include <X11/cursorfont.h>
-#endif
-
 #ifdef _WIN32
 #include <mmsystem.h>
 #include <windows.h>

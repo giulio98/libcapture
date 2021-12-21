@@ -4,6 +4,11 @@
 #include <string>
 #include <vector>
 
+#ifdef LINUX
+#include <X11/Xlib.h>
+#include <X11/cursorfont.h>
+#endif
+
 #include "screen_recorder.h"
 
 int select_area();
