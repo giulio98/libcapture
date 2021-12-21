@@ -227,7 +227,7 @@ void ScreenRecorder::setParams(const std::string &video_device, const std::strin
         device_name_ss << "video=" << video_device;
 #elif defined(LINUX)
         device_name_ss << video_device;  // getenv("DISPLAY") << ".0+" << video_offset_x_ << "," << video_offset_y_
-        if (capture_audio) audio_device_name_ = audio_device;  // hw:0,0
+        if (capture_audio_) audio_device_name_ = audio_device;  // hw:0,0
 #else  // macOS
         device_name_ss << video_device << ":";               // 1
         if (capture_audio_) device_name_ss << audio_device;  // 0
