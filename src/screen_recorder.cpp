@@ -466,7 +466,7 @@ void ScreenRecorder::capture() {
     frame_counters_[av::DataType::Audio] = 0;
 
     /* start counting for fps estimation */
-    dropped_frame_counter_ = -1;  // wait for an extra second at the beginning to allow the framerate to stabilize
+    dropped_frame_counter_ = -2;  // wait for an extra second at the beginning to allow the framerate to stabilize
     start_time_ = av_gettime();
 
     std::thread video_processor;
