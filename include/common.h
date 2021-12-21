@@ -32,7 +32,8 @@ extern "C" {
 }
 
 namespace av {
-enum DataType { Audio = 0, Video, NumDataTypes };
+/* DO NOT change the order */
+enum DataType { Audio = 0, Video, NumDataTypes }; /* Data types (audio or video) */
 
 using PacketUPtr = std::unique_ptr<AVPacket, DeleterPP<av_packet_free>>;
 using FrameUPtr = std::unique_ptr<AVFrame, DeleterPP<av_frame_free>>;
