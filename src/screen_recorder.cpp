@@ -392,8 +392,8 @@ void ScreenRecorder::flushPipelines() {
         processConvertedFrame(nullptr, av::DataType::Audio);
     }
 
-    /* flush output queue */
-    muxer_->writePacket(nullptr, av::DataType::none);
+    /* flush output queue, data_type is irrelevant here */
+    muxer_->writePacket(nullptr, av::DataType::Video);
 }
 
 void ScreenRecorder::readPackets(Demuxer *demuxer, bool handle_start_time) {
@@ -431,16 +431,15 @@ void ScreenRecorder::readPackets(Demuxer *demuxer, bool handle_start_time) {
 }
 
 void ScreenRecorder::processPackets(av::DataType data_type) {
-    if (data_type == av::DataType::none) throw std::runtime_error("No type specified for processor thread");
+    if (data_type == av::DataType::NumDataTypes) throw std::runtime_error("Invalid packets type specified");
 
     std::deque<av::PacketUPtr> &queue = packets_queues_[data_type];
-    std::condition_variable &cv = queues_cv_[data_type];
 
     while (true) {
         av::PacketUPtr packet;
         {
             std::unique_lock ul{m_};
-            cv.wait(ul, [this, &queue]() { return (!queue.empty() || stop_capture_); });
+            queues_cv_[data_type].wait(ul, [this, &queue]() { return (!queue.empty() || stop_capture_); });
             if (queue.empty() && stop_capture_) break;
             packet = std::move(queue.front());
             queue.pop_front();
@@ -461,7 +460,7 @@ void ScreenRecorder::capture() {
     std::thread video_processor;
     std::thread audio_processor;
 
-    auto process_fn = [this](av::DataType data_type) {
+    auto processor_fn = [this](av::DataType data_type) {
         try {
             processPackets(data_type);
         } catch (...) {
@@ -469,8 +468,8 @@ void ScreenRecorder::capture() {
         }
     };
 
-    video_processor = std::thread(process_fn, av::DataType::Video);
-    if (capture_audio_) audio_processor = std::thread(process_fn, av::DataType::Audio);
+    video_processor = std::thread(processor_fn, av::DataType::Video);
+    if (capture_audio_) audio_processor = std::thread(processor_fn, av::DataType::Audio);
 
 #ifdef LINUX
     std::thread audio_capturer;

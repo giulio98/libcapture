@@ -64,11 +64,12 @@ std::pair<av::PacketUPtr, av::DataType> Demuxer::readPacket() const {
     av::PacketUPtr packet(av_packet_alloc());
     if (!packet) throw_error("failed to allocate packet");
 
+    av::DataType packet_type;
+
     int ret = av_read_frame(fmt_ctx_.get(), packet.get());
-    if (ret == AVERROR(EAGAIN)) return std::make_pair(nullptr, av::DataType::none);
+    if (ret == AVERROR(EAGAIN)) return std::make_pair(nullptr, packet_type);
     if (ret < 0) throw_error("failed to read a packet");
 
-    av::DataType packet_type;
     if (video_stream_ && packet->stream_index == video_stream_->index) {
         packet_type = av::DataType::Video;
     } else if (audio_stream_ && packet->stream_index == audio_stream_->index) {

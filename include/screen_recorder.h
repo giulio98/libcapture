@@ -56,15 +56,15 @@ class ScreenRecorder {
     std::unique_ptr<Demuxer> audio_demuxer_;
 #endif
     std::unique_ptr<Muxer> muxer_;
-    std::array<std::unique_ptr<Decoder>, av::DataType::none> decoders_;
-    std::array<std::unique_ptr<Encoder>, av::DataType::none> encoders_;
-    std::array<std::unique_ptr<Converter>, av::DataType::none> converters_;
+    std::array<std::unique_ptr<Decoder>, av::DataType::NumDataTypes> decoders_;
+    std::array<std::unique_ptr<Encoder>, av::DataType::NumDataTypes> encoders_;
+    std::array<std::unique_ptr<Converter>, av::DataType::NumDataTypes> converters_;
 
     std::map<std::string, std::string> video_encoder_options_;
     std::map<std::string, std::string> audio_encoder_options_;
 
-    std::array<std::deque<av::PacketUPtr>, av::DataType::none> packets_queues_;
-    std::array<std::condition_variable, av::DataType::none> queues_cv_;
+    std::array<std::deque<av::PacketUPtr>, av::DataType::NumDataTypes> packets_queues_;
+    std::array<std::condition_variable, av::DataType::NumDataTypes> queues_cv_;
 
     /* Counter of video frames used to compute PTSs */
     int64_t video_frame_counter_;
