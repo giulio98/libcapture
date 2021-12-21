@@ -29,10 +29,10 @@ ScreenRecorder::ScreenRecorder() {
     out_video_codec_id_ = AV_CODEC_ID_H264;
     out_audio_codec_id_ = AV_CODEC_ID_AAC;
 
-#ifdef LINUX
+#if defined(LINUX)
     in_fmt_name_ = "x11grab";
     in_audio_fmt_name_ = "alsa";
-#elif _WIN32
+#elif defined(WINDOWS)
     in_fmt_name_ = "dshow";
 #else
     in_fmt_name_ = "avfoundation";
@@ -191,11 +191,19 @@ void ScreenRecorder::initConverters() {
 void ScreenRecorder::printInfo() const {
     LogLevelSetter lls(AV_LOG_INFO);
     std::cout << "##### Streams Info #####" << std::endl;
+
+    if (!demuxer_) throw std::runtime_error("Demuxer was not allocated yet");
     demuxer_->dumpInfo();
 #ifdef LINUX
-    if (capture_audio_) audio_demuxer_->dumpInfo(1);
+    if (capture_audio_) {
+        if (!audio_demuxer_) throw std::runtime_error("Audio demuxer was not allocated yet");
+        audio_demuxer_->dumpInfo(1);
+    }
 #endif
+
+    if (!muxer_) throw std::runtime_error("Muxer was not allocated yet");
     muxer_->dumpInfo();
+
     std::cout << "Video framerate: " << video_framerate_ << " fps";
     if (video_framerate_ > 30)
         std::cout << " (WARNING: you may experience video frame loss and audio dropouts with high fps)";
@@ -247,7 +255,7 @@ void ScreenRecorder::setParams(const std::string &video_device, const std::strin
     video_offset_y_ = video_offset_y;
 }
 
-void ScreenRecorder::checkVideoSize() {
+void ScreenRecorder::adjustVideoSize() {
     auto params = demuxer_->getVideoParams();
 
     if (!video_width_) video_width_ = params->width;
@@ -266,7 +274,7 @@ void ScreenRecorder::start(const std::string &video_device, const std::string &a
         setParams(video_device, audio_device, output_file, video_width, video_height, video_offset_x, video_offset_y,
                   framerate);
         initInput();
-        checkVideoSize();
+        adjustVideoSize();
         initOutput();
         initConverters();
     } catch (const std::exception &e) {
@@ -275,9 +283,14 @@ void ScreenRecorder::start(const std::string &video_device, const std::string &a
                                  ")");
     }
 
-    std::cout << std::endl;
-    printInfo();
-    std::cout << std::endl;
+    try {
+        std::cout << std::endl;
+        printInfo();
+        std::cout << std::endl;
+    } catch (const std::exception &e) {
+        std::string details(e.what());
+        throw std::runtime_error("Couldn't print streams info (" + details + ")");
+    }
 
     stop_capture_ = false;
     paused_ = false;
