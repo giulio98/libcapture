@@ -93,7 +93,7 @@ std::tuple<std::string, std::string, int, int, int, int, int, std::string> get_p
             std::cout << "Parsed video size: " << width << "x" << height << std::endl;
             std::cout << "Parsed video offset: " << off_x << "," << off_y << std::endl;
             video_size_set = true;
-        } else if (*it == "-f") {
+        } else if (*it == "-framerate") {
             if (framerate_set || ++it == args.end()) throw std::runtime_error(wrong_args_msg);
             framerate = std::stoi(*it);
             framerate_set = true;
@@ -149,18 +149,10 @@ int main(int argc, char **argv) {
         std::cerr << "Usage: " << argv[0];
         std::cerr << " [-video_device <device_name>] [-audio_device <device_name>|none]";
         std::cerr << " [-video_size <width>x<height>:<offset_x>,<offset_y>]";
-        std::cerr << " [-f framerate] [-o output_file] [-h]";
+        std::cerr << " [-framerate <framerate>] [-o <output_file>] [-h]";
         std::cerr << std::endl;
         return 1;
     }
-
-    if (std::filesystem::exists(output_file)) {
-        std::string answer;
-        std::cout << "The output file " << output_file << " already exists, override it? [y/N] ";
-        std::getline(std::cin, answer);
-        if (answer != "y" && answer != "Y") return 0;
-    }
-    std::cout << std::endl;  // seprate client printing from the rest
 
     // try {
     //     while (true) {
@@ -191,7 +183,20 @@ int main(int argc, char **argv) {
 
     try {
         ScreenRecorder sc;
-        sc.listAvailableDevices();
+
+        if (video_device.empty()) {
+            std::cerr << "ERROR: No video device specified" << std::endl << std::endl;
+            sc.listAvailableDevices();
+            return 1;
+        }
+
+        if (std::filesystem::exists(output_file)) {
+            std::string answer;
+            std::cout << "The output file " << output_file << " already exists, override it? [y/N] ";
+            std::getline(std::cin, answer);
+            if (answer != "y" && answer != "Y") return 0;
+        }
+        std::cout << std::endl;  // seprate client printing from the rest
 
         std::thread worker([&]() {
             try {
