@@ -24,6 +24,7 @@
 
 #define DURATION_LOGGING 0
 #define FRAMERATE_LOGGING 0
+#define PROCESSING_THREADS 1
 
 ScreenRecorder::ScreenRecorder() {
     out_video_pix_fmt_ = AV_PIX_FMT_YUV420P;
@@ -436,9 +437,13 @@ void ScreenRecorder::readPackets(Demuxer *demuxer, bool handle_start_time) {
 
         if (!av::isDataTypeValid(packet_type)) throw std::runtime_error("Invalid packet received from demuxer");
 
+#if PROCESSING_THREADS
         std::unique_lock ul{m_};
         packets_queues_[packet_type].push(std::move(packet));
         queues_cv_[packet_type].notify_all();
+#else
+        processPacket(packet.get(), packet_type);
+#endif
     }
 }
 
@@ -474,6 +479,7 @@ void ScreenRecorder::capture() {
     std::exception_ptr video_processor_e_ptr;
     std::exception_ptr audio_processor_e_ptr;
 
+#if PROCESSING_THREADS
     auto processor_fn = [this](av::DataType data_type, std::exception_ptr &e_ptr) {
         try {
             processPackets(data_type);
@@ -486,6 +492,7 @@ void ScreenRecorder::capture() {
     video_processor = std::thread(processor_fn, av::DataType::Video, std::ref(video_processor_e_ptr));
     if (capture_audio_)
         audio_processor = std::thread(processor_fn, av::DataType::Audio, std::ref(audio_processor_e_ptr));
+#endif
 
 #ifdef LINUX
     std::thread audio_reader;
