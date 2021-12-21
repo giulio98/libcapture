@@ -42,7 +42,7 @@ std::tuple<std::string, std::string, int, int, int, int, int, std::string> get_p
     int height = 0;
     int off_x = 0;
     int off_y = 0;
-    int framerate = 25;
+    int framerate = 30;
     std::string video_device;
     std::string audio_device;
     std::string output_file;
