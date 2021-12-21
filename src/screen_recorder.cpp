@@ -126,7 +126,7 @@ void ScreenRecorder::initInput() {
 
     demuxer_ = std::make_unique<Demuxer>(in_fmt_name_, device_name_, demuxer_options);
     demuxer_->openInput();
-    decoders_[av::DataType::video] = std::make_unique<Decoder>(demuxer_->getVideoParams());
+    decoders_[av::DataType::Video] = std::make_unique<Decoder>(demuxer_->getVideoParams());
 
     if (capture_audio_) {
 #ifdef LINUX
@@ -137,17 +137,17 @@ void ScreenRecorder::initInput() {
 #else
         auto params = demuxer_->getAudioParams();
 #endif
-        decoders_[av::DataType::audio] = std::make_unique<Decoder>(params);
+        decoders_[av::DataType::Audio] = std::make_unique<Decoder>(params);
     }
 }
 
 void ScreenRecorder::initOutput() {
     muxer_ = std::make_unique<Muxer>(output_file_);
 
-    encoders_[av::DataType::video] =
+    encoders_[av::DataType::Video] =
         std::make_unique<VideoEncoder>(out_video_codec_id_, video_encoder_options_, muxer_->getGlobalHeaderFlags(),
                                        video_width_, video_height_, out_video_pix_fmt_, video_framerate_);
-    muxer_->addVideoStream(encoders_[av::DataType::video]->getCodecContext());
+    muxer_->addVideoStream(encoders_[av::DataType::Video]->getCodecContext());
 
     if (capture_audio_) {
 #ifdef LINUX
@@ -155,23 +155,23 @@ void ScreenRecorder::initOutput() {
 #else
         auto params = demuxer_->getAudioParams();
 #endif
-        encoders_[av::DataType::audio] =
+        encoders_[av::DataType::Audio] =
             std::make_unique<AudioEncoder>(out_audio_codec_id_, audio_encoder_options_, muxer_->getGlobalHeaderFlags(),
                                            params->channels, params->sample_rate);
-        muxer_->addAudioStream(encoders_[av::DataType::audio]->getCodecContext());
+        muxer_->addAudioStream(encoders_[av::DataType::Audio]->getCodecContext());
     }
 
     muxer_->openFile();
 }
 
 void ScreenRecorder::initConverters() {
-    converters_[av::DataType::video] = std::make_unique<VideoConverter>(
-        decoders_[av::DataType::video]->getCodecContext(), encoders_[av::DataType::video]->getCodecContext(),
+    converters_[av::DataType::Video] = std::make_unique<VideoConverter>(
+        decoders_[av::DataType::Video]->getCodecContext(), encoders_[av::DataType::Video]->getCodecContext(),
         video_offset_x_, video_offset_y_);
 
     if (capture_audio_) {
-        converters_[av::DataType::audio] = std::make_unique<AudioConverter>(
-            decoders_[av::DataType::audio]->getCodecContext(), encoders_[av::DataType::audio]->getCodecContext());
+        converters_[av::DataType::Audio] = std::make_unique<AudioConverter>(
+            decoders_[av::DataType::Audio]->getCodecContext(), encoders_[av::DataType::Audio]->getCodecContext());
     }
 }
 
@@ -297,8 +297,8 @@ void ScreenRecorder::stopAndNotify() noexcept {
     std::unique_lock<std::mutex> ul{m_};
     stop_capture_ = true;
     status_cv_.notify_all();
-    queues_cv_[av::DataType::video].notify_all();
-    queues_cv_[av::DataType::audio].notify_all();
+    queues_cv_[av::DataType::Video].notify_all();
+    queues_cv_[av::DataType::Audio].notify_all();
 }
 
 void ScreenRecorder::stop() {
@@ -354,7 +354,7 @@ void ScreenRecorder::processPacket(const AVPacket *packet, av::DataType data_typ
 #if DURATION_LOGGING
     DurationLogger dl("Audio packet processed in ");
 #endif
-    int64_t &frame_counter = (data_type == av::DataType::audio) ? audio_frame_counter_ : video_frame_counter_;
+    int64_t &frame_counter = (data_type == av::DataType::Audio) ? audio_frame_counter_ : video_frame_counter_;
 
     bool decoder_received = false;
     while (!decoder_received) {
@@ -383,13 +383,13 @@ void ScreenRecorder::processPacket(const AVPacket *packet, av::DataType data_typ
 
 void ScreenRecorder::flushPipelines() {
     /* flush video pipeline */
-    processPacket(nullptr, av::DataType::video);
-    processConvertedFrame(nullptr, av::DataType::video);
+    processPacket(nullptr, av::DataType::Video);
+    processConvertedFrame(nullptr, av::DataType::Video);
 
     /* flush audio pipeline */
     if (capture_audio_) {
-        processPacket(nullptr, av::DataType::audio);
-        processConvertedFrame(nullptr, av::DataType::audio);
+        processPacket(nullptr, av::DataType::Audio);
+        processConvertedFrame(nullptr, av::DataType::Audio);
     }
 
     /* flush output queue */
@@ -469,8 +469,8 @@ void ScreenRecorder::capture() {
         }
     };
 
-    video_processor = std::thread(process_fn, av::DataType::video);
-    if (capture_audio_) audio_processor = std::thread(process_fn, av::DataType::audio);
+    video_processor = std::thread(process_fn, av::DataType::Video);
+    if (capture_audio_) audio_processor = std::thread(process_fn, av::DataType::Audio);
 
 #ifdef LINUX
     std::thread audio_capturer;

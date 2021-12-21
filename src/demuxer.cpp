@@ -70,9 +70,9 @@ std::pair<av::PacketUPtr, av::DataType> Demuxer::readPacket() const {
 
     av::DataType packet_type;
     if (video_stream_ && packet->stream_index == video_stream_->index) {
-        packet_type = av::DataType::video;
+        packet_type = av::DataType::Video;
     } else if (audio_stream_ && packet->stream_index == audio_stream_->index) {
-        packet_type = av::DataType::audio;
+        packet_type = av::DataType::Audio;
     } else {
         throw_error("unknown packet stream index");
     }

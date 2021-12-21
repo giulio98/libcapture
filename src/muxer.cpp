@@ -78,11 +78,11 @@ void Muxer::writePacket(av::PacketUPtr packet, av::DataType packet_type) {
     if (file_closed_) throw_error("cannot write packet, file has already been closed");
 
     if (packet) {
-        if (packet_type == av::DataType::video) {
+        if (packet_type == av::DataType::Video) {
             if (!video_stream_) throw_error("video stream not present");
             av_packet_rescale_ts(packet.get(), video_codec_time_base_, video_stream_->time_base);
             packet->stream_index = video_stream_->index;
-        } else if (packet_type == av::DataType::audio) {
+        } else if (packet_type == av::DataType::Audio) {
             if (!audio_stream_) throw_error("audio stream not present");
             av_packet_rescale_ts(packet.get(), audio_codec_time_base_, audio_stream_->time_base);
             packet->stream_index = audio_stream_->index;
