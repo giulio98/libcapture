@@ -443,7 +443,7 @@ void ScreenRecorder::readPackets(Demuxer *demuxer, bool handle_start_time) {
 void ScreenRecorder::processPackets(av::DataType data_type) {
     if (!av::isDataTypeValid(data_type)) throw std::runtime_error("Invalid packet type specified for processing");
 
-    auto &queue = packets_queues_[data_type];
+    std::queue<av::PacketUPtr> &queue = packets_queues_[data_type];
 
     while (true) {
         av::PacketUPtr packet;
