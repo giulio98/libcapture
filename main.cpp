@@ -11,6 +11,8 @@
 
 #include "screen_recorder.h"
 
+#define DEFAULT_DEVICES 0
+
 std::tuple<int, int, int, int> parse_video_size(const std::string &str) {
     int width = 0;
     int height = 0;
@@ -50,6 +52,7 @@ std::tuple<std::string, std::string, int, int, int, int, int, std::string> get_p
     std::string audio_device;
     std::string output_file;
 
+#if DEFAULT_DEVICES
 #if defined(_WIN32)
     video_device = "screen-capture-recorder";
     audio_device = "Gruppo microfoni (Realtek High Definition Audio(SST))";
@@ -63,6 +66,7 @@ std::tuple<std::string, std::string, int, int, int, int, int, std::string> get_p
 #else
     video_device = "1";
     audio_device = "0";
+#endif
 #endif
 
     bool video_device_set = false;
@@ -102,12 +106,14 @@ std::tuple<std::string, std::string, int, int, int, int, int, std::string> get_p
         }
     }
 
-    std::cout << "Video device: " << video_device << std::endl;
-    std::cout << "Audio device: " << audio_device;
+    std::cout << "Parsed video device: " << video_device << std::endl;
+    std::cout << "Parsed audio device: " << audio_device;
+#if DEFAULT_DEVICES
     if (audio_device == "none") {
         audio_device = "";
         std::cout << " (mute)";
     }
+#endif
     std::cout << std::endl;
 
     if (!output_set) {
