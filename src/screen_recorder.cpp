@@ -515,7 +515,8 @@ void ScreenRecorder::listAvailableDevices() {
     Demuxer demuxer(in_fmt_name_, dummy_device_name, options);
     std::cout << "##### Available Devices #####" << std::endl;
     {
-        LogCallbackSetter lcs(log_callback);
+        // LogCallbackSetter lcs(log_callback);
+        LogLevelSetter lls(AV_LOG_INFO);
         try {
             demuxer.openInput();
         } catch (...) {
