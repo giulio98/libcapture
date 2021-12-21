@@ -382,6 +382,8 @@ void ScreenRecorder::processPacket(const AVPacket *packet, av::DataType data_typ
 
                     frame_counter++;
 
+                    if (data_type == av::DataType::Video && frame_counter % video_framerate_ == 0) estimateFramerate();
+
                     processConvertedFrame(converted_frame.get(), data_type);
                 }
             }
