@@ -120,13 +120,19 @@ class ScreenRecorder {
     void capture();
 
     /**
-     * Capture the frames coming from the specified demuxer and process them
+     * Read the packets coming from the specified demuxer and store them in the corresponding queue
      * @param demuxer           an observer pointer to the demuxer to se to read the packets
      * @param handle_start_time whether the function should internally handle the start_time variable
      * when a pause is performed (WARNING: in case of multiple concurrent threads, only one of them should
      * handle the start_time)
      */
-    void captureFrames(Demuxer *demuxer, bool handle_start_time = false);
+    void readPackets(Demuxer *demuxer, bool handle_start_time = false);
+
+    /**
+     * Process the packets stored in the queue corresponding to data_type
+     * @param data_type the data type of the packets to process
+     */
+    void processPackets(av::DataType data_type);
 
     /**
      * Stop the capturing and notify all the CV

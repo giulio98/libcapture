@@ -419,7 +419,7 @@ void ScreenRecorder::flushPipelines() {
     muxer_->writePacket(nullptr, av::DataType::none);
 }
 
-void ScreenRecorder::captureFrames(Demuxer *demuxer, bool handle_start_time) {
+void ScreenRecorder::readPackets(Demuxer *demuxer, bool handle_start_time) {
     while (true) {
         {
             std::unique_lock<std::mutex> ul{m_};
@@ -461,6 +461,24 @@ void ScreenRecorder::captureFrames(Demuxer *demuxer, bool handle_start_time) {
     }
 }
 
+void ScreenRecorder::processPackets(av::DataType data_type) {
+    if (data_type == av::DataType::none) throw std::runtime_error("No type specified for processor thread");
+    bool audio = (data_type == av::DataType::audio);
+    std::deque<av::PacketUPtr> &queue = audio ? audio_queue_ : video_queue_;
+    std::condition_variable &cv = audio ? audio_queue_cv_ : video_queue_cv_;
+    while (true) {
+        av::PacketUPtr packet;
+        {
+            std::unique_lock ul{m_};
+            cv.wait(ul, [this, &queue]() { return (!queue.empty() || stop_capture_); });
+            if (queue.empty() && stop_capture_) break;
+            packet = std::move(queue.front());
+            queue.pop_front();
+        }
+        processPacket(packet.get(), data_type);
+    }
+}
+
 void ScreenRecorder::capture() {
     /* start counting for PTS */
     video_frame_counter_ = 0;
@@ -475,21 +493,7 @@ void ScreenRecorder::capture() {
 
     auto process_fn = [this](av::DataType data_type) {
         try {
-            if (data_type == av::DataType::none) throw std::runtime_error("No type specified for processor thread");
-            bool audio = (data_type == av::DataType::audio);
-            std::deque<av::PacketUPtr> &queue = audio ? audio_queue_ : video_queue_;
-            std::condition_variable &cv = audio ? audio_queue_cv_ : video_queue_cv_;
-            while (true) {
-                av::PacketUPtr packet;
-                {
-                    std::unique_lock ul{m_};
-                    cv.wait(ul, [this, &queue]() { return (!queue.empty() || stop_capture_); });
-                    if (queue.empty() && stop_capture_) break;
-                    packet = std::move(queue.front());
-                    queue.pop_front();
-                }
-                processPacket(packet.get(), data_type);
-            }
+            processPackets(data_type);
         } catch (...) {
             stopAndNotify();
         }
@@ -505,7 +509,7 @@ void ScreenRecorder::capture() {
     if (capture_audio_) {
         audio_capturer = std::thread([this, &e_ptr]() {
             try {
-                captureFrames(audio_demuxer_.get());
+                readPackets(audio_demuxer_.get());
             } catch (...) {
                 e_ptr = std::current_exception();
                 stopAndNotify();
@@ -514,7 +518,7 @@ void ScreenRecorder::capture() {
     }
 #endif
 
-    captureFrames(demuxer_.get(), true);
+    readPackets(demuxer_.get(), true);
 
 #ifdef LINUX
     if (audio_capturer.joinable()) audio_capturer.join();
