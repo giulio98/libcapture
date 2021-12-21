@@ -1,6 +1,6 @@
 #pragma once
 
-#include <memory>
+#include <mutex>
 #include <string>
 
 #include "common.h"
@@ -14,6 +14,7 @@ class Muxer {
     AVRational audio_codec_time_base_{};
     bool file_opened_;
     bool file_closed_;
+    std::mutex m_;
 
 public:
     /**
@@ -51,11 +52,11 @@ public:
     void closeFile();
 
     /**
-     * Write a packet to the output file
+     * Write a packet to the output file. This function is thread-safe
      * @param packet        the packet to write. If nullptr, the output queue will be flushed
      * @param packet_type   the type of the packet (audio or video)
      */
-    void writePacket(av::PacketUPtr packet, av::DataType packet_type) const;
+    void writePacket(av::PacketUPtr packet, av::DataType packet_type);
 
     /**
      * Print informations about the streams

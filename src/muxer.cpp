@@ -73,7 +73,7 @@ void Muxer::closeFile() {
     file_closed_ = true;
 }
 
-void Muxer::writePacket(av::PacketUPtr packet, av::DataType packet_type) const {
+void Muxer::writePacket(av::PacketUPtr packet, av::DataType packet_type) {
     if (!file_opened_) throw_error("cannot write packet, file has not been opened");
     if (file_closed_) throw_error("cannot write packet, file has already been closed");
 
@@ -91,6 +91,7 @@ void Muxer::writePacket(av::PacketUPtr packet, av::DataType packet_type) const {
         }
     }
 
+    std::unique_lock ul{m_};
     if (av_interleaved_write_frame(fmt_ctx_.get(), packet.get())) throw_error("failed to write packet");
 }
 
