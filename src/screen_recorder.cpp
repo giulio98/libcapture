@@ -103,39 +103,24 @@ void ScreenRecorder::initInput() {
     setDisplayResolution();
     demuxer_options.insert({"rtbufsize", "1024M"});
 #else
-
     {
         std::stringstream framerate_ss;
         framerate_ss << video_framerate_;
         demuxer_options.insert({"framerate", framerate_ss.str()});
     }
-
 #ifdef LINUX
-
     {
         std::stringstream video_size_ss;
         video_size_ss << video_width_ << "x" << video_height_;
         demuxer_options.insert({"video_size", video_size_ss.str()});
     }
     demuxer_options.insert({"show_region", "1"});
-    /*
-    device_name_ss << getenv("DISPLAY") << ".0+" << video_offset_x_ << "," << video_offset_y_;
-    audio_device_name_ss << "hw:0,0";
-    */
     /* set the offsets to 0 since they won't be used for cropping */
     video_offset_x_ = video_offset_y_ = 0;
-
 #else  // macOS
-
     demuxer_options.insert({"pixel_format", "uyvy422"});
     demuxer_options.insert({"capture_cursor", "0"});
-    /*
-    device_name_ss << "1:";
-    if (capture_audio_) device_name_ss << "0";
-    */
-
 #endif
-
 #endif
 
     demuxer_ = std::make_unique<Demuxer>(in_fmt_name_, device_name_, demuxer_options);
