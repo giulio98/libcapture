@@ -208,8 +208,4 @@ public:
      * Print a list of the devices available for capturing
      */
     void listAvailableDevices();
-
-#ifdef WINDOWS
-    static std::vector<std::string> getInputAudioDevices();
-#endif
 };

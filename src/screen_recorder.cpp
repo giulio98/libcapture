@@ -6,10 +6,8 @@
 #include <stdexcept>
 
 #ifdef _WIN32
-#include <mmsystem.h>
 #include <windows.h>
 #include <winreg.h>
-
 #include <string>
 #endif
 
@@ -46,20 +44,6 @@ ScreenRecorder::~ScreenRecorder() {
 }
 
 #ifdef WINDOWS
-std::vector<std::string> ScreenRecorder::getInputAudioDevices() {
-    UINT deviceCount = waveInGetNumDevs();
-    std::vector<std::string> audio_devices;
-    if (deviceCount > 0) {
-        for (int i = 0; i < deviceCount; i++) {
-            WAVEINCAPSW waveInCaps;
-            waveInGetDevCapsW(i, &waveInCaps, sizeof(WAVEINCAPS));
-            std::wstring ws(waveInCaps.szPname);
-            std::string str(ws.begin(), ws.end());
-            audio_devices.push_back(str);
-        }
-    }
-    return audio_devices;
-}
 
 void ScreenRecorder::setDisplayResolution() const {
     int x1, y1, x2, y2, resolution_width, resolution_height;
