@@ -5,6 +5,10 @@ set(CMAKE_CXX_STANDARD 20)
 
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
+set(CMAKE_AUTOUIC ON)
+
 
 add_executable(screen-recorder
     main.cpp
@@ -17,6 +21,7 @@ add_executable(screen-recorder
     src/audio_encoder.cpp
     src/video_converter.cpp
     src/audio_converter.cpp
+    ui/mainwindow.cpp
 )
 
 target_include_directories(screen-recorder PRIVATE src include)
@@ -27,13 +32,15 @@ IF(WIN32)
     MESSAGE(STATUS "Platform is Windows")
     add_definitions(-DWINDOWS)
 
+    LIST(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+
     IF(NOT MSVC)
         add_library(FFmpeg::FFmpeg INTERFACE IMPORTED)
         set_target_properties(FFmpeg::FFmpeg
             PROPERTIES
             INTERFACE_LINK_DIRECTORIES "${screen-recorder_SOURCE_DIR}/ffmpeg/lib/"
             INTERFACE_INCLUDE_DIRECTORIES "${screen-recorder_SOURCE_DIR}/ffmpeg/include/"
-            INTERFACE_LINK_LIBRARIES "avdevice;avfilter;avformat;avcodec;swresample;swscale;avutil"
+            INTERFACE_LINK_LIBRARIES "avdevice;avfilter;avformat;avcodec;swresample;swscale;avutil;"
 
         )
         file(COPY ${screen-recorder_SOURCE_DIR}/ffmpeg/bin/
@@ -51,7 +58,7 @@ IF(WIN32)
             set_target_properties(FFmpeg::FFmpeg PROPERTIES
                 INTERFACE_LINK_DIRECTORIES "${ffmpeg_SOURCE_DIR}/lib"
                 INTERFACE_INCLUDE_DIRECTORIES "${ffmpeg_SOURCE_DIR}/include/"
-                INTERFACE_LINK_LIBRARIES "avdevice;avfilter;avformat;avcodec;swresample;swscale;avutil"
+                INTERFACE_LINK_LIBRARIES "avdevice;avfilter;avformat;avcodec;swresample;swscale;avutil;"
             )
             set(FFMPEG_DLLS  avdevice-58.dll avfilter-7.dll avformat-58.dll avcodec-58.dll swresample-3.dll swscale-5.dll avutil-56.dll)
             list(TRANSFORM FFMPEG_DLLS PREPEND "${ffmpeg_SOURCE_DIR}/bin/")
@@ -75,6 +82,8 @@ ELSE()
         target_link_libraries(screen-recorder ${X11_LIBRARIES})
     ENDIF()
 
+    find_package(Qt5 COMPONENTS Widgets REQUIRED)
+
     find_package(PkgConfig REQUIRED)
     pkg_check_modules(LIBAV REQUIRED IMPORTED_TARGET
         libavdevice
@@ -86,6 +95,7 @@ ELSE()
         libavutil
     )
     target_link_libraries(screen-recorder PkgConfig::LIBAV)
+    target_link_libraries(screen-recorder Qt5::Widgets)
 
 ENDIF()
 
