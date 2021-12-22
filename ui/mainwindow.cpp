@@ -18,22 +18,30 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_captureButton_clicked()
 {
-    //sc = new ScreenRecorder;
     QString output_file = ui->lineEdit_filename->text();
     QString framerate = ui->lineEdit_framerate->text();
     bool capture_audio = ui->checkBox->checkState() == Qt::Unchecked ? false : true;
-
-    sc->start(":0.0+","hw:0,0",output_file.toStdString(),264,264,0,0,framerate.toInt());
 
     ui->stopButton->setProperty("enabled", true);
     ui->pauseButton->setProperty("enabled", true);
     ui->captureButton->setProperty("enabled", false);
 
+    try {
+        sc->start(":0.0+","hw:0,0",output_file.toStdString(),264,264,0,0,framerate.toInt());
+    } catch (const std::exception &e) {
+                //std::cerr << e.what() << ", terminating..." << std::endl;
+                exit(1);
+    }
 }
 
 void MainWindow::on_stopButton_clicked()
 {
-    sc->stop();
+    try {
+        sc->stop();
+    } catch (const std::exception &e) {
+                //std::cerr << e.what() << ", terminating..." << std::endl;
+                exit(1);
+    }
 
     ui->captureButton->setProperty("enabled", true);
     ui->stopButton->setProperty("enabled", false);
@@ -43,7 +51,12 @@ void MainWindow::on_stopButton_clicked()
 
 void MainWindow::on_pauseButton_clicked()
 {
-    sc->pause();
+    try {
+        sc->pause();
+    } catch (const std::exception &e) {
+                //std::cerr << e.what() << ", terminating..." << std::endl;
+                exit(1);
+    }
 
     ui->pauseButton->setProperty("enabled", false);
     ui->stopButton->setProperty("enabled", true);
@@ -52,7 +65,12 @@ void MainWindow::on_pauseButton_clicked()
 
 void MainWindow::on_resumeButton_clicked()
 {
-    sc->resume();
+    try {
+        sc->resume();
+    } catch (const std::exception &e) {
+                //std::cerr << e.what() << ", terminating..." << std::endl;
+                exit(1);
+    }
 
     ui->pauseButton->setProperty("enabled", true);
     ui->resumeButton->setProperty("enabled", false);
