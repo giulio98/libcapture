@@ -455,9 +455,11 @@ void ScreenRecorder::processPackets(av::DataType data_type) {
 }
 
 void ScreenRecorder::capture() {
-    ScopedThread video_processor;
-    ScopedThread audio_processor;
+    std::thread video_processor;
+    ThreadGuard video_processor_tg(video_processor);
     std::exception_ptr video_processor_e_ptr;
+    std::thread audio_processor;
+    ThreadGuard audio_processor_tg(audio_processor);
     std::exception_ptr audio_processor_e_ptr;
 
     auto processor_fn = [this](av::DataType data_type, std::exception_ptr &e_ptr) {
@@ -487,7 +489,8 @@ void ScreenRecorder::capture() {
         start_time_ = av_gettime();
 
 #ifdef LINUX
-        ScopedThread audio_reader;
+        std::thread audio_reader;
+        ThreadGuard audio_reader_tg(audio_reader);
         std::exception_ptr audio_reader_e_ptr;
 
         if (capture_audio_) {
