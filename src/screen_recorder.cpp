@@ -8,6 +8,7 @@
 #ifdef _WIN32
 #include <windows.h>
 #include <winreg.h>
+
 #include <string>
 #endif
 
@@ -44,7 +45,6 @@ ScreenRecorder::~ScreenRecorder() {
 }
 
 #ifdef WINDOWS
-
 void ScreenRecorder::setDisplayResolution() const {
     int x1, y1, x2, y2, resolution_width, resolution_height;
     x1 = GetSystemMetrics(SM_XVIRTUALSCREEN);
