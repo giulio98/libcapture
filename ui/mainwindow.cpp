@@ -28,9 +28,12 @@ void MainWindow::on_captureButton_clicked()
 
     try {
         sc->start(":0.0+","hw:0,0",output_file.toStdString(),264,264,0,0,framerate.toInt());
+        ui->plainTextEdit->appendPlainText("Recording..."); // Adds the message to the widget
     } catch (const std::exception &e) {
                 //std::cerr << e.what() << ", terminating..." << std::endl;
-                exit(1);
+                //exit(1);
+                 ui->plainTextEdit->appendPlainText(e.what());
+
     }
 }
 
@@ -38,9 +41,11 @@ void MainWindow::on_stopButton_clicked()
 {
     try {
         sc->stop();
+        ui->plainTextEdit->appendPlainText("Recording stopped"); // Adds the message to the widget
     } catch (const std::exception &e) {
                 //std::cerr << e.what() << ", terminating..." << std::endl;
-                exit(1);
+                //exit(1);
+                ui->plainTextEdit->appendPlainText(e.what());
     }
 
     ui->captureButton->setProperty("enabled", true);
@@ -53,9 +58,11 @@ void MainWindow::on_pauseButton_clicked()
 {
     try {
         sc->pause();
+        ui->plainTextEdit->appendPlainText("Recording paused");
     } catch (const std::exception &e) {
                 //std::cerr << e.what() << ", terminating..." << std::endl;
-                exit(1);
+                //exit(1);
+                ui->plainTextEdit->appendPlainText(e.what());
     }
 
     ui->pauseButton->setProperty("enabled", false);
@@ -67,9 +74,11 @@ void MainWindow::on_resumeButton_clicked()
 {
     try {
         sc->resume();
+        ui->plainTextEdit->appendPlainText("Recording resumed...");
     } catch (const std::exception &e) {
                 //std::cerr << e.what() << ", terminating..." << std::endl;
-                exit(1);
+                //exit(1);
+                ui->plainTextEdit->appendPlainText(e.what());
     }
 
     ui->pauseButton->setProperty("enabled", true);
