@@ -10,7 +10,7 @@ public:
         if (t_.joinable()) t_.join();
     }
 
-    ThreadGuard(ThreadGuard const &) = delete;
+    ThreadGuard(const ThreadGuard &) = delete;
 
-    ThreadGuard &operator=(ThreadGuard const &) = delete;
+    ThreadGuard &operator=(const ThreadGuard &) = delete;
 };
