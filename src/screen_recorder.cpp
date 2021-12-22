@@ -72,7 +72,7 @@ void ScreenRecorder::setDisplayResolution() const {
         RegSetValueEx(hkey, TEXT("start_y"), 0, dwType, (PBYTE)&rofl, dwSize);
         RegCloseKey(hkey);
     } else {
-        throw std::runtime_error("Error opening key");
+        throw std::runtime_error("Error opening key when setting display resolution");
     }
 }
 #endif
