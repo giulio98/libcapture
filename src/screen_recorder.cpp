@@ -15,6 +15,7 @@
 #include "duration_logger.h"
 #include "log_callback_setter.h"
 #include "log_level_setter.h"
+#include "scoped_thread.h"
 #include "thread_guard.h"
 
 #define DURATION_LOGGING 0
@@ -454,10 +455,8 @@ void ScreenRecorder::processPackets(av::DataType data_type) {
 }
 
 void ScreenRecorder::capture() {
-    std::thread video_processor;
-    std::thread audio_processor;
-    ThreadGuard video_processor_tg(video_processor);
-    ThreadGuard audio_processor_tg(audio_processor);
+    ScopedThread video_processor;
+    ScopedThread audio_processor;
     std::exception_ptr video_processor_e_ptr;
     std::exception_ptr audio_processor_e_ptr;
 
@@ -488,8 +487,7 @@ void ScreenRecorder::capture() {
         start_time_ = av_gettime();
 
 #ifdef LINUX
-        std::thread audio_reader;
-        ThreadGuard audio_reader_tg(audio_reader);
+        ScopedThread audio_reader;
         std::exception_ptr audio_reader_e_ptr;
 
         if (capture_audio_) {
