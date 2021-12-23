@@ -461,9 +461,6 @@ void ScreenRecorder::capture() {
     frame_counters_[av::DataType::Video] = 0;
     frame_counters_[av::DataType::Audio] = 0;
 
-    /* start counting for fps estimation */
-    dropped_frame_counter_ = -2;  // wait for an extra second at the beginning to allow the framerate to stabilize
-
 #ifdef LINUX
     std::exception_ptr audio_reader_e_ptr;
 #endif
@@ -492,8 +489,6 @@ void ScreenRecorder::capture() {
             if (capture_audio_)
                 audio_processor = std::thread(processor_fn, av::DataType::Audio, std::ref(audio_processor_e_ptr));
 #endif
-
-            start_time_ = av_gettime();
 
 #ifdef LINUX
             if (capture_audio_) {
