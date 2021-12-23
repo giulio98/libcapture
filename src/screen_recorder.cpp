@@ -461,13 +461,14 @@ void ScreenRecorder::capture() {
     frame_counters_[av::DataType::Video] = 0;
     frame_counters_[av::DataType::Audio] = 0;
 
+    /* exception pointers for threads */
 #ifdef LINUX
     std::exception_ptr audio_reader_e_ptr;
 #endif
     std::exception_ptr video_processor_e_ptr;
     std::exception_ptr audio_processor_e_ptr;
 
-    {  // Threads scope
+    {  // threads scope
 #ifdef LINUX
         ScopedThread audio_reader;
 #endif
@@ -483,7 +484,7 @@ void ScreenRecorder::capture() {
             }
         };
 
-        try {  // Try-catch necessary because of the threads
+        try {  // try-catch necessary because of the threads
 #if PROCESSING_THREADS
             video_processor = std::thread(processor_fn, av::DataType::Video, std::ref(video_processor_e_ptr));
             if (capture_audio_)
@@ -509,7 +510,7 @@ void ScreenRecorder::capture() {
             stopAndNotify();
             throw;
         }
-    }  // Join all threads
+    }  // join all threads
 
 #ifdef LINUX
     if (audio_reader_e_ptr) std::rethrow_exception(audio_reader_e_ptr);
