@@ -272,7 +272,6 @@ void ScreenRecorder::start(const std::string &video_device, const std::string &a
         std::cout << "Recording..." << std::endl;
         try {
             capture();
-            flushPipelines();
         } catch (const std::exception &e) {
             std::cerr << "Fatal error during capturing (" << e.what() << "), terminating..." << std::endl;
             exit(1);
