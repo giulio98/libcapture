@@ -39,7 +39,7 @@ ScreenRecorder::ScreenRecorder() {
     video_encoder_options_.insert({"preset", "ultrafast"});
 
     avdevice_register_all();
-    av_log_set_level(AV_LOG_PRINT_LEVEL);
+    // av_log_set_level(AV_LOG_PRINT_LEVEL);
 }
 
 ScreenRecorder::~ScreenRecorder() {
@@ -272,6 +272,7 @@ void ScreenRecorder::start(const std::string &video_device, const std::string &a
         std::cout << "Recording..." << std::endl;
         try {
             capture();
+            flushPipelines();
         } catch (const std::exception &e) {
             std::cerr << "Fatal error during capturing (" << e.what() << "), terminating..." << std::endl;
             exit(1);
@@ -450,27 +451,12 @@ void ScreenRecorder::processPackets(av::DataType data_type) {
             packet = std::move(queue.front());
             queue.pop();
         }
+        if (!packet) throw std::runtime_error("Empty packet in queue");
         processPacket(packet.get(), data_type);
     }
 }
 
 void ScreenRecorder::capture() {
-    std::thread video_processor;
-    ThreadGuard video_processor_tg(video_processor);
-    std::exception_ptr video_processor_e_ptr;
-    std::thread audio_processor;
-    ThreadGuard audio_processor_tg(audio_processor);
-    std::exception_ptr audio_processor_e_ptr;
-
-    auto processor_fn = [this](av::DataType data_type, std::exception_ptr &e_ptr) {
-        try {
-            processPackets(data_type);
-        } catch (...) {
-            e_ptr = std::current_exception();
-            stopAndNotify();
-        }
-    };
-
     /* start counting for PTS */
     frame_counters_[av::DataType::Video] = 0;
     frame_counters_[av::DataType::Audio] = 0;
@@ -478,47 +464,65 @@ void ScreenRecorder::capture() {
     /* start counting for fps estimation */
     dropped_frame_counter_ = -2;  // wait for an extra second at the beginning to allow the framerate to stabilize
 
-    /* Try-catch necessary due to threads */
-    try {
+#ifdef LINUX
+    std::exception_ptr audio_reader_e_ptr;
+#endif
+    std::exception_ptr video_processor_e_ptr;
+    std::exception_ptr audio_processor_e_ptr;
+
+    {  // Threads scope
+#ifdef LINUX
+        ScopedThread audio_reader;
+#endif
+        ScopedThread video_processor;
+        ScopedThread audio_processor;
+
+        auto processor_fn = [this](av::DataType data_type, std::exception_ptr &e_ptr) {
+            try {
+                processPackets(data_type);
+            } catch (...) {
+                e_ptr = std::current_exception();
+                stopAndNotify();
+            }
+        };
+
+        try {  // Try-catch necessary because of the threads
 #if PROCESSING_THREADS
-        video_processor = std::thread(processor_fn, av::DataType::Video, std::ref(video_processor_e_ptr));
-        if (capture_audio_)
-            audio_processor = std::thread(processor_fn, av::DataType::Audio, std::ref(audio_processor_e_ptr));
+            video_processor = std::thread(processor_fn, av::DataType::Video, std::ref(video_processor_e_ptr));
+            if (capture_audio_)
+                audio_processor = std::thread(processor_fn, av::DataType::Audio, std::ref(audio_processor_e_ptr));
 #endif
 
-        start_time_ = av_gettime();
+            start_time_ = av_gettime();
 
 #ifdef LINUX
-        std::thread audio_reader;
-        ThreadGuard audio_reader_tg(audio_reader);
-        std::exception_ptr audio_reader_e_ptr;
+            if (capture_audio_) {
+                audio_reader = std::thread([this, &audio_reader_e_ptr]() {
+                    try {
+                        readPackets(audio_demuxer_.get());
+                    } catch (...) {
+                        audio_reader_e_ptr = std::current_exception();
+                        stopAndNotify();
+                    }
+                });
+            }
+#endif
 
-        if (capture_audio_) {
-            audio_reader = std::thread([this, &audio_reader_e_ptr]() {
-                try {
-                    readPackets(audio_demuxer_.get());
-                } catch (...) {
-                    audio_reader_e_ptr = std::current_exception();
-                    stopAndNotify();
-                }
-            });
+            readPackets(demuxer_.get(), true);
+
+        } catch (...) {
+            stopAndNotify();
+            throw;
         }
-#endif
-
-        readPackets(demuxer_.get(), true);
+    }  // Join all threads
 
 #ifdef LINUX
-        if (audio_reader_e_ptr) std::rethrow_exception(audio_reader_e_ptr);
+    if (audio_reader_e_ptr) std::rethrow_exception(audio_reader_e_ptr);
 #endif
-        if (video_processor_e_ptr) std::rethrow_exception(video_processor_e_ptr);
-        if (audio_processor_e_ptr) std::rethrow_exception(audio_processor_e_ptr);
+    if (video_processor_e_ptr) std::rethrow_exception(video_processor_e_ptr);
+    if (audio_processor_e_ptr) std::rethrow_exception(audio_processor_e_ptr);
 
-        flushPipelines();
-
-    } catch (...) {
-        stopAndNotify();
-        throw;
-    }
+    flushPipelines();
 }
 
 static void log_callback(void *avcl, int level, const char *fmt, va_list vl) {
