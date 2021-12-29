@@ -20,7 +20,7 @@
 
 #define DURATION_LOGGING 0
 #define FRAMERATE_LOGGING 0
-#define PROCESSING_THREADS 1
+#define PROCESSING_THREADS 0
 
 ScreenRecorder::ScreenRecorder() {
     out_video_pix_fmt_ = AV_PIX_FMT_YUV420P;
