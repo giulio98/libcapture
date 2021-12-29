@@ -15,6 +15,10 @@ Decoder::Decoder(const AVCodecParameters *params) : codec_(nullptr) {
         throw_error("failed to copy codec params to codec context");
 
     if (avcodec_open2(codec_ctx_.get(), codec_, nullptr) < 0) throw_error("unable to open the av codec");
+
+    /* If the video framerate is unknown to the stream, set it manually */
+    // if (!codec_ctx_->framerate.num && framerate) codec_ctx_->framerate = (AVRational){framerate, 1};
+    // if (!codec_ctx_->time_base.num && framerate) codec_ctx_->time_base = (AVRational){1, framerate};
 }
 
 bool Decoder::sendPacket(const AVPacket *packet) const {
@@ -32,6 +36,9 @@ av::FrameUPtr Decoder::getFrame() const {
     int ret = avcodec_receive_frame(codec_ctx_.get(), frame.get());
     if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) return nullptr;
     if (ret < 0) throw_error("failed to receive frame from decoder");
+
+    frame->pts = frame->best_effort_timestamp;
+
     return frame;
 }
 

@@ -1,85 +1,90 @@
 #include "audio_converter.h"
 
+#include <iostream>
+#include <sstream>
 #include <stdexcept>
 
 static void throw_error(const std::string &msg) { throw std::runtime_error("Audio Converter: " + msg); }
 
-AudioConverter::AudioConverter(const AVCodecContext *in_codec_ctx, const AVCodecContext *out_codec_ctx) {
+AudioConverter::AudioConverter(const AVCodecContext *in_codec_ctx, const AVCodecContext *out_codec_ctx)
+    : buffersrc_ctx_(nullptr), buffersink_ctx_(nullptr) {
     if (!in_codec_ctx) throw_error("in_codec_ctx is NULL");
     if (!out_codec_ctx) throw_error("out_codec_ctx is NULL");
 
-    out_channels_ = out_codec_ctx->channels;
-    out_frame_size_ = out_codec_ctx->frame_size;
-    out_sample_rate_ = out_codec_ctx->sample_rate;
-    out_sample_fmt_ = out_codec_ctx->sample_fmt;
+    filter_graph_ = av::FilterGraphUPtr(avfilter_graph_alloc());
+    if (!filter_graph_) throw_error("failed to allocate filter graph");
 
-    resample_ctx_ =
-        av::SwrContextUPtr(swr_alloc_set_opts(nullptr, av_get_default_channel_layout(out_channels_), out_sample_fmt_,
-                                              out_sample_rate_, av_get_default_channel_layout(in_codec_ctx->channels),
-                                              in_codec_ctx->sample_fmt, in_codec_ctx->sample_rate, 0, nullptr));
-    if (!resample_ctx_) throw_error("failed to allocate the resampling context");
+    {
+        /* buffer src set-up*/
+        std::stringstream args_ss;
+        args_ss << "time_base=" << out_codec_ctx->time_base.num << "/" << out_codec_ctx->time_base.den;
+        args_ss << ":sample_rate=" << in_codec_ctx->sample_rate;
+        args_ss << ":sample_fmt=" << av_get_sample_fmt_name(in_codec_ctx->sample_fmt);
+        args_ss << ":channel_layout=" << in_codec_ctx->channel_layout;
 
-    if (swr_init(resample_ctx_.get()) < 0) throw_error("failed to initialize the resampling context");
-
-    int fifo_duration = 1;  // maximum duration of the FIFO buffer, in seconds
-    fifo_buf_ =
-        av::AudioFifoUPtr(av_audio_fifo_alloc(out_sample_fmt_, out_channels_, out_sample_rate_ * fifo_duration));
-    if (!fifo_buf_) throw_error("failed to allocate FIFO buffer");
-}
-
-bool AudioConverter::sendFrame(const AVFrame *frame) const {
-    if (!frame) throw_error("frame is not allocated");
-    if (av_audio_fifo_space(fifo_buf_.get()) < frame->nb_samples) return false;
-
-    uint8_t **buf = nullptr;
-    auto cleanup = [&buf]() {
-        if (buf) {
-            av_freep(&buf[0]);
-#ifndef _WIN32
-            free(buf);
-#endif
-            buf = nullptr;
-        }
-    };
-
-    try {
-        if (av_samples_alloc_array_and_samples(&buf, nullptr, out_channels_, frame->nb_samples, out_sample_fmt_, 0) < 0)
-            throw_error("failed to alloc samples by av_samples_alloc_array_and_samples.");
-
-        if (swr_convert(resample_ctx_.get(), buf, frame->nb_samples, (const uint8_t **)frame->extended_data,
-                        frame->nb_samples) < 0)
-            throw_error("failed to convert samples");
-
-        if (av_audio_fifo_write(fifo_buf_.get(), (void **)buf, frame->nb_samples) < 0)
-            throw_error("failed to write to fifo");
-    } catch (...) {
-        cleanup();
-        throw;
+        const AVFilter *filter = avfilter_get_by_name("abuffer");
+        if (!filter) throw_error("failed to find src filter definition");
+        if (avfilter_graph_create_filter(&buffersrc_ctx_, filter, "in", args_ss.str().c_str(), nullptr,
+                                         filter_graph_.get()) < 0)
+            throw_error("failed to create src filter");
     }
 
-    cleanup();
+    {
+        const AVFilter *filter = avfilter_get_by_name("abuffersink");
+        if (!filter) throw_error("failed to find sink filter definition");
+        if (avfilter_graph_create_filter(&buffersink_ctx_, filter, "out", nullptr, nullptr, filter_graph_.get()) < 0)
+            throw_error("failed to create sink filter");
+    }
 
-    return true;
+    {
+        /* Endpoints for the filter graph. */
+        av::FilterInOutUPtr outputs(avfilter_inout_alloc());
+        if (!outputs) throw_error("failed to allocate filter outputs");
+        outputs->name = av_strdup("in");
+        outputs->filter_ctx = buffersrc_ctx_;
+        outputs->pad_idx = 0;
+        outputs->next = nullptr;
+
+        av::FilterInOutUPtr inputs(avfilter_inout_alloc());
+        if (!inputs) throw_error("failed to allocate filter inputs");
+        inputs->name = av_strdup("out");
+        inputs->filter_ctx = buffersink_ctx_;
+        inputs->pad_idx = 0;
+        inputs->next = nullptr;
+
+        std::stringstream filter_spec_ss;
+        filter_spec_ss << "asetnsamples=n=" << out_codec_ctx->frame_size;
+        filter_spec_ss << ",";
+        filter_spec_ss << "aformat=sample_fmts=" << av_get_sample_fmt_name(out_codec_ctx->sample_fmt)
+                       << ":sample_rates=" << out_codec_ctx->sample_rate
+                       << ":channel_layouts=" << av_get_channel_name(out_codec_ctx->channel_layout);
+        filter_spec_ss << ",";
+        filter_spec_ss << "asetpts=PTS-STARTPTS";
+
+        AVFilterInOut *outputs_raw = outputs.release();
+        AVFilterInOut *inputs_raw = inputs.release();
+        int ret = avfilter_graph_parse_ptr(filter_graph_.get(), filter_spec_ss.str().c_str(), &inputs_raw, &outputs_raw,
+                                           nullptr);
+        outputs = av::FilterInOutUPtr(outputs_raw);
+        inputs = av::FilterInOutUPtr(inputs_raw);
+        if (ret < 0) throw_error("failed to parse pointers");
+    }
+
+    if (avfilter_graph_config(filter_graph_.get(), nullptr) < 0) throw_error("failed to configure the filter graph");
 }
 
-av::FrameUPtr AudioConverter::getFrame(int64_t frame_number) const {
-    /* not enough samples to build a frame */
-    if (av_audio_fifo_size(fifo_buf_.get()) < out_frame_size_) return nullptr;
+void AudioConverter::sendFrame(av::FrameUPtr frame) const {
+    if (!frame) throw_error("sent frame is not allocated");
+    if (av_buffersrc_add_frame(buffersrc_ctx_, frame.get())) throw_error("failed to write frame to filter");
+}
 
+av::FrameUPtr AudioConverter::getFrame() const {
     av::FrameUPtr frame(av_frame_alloc());
-    if (!frame) throw_error("failed to allocate internal frame");
+    if (!frame) throw_error("failed to allocate frame");
 
-    frame->nb_samples = out_frame_size_;
-    frame->channels = out_channels_;
-    frame->channel_layout = av_get_default_channel_layout(out_channels_);
-    frame->format = out_sample_fmt_;
-    frame->sample_rate = out_sample_rate_;
-    if (av_frame_get_buffer(frame.get(), 0)) throw_error("failed to allocate frame data");
-
-    if (av_audio_fifo_read(fifo_buf_.get(), (void **)frame->data, out_frame_size_) < 0)
-        throw_error("failed to read data into frame");
-
-    frame->pts = frame_number * out_frame_size_;
+    int ret = av_buffersink_get_frame(buffersink_ctx_, frame.get());
+    if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) return nullptr;
+    if (ret < 0) throw_error("failed to receive frame from filter");
 
     return frame;
 }

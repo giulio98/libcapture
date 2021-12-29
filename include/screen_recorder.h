@@ -19,6 +19,7 @@
 
 class ScreenRecorder {
     bool capture_audio_;
+    AVRational time_base_;
 
     /* Synchronization variables */
 

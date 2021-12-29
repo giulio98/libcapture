@@ -1,5 +1,6 @@
 #include "video_converter.h"
 
+#include <iostream>
 #include <sstream>
 #include <stdexcept>
 
@@ -59,6 +60,8 @@ VideoConverter::VideoConverter(const AVCodecContext *in_codec_ctx, const AVCodec
         filter_spec_ss << ",";
         filter_spec_ss << "crop=" << out_codec_ctx->width << ":" << out_codec_ctx->height << ":" << offset_x << ":"
                        << offset_y;
+        filter_spec_ss << ",";
+        filter_spec_ss << "setpts=PTS-STARTPTS";
 
         AVFilterInOut *outputs_raw = outputs.release();
         AVFilterInOut *inputs_raw = inputs.release();
@@ -72,21 +75,18 @@ VideoConverter::VideoConverter(const AVCodecContext *in_codec_ctx, const AVCodec
     if (avfilter_graph_config(filter_graph_.get(), nullptr) < 0) throw_error("failed to configure the filter graph");
 }
 
-bool VideoConverter::sendFrame(const AVFrame *frame) const {
+void VideoConverter::sendFrame(av::FrameUPtr frame) const {
     if (!frame) throw_error("sent frame is not allocated");
-    if (av_buffersrc_write_frame(buffersrc_ctx_, frame)) throw_error("failed to write frame to filter");
-    return true;
+    if (av_buffersrc_add_frame(buffersrc_ctx_, frame.get())) throw_error("failed to write frame to filter");
 }
 
-av::FrameUPtr VideoConverter::getFrame(int64_t frame_number) const {
+av::FrameUPtr VideoConverter::getFrame() const {
     av::FrameUPtr frame(av_frame_alloc());
     if (!frame) throw_error("failed to allocate frame");
 
     int ret = av_buffersink_get_frame(buffersink_ctx_, frame.get());
     if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) return nullptr;
     if (ret < 0) throw_error("failed to receive frame from filter");
-
-    frame->pts = frame_number;
 
     return frame;
 };

@@ -20,7 +20,7 @@
 
 #define DURATION_LOGGING 0
 #define FRAMERATE_LOGGING 0
-#define PROCESSING_THREADS 1
+#define PROCESSING_THREADS 0
 
 ScreenRecorder::ScreenRecorder() {
     out_video_pix_fmt_ = AV_PIX_FMT_YUV420P;
@@ -37,6 +37,9 @@ ScreenRecorder::ScreenRecorder() {
 #endif
 
     video_encoder_options_.insert({"preset", "ultrafast"});
+
+    time_base_.num = 1;
+    time_base_.den = 90000;
 
     avdevice_register_all();
     // av_log_set_level(AV_LOG_PRINT_LEVEL);
@@ -360,18 +363,12 @@ void ScreenRecorder::processPacket(const AVPacket *packet, av::DataType data_typ
             auto frame = decoder->getFrame();
             if (!frame) break;
 
-            bool converter_received = false;
-            while (!converter_received) {
-                converter_received = converter->sendFrame(frame.get());
+            converter->sendFrame(std::move(frame));
 
-                while (true) {
-                    auto converted_frame = converter->getFrame(frame_counter);
-                    if (!converted_frame) break;
-
-                    frame_counter++;
-
-                    processConvertedFrame(converted_frame.get(), data_type);
-                }
+            while (true) {
+                auto converted_frame = converter->getFrame();
+                if (!converted_frame) break;
+                processConvertedFrame(converted_frame.get(), data_type);
             }
         }
     }
@@ -427,6 +424,13 @@ void ScreenRecorder::readPackets(Demuxer *demuxer, bool handle_start_time) {
         packets_queues_[packet_type].push(std::move(packet));
         queues_cv_[packet_type].notify_all();
 #else
+        AVRational in_time_base;
+        if (packet_type == av::DataType::Audio) {
+            in_time_base = demuxer->getAudioTimeBase();
+        } else {
+            in_time_base = demuxer->getVideoTimeBase();
+        }
+        av_packet_rescale_ts(packet.get(), in_time_base, encoders_[packet_type]->getCodecContext()->time_base);
         processPacket(packet.get(), packet_type);
 #endif
     }

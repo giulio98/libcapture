@@ -58,6 +58,18 @@ const AVCodecParameters *Demuxer::getAudioParams() const {
     return audio_stream_->codecpar;
 }
 
+[[nodiscard]] AVRational Demuxer::getVideoTimeBase() const {
+    if (!fmt_ctx_) throw_error("input is not open");
+    if (!video_stream_) throw_error("video stream not present");
+    return video_stream_->time_base;
+}
+
+[[nodiscard]] AVRational Demuxer::getAudioTimeBase() const {
+    if (!fmt_ctx_) throw_error("input is not open");
+    if (!audio_stream_) throw_error("audio stream not present");
+    return audio_stream_->time_base;
+}
+
 std::pair<av::PacketUPtr, av::DataType> Demuxer::readPacket() const {
     if (!fmt_ctx_) throw_error("input is not open");
 

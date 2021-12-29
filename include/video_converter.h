@@ -27,12 +27,12 @@ public:
      * Send a frame to convert
      * @return always true (the return type is only there for compatibility reasons)
      */
-    bool sendFrame(const AVFrame *frame) const override;
+    void sendFrame(av::FrameUPtr frame) const override;
 
     /**
      * Get a converted frame
      * @param frame_number the frame's sequence number to use to compute the PTS
      * @return a new converted frame if it was possible to build it, nullptr otherwise
      */
-    [[nodiscard]] av::FrameUPtr getFrame(int64_t frame_number = 0) const override;
+    [[nodiscard]] av::FrameUPtr getFrame() const override;
 };
