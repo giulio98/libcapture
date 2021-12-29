@@ -307,15 +307,15 @@ void ScreenRecorder::resume() {
 }
 
 void ScreenRecorder::estimateFramerate() {
-    auto estimated_framerate = 1000000 * frame_counters_[av::DataType::Video] / (av_gettime() - start_time_);
+    auto estimated_framerate = 1000000 * video_frames_counter_ / (av_gettime() - start_time_);
 #if FRAMERATE_LOGGING
     std::cout << "Estimated framerate: " << estimated_framerate << " fps" << std::endl;
 #else
-    if (estimated_framerate < (video_framerate_ - 1)) dropped_frame_counter_++;
-    if (dropped_frame_counter_ == 2) {
+    if (estimated_framerate < (video_framerate_ - 1)) dropped_frames_counter_++;
+    if (dropped_frames_counter_ == 2) {
         std::cerr << "WARNING: it looks like you're dropping some frames (estimated " << estimated_framerate
                   << " fps), try to lower the fps" << std::endl;
-        dropped_frame_counter_ = 0;
+        dropped_frames_counter_ = 0;
     }
 #endif
 }
@@ -343,7 +343,6 @@ void ScreenRecorder::processPacket(const AVPacket *packet, av::DataType data_typ
 #endif
     if (!av::isDataTypeValid(data_type)) throw std::runtime_error("Invalid packet received for processing");
 
-    // int64_t &frame_counter = frame_counters_[data_type];
     const Decoder *decoder = decoders_[data_type].get();
     const Converter *converter = converters_[data_type].get();
 
@@ -356,6 +355,10 @@ void ScreenRecorder::processPacket(const AVPacket *packet, av::DataType data_typ
             if (!frame) break;
 
             converter->sendFrame(std::move(frame));
+
+            if (data_type == av::DataType::Video) {
+                if ((++video_frames_counter_ % video_framerate_) == 0) estimateFramerate();
+            }
 
             while (true) {
                 auto converted_frame = converter->getFrame();
@@ -383,6 +386,8 @@ void ScreenRecorder::flushPipelines() {
 }
 
 void ScreenRecorder::readPackets(Demuxer *demuxer, bool handle_start_time) {
+    if (handle_start_time) start_time_ = av_gettime();
+
     while (true) {
         {
             std::unique_lock<std::mutex> ul{m_};
@@ -442,9 +447,8 @@ void ScreenRecorder::processPackets(av::DataType data_type) {
 }
 
 void ScreenRecorder::capture() {
-    /* start counting for PTS */
-    frame_counters_[av::DataType::Video] = 0;
-    frame_counters_[av::DataType::Audio] = 0;
+    video_frames_counter_ = 0;
+    dropped_frames_counter_ = -1;
 
     /* exception pointers for threads */
 #ifdef LINUX

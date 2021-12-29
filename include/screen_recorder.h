@@ -67,12 +67,12 @@ class ScreenRecorder {
     std::array<std::condition_variable, av::DataType::NumDataTypes> queues_cv_;
 
     /* Counters of video and audio frames used to compute PTSs */
-    std::array<int64_t, av::DataType::NumDataTypes> frame_counters_;
+    int64_t video_frames_counter_;
 
     /* Recording start time */
     int64_t start_time_;
     /* Counter of times in which the estimated framerate is lower than the specified one */
-    int dropped_frame_counter_;
+    int dropped_frames_counter_;
 
     /**
      * Set the ScreenRecorder recording parameters after performing some basic validation.
