@@ -348,7 +348,7 @@ void ScreenRecorder::processPacket(const AVPacket *packet, av::DataType data_typ
 #endif
     if (!av::isDataTypeValid(data_type)) throw std::runtime_error("Invalid packet received for processing");
 
-    int64_t &frame_counter = frame_counters_[data_type];
+    // int64_t &frame_counter = frame_counters_[data_type];
     const Decoder *decoder = decoders_[data_type].get();
     const Converter *converter = converters_[data_type].get();
 
@@ -360,18 +360,13 @@ void ScreenRecorder::processPacket(const AVPacket *packet, av::DataType data_typ
             auto frame = decoder->getFrame();
             if (!frame) break;
 
-            bool converter_received = false;
-            while (!converter_received) {
-                converter_received = converter->sendFrame(frame.get());
+            converter->sendFrame(std::move(frame));
 
-                while (true) {
-                    auto converted_frame = converter->getFrame(frame_counter);
-                    if (!converted_frame) break;
+            while (true) {
+                auto converted_frame = converter->getFrame();
+                if (!converted_frame) break;
 
-                    frame_counter++;
-
-                    processConvertedFrame(converted_frame.get(), data_type);
-                }
+                processConvertedFrame(converted_frame.get(), data_type);
             }
         }
     }

@@ -3,21 +3,29 @@
 #include "common.h"
 
 class Converter {
-public:
-    Converter() = default;
+    av::FilterGraphUPtr filter_graph_;
+    AVFilterContext *buffersrc_ctx_;
+    AVFilterContext *buffersink_ctx_;
 
-    virtual ~Converter() = default;
+protected:
+    Converter();
+
+    void init(const std::string &src_name, const std::string &sink_name, const std::string &src_args,
+              const std::string &filter_spec);
+
+    void throwError(const std::string &msg) const;
+
+public:
+    ~Converter() = default;
 
     /**
      * Send a frame to convert
-     * @return true if the conversion was successful, false otherwise
      */
-    virtual bool sendFrame(const AVFrame *frame) const = 0;
+    void sendFrame(av::FrameUPtr frame) const;
 
     /**
      * Get a converted frame
-     * @param frame_number the frame's sequence number to use to compute the PTS
      * @return a new converted frame if it was possible to build it, nullptr otherwise
      */
-    [[nodiscard]] virtual av::FrameUPtr getFrame(int64_t frame_number = 0) const = 0;
+    [[nodiscard]] av::FrameUPtr getFrame() const;
 };

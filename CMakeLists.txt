@@ -13,6 +13,7 @@ add_executable(screen-recorder
     src/muxer.cpp
     src/decoder.cpp
     src/encoder.cpp
+    src/converter.cpp
     src/video_encoder.cpp
     src/audio_encoder.cpp
     src/video_converter.cpp
