@@ -7,8 +7,10 @@ static void throw_error(const std::string &msg) { throw std::runtime_error("Enco
 
 Encoder::Encoder(AVCodecID codec_id) : codec_(nullptr) {
 #ifdef MACOS
-    if (codec_id == AV_CODEC_ID_H264) codec_ = avcodec_find_encoder_by_name("h264_videotoolbox");
-    if (codec_) std::cout << "Using Video-Toolbox encoder" << std::endl;
+    if (codec_id == AV_CODEC_ID_H264) {
+        codec_ = avcodec_find_encoder_by_name("h264_videotoolbox");
+        if (codec_) std::cout << "Using Video-Toolbox encoder" << std::endl;
+    }
 #endif
     if (!codec_) codec_ = avcodec_find_encoder(codec_id);
     if (!codec_) throw_error("cannot find codec");
@@ -17,7 +19,11 @@ Encoder::Encoder(AVCodecID codec_id) : codec_(nullptr) {
     if (!codec_ctx_) throw_error("failed to allocated memory for AVCodecContext");
 }
 
-void Encoder::open(const std::map<std::string, std::string> &options) {
+const AVCodec *Encoder::getCodec() const { return codec_; }
+
+AVCodecContext *Encoder::getCodecContextMod() const { return codec_ctx_.get(); }
+
+void Encoder::init(const std::map<std::string, std::string> &options) {
     av::DictionaryUPtr dict = av::map2dict(options);
     AVDictionary *dict_raw = dict.release();
     int ret = avcodec_open2(codec_ctx_.get(), codec_, dict_raw ? &dict_raw : nullptr);

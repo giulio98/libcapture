@@ -6,13 +6,31 @@
 #include "common.h"
 
 class Encoder {
-protected:
     AVCodec *codec_;
     av::CodecContextUPtr codec_ctx_;
 
+protected:
     explicit Encoder(AVCodecID codec_id);
 
-    void open(const std::map<std::string, std::string> &options);
+    /**
+     * Access the internal encoder
+     * @return a pointer (to const) to the internal encoder
+     */
+    [[nodiscard]] const AVCodec *getCodec() const;
+
+    /**
+     * Access the internal codec context.
+     * This function differs from getCodecContext() because the pointed context is modifiable (not const)
+     * @return a pointer to access the codec context
+     */
+    [[nodiscard]] AVCodecContext *getCodecContextMod() const;
+
+    /**
+     * Initialize the internal codec context.
+     * WARNING: This function must be called after setting the necessary context fields
+     * @param options a map containing the options to use when initializing the context
+     */
+    void init(const std::map<std::string, std::string> &options);
 
 public:
     /**
