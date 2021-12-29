@@ -21,7 +21,7 @@ AudioConverter::AudioConverter(const AVCodecContext *dec_ctx, const AVCodecConte
                    << ":sample_rates=" << enc_ctx->sample_rate
                    << ":channel_layouts=" << av_get_channel_name(enc_ctx->channel_layout);
     /* PTS */
-    filter_spec_ss << ",asetpts=NB_CONSUMED_SAMPLES";
+    filter_spec_ss << ",asetpts=N";
 
     init("abuffer", "abuffersink", src_args_ss.str(), filter_spec_ss.str());
 }
