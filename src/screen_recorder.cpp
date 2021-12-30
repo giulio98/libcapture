@@ -322,7 +322,6 @@ void ScreenRecorder::estimateFramerate() {
 
 void ScreenRecorder::processConvertedFrame(const AVFrame *frame, av::DataType data_type) {
     if (!av::isDataTypeValid(data_type)) throw std::runtime_error("Invalid frame received for processing");
-    if (data_type == av::DataType::Video) estimateFramerate();
 
     const Encoder *encoder = encoders_[data_type].get();
 
@@ -361,6 +360,7 @@ void ScreenRecorder::processPacket(const AVPacket *packet, av::DataType data_typ
                 auto converted_frame = converter->getFrame();
                 if (!converted_frame) break;
                 frames_counter++;
+                if (data_type == av::DataType::Video && (frames_counter % video_framerate_) == 0) estimateFramerate();
                 processConvertedFrame(converted_frame.get(), data_type);
             }
         }
