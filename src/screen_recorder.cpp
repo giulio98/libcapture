@@ -307,7 +307,7 @@ void ScreenRecorder::resume() {
 }
 
 void ScreenRecorder::estimateFramerate() {
-    int64_t estimated_framerate = 1000000 * video_frames_counter_ / (av_gettime() - start_time_);
+    int64_t estimated_framerate = 1000000 * frames_counters_[av::DataType::Video] / (av_gettime() - start_time_);
 #if FRAMERATE_LOGGING
     std::cout << "Estimated framerate: " << estimated_framerate << " fps" << std::endl;
 #else
@@ -322,6 +322,7 @@ void ScreenRecorder::estimateFramerate() {
 
 void ScreenRecorder::processConvertedFrame(const AVFrame *frame, av::DataType data_type) {
     if (!av::isDataTypeValid(data_type)) throw std::runtime_error("Invalid frame received for processing");
+    if (data_type == av::DataType::Video) estimateFramerate();
 
     const Encoder *encoder = encoders_[data_type].get();
 
@@ -343,6 +344,7 @@ void ScreenRecorder::processPacket(const AVPacket *packet, av::DataType data_typ
 #endif
     if (!av::isDataTypeValid(data_type)) throw std::runtime_error("Invalid packet received for processing");
 
+    int64_t &frames_counter = frames_counters_[data_type];
     const Decoder *decoder = decoders_[data_type].get();
     const Converter *converter = converters_[data_type].get();
 
@@ -353,17 +355,12 @@ void ScreenRecorder::processPacket(const AVPacket *packet, av::DataType data_typ
         while (true) {
             auto frame = decoder->getFrame();
             if (!frame) break;
-
             converter->sendFrame(std::move(frame));
-
-            if (data_type == av::DataType::Video) {
-                if ((++video_frames_counter_ % video_framerate_) == 0) estimateFramerate();
-            }
 
             while (true) {
                 auto converted_frame = converter->getFrame();
                 if (!converted_frame) break;
-
+                frames_counter++;
                 processConvertedFrame(converted_frame.get(), data_type);
             }
         }
@@ -447,7 +444,9 @@ void ScreenRecorder::processPackets(av::DataType data_type) {
 }
 
 void ScreenRecorder::capture() {
-    video_frames_counter_ = 0;
+    frames_counters_[av::DataType::Video] = 0;
+    frames_counters_[av::DataType::Audio] = 0;
+
     dropped_frames_counter_ = -1;
 
     /* exception pointers for threads */
