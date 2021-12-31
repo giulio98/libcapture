@@ -11,8 +11,11 @@ AudioConverter::AudioConverter(const AVCodecContext *dec_ctx, const AVCodecConte
     src_args_ss << "time_base=" << in_time_base.num << "/" << in_time_base.den;
     src_args_ss << ":sample_rate=" << dec_ctx->sample_rate;
     src_args_ss << ":sample_fmt=" << av_get_sample_fmt_name(dec_ctx->sample_fmt);
-    /* channels and NOT channel layout since the latter may not be set */
-    src_args_ss << ":channels=" << dec_ctx->channels;
+    if (dec_ctx->channel_layout) {  // if a specific channel layout is known to the decoder, use it
+        src_args_ss << ":channel_layout=" << dec_ctx->channel_layout;
+    } else {  // otherwise, just set the number of channels
+        src_args_ss << ":channels=" << dec_ctx->channels;
+    }
 
     std::stringstream filter_spec_ss;
     /* number of samples for output frames */
