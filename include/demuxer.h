@@ -45,6 +45,18 @@ public:
     [[nodiscard]] const AVCodecParameters *getAudioParams() const;
 
     /**
+     * Get the time-base of the video stream
+     * @return the video time-base
+     */
+    [[nodiscard]] AVRational getVideoTimeBase() const;
+
+    /**
+     * Get the time-base of the audio stream
+     * @return the audio time-base
+     */
+    [[nodiscard]] AVRational getAudioTimeBase() const;
+
+    /**
      * Read a packet from the input device and return it together with its type
      * @return a packet and its type if it was possible to read it, nullptr and a random meaningless type
      * if there was nothing to read

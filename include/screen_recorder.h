@@ -63,8 +63,10 @@ class ScreenRecorder {
     std::map<std::string, std::string> video_encoder_options_;
     std::map<std::string, std::string> audio_encoder_options_;
 
-    std::array<std::queue<av::PacketUPtr>, av::DataType::NumDataTypes> packets_queues_;
-    std::array<std::condition_variable, av::DataType::NumDataTypes> queues_cv_;
+#ifndef LINUX
+    std::array<av::PacketUPtr, av::DataType::NumDataTypes> packets_;
+    std::array<std::condition_variable, av::DataType::NumDataTypes> packets_cv_;
+#endif
 
     /* Counters of video and audio frames used to compute PTSs */
     std::array<int64_t, av::DataType::NumDataTypes> frames_counters_;
@@ -120,12 +122,6 @@ class ScreenRecorder {
      * handle the start_time)
      */
     void readPackets(Demuxer *demuxer, bool handle_start_time = false);
-
-    /**
-     * Process the packets stored in the queue corresponding to data_type
-     * @param data_type the data type of the packets to process
-     */
-    void processPackets(av::DataType data_type);
 
     /**
      * Stop the capturing and notify all the CV

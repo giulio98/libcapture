@@ -16,11 +16,9 @@
 #include "log_callback_setter.h"
 #include "log_level_setter.h"
 #include "scoped_thread.h"
-#include "thread_guard.h"
 
 #define DURATION_LOGGING 0
-#define FRAMERATE_LOGGING 0
-#define PROCESSING_THREADS 0
+#define FRAMERATE_LOGGING 1
 
 ScreenRecorder::ScreenRecorder() {
     out_video_pix_fmt_ = AV_PIX_FMT_YUV420P;
@@ -115,24 +113,25 @@ void ScreenRecorder::initInput() {
     decoders_[av::DataType::Video] = std::make_unique<Decoder>(demuxer_->getVideoParams());
 
     if (capture_audio_) {
+        const AVCodecParameters *audio_params;
 #ifdef LINUX
         audio_demuxer_ =
             std::make_unique<Demuxer>(in_audio_fmt_name_, audio_device_name_, std::map<std::string, std::string>());
         audio_demuxer_->openInput();
-        auto params = audio_demuxer_->getAudioParams();
+        audio_params = audio_demuxer_->getAudioParams();
 #else
-        auto params = demuxer_->getAudioParams();
+        audio_params = demuxer_->getAudioParams();
 #endif
-        decoders_[av::DataType::Audio] = std::make_unique<Decoder>(params);
+        decoders_[av::DataType::Audio] = std::make_unique<Decoder>(audio_params);
     }
 }
 
 void ScreenRecorder::initOutput() {
     muxer_ = std::make_unique<Muxer>(output_file_);
 
-    encoders_[av::DataType::Video] =
-        std::make_unique<VideoEncoder>(out_video_codec_id_, video_encoder_options_, video_width_, video_height_,
-                                       out_video_pix_fmt_, video_framerate_, muxer_->getGlobalHeaderFlags());
+    encoders_[av::DataType::Video] = std::make_unique<VideoEncoder>(
+        out_video_codec_id_, video_encoder_options_, video_width_, video_height_, out_video_pix_fmt_,
+        demuxer_->getVideoTimeBase(), muxer_->getGlobalHeaderFlags());
     muxer_->addVideoStream(encoders_[av::DataType::Video]->getCodecContext());
 
     if (capture_audio_) {
@@ -148,11 +147,18 @@ void ScreenRecorder::initOutput() {
 void ScreenRecorder::initConverters() {
     converters_[av::DataType::Video] = std::make_unique<VideoConverter>(
         decoders_[av::DataType::Video]->getCodecContext(), encoders_[av::DataType::Video]->getCodecContext(),
-        video_offset_x_, video_offset_y_);
+        demuxer_->getVideoTimeBase(), video_offset_x_, video_offset_y_);
 
     if (capture_audio_) {
+        const Demuxer *demuxer;
+#ifdef LINUX
+        demuxer = audio_demuxer_.get();
+#else
+        demuxer = demuxer_.get();
+#endif
         converters_[av::DataType::Audio] = std::make_unique<AudioConverter>(
-            decoders_[av::DataType::Audio]->getCodecContext(), encoders_[av::DataType::Audio]->getCodecContext());
+            decoders_[av::DataType::Audio]->getCodecContext(), encoders_[av::DataType::Audio]->getCodecContext(),
+            demuxer->getAudioTimeBase());
     }
 }
 
@@ -278,8 +284,10 @@ void ScreenRecorder::stopAndNotify() noexcept {
     std::unique_lock<std::mutex> ul{m_};
     stop_capture_ = true;
     status_cv_.notify_all();
-    queues_cv_[av::DataType::Video].notify_all();
-    queues_cv_[av::DataType::Audio].notify_all();
+#ifndef LINUX
+    packets_cv_[av::DataType::Video].notify_all();
+    packets_cv_[av::DataType::Audio].notify_all();
+#endif
 }
 
 void ScreenRecorder::stop() {
@@ -383,12 +391,16 @@ void ScreenRecorder::flushPipelines() {
 }
 
 void ScreenRecorder::readPackets(Demuxer *demuxer, bool handle_start_time) {
+    int64_t pts_offset = 0;
+    int64_t last_pts = 0;
+
     if (handle_start_time) start_time_ = av_gettime();
 
     while (true) {
+        bool handle_pause;
         {
             std::unique_lock<std::mutex> ul{m_};
-            bool handle_pause = paused_;
+            handle_pause = paused_;
             int64_t pause_start_time;
 
             if (handle_pause) {
@@ -410,36 +422,26 @@ void ScreenRecorder::readPackets(Demuxer *demuxer, bool handle_start_time) {
         }
 
         auto [packet, packet_type] = demuxer->readPacket();
-        if (!packet) continue;
-
+        if (!packet) continue;  // no packet to process
         if (!av::isDataTypeValid(packet_type)) throw std::runtime_error("Invalid packet received from demuxer");
 
-#if PROCESSING_THREADS
-        std::unique_lock ul{m_};
-        packets_queues_[packet_type].push(std::move(packet));
-        queues_cv_[packet_type].notify_all();
-#else
-        processPacket(packet.get(), packet_type);
-#endif
-    }
-}
-
-void ScreenRecorder::processPackets(av::DataType data_type) {
-    if (!av::isDataTypeValid(data_type)) throw std::runtime_error("Invalid packet type specified for processing");
-
-    std::queue<av::PacketUPtr> &queue = packets_queues_[data_type];
-
-    while (true) {
-        av::PacketUPtr packet;
-        {
-            std::unique_lock ul{m_};
-            queues_cv_[data_type].wait(ul, [this, &queue]() { return (!queue.empty() || stop_capture_); });
-            if (queue.empty() && stop_capture_) break;
-            packet = std::move(queue.front());
-            queue.pop();
+        /* If we're restarting after a pause, use the first frame to adjust the pts */
+        if (handle_pause) {
+            pts_offset += (packet->pts - last_pts);
+            continue;  // don't process the packet to avoid issues with pts - TO-DO: check if needed!
         }
-        if (!packet) throw std::runtime_error("Empty packet in queue");
-        processPacket(packet.get(), data_type);
+        last_pts = packet->pts;     // save the (original) packet pts for eventual pause
+        packet->pts -= pts_offset;  // adjust pts for pause offset
+
+#ifdef LINUX
+        processPacket(packet.get(), packet_type);
+#else
+        std::unique_lock ul{m_};
+        if (!packets_[packet_type]) {  // if previous packet has been fully processed
+            packets_[packet_type] = std::move(packet);
+            packets_cv_[packet_type].notify_all();
+        }
+#endif
     }
 }
 
@@ -449,47 +451,69 @@ void ScreenRecorder::capture() {
 
     dropped_frames_counter_ = -1;
 
-    /* exception pointers for threads */
 #ifdef LINUX
+    /*
+     * If there are separate demuxers for audio and video,
+     * use a background thread to read the audio packets
+     */
+
     std::exception_ptr audio_reader_e_ptr;
-#endif
+
+    auto audio_reader_fn = [this, &audio_reader_e_ptr] {
+        try {
+            readPackets(audio_demuxer_.get());
+        } catch (...) {
+            audio_reader_e_ptr = std::current_exception();
+            stopAndNotify();
+        }
+    };
+
+#else
+    /*
+     * Otherwise, use two background threads for the separate processing of audio and video
+     * to avoid blocking the reading of one stream with the processing of the other
+     */
+
     std::exception_ptr video_processor_e_ptr;
     std::exception_ptr audio_processor_e_ptr;
+
+    auto processor_fn = [this](av::DataType data_type, std::exception_ptr &e_ptr) {
+        try {
+            if (!av::isDataTypeValid(data_type))
+                throw std::runtime_error("Invalid packet type specified for processing");
+            while (true) {
+                av::PacketUPtr packet;
+                {
+                    std::unique_lock ul{m_};
+                    packets_cv_[data_type].wait(ul,
+                                                [this, data_type]() { return (packets_[data_type] || stop_capture_); });
+                    if (!packets_[data_type] && stop_capture_) break;
+                    packet = std::move(packets_[data_type]);
+                }
+                processPacket(packet.get(), data_type);
+            }
+        } catch (...) {
+            e_ptr = std::current_exception();
+            stopAndNotify();
+        }
+    };
+#endif
 
     {  // threads scope
 #ifdef LINUX
         ScopedThread audio_reader;
-#endif
+#else
         ScopedThread video_processor;
         ScopedThread audio_processor;
-
-        auto processor_fn = [this](av::DataType data_type, std::exception_ptr &e_ptr) {
-            try {
-                processPackets(data_type);
-            } catch (...) {
-                e_ptr = std::current_exception();
-                stopAndNotify();
-            }
-        };
+#endif
 
         try {  // try-catch necessary because of the threads
-#if PROCESSING_THREADS
+#ifdef LINUX
+            if (capture_audio_) audio_reader = std::thread(audio_reader_fn);
+#else
             video_processor = std::thread(processor_fn, av::DataType::Video, std::ref(video_processor_e_ptr));
             if (capture_audio_)
                 audio_processor = std::thread(processor_fn, av::DataType::Audio, std::ref(audio_processor_e_ptr));
-#endif
-
-#ifdef LINUX
-            if (capture_audio_) {
-                audio_reader = std::thread([this, &audio_reader_e_ptr]() {
-                    try {
-                        readPackets(audio_demuxer_.get());
-                    } catch (...) {
-                        audio_reader_e_ptr = std::current_exception();
-                        stopAndNotify();
-                    }
-                });
-            }
 #endif
 
             readPackets(demuxer_.get(), true);
@@ -498,13 +522,14 @@ void ScreenRecorder::capture() {
             stopAndNotify();
             throw;
         }
-    }  // join all threads
+    }  // threads scope : join all threads here
 
 #ifdef LINUX
     if (audio_reader_e_ptr) std::rethrow_exception(audio_reader_e_ptr);
-#endif
+#else
     if (video_processor_e_ptr) std::rethrow_exception(video_processor_e_ptr);
     if (audio_processor_e_ptr) std::rethrow_exception(audio_processor_e_ptr);
+#endif
 
     flushPipelines();
 }
