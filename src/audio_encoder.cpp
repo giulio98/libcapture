@@ -6,8 +6,9 @@ AudioEncoder::AudioEncoder(AVCodecID codec_id, const std::map<std::string, std::
     AVCodecContext *codec_ctx = getCodecContextMod();
 
     codec_ctx->sample_rate = dec_ctx->sample_rate;
-    codec_ctx->channel_layout = dec_ctx->channel_layout;
-    codec_ctx->channels = av_get_channel_layout_nb_channels(codec_ctx->channel_layout);
+    /* Take the channels from the decoder (NOT the channel layout, since it may not be set e.g. on Linux) */
+    codec_ctx->channels = dec_ctx->channels;
+    codec_ctx->channel_layout = av_get_default_channel_layout(codec_ctx->channels);
     codec_ctx->sample_fmt = getCodec()->sample_fmts[0];  // for aac there is AV_SAMPLE_FMT_FLTP = 8
     codec_ctx->time_base.num = 1;
     codec_ctx->time_base.den = codec_ctx->sample_rate;
