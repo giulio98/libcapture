@@ -2,7 +2,7 @@
 
 #include <stdexcept>
 
-static void throw_error(const std::string &msg) { throw std::runtime_error("Decoder:" + msg); }
+static void throw_error(const std::string &msg) { throw std::runtime_error("Decoder: " + msg); }
 
 Decoder::Decoder(const AVCodecParameters *params) : codec_(nullptr) {
     codec_ = avcodec_find_decoder(params->codec_id);
