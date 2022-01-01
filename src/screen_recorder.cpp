@@ -425,13 +425,15 @@ void ScreenRecorder::readPackets(Demuxer *demuxer, bool handle_start_time) {
         if (!packet) continue;  // no packet to process
         if (!av::isDataTypeValid(packet_type)) throw std::runtime_error("Invalid packet received from demuxer");
 
-        /* If we're restarting after a pause, use the first frame to adjust the pts */
-        if (handle_pause) {
-            pts_offset += (packet->pts - last_pts);
-            continue;  // don't process the packet to avoid issues with pts - TO-DO: check if needed!
-        }
-        last_pts = packet->pts;     // save the (original) packet pts for eventual pause
-        packet->pts -= pts_offset;  // adjust pts for pause offset
+        /* if we're restarting after a pause, use the first frame to adjust the pts */
+        if (handle_pause) pts_offset += (packet->pts - last_pts);
+        /* save the (original) packet pts for an eventual pause */
+        last_pts = packet->pts;
+        /* if we're restarting after a pause, don't process the packet to avoid repeating pts */
+        if (handle_pause) continue;
+
+        /* adjust pts for pause offset */
+        packet->pts -= pts_offset;
 
 #ifdef LINUX
         processPacket(packet.get(), packet_type);
