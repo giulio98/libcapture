@@ -34,7 +34,7 @@ ScreenRecorder::ScreenRecorder() {
     in_fmt_name_ = "avfoundation";
 #endif
 
-    video_encoder_options_.insert({"preset", "ultrafast"});
+    video_encoder_options_.insert({"preset", "veryfast"});
 
     avdevice_register_all();
     // av_log_set_level(AV_LOG_PRINT_LEVEL);
