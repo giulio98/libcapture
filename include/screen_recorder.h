@@ -78,7 +78,7 @@ class ScreenRecorder {
 
     /**
      * Set the ScreenRecorder recording parameters after performing some basic validation.
-     * WARNING: This function has to be called before initInput()
+     * WARNING: This function must be called before initInput()
      */
     void setParams(const std::string &video_device, const std::string &audio_device, const std::string &output_file,
                    int video_width, int video_height, int video_offset_x, int video_offset_y, int framerate);
@@ -86,7 +86,7 @@ class ScreenRecorder {
     /**
      * Adjust the ScreenRecorder video measures in case the whole display is recorder
      * and perform some basic validation.
-     * WARNING: This function has to called after initInput() and before initOutput()
+     * WARNING: This function must be called after initInput() and before initOutput()
      */
     void adjustVideoSize();
 
@@ -116,8 +116,8 @@ class ScreenRecorder {
 
     /**
      * Read the packets coming from the specified demuxer and store them in the corresponding queue
-     * @param demuxer           an observer pointer to the demuxer to se to read the packets
-     * @param handle_start_time whether the function should internally handle the start_time variable
+     * @param demuxer           an observer pointer to the demuxer to use to read the packets
+     * @param handle_start_time whether the function should internally handle the start_time_ variable
      * when a pause is performed (WARNING: in case of multiple concurrent threads, only one of them should
      * handle the start_time)
      */
