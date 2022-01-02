@@ -7,10 +7,10 @@ static void throw_error(const std::string &msg) { throw std::runtime_error("Enco
 
 Encoder::Encoder(AVCodecID codec_id) : codec_(nullptr) {
 #ifdef MACOS
-    if (codec_id == AV_CODEC_ID_H264) {
-        codec_ = avcodec_find_encoder_by_name("h264_videotoolbox");
-        if (codec_) std::cout << "Using Video-Toolbox encoder" << std::endl;
-    }
+    // if (codec_id == AV_CODEC_ID_H264) {
+    //     codec_ = avcodec_find_encoder_by_name("h264_videotoolbox");
+    //     if (codec_) std::cout << "Using Video-Toolbox encoder" << std::endl;
+    // }
 #endif
     if (!codec_) codec_ = avcodec_find_encoder(codec_id);
     if (!codec_) throw_error("cannot find codec");
