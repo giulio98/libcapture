@@ -16,10 +16,10 @@ public:
         if (t_.joinable()) t_.join();
     }
 
+    ScopedThread &operator=(const ScopedThread &) = delete;
+
     ScopedThread &operator=(ScopedThread &&other) noexcept {
         t_ = std::move(other.t_);
         return *this;
     }
-
-    ScopedThread &operator=(const ScopedThread &) = delete;
 };
