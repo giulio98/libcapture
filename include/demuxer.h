@@ -33,6 +33,11 @@ public:
     void closeInput();
 
     /**
+     * Flush he internal buffered data
+     */
+    void flush();
+
+    /**
      * Access the video stream parameters
      * @return an observer pointer to access the parameters
      */

@@ -405,7 +405,7 @@ void ScreenRecorder::readPackets(Demuxer *demuxer, bool handle_start_time) {
 
             if (handle_pause) {
                 if (handle_start_time) pause_start_time = av_gettime();
-#ifndef MACOS_TMP
+#ifndef MACOS
                 demuxer->closeInput();
 #endif
             }
@@ -415,8 +415,10 @@ void ScreenRecorder::readPackets(Demuxer *demuxer, bool handle_start_time) {
 
             if (handle_pause) {
                 adjust_pts_offset = true;
-#ifndef MACOS_TMP
+#ifndef MACOS
                 demuxer->openInput();
+#else
+                demuxer->flush();
 #endif
                 if (handle_start_time) start_time_ += (av_gettime() - pause_start_time);
             }
@@ -426,10 +428,12 @@ void ScreenRecorder::readPackets(Demuxer *demuxer, bool handle_start_time) {
         if (!packet) continue;  // no packet to process
         if (!av::isDataTypeValid(packet_type)) throw std::runtime_error("Invalid packet received from demuxer");
 
-        /* if we're restarting after a pause, use the first frame to adjust the pts */
+        /* if we're restarting after a pause, use the first packet to adjust the pts */
         if (adjust_pts_offset) pts_offset += (packet->pts - last_pts);
+
         /* save the (original) packet pts for an eventual pause */
         last_pts = packet->pts;
+
         /* if we're restarting after a pause, don't process the packet to avoid repeating pts */
         if (adjust_pts_offset) {
             adjust_pts_offset = false;

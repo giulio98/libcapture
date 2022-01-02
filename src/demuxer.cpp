@@ -46,6 +46,12 @@ void Demuxer::closeInput() {
     audio_stream_ = nullptr;
 }
 
+void Demuxer::flush() {
+    if (!fmt_ctx_) throw_error("input is not open");
+    if (fmt_ctx_->pb) avio_flush(fmt_ctx_->pb);
+    if (avformat_flush(fmt_ctx_.get()) < 0) throw_error("failed to flush internal data");
+}
+
 const AVCodecParameters *Demuxer::getVideoParams() const {
     if (!fmt_ctx_) throw_error("input is not open");
     if (!video_stream_) throw_error("video stream not present");
