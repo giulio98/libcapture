@@ -190,7 +190,7 @@ public:
 
     /**
      * Pause the screen capture.
-     * If the recording is already pause/stopped, nothing will be done
+     * If the recording is already paused/stopped, nothing will be done
      */
     void pause();
 
