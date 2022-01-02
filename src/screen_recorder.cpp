@@ -405,7 +405,7 @@ void ScreenRecorder::readPackets(Demuxer *demuxer, bool handle_start_time) {
 
             if (handle_pause) {
                 if (handle_start_time) pause_start_time = av_gettime();
-#ifndef MACOS
+#ifndef MACOS_TMP
                 demuxer->closeInput();
 #endif
             }
@@ -415,7 +415,7 @@ void ScreenRecorder::readPackets(Demuxer *demuxer, bool handle_start_time) {
 
             if (handle_pause) {
                 adjust_pts_offset = true;
-#ifndef MACOS
+#ifndef MACOS_TMP
                 demuxer->openInput();
 #endif
                 if (handle_start_time) start_time_ += (av_gettime() - pause_start_time);
