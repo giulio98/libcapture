@@ -393,14 +393,14 @@ void ScreenRecorder::flushPipelines() {
 void ScreenRecorder::readPackets(Demuxer *demuxer, bool handle_start_time) {
     int64_t pts_offset = 0;
     int64_t last_pts = 0;
+    bool adjust_pts_offset = false;
 
     if (handle_start_time) start_time_ = av_gettime();
 
     while (true) {
-        bool handle_pause;
         {
             std::unique_lock<std::mutex> ul{m_};
-            handle_pause = paused_;
+            bool handle_pause = paused_;
             int64_t pause_start_time;
 
             if (handle_pause) {
@@ -414,6 +414,7 @@ void ScreenRecorder::readPackets(Demuxer *demuxer, bool handle_start_time) {
             if (stop_capture_) break;
 
             if (handle_pause) {
+                adjust_pts_offset = true;
 #ifndef MACOS
                 demuxer->openInput();
 #endif
@@ -426,11 +427,14 @@ void ScreenRecorder::readPackets(Demuxer *demuxer, bool handle_start_time) {
         if (!av::isDataTypeValid(packet_type)) throw std::runtime_error("Invalid packet received from demuxer");
 
         /* if we're restarting after a pause, use the first frame to adjust the pts */
-        if (handle_pause) pts_offset += (packet->pts - last_pts);
+        if (adjust_pts_offset) pts_offset += (packet->pts - last_pts);
         /* save the (original) packet pts for an eventual pause */
         last_pts = packet->pts;
         /* if we're restarting after a pause, don't process the packet to avoid repeating pts */
-        if (handle_pause) continue;
+        if (adjust_pts_offset) {
+            adjust_pts_offset = false;
+            continue;
+        }
 
         /* adjust pts for pause offset */
         packet->pts -= pts_offset;
