@@ -45,7 +45,8 @@ ScreenRecorder::ScreenRecorder() {
     avdevice_register_all();
 
 #if SCREEN_RECORDER_VERBOSE
-    av_log_set_level(AV_LOG_DEBUG);
+    av_log_set_level(AV_LOG_VERBOSE);
+    // av_log_set_level(AV_LOG_DEBUG);
 #else
     av_log_set_level(AV_LOG_PRINT_LEVEL);
 #endif
@@ -268,6 +269,7 @@ void ScreenRecorder::start(const std::string &video_device, const std::string &a
                                  ")");
     }
 
+#if SCREEN_RECORDER_VERBOSE
     try {
         std::cout << std::endl;
         printInfo();
@@ -276,6 +278,7 @@ void ScreenRecorder::start(const std::string &video_device, const std::string &a
         std::string details(e.what());
         throw std::runtime_error("Couldn't print streams info (" + details + ")");
     }
+#endif
 
     stop_capture_ = false;
     paused_ = false;
