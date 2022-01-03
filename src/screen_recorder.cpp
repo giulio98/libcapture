@@ -175,7 +175,6 @@ void ScreenRecorder::initConverters() {
 }
 
 void ScreenRecorder::printInfo() const {
-    LogLevelSetter lls(AV_LOG_INFO);
     std::cout << "##### Streams Info #####" << std::endl;
 
     if (!demuxer_) throw std::runtime_error("Demuxer was not allocated yet");
