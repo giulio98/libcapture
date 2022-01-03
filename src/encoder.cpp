@@ -1,6 +1,5 @@
 #include "encoder.h"
 
-#include <iostream>
 #include <stdexcept>
 
 static void throw_error(const std::string &msg) { throw std::runtime_error("Encoder: " + msg); }
