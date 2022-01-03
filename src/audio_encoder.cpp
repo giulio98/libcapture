@@ -14,8 +14,9 @@ AudioEncoder::AudioEncoder(AVCodecID codec_id, const std::map<std::string, std::
         enc_ctx->channel_layout = av_get_default_channel_layout(enc_ctx->channels);
     }
     enc_ctx->sample_fmt = getCodec()->sample_fmts[0];
-    enc_ctx->time_base.num = 1;
-    enc_ctx->time_base.den = enc_ctx->sample_rate;
+    /* for audio, the time base will be automatically set by init() */
+    // enc_ctx->time_base.num = 1;
+    // enc_ctx->time_base.den = enc_ctx->sample_rate;
 
     if (global_header_flags & AVFMT_GLOBALHEADER) enc_ctx->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
 
