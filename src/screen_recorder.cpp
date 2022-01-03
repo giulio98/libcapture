@@ -5,7 +5,7 @@
 #include <sstream>
 #include <stdexcept>
 
-#ifdef _WIN32
+#ifdef WINDOWS
 #include <windows.h>
 #include <winreg.h>
 
@@ -17,8 +17,10 @@
 #include "log_level_setter.h"
 #include "scoped_thread.h"
 
+#if SCREEN_RECORDER_VERBOSE
 #define DURATION_LOGGING 0
 #define FRAMERATE_LOGGING 1
+#endif
 
 ScreenRecorder::ScreenRecorder() {
     out_video_pix_fmt_ = AV_PIX_FMT_YUV420P;
@@ -41,7 +43,12 @@ ScreenRecorder::ScreenRecorder() {
     video_encoder_options_.insert({"preset", "ultrafast"});
 
     avdevice_register_all();
-    // av_log_set_level(AV_LOG_PRINT_LEVEL);
+
+#if SCREEN_RECORDER_VERBOSE
+    av_log_set_level(AV_LOG_DEBUG);
+#else
+    av_log_set_level(AV_LOG_PRINT_LEVEL);
+#endif
 }
 
 ScreenRecorder::~ScreenRecorder() {
@@ -288,7 +295,7 @@ void ScreenRecorder::stopAndNotify() noexcept {
     std::unique_lock<std::mutex> ul{m_};
     stop_capture_ = true;
     status_cv_.notify_all();
-#ifndef LINUX
+#if !defined(LINUX) && USE_PROCESSING_THREADS
     packets_cv_[av::DataType::Video].notify_all();
     packets_cv_[av::DataType::Audio].notify_all();
 #endif
@@ -447,7 +454,7 @@ void ScreenRecorder::readPackets(Demuxer *demuxer, bool handle_start_time) {
         /* adjust pts for pause offset */
         packet->pts -= pts_offset;
 
-#ifdef LINUX
+#if defined(LINUX) || !USE_PROCESSING_THREADS
         processPacket(packet.get(), packet_type);
 #else
         std::unique_lock ul{m_};
@@ -482,7 +489,7 @@ void ScreenRecorder::capture() {
         }
     };
 
-#else
+#elif USE_PROCESSING_THREADS
     /*
      * Otherwise, use two background threads for the separate processing of audio and video
      * to avoid blocking the reading of one stream with the processing of the other
@@ -516,7 +523,7 @@ void ScreenRecorder::capture() {
     {  // threads scope
 #ifdef LINUX
         ScopedThread audio_reader;
-#else
+#elif USE_PROCESSING_THREADS
         ScopedThread video_processor;
         ScopedThread audio_processor;
 #endif
@@ -524,7 +531,7 @@ void ScreenRecorder::capture() {
         try {  // try-catch necessary because of the threads
 #ifdef LINUX
             if (capture_audio_) audio_reader = std::thread(audio_reader_fn);
-#else
+#elif USE_PROCESSING_THREADS
             video_processor = std::thread(processor_fn, av::DataType::Video, std::ref(video_processor_e_ptr));
             if (capture_audio_)
                 audio_processor = std::thread(processor_fn, av::DataType::Audio, std::ref(audio_processor_e_ptr));
@@ -540,7 +547,7 @@ void ScreenRecorder::capture() {
 
 #ifdef LINUX
     if (audio_reader_e_ptr) std::rethrow_exception(audio_reader_e_ptr);
-#else
+#elif USE_PROCESSING_THREADS
     if (video_processor_e_ptr) std::rethrow_exception(video_processor_e_ptr);
     if (audio_processor_e_ptr) std::rethrow_exception(audio_processor_e_ptr);
 #endif

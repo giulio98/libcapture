@@ -63,7 +63,7 @@ class ScreenRecorder {
     std::map<std::string, std::string> video_encoder_options_;
     std::map<std::string, std::string> audio_encoder_options_;
 
-#ifndef LINUX
+#if !defined(LINUX) && USE_PROCESSING_THREADS
     std::array<av::PacketUPtr, av::DataType::NumDataTypes> packets_;
     std::array<std::condition_variable, av::DataType::NumDataTypes> packets_cv_;
 #endif

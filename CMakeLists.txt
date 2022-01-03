@@ -23,6 +23,8 @@ add_executable(screen-recorder
 target_include_directories(screen-recorder PRIVATE src include)
 
 
+add_compile_definitions(USE_PROCESSING_THREADS=1 SCREEN_RECORDER_VERBOSE=0)
+
 IF(WIN32)
 
     MESSAGE(STATUS "Platform is Windows")
