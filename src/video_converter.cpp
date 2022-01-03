@@ -15,12 +15,12 @@ VideoConverter::VideoConverter(const AVCodecContext *dec_ctx, const AVCodecConte
     src_args_ss << ":pixel_aspect=" << dec_ctx->sample_aspect_ratio.num << "/" << dec_ctx->sample_aspect_ratio.den;
 
     std::stringstream filter_spec_ss;
+    /* set PTS */
+    filter_spec_ss << "setpts=PTS-STARTPTS";
     /* format conversion */
-    filter_spec_ss << "format=" << enc_ctx->pix_fmt;
+    filter_spec_ss << ",format=" << enc_ctx->pix_fmt;
     /* cropping */
     filter_spec_ss << ",crop=" << enc_ctx->width << ":" << enc_ctx->height << ":" << offset_x << ":" << offset_y;
-    /* PTS */
-    filter_spec_ss << ",setpts=PTS-STARTPTS";
 
     init("buffer", "buffersink", src_args_ss.str(), filter_spec_ss.str());
 }
