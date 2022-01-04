@@ -42,7 +42,8 @@ std::tuple<int, int, int, int> parse_video_size(const std::string &str) {
     return std::make_tuple(width, height, off_x, off_y);
 }
 
-std::tuple<std::string, std::string, int, int, int, int, int, std::string> get_params(std::vector<std::string> args) {
+std::tuple<std::string, std::string, int, int, int, int, int, std::string, bool> get_params(
+    std::vector<std::string> args) {
     int width = 0;
     int height = 0;
     int off_x = 0;
@@ -74,6 +75,7 @@ std::tuple<std::string, std::string, int, int, int, int, int, std::string> get_p
     bool video_size_set = false;
     bool framerate_set = false;
     bool output_set = false;
+    bool verbose = false;
     std::string wrong_args_msg("Wrong arguments");
 
     for (auto it = args.begin(); it != args.end(); it++) {
@@ -101,6 +103,8 @@ std::tuple<std::string, std::string, int, int, int, int, int, std::string> get_p
             if (output_set || ++it == args.end()) throw std::runtime_error(wrong_args_msg);
             output_file = *it;
             output_set = true;
+        } else if (*it == "-v") {
+            verbose = true;
         } else {
             throw std::runtime_error("Unknown arg: " + *it);
         }
@@ -121,7 +125,7 @@ std::tuple<std::string, std::string, int, int, int, int, int, std::string> get_p
         std::cout << "No output file specified, saving to " << output_file << std::endl;
     }
 
-    return std::make_tuple(video_device, audio_device, width, height, off_x, off_y, framerate, output_file);
+    return std::make_tuple(video_device, audio_device, width, height, off_x, off_y, framerate, output_file, verbose);
 }
 
 int main(int argc, char **argv) {
@@ -135,6 +139,7 @@ int main(int argc, char **argv) {
     int video_width, video_height, video_offset_x, video_offset_y;
     std::string video_device;
     std::string audio_device;
+    bool verbose = false;
 
     try {
         std::vector<std::string> args;
@@ -142,14 +147,14 @@ int main(int argc, char **argv) {
             args.emplace_back(argv[i]);
         }
         std::tie(video_device, audio_device, video_width, video_height, video_offset_x, video_offset_y, framerate,
-                 output_file) = get_params(args);
+                 output_file, verbose) = get_params(args);
     } catch (const std::exception &e) {
         std::string msg(e.what());
         if (msg != "") std::cerr << "ERROR: " << msg << std::endl;
         std::cerr << "Usage: " << argv[0];
         std::cerr << " [-video_device <device_name>] [-audio_device <device_name>|none]";
         std::cerr << " [-video_size <width>x<height>:<offset_x>,<offset_y>]";
-        std::cerr << " [-framerate <framerate>] [-o <output_file>] [-h]";
+        std::cerr << " [-framerate <framerate>] [-o <output_file>] [-v] [-h]";
         std::cerr << std::endl;
         return 1;
     }
@@ -174,7 +179,7 @@ int main(int argc, char **argv) {
         std::thread worker([&]() {
             try {
                 sc.start(video_device, audio_device, output_file, video_width, video_height, video_offset_x,
-                         video_offset_y, framerate);
+                         video_offset_y, framerate, verbose);
                 while (true) {
                     std::unique_lock ul(m);
                     cv.wait(ul, [&]() { return pause || resume || stop; });

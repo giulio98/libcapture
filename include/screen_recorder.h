@@ -18,6 +18,8 @@
 #include "video_encoder.h"
 
 class ScreenRecorder {
+    bool verbose_;
+
     bool capture_audio_;
 
     /* Synchronization variables */
@@ -81,7 +83,8 @@ class ScreenRecorder {
      * WARNING: This function must be called before initInput()
      */
     void setParams(const std::string &video_device, const std::string &audio_device, const std::string &output_file,
-                   int video_width, int video_height, int video_offset_x, int video_offset_y, int framerate);
+                   int video_width, int video_height, int video_offset_x, int video_offset_y, int framerate,
+                   bool verbose);
 
     /**
      * Adjust the ScreenRecorder video measures in case the whole display is recorder
@@ -181,7 +184,8 @@ public:
      * @param framerate         the video framerate to use
      */
     void start(const std::string &video_device, const std::string &audio_device, const std::string &output_file,
-               int video_width, int video_height, int video_offset_x, int video_offset_y, int framerate);
+               int video_width, int video_height, int video_offset_x, int video_offset_y, int framerate,
+               bool verbose = false);
 
     /**
      * Stop the screen capture

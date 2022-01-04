@@ -17,10 +17,7 @@
 #include "log_level_setter.h"
 #include "scoped_thread.h"
 
-#if SCREEN_RECORDER_VERBOSE
 #define DURATION_LOGGING 0
-#define FRAMERATE_LOGGING 1
-#endif
 
 ScreenRecorder::ScreenRecorder() {
     out_video_pix_fmt_ = AV_PIX_FMT_YUV420P;
@@ -43,13 +40,6 @@ ScreenRecorder::ScreenRecorder() {
     video_encoder_options_.insert({"preset", "ultrafast"});
 
     avdevice_register_all();
-
-#if SCREEN_RECORDER_VERBOSE
-    av_log_set_level(AV_LOG_VERBOSE);
-    // av_log_set_level(AV_LOG_DEBUG);
-#else
-    av_log_set_level(AV_LOG_PRINT_LEVEL);
-#endif
 }
 
 ScreenRecorder::~ScreenRecorder() {
@@ -175,7 +165,7 @@ void ScreenRecorder::initConverters() {
 }
 
 void ScreenRecorder::printInfo() const {
-    std::cout << "##### Streams Info #####" << std::endl;
+    std::cout << "##### Screen-Recoder Info #####" << std::endl;
 
     if (demuxer_) demuxer_->dumpInfo();
 #ifdef LINUX
@@ -200,7 +190,7 @@ void ScreenRecorder::printInfo() const {
 
 void ScreenRecorder::setParams(const std::string &video_device, const std::string &audio_device,
                                const std::string &output_file, int video_width, int video_height, int video_offset_x,
-                               int video_offset_y, int framerate) {
+                               int video_offset_y, int framerate, bool verbose) {
     if (framerate <= 0) throw std::runtime_error("Video framerate must be a positive number");
     if (video_width < 0 || video_height < 0) throw std::runtime_error("video width and height must be >= 0");
     if (video_offset_x < 0 || video_offset_y < 0) throw std::runtime_error("video offsets must be >= 0");
@@ -241,6 +231,14 @@ void ScreenRecorder::setParams(const std::string &video_device, const std::strin
     video_height_ = video_height;
     video_offset_x_ = video_offset_x;
     video_offset_y_ = video_offset_y;
+
+    verbose_ = verbose;
+    if (verbose_) {
+        av_log_set_level(AV_LOG_VERBOSE);
+        // av_log_set_level(AV_LOG_DEBUG);
+    } else {
+        av_log_set_level(AV_LOG_PRINT_LEVEL);
+    }
 }
 
 void ScreenRecorder::adjustVideoSize() {
@@ -257,10 +255,10 @@ void ScreenRecorder::adjustVideoSize() {
 
 void ScreenRecorder::start(const std::string &video_device, const std::string &audio_device,
                            const std::string &output_file, int video_width, int video_height, int video_offset_x,
-                           int video_offset_y, int framerate) {
+                           int video_offset_y, int framerate, bool verbose) {
     try {
         setParams(video_device, audio_device, output_file, video_width, video_height, video_offset_x, video_offset_y,
-                  framerate);
+                  framerate, verbose);
         initInput();
         adjustVideoSize();
         initOutput();
@@ -271,16 +269,11 @@ void ScreenRecorder::start(const std::string &video_device, const std::string &a
                                  ")");
     }
 
-#if SCREEN_RECORDER_VERBOSE
-    try {
+    if (verbose_) {
         std::cout << std::endl;
         printInfo();
         std::cout << std::endl;
-    } catch (const std::exception &e) {
-        std::string details(e.what());
-        throw std::runtime_error("Couldn't print streams info (" + details + ")");
     }
-#endif
 
     stop_capture_ = false;
     paused_ = false;
@@ -332,16 +325,16 @@ void ScreenRecorder::resume() {
 
 void ScreenRecorder::estimateFramerate() {
     int64_t estimated_framerate = 1000000 * frames_counters_[av::DataType::Video] / (av_gettime() - start_time_);
-#if FRAMERATE_LOGGING
-    std::cout << "Estimated framerate: " << estimated_framerate << " fps" << std::endl;
-#else
-    if (estimated_framerate < video_framerate_) dropped_frames_counter_++;
-    if (dropped_frames_counter_ == 2) {
-        std::cerr << "WARNING: it looks like you're dropping some frames (estimated " << estimated_framerate
-                  << " fps), try to lower the fps" << std::endl;
-        dropped_frames_counter_ = 0;
+    if (verbose_) {
+        std::cout << "Estimated framerate: " << estimated_framerate << " fps" << std::endl;
+    } else {
+        if (estimated_framerate < video_framerate_) dropped_frames_counter_++;
+        if (dropped_frames_counter_ == 2) {
+            std::cerr << "WARNING: it looks like you're dropping some frames (estimated " << estimated_framerate
+                      << " fps), try to lower the fps" << std::endl;
+            dropped_frames_counter_ = 0;
+        }
     }
-#endif
 }
 
 void ScreenRecorder::processConvertedFrame(const AVFrame *frame, av::DataType data_type) {
