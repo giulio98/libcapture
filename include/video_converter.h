@@ -7,9 +7,9 @@ class VideoConverter : public Converter {
 public:
     /**
      * Create a new video converter
-     * @param dec_ctx       the codec context containing the input params (from the decoder)
-     * @param enc_ctx       the codec context containing the output params (from the encoder)
-     * @param in_time_base  the time-base of the input frames
+     * @param dec_ctx       the decoder context containing the input params
+     * @param enc_ctx       the encoder context containing the output params
+     * @param in_time_base  the time-base of the input frames (must be taken from the demuxer)
      * @param offset_x      the horizontal offset to use when performing the cropping of the frames
      * @param offset_y      the vertical offset to use when performing the cropping of the frames
      */
