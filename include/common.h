@@ -57,6 +57,16 @@ inline DictionaryUPtr map2dict(const std::map<std::string, std::string> &map) {
     return DictionaryUPtr(dict);
 }
 
+inline std::map<std::string, std::string> dict2map(const AVDictionary *dict) {
+    std::map<std::string, std::string> map;
+    const AVDictionaryEntry *entry = nullptr;
+    do {
+        entry = av_dict_get(dict, "", entry, AV_DICT_IGNORE_SUFFIX);
+        if (entry) map.insert({entry->key, entry->value});
+    } while (entry);
+    return map;
+}
+
 inline bool isDataTypeValid(DataType data_type) {
     return (data_type == DataType::Audio || data_type == DataType::Video);
 }
