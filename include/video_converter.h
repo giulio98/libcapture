@@ -9,7 +9,7 @@ public:
      * Create a new video converter
      * @param dec_ctx       the codec context containing the input params (from the decoder)
      * @param enc_ctx       the codec context containing the output params (from the encoder)
-     * @param in_time_base  the time-base of the input packets
+     * @param in_time_base  the time-base of the input frames
      * @param offset_x      the horizontal offset to use when performing the cropping of the frames
      * @param offset_y      the vertical offset to use when performing the cropping of the frames
      */
