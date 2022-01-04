@@ -177,17 +177,20 @@ void ScreenRecorder::initConverters() {
 void ScreenRecorder::printInfo() const {
     std::cout << "##### Streams Info #####" << std::endl;
 
-    if (!demuxer_) throw std::runtime_error("Demuxer was not allocated yet");
-    demuxer_->dumpInfo();
+    if (demuxer_) demuxer_->dumpInfo();
 #ifdef LINUX
-    if (capture_audio_) {
-        if (!audio_demuxer_) throw std::runtime_error("Audio demuxer was not allocated yet");
-        audio_demuxer_->dumpInfo(1);
-    }
+    if (capture_audio_ && audio_demuxer_) audio_demuxer_->dumpInfo(1);
 #endif
 
-    if (!muxer_) throw std::runtime_error("Muxer was not allocated yet");
-    muxer_->dumpInfo();
+    if (muxer_) muxer_->dumpInfo();
+
+    if (encoders_[av::DataType::Video]) {
+        std::cout << "Video encoder: " << encoders_[av::DataType::Video]->getName() << std::endl;
+    }
+
+    if (capture_audio_ && encoders_[av::DataType::Audio]) {
+        std::cout << "Audio encoder: " << encoders_[av::DataType::Audio]->getName() << std::endl;
+    }
 
     std::cout << "Video framerate: " << video_framerate_ << " fps";
     if (video_framerate_ > 30)
