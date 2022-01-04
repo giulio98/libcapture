@@ -3,7 +3,7 @@
 AudioEncoder::AudioEncoder(AVCodecID codec_id, const std::map<std::string, std::string> &options,
                            const AVCodecContext *dec_ctx, int global_header_flags)
     : Encoder(codec_id) {
-    AVCodecContext *enc_ctx = getCodecContextMod();
+    AVCodecContext *enc_ctx = getContextMod();
 
     enc_ctx->sample_rate = dec_ctx->sample_rate;
     if (dec_ctx->channel_layout) { /* if a specific channel layout is known to the decoder, keep it */

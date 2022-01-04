@@ -33,5 +33,5 @@ public:
      * Access the internal codec context
      * @return an observer pointer to access the codec context
      */
-    [[nodiscard]] const AVCodecContext *getCodecContext() const;
+    [[nodiscard]] const AVCodecContext *getContext() const;
 };

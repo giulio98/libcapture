@@ -3,7 +3,7 @@
 VideoEncoder::VideoEncoder(AVCodecID codec_id, const std::map<std::string, std::string> &options, int width, int height,
                            AVPixelFormat pix_fmt, AVRational time_base, int global_header_flags)
     : Encoder(codec_id) {
-    AVCodecContext *enc_ctx = getCodecContextMod();
+    AVCodecContext *enc_ctx = getContextMod();
 
     enc_ctx->width = width;
     enc_ctx->height = height;

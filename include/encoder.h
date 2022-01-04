@@ -23,10 +23,10 @@ protected:
 
     /**
      * Access the internal codec context.
-     * This function differs from getCodecContext() because the pointed context is modifiable (not const)
+     * This function differs from getContext() because the pointed context is modifiable (not const)
      * @return a pointer to access the codec context
      */
-    [[nodiscard]] AVCodecContext *getCodecContextMod() const;
+    [[nodiscard]] AVCodecContext *getContextMod() const;
 
     /**
      * Initialize the internal codec context (note that a not-initialized encode won't be usable).
@@ -54,7 +54,7 @@ public:
      * Access the internal codec context
      * @return an observer pointer to access the codec context
      */
-    [[nodiscard]] const AVCodecContext *getCodecContext() const;
+    [[nodiscard]] const AVCodecContext *getContext() const;
 
     /** Get the encoder name
      * @return the encoder name

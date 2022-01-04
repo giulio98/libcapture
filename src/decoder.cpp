@@ -35,4 +35,4 @@ av::FrameUPtr Decoder::getFrame() const {
     return frame;
 }
 
-const AVCodecContext *Decoder::getCodecContext() const { return codec_ctx_.get(); }
+const AVCodecContext *Decoder::getContext() const { return codec_ctx_.get(); }
