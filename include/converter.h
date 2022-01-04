@@ -8,11 +8,25 @@ class Converter {
     AVFilterContext *buffersink_ctx_;
 
 protected:
+    /**
+     * Create a new converter
+     */
     Converter();
 
-    void init(const std::string &src_name, const std::string &sink_name, const std::string &src_args,
-              const std::string &filter_spec);
+    /**
+     * Initialize the converter (note that the converter won't be usable without initialization)
+     * @param src_filter_name   the name of the src filter to use
+     * @param sunk_filter_name  the name of the sink filter to use
+     * @param src_filter_args   the arguments to use for the src filter
+     * @param filter_spec       the specifications of the conversion filter
+     */
+    void init(const std::string &src_filter_name, const std::string &sink_filter_name,
+              const std::string &src_filter_args, const std::string &filter_spec);
 
+    /**
+     * Throw an std::runtime_error exception
+     * @param msg the message to throw
+     */
     void throwError(const std::string &msg) const;
 
 public:

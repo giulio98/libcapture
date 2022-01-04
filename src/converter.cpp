@@ -7,10 +7,10 @@ Converter::Converter() : buffersrc_ctx_(nullptr), buffersink_ctx_(nullptr) {
     if (!filter_graph_) throwError("failed to allocate filter graph");
 }
 
-void Converter::init(const std::string &src_name, const std::string &sink_name, const std::string &src_args,
-                     const std::string &filter_spec) {
+void Converter::init(const std::string &src_filter_name, const std::string &sink_filter_name,
+                     const std::string &src_args, const std::string &filter_spec) {
     { /* buffer src set-up*/
-        const AVFilter *filter = avfilter_get_by_name(src_name.c_str());
+        const AVFilter *filter = avfilter_get_by_name(src_filter_name.c_str());
         if (!filter) throwError("failed to find src filter definition");
         if (avfilter_graph_create_filter(&buffersrc_ctx_, filter, "in", src_args.c_str(), nullptr,
                                          filter_graph_.get()) < 0)
@@ -18,7 +18,7 @@ void Converter::init(const std::string &src_name, const std::string &sink_name, 
     }
 
     { /* buffer sink set-up*/
-        const AVFilter *filter = avfilter_get_by_name(sink_name.c_str());
+        const AVFilter *filter = avfilter_get_by_name(sink_filter_name.c_str());
         if (!filter) throwError("failed to find sink filter definition");
         if (avfilter_graph_create_filter(&buffersink_ctx_, filter, "out", nullptr, nullptr, filter_graph_.get()) < 0)
             throwError("failed to create src filter");

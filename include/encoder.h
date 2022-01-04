@@ -10,6 +10,9 @@ class Encoder {
     av::CodecContextUPtr codec_ctx_;
 
 protected:
+    /** Create a new encoder
+     * @param codec_id the ID of the codec to which encode the frames
+     */
     explicit Encoder(AVCodecID codec_id);
 
     /**
@@ -26,7 +29,7 @@ protected:
     [[nodiscard]] AVCodecContext *getCodecContextMod() const;
 
     /**
-     * Initialize the internal codec context.
+     * Initialize the internal codec context (note that a not-initialized encode won't be usable).
      * WARNING: This function must be called after setting the necessary context fields
      * @param options a map containing the options to use when initializing the context
      */
