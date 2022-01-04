@@ -39,15 +39,15 @@ bool Encoder::sendFrame(const AVFrame *frame) const {
     return true;
 }
 
-av::PacketUPtr Encoder::getPacket() const {
-    av::PacketUPtr packet(av_packet_alloc());
-    if (!packet) throw_error("failed to allocate packet");
+av::PacketUPtr Encoder::getPacket() {
+    if (!packet_) packet_ = av::PacketUPtr(av_packet_alloc());
+    if (!packet_) throw_error("failed to allocate packet");
 
-    int ret = avcodec_receive_packet(codec_ctx_.get(), packet.get());
+    int ret = avcodec_receive_packet(codec_ctx_.get(), packet_.get());
     if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) return nullptr;
     if (ret < 0) throw_error("failed to receive frame from decoder");
 
-    return packet;
+    return std::move(packet_);
 }
 
 const AVCodecContext *Encoder::getCodecContext() const { return codec_ctx_.get(); }
