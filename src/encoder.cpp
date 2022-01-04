@@ -15,8 +15,11 @@ Encoder::Encoder(AVCodecID codec_id) : codec_(nullptr) {
         codec_ = avcodec_find_encoder_by_name("aac_at");
     }
 #endif
-    if (!codec_) codec_ = avcodec_find_encoder(codec_id);
-    if (!codec_) throw_error("cannot find codec");
+
+    if (!codec_) {
+        codec_ = avcodec_find_encoder(codec_id);
+        if (!codec_) throw_error("cannot find codec");
+    }
 
     codec_ctx_ = av::CodecContextUPtr(avcodec_alloc_context3(codec_));
     if (!codec_ctx_) throw_error("failed to allocated memory for AVCodecContext");
