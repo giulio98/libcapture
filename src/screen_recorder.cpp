@@ -363,7 +363,7 @@ void ScreenRecorder::processPacket(const AVPacket *packet, av::DataType data_typ
 
     int64_t &frames_counter = frames_counters_[data_type];
     Decoder *decoder = decoders_[data_type].get();
-    const Converter *converter = converters_[data_type].get();
+    Converter *converter = converters_[data_type].get();
 
     bool decoder_received = false;
     while (!decoder_received) {

@@ -6,6 +6,7 @@ class Converter {
     av::FilterGraphUPtr filter_graph_;
     AVFilterContext *buffersrc_ctx_;
     AVFilterContext *buffersink_ctx_;
+    av::FrameUPtr frame_;
 
 protected:
     Converter();
@@ -27,5 +28,5 @@ public:
      * Get a converted frame
      * @return a new converted frame if it was possible to build it, nullptr otherwise
      */
-    [[nodiscard]] av::FrameUPtr getFrame() const;
+    [[nodiscard]] av::FrameUPtr getFrame();
 };

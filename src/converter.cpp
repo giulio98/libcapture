@@ -58,15 +58,15 @@ void Converter::sendFrame(av::FrameUPtr frame) const {
     if (av_buffersrc_add_frame(buffersrc_ctx_, frame.get())) throwError("failed to write frame to filter");
 }
 
-av::FrameUPtr Converter::getFrame() const {
+av::FrameUPtr Converter::getFrame() {
     if (!buffersink_ctx_) throwError("buffersink is not allocated");
 
-    av::FrameUPtr frame(av_frame_alloc());
-    if (!frame) throwError("failed to allocate frame");
+    if (!frame_) frame_ = av::FrameUPtr(av_frame_alloc());
+    if (!frame_) throwError("failed to allocate frame");
 
-    int ret = av_buffersink_get_frame(buffersink_ctx_, frame.get());
+    int ret = av_buffersink_get_frame(buffersink_ctx_, frame_.get());
     if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) return nullptr;
     if (ret < 0) throwError("failed to receive frame from filter");
 
-    return frame;
+    return std::move(frame_);
 };
