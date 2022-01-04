@@ -1,5 +1,6 @@
 #include "demuxer.h"
 
+#include <iostream>
 #include <stdexcept>
 
 #define VERBOSE 0
