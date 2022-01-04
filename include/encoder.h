@@ -52,4 +52,9 @@ public:
      * @return an observer pointer to access the codec context
      */
     [[nodiscard]] const AVCodecContext *getCodecContext() const;
+
+    /** Get the encoder name
+     * @return the encoder name
+     */
+    [[nodiscard]] std::string getName() const;
 };
