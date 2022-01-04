@@ -12,6 +12,7 @@ class Demuxer {
     std::map<std::string, std::string> options_;
     const AVStream *video_stream_;
     const AVStream *audio_stream_;
+    av::PacketUPtr packet_;
 
 public:
     /**
@@ -66,7 +67,7 @@ public:
      * @return a packet and its type if it was possible to read it, nullptr and a random meaningless type
      * if there was nothing to read
      */
-    [[nodiscard]] std::pair<av::PacketUPtr, av::DataType> readPacket() const;
+    [[nodiscard]] std::pair<av::PacketUPtr, av::DataType> readPacket();
 
     /**
      * Print informations about the streams
