@@ -2,6 +2,8 @@
 
 #include <stdexcept>
 
+#define VERBOSE 0
+
 static void throw_error(const std::string &msg) { throw std::runtime_error("Demuxer: " + msg); }
 
 Demuxer::Demuxer(const std::string &fmt_name, std::string device_name, std::map<std::string, std::string> options)
@@ -25,6 +27,12 @@ void Demuxer::openInput() {
         dict = av::DictionaryUPtr(dict_raw);
         fmt_ctx_ = av::InFormatContextUPtr(fmt_ctx);
         if (ret) throw_error("cannot open input format");
+#if VERBOSE
+        auto map = av::dict2map(dict.get());
+        for (const auto &[key, val] : map) {
+            std::cerr << "Encoder: couldn't find any '" << key << "' option" << std::endl;
+        }
+#endif
     }
 
     if (avformat_find_stream_info(fmt_ctx_.get(), nullptr) < 0) throw_error("Failed to find stream info");

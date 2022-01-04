@@ -2,6 +2,8 @@
 
 #include <stdexcept>
 
+#define VERBOSE 0
+
 static void throw_error(const std::string &msg) { throw std::runtime_error("Encoder: " + msg); }
 
 Encoder::Encoder(AVCodecID codec_id) : codec_(nullptr) {
@@ -29,6 +31,12 @@ void Encoder::init(const std::map<std::string, std::string> &options) {
     int ret = avcodec_open2(codec_ctx_.get(), codec_, dict_raw ? &dict_raw : nullptr);
     dict = av::DictionaryUPtr(dict_raw);
     if (ret) throw_error("failed to initialize Codec Context");
+#if VERBOSE
+    auto map = av::dict2map(dict.get());
+    for (const auto &[key, val] : map) {
+        std::cerr << "Encoder: couldn't find any '" << key << "' option" << std::endl;
+    }
+#endif
 }
 
 bool Encoder::sendFrame(const AVFrame *frame) const {
