@@ -21,7 +21,9 @@ Muxer::~Muxer() {
     if (file_opened_ && !file_closed_) {
         std::cerr << "Demuxer: WARNING, the output file " << filename_
                   << " has not been closed, trying to close now...";
-        if (avio_close(fmt_ctx_->pb) < 0) std::cerr << " failed to close file";
+        if (fmt_ctx_->pb) {
+            if (avio_close(fmt_ctx_->pb) < 0) std::cerr << " failed to close file";
+        }
         std::cerr << std::endl;
     }
 }
@@ -69,7 +71,9 @@ void Muxer::closeFile() {
     if (!file_opened_) throw_error("cannot close file, file has not been opened");
     if (file_closed_) throw_error("cannot close file, file has already been closed");
     if (av_write_trailer(fmt_ctx_.get()) < 0) throw_error("failed to write file trailer");
-    if (avio_close(fmt_ctx_->pb) < 0) throw_error("failed to close file");
+    if (fmt_ctx_->pb) {
+        if (avio_close(fmt_ctx_->pb) < 0) throw_error("failed to close file");
+    }
     file_closed_ = true;
 }
 
