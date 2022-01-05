@@ -405,6 +405,7 @@ void ScreenRecorder::readPackets(Demuxer *demuxer, bool handle_start_time) {
     int64_t pts_offset = 0;
     int64_t last_pts = 0;
     bool adjust_pts_offset = false;
+    std::chrono::milliseconds sleep_interval(std::min(5, 300 / video_framerate_));
 
     if (handle_start_time) start_time_ = av_gettime();
 
@@ -436,7 +437,10 @@ void ScreenRecorder::readPackets(Demuxer *demuxer, bool handle_start_time) {
         }
 
         auto [packet, packet_type] = demuxer->readPacket();
-        if (!packet) continue;  // no packet to process
+        if (!packet) {  // no packet to process
+            std::this_thread::sleep_for(sleep_interval);
+            continue;
+        }
         if (!av::isDataTypeValid(packet_type)) throw std::runtime_error("Invalid packet received from demuxer");
 
         /* if we're restarting after a pause, use the first packet to adjust the pts */
