@@ -5,12 +5,9 @@
 
 static void throw_error(const std::string &msg) { throw std::runtime_error("Muxer: " + msg); }
 
-Muxer::Muxer(std::string filename)
-    : filename_(std::move(filename)),
-      video_stream_(nullptr),
-      audio_stream_(nullptr),
-      file_opened_(false),
-      file_closed_(false) {
+Muxer::Muxer(std::string filename) : filename_(std::move(filename)), file_opened_(false), file_closed_(false) {
+    streams_[av::DataType::Audio] = nullptr;
+    streams_[av::DataType::Video] = nullptr;
     AVFormatContext *fmt_ctx = nullptr;
     if (avformat_alloc_output_context2(&fmt_ctx, nullptr, nullptr, filename_.c_str()) < 0)
         throw_error("failed to allocate output format context");
@@ -28,30 +25,20 @@ Muxer::~Muxer() {
     }
 }
 
-void Muxer::addVideoStream(const AVCodecContext *enc_ctx) {
+void Muxer::addStream(const AVCodecContext *enc_ctx, av::DataType data_type) {
     if (file_opened_) throw_error("cannot add a new stream, file has already been opened");
-    if (video_stream_) throw_error("video stream already added");
 
-    video_stream_ = avformat_new_stream(fmt_ctx_.get(), nullptr);
-    if (!video_stream_) throw_error("failed to create a new video stream");
+    const AVStream *stream = streams_[data_type];
 
-    if (avcodec_parameters_from_context(video_stream_->codecpar, enc_ctx) < 0)
+    if (stream) throw_error("stream of specified type already added");
+    stream = avformat_new_stream(fmt_ctx_.get(), nullptr);
+    if (!stream) throw_error("failed to create a new stream");
+
+    if (avcodec_parameters_from_context(stream->codecpar, enc_ctx) < 0)
         throw_error("failed to write video stream parameters");
 
-    video_enc_time_base_ = enc_ctx->time_base;
-}
-
-void Muxer::addAudioStream(const AVCodecContext *enc_ctx) {
-    if (file_opened_) throw_error("cannot add a new stream, file has already been opened");
-    if (audio_stream_) throw_error("audio stream already added");
-
-    audio_stream_ = avformat_new_stream(fmt_ctx_.get(), nullptr);
-    if (!audio_stream_) throw_error("failed to create a new audio stream");
-
-    if (avcodec_parameters_from_context(audio_stream_->codecpar, enc_ctx) < 0)
-        throw_error("failed to write audio stream parameters");
-
-    audio_enc_time_base_ = enc_ctx->time_base;
+    streams_[data_type] = stream;
+    encoders_time_bases_[data_type] = enc_ctx->time_base;
 }
 
 void Muxer::openFile() {
@@ -83,17 +70,11 @@ void Muxer::writePacket(av::PacketUPtr packet, av::DataType packet_type) {
     if (file_closed_) throw_error("cannot write packet, file has already been closed");
 
     if (packet) {
-        if (packet_type == av::DataType::Video) {
-            if (!video_stream_) throw_error("video stream not present");
-            av_packet_rescale_ts(packet.get(), video_enc_time_base_, video_stream_->time_base);
-            packet->stream_index = video_stream_->index;
-        } else if (packet_type == av::DataType::Audio) {
-            if (!audio_stream_) throw_error("audio stream not present");
-            av_packet_rescale_ts(packet.get(), audio_enc_time_base_, audio_stream_->time_base);
-            packet->stream_index = audio_stream_->index;
-        } else {
-            throw_error("received packet is of unknown type");
-        }
+        if (!av::isDataTypeValid(packet_type)) throw_error("received packet of unknown type");
+        const AVStream *stream = streams_[packet_type];
+        if (!stream) throw_error("stream of specified type not present");
+        av_packet_rescale_ts(packet.get(), encoders_time_bases_[packet_type], stream->time_base);
+        packet->stream_index = stream->index;
     }
 
     std::unique_lock ul{m_};

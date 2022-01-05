@@ -136,7 +136,7 @@ void ScreenRecorder::initOutput() {
     encoders_[av::DataType::Video] = std::make_unique<VideoEncoder>(
         out_video_codec_id_, video_width_, video_height_, out_video_pix_fmt_, demuxer_->getVideoTimeBase(),
         muxer_->getGlobalHeaderFlags(), video_encoder_options_);
-    muxer_->addVideoStream(encoders_[av::DataType::Video]->getContext());
+    muxer_->addStream(encoders_[av::DataType::Video]->getContext(), av::DataType::Video);
 
     if (capture_audio_) {
         const AVCodecContext *dec_ctx = decoders_[av::DataType::Audio]->getContext();
@@ -146,7 +146,7 @@ void ScreenRecorder::initOutput() {
         encoders_[av::DataType::Audio] =
             std::make_unique<AudioEncoder>(out_audio_codec_id_, dec_ctx->sample_rate, channel_layout,
                                            muxer_->getGlobalHeaderFlags(), audio_encoder_options_);
-        muxer_->addAudioStream(encoders_[av::DataType::Audio]->getContext());
+        muxer_->addStream(encoders_[av::DataType::Audio]->getContext(), av::DataType::Audio);
     }
 
     muxer_->openFile();

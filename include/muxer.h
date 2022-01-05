@@ -1,5 +1,6 @@
 #pragma once
 
+#include <array>
 #include <mutex>
 #include <string>
 
@@ -8,10 +9,8 @@
 class Muxer {
     av::FormatContextUPtr fmt_ctx_;
     std::string filename_;
-    const AVStream *video_stream_;
-    const AVStream *audio_stream_;
-    AVRational video_enc_time_base_{};
-    AVRational audio_enc_time_base_{};
+    std::array<const AVStream *, av::DataType::NumDataTypes> streams_;
+    std::array<AVRational, av::DataType::NumDataTypes> encoders_time_bases_;
     bool file_opened_;
     bool file_closed_;
     std::mutex m_;
@@ -26,18 +25,12 @@ public:
     ~Muxer();
 
     /**
-     * Add a video stream to the muxer.
+     * Add a stream to the muxer.
      * WARNING: This function must be called before opening the file with openFile()
-     * @param enc_ctx the context of the encoder generating the packet stream
+     * @param enc_ctx   the context of the encoder generating the packet stream
+     * @param data_type the type of data of the stream
      */
-    void addVideoStream(const AVCodecContext *enc_ctx);
-
-    /**
-     * Add an audio stream to the muxer.
-     * WARNING: This function must be called before opening the file with openFile()
-     * @param enc_ctx the context of the encoder generating the packet stream
-     */
-    void addAudioStream(const AVCodecContext *enc_ctx);
+    void addStream(const AVCodecContext *enc_ctx, av::DataType data_type);
 
     /**
      * Open the file and write the header.
