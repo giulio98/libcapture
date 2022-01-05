@@ -18,6 +18,7 @@ add_executable(screen-recorder
     src/audio_encoder.cpp
     src/video_converter.cpp
     src/audio_converter.cpp
+    src/pipeline.cpp
 )
 
 target_include_directories(screen-recorder PRIVATE src include)
