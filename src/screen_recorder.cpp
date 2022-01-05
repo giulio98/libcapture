@@ -1,9 +1,10 @@
 #include "screen_recorder.h"
 
+#include <chrono>
 #include <cstdlib>
-#include <future>
 #include <sstream>
 #include <stdexcept>
+#include <thread>
 
 #ifdef WINDOWS
 #include <windows.h>
