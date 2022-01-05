@@ -10,8 +10,8 @@ class Muxer {
     std::string filename_;
     const AVStream *video_stream_;
     const AVStream *audio_stream_;
-    AVRational video_codec_time_base_{};
-    AVRational audio_codec_time_base_{};
+    AVRational video_enc_time_base_{};
+    AVRational audio_enc_time_base_{};
     bool file_opened_;
     bool file_closed_;
     std::mutex m_;
@@ -28,16 +28,16 @@ public:
     /**
      * Add a video stream to the muxer.
      * WARNING: This function must be called before opening the file with openFile()
-     * @param codec_ctx a codec context containing the video parameters
+     * @param enc_ctx the context of the encoder generating the packet stream
      */
-    void addVideoStream(const AVCodecContext *codec_ctx);
+    void addVideoStream(const AVCodecContext *enc_ctx);
 
     /**
      * Add an audio stream to the muxer.
      * WARNING: This function must be called before opening the file with openFile()
-     * @param codec_ctx a codec context containing the audio parameters
+     * @param enc_ctx the context of the encoder generating the packet stream
      */
-    void addAudioStream(const AVCodecContext *codec_ctx);
+    void addAudioStream(const AVCodecContext *enc_ctx);
 
     /**
      * Open the file and write the header.

@@ -26,30 +26,30 @@ Muxer::~Muxer() {
     }
 }
 
-void Muxer::addVideoStream(const AVCodecContext *codec_ctx) {
+void Muxer::addVideoStream(const AVCodecContext *enc_ctx) {
     if (file_opened_) throw_error("cannot add a new stream, file has already been opened");
     if (video_stream_) throw_error("video stream already added");
 
     video_stream_ = avformat_new_stream(fmt_ctx_.get(), nullptr);
     if (!video_stream_) throw_error("failed to create a new video stream");
 
-    if (avcodec_parameters_from_context(video_stream_->codecpar, codec_ctx) < 0)
+    if (avcodec_parameters_from_context(video_stream_->codecpar, enc_ctx) < 0)
         throw_error("failed to write video stream parameters");
 
-    video_codec_time_base_ = codec_ctx->time_base;
+    video_enc_time_base_ = enc_ctx->time_base;
 }
 
-void Muxer::addAudioStream(const AVCodecContext *codec_ctx) {
+void Muxer::addAudioStream(const AVCodecContext *enc_ctx) {
     if (file_opened_) throw_error("cannot add a new stream, file has already been opened");
     if (audio_stream_) throw_error("audio stream already added");
 
     audio_stream_ = avformat_new_stream(fmt_ctx_.get(), nullptr);
     if (!audio_stream_) throw_error("failed to create a new audio stream");
 
-    if (avcodec_parameters_from_context(audio_stream_->codecpar, codec_ctx) < 0)
+    if (avcodec_parameters_from_context(audio_stream_->codecpar, enc_ctx) < 0)
         throw_error("failed to write audio stream parameters");
 
-    audio_codec_time_base_ = codec_ctx->time_base;
+    audio_enc_time_base_ = enc_ctx->time_base;
 }
 
 void Muxer::openFile() {
@@ -80,11 +80,11 @@ void Muxer::writePacket(av::PacketUPtr packet, av::DataType packet_type) {
     if (packet) {
         if (packet_type == av::DataType::Video) {
             if (!video_stream_) throw_error("video stream not present");
-            av_packet_rescale_ts(packet.get(), video_codec_time_base_, video_stream_->time_base);
+            av_packet_rescale_ts(packet.get(), video_enc_time_base_, video_stream_->time_base);
             packet->stream_index = video_stream_->index;
         } else if (packet_type == av::DataType::Audio) {
             if (!audio_stream_) throw_error("audio stream not present");
-            av_packet_rescale_ts(packet.get(), audio_codec_time_base_, audio_stream_->time_base);
+            av_packet_rescale_ts(packet.get(), audio_enc_time_base_, audio_stream_->time_base);
             packet->stream_index = audio_stream_->index;
         } else {
             throw_error("received packet is of unknown type");
