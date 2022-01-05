@@ -1,7 +1,7 @@
 #include "video_encoder.h"
 
-VideoEncoder::VideoEncoder(AVCodecID codec_id, const std::map<std::string, std::string> &options, int width, int height,
-                           AVPixelFormat pix_fmt, AVRational time_base, int global_header_flags)
+VideoEncoder::VideoEncoder(AVCodecID codec_id, int width, int height, AVPixelFormat pix_fmt, AVRational time_base,
+                           int global_header_flags, const std::map<std::string, std::string> &options)
     : Encoder(codec_id) {
     AVCodecContext *enc_ctx = getContextMod();
 

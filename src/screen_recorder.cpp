@@ -133,14 +133,18 @@ void ScreenRecorder::initOutput() {
     muxer_ = std::make_unique<Muxer>(output_file_);
 
     encoders_[av::DataType::Video] = std::make_unique<VideoEncoder>(
-        out_video_codec_id_, video_encoder_options_, video_width_, video_height_, out_video_pix_fmt_,
-        demuxer_->getVideoTimeBase(), muxer_->getGlobalHeaderFlags());
+        out_video_codec_id_, video_width_, video_height_, out_video_pix_fmt_, demuxer_->getVideoTimeBase(),
+        muxer_->getGlobalHeaderFlags(), video_encoder_options_);
     muxer_->addVideoStream(encoders_[av::DataType::Video]->getContext());
 
     if (capture_audio_) {
-        encoders_[av::DataType::Audio] = std::make_unique<AudioEncoder>(
-            out_audio_codec_id_, audio_encoder_options_, decoders_[av::DataType::Audio]->getContext(),
-            muxer_->getGlobalHeaderFlags());
+        const AVCodecContext *dec_ctx = decoders_[av::DataType::Audio]->getContext();
+        auto channel_layout =
+            (dec_ctx->channel_layout) ? dec_ctx->channel_layout : av_get_default_channel_layout(dec_ctx->channels);
+
+        encoders_[av::DataType::Audio] =
+            std::make_unique<AudioEncoder>(out_audio_codec_id_, dec_ctx->sample_rate, channel_layout,
+                                           muxer_->getGlobalHeaderFlags(), audio_encoder_options_);
         muxer_->addAudioStream(encoders_[av::DataType::Audio]->getContext());
     }
 
@@ -159,9 +163,9 @@ void ScreenRecorder::initConverters() {
 #else
         demuxer = demuxer_.get();
 #endif
-        converters_[av::DataType::Audio] = std::make_unique<AudioConverter>(
-            decoders_[av::DataType::Audio]->getContext(), encoders_[av::DataType::Audio]->getContext(),
-            demuxer->getAudioTimeBase());
+        converters_[av::DataType::Audio] =
+            std::make_unique<AudioConverter>(decoders_[av::DataType::Audio]->getContext(),
+                                             encoders_[av::DataType::Audio]->getContext(), demuxer->getAudioTimeBase());
     }
 }
 

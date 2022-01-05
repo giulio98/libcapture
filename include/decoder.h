@@ -11,7 +11,7 @@ class Decoder {
 public:
     /**
      * Create a new decoder
-     * @param params the parameters to use to initialize the decoder
+     * @param params the parameters of the stream to decode (likely taken from a demuxer)
      */
     explicit Decoder(const AVCodecParameters *params);
 

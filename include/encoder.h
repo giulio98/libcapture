@@ -17,7 +17,7 @@ protected:
 
     /**
      * Access the internal encoder
-     * @return a pointer (to const) to the internal encoder
+     * @return an observer pointer to the internal encoder
      */
     [[nodiscard]] const AVCodec *getCodec() const;
 
