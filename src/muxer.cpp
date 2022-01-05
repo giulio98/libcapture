@@ -70,6 +70,7 @@ void Muxer::openFile() {
 void Muxer::closeFile() {
     if (!file_opened_) throw_error("cannot close file, file has not been opened");
     if (file_closed_) throw_error("cannot close file, file has already been closed");
+    if (av_interleaved_write_frame(fmt_ctx_.get(), nullptr)) throw_error("failed to flush internal packet queue");
     if (av_write_trailer(fmt_ctx_.get()) < 0) throw_error("failed to write file trailer");
     if (fmt_ctx_->pb) {
         if (avio_close(fmt_ctx_->pb) < 0) throw_error("failed to close file");

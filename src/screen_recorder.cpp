@@ -399,9 +399,6 @@ void ScreenRecorder::flushPipelines() {
         processPacket(nullptr, av::DataType::Audio);
         processConvertedFrame(nullptr, av::DataType::Audio);
     }
-
-    /* flush output queue, data_type is irrelevant here */
-    muxer_->writePacket(nullptr, av::DataType::Video);
 }
 
 void ScreenRecorder::readPackets(Demuxer *demuxer, bool handle_start_time) {
