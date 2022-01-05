@@ -406,7 +406,7 @@ void ScreenRecorder::readPackets(Demuxer *demuxer, bool handle_start_time) {
     int64_t pts_offset = 0;
     int64_t last_pts = 0;
     bool adjust_pts_offset = false;
-    std::chrono::milliseconds sleep_interval(std::min(5, 300 / video_framerate_));
+    std::chrono::milliseconds sleep_interval(std::min(3, 200 / video_framerate_));
 
     if (handle_start_time) start_time_ = av_gettime();
 
