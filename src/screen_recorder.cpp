@@ -17,7 +17,7 @@
 #include "log_level_setter.h"
 #include "scoped_thread.h"
 
-#define USE_PROCESSING_THREADS 0
+#define USE_PROCESSING_THREADS 1
 #define DURATION_LOGGING 0
 
 ScreenRecorder::ScreenRecorder() {
