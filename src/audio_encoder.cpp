@@ -1,14 +1,15 @@
 #include "audio_encoder.h"
 
 AudioEncoder::AudioEncoder(AVCodecID codec_id, int sample_rate, uint64_t channel_layout, int global_header_flags,
-                 const std::map<std::string, std::string> &options)
+                           const std::map<std::string, std::string> &options)
     : Encoder(codec_id) {
     AVCodecContext *enc_ctx = getContextMod();
+    const AVCodec *codec = getCodec();
 
     enc_ctx->sample_rate = sample_rate;
     enc_ctx->channel_layout = channel_layout;
     enc_ctx->channels = av_get_channel_layout_nb_channels(enc_ctx->channel_layout);
-    enc_ctx->sample_fmt = getCodec()->sample_fmts[0];
+    if (codec->sample_fmts) enc_ctx->sample_fmt = codec->sample_fmts[0];
     /* for audio, the time base will be automatically set by init() */
     // enc_ctx->time_base.num = 1;
     // enc_ctx->time_base.den = enc_ctx->sample_rate;

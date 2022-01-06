@@ -9,11 +9,11 @@ static void throw_error(const std::string &msg) { throw std::runtime_error("Enco
 
 Encoder::Encoder(AVCodecID codec_id) : codec_(nullptr) {
 #ifdef MACOS
-    // if (codec_id == AV_CODEC_ID_H264) {
-    //     codec_ = avcodec_find_encoder_by_name("h264_videotoolbox");
-    // } else if (codec_id == AV_CODEC_ID_AAC) {
-    //     codec_ = avcodec_find_encoder_by_name("aac_at");
-    // }
+    if (codec_id == AV_CODEC_ID_H264) {
+        codec_ = avcodec_find_encoder_by_name("h264_videotoolbox");
+    } else if (codec_id == AV_CODEC_ID_AAC) {
+        codec_ = avcodec_find_encoder_by_name("aac_at");
+    }
 #endif
 
     if (!codec_) {

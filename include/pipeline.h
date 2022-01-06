@@ -1,5 +1,8 @@
 #pragma once
 
+#include <array>
+#include <vector>
+
 #include "audio_converter.h"
 #include "audio_encoder.h"
 #include "common.h"
@@ -9,38 +12,49 @@
 #include "thread"
 #include "thread_guard.h"
 #include "video_converter.h"
+#include "video_dimensions.h"
 #include "video_encoder.h"
-#include "video_parameters.h"
 
 class Pipeline {
-    bool video_;
-    bool audio_;
+    std::array<bool, av::DataType::NumDataTypes> data_types_;
     std::shared_ptr<Demuxer> demuxer_;
     std::shared_ptr<Muxer> muxer_;
+    // TO-DO: make these automatic objects rather than pointers
     std::array<std::unique_ptr<Decoder>, av::DataType::NumDataTypes> decoders_;
     std::array<std::unique_ptr<Encoder>, av::DataType::NumDataTypes> encoders_;
     std::array<std::unique_ptr<Converter>, av::DataType::NumDataTypes> converters_;
-    std::map<std::string, std::string> video_encoder_options_;
 
-#ifndef LINUX
-    std::thread video_processor_;
-    std::thread audio_processor_;
+    int64_t pts_offset_;
+    int64_t last_pts_;
+    bool adjust_pts_offset_;
+
+    std::mutex m_;
+    bool stop_;
+    std::array<std::thread, av::DataType::NumDataTypes> processors_;
     std::array<av::PacketUPtr, av::DataType::NumDataTypes> packets_;
     std::array<std::condition_variable, av::DataType::NumDataTypes> packets_cv_;
-    void process(av::DataType data_type, std::exception_ptr &e_ptr);
-#endif
+    std::array<std::exception_ptr, av::DataType::NumDataTypes> e_ptrs_;
+    void startProcessor(av::DataType data_type);
+    void stopAndNotify();
+    void checkExceptions();
 
-    void addDecoder(av::DataType data_type);
+    void initDecoder(av::DataType data_type);
     void addOutputStream(av::DataType data_type);
+
+    void processPacket(const AVPacket *packet, av::DataType data_type);
+    void processConvertedFrame(const AVFrame *frame, av::DataType data_type);
+    void flushPipeline(av::DataType data_type);
 
 public:
     Pipeline(std::shared_ptr<Demuxer> demuxer, std::shared_ptr<Muxer> muxer);
 
     ~Pipeline();
 
-    void initVideo(AVCodecID codec_id, AVPixelFormat pix_fmt, const VideoParameters &video_params);
+    void initVideo(AVCodecID codec_id, const VideoDimensions &video_dims, AVPixelFormat pix_fmt);
 
     void initAudio(AVCodecID codec_id);
 
-    bool step();
+    bool step(bool recovering_from_pause = false);
+
+    void flush();
 };
