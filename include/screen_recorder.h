@@ -25,7 +25,7 @@ class ScreenRecorder {
 
     /* Recording parameters */
 
-    AVPixelFormat out_pix_fmt_;
+    AVPixelFormat out_video_pix_fmt_;
     AVCodecID out_video_codec_id_;
     AVCodecID out_audio_codec_id_;
 

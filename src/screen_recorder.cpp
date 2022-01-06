@@ -80,7 +80,7 @@ static void checkParams(const std::string &video_device, const std::string &outp
 }
 
 ScreenRecorder::ScreenRecorder() {
-    out_pix_fmt_ = AV_PIX_FMT_YUV420P;
+    out_video_pix_fmt_ = AV_PIX_FMT_YUV420P;
     out_video_codec_id_ = AV_CODEC_ID_H264;
     out_audio_codec_id_ = AV_CODEC_ID_AAC;
 
@@ -151,16 +151,20 @@ void ScreenRecorder::start(const std::string &video_device, const std::string &a
         av_log_set_level(AV_LOG_PRINT_LEVEL);
     }
 
-    {
-        std::string device_name = getInputDeviceName(video_device, audio_device);
-        std::map<std::string, std::string> demuxer_options = getDemuxerOptions(video_dims, framerate);
-        demuxer_ = std::make_unique<Demuxer>(in_fmt_name_, device_name, demuxer_options);
-        demuxer_->openInput();
-        muxer_ = std::make_unique<Muxer>(output_file);
-        pipeline_ = std::make_unique<Pipeline>(demuxer_, muxer_);
-        pipeline_->initVideo(out_video_codec_id_, video_dims, out_pix_fmt_);
-        pipeline_->initAudio(out_audio_codec_id_);
-        muxer_->openFile();
+    std::string device_name = getInputDeviceName(video_device, audio_device);
+    std::map<std::string, std::string> demuxer_options = getDemuxerOptions(video_dims, framerate);
+    demuxer_ = std::make_unique<Demuxer>(in_fmt_name_, device_name, demuxer_options);
+    demuxer_->openInput();
+    muxer_ = std::make_unique<Muxer>(output_file);
+    pipeline_ = std::make_unique<Pipeline>(demuxer_, muxer_);
+    pipeline_->initVideo(out_video_codec_id_, video_dims, out_video_pix_fmt_);
+    pipeline_->initAudio(out_audio_codec_id_);
+    muxer_->openFile();
+
+    if (verbose_) {
+        std::cout << "\n##### Pipeline Info #####" << std::endl;
+        pipeline_->printInfo();
+        std::cout << std::endl;
     }
 
     stop_capture_ = false;
