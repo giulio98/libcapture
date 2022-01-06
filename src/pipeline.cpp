@@ -1,5 +1,6 @@
 #include "pipeline.h"
 
+#include <iostream>
 #include <map>
 #include <sstream>
 
@@ -194,5 +195,13 @@ void Pipeline::flush() {
     /* flush the pipelines */
     for (auto type : {av::DataType::Video, av::DataType::Audio}) {
         if (data_types_[type]) flushPipeline(type);
+    }
+}
+
+void Pipeline::printInfo() const {
+    if (demuxer_) demuxer_->dumpInfo();
+    if (muxer_) muxer_->dumpInfo();
+    for (auto type : {av::DataType::Video, av::DataType::Audio}) {
+        if (data_types_[type]) std::cout << "Encoder " << type << ": " << encoders_[type]->getName() << std::endl;
     }
 }
