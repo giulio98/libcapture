@@ -178,6 +178,7 @@ bool Pipeline::step(bool recovering_from_pause) {
     last_pts_ = packet->pts;
 
     if (!recovering_from_pause) {
+        packet->pts -= pts_offset_;
         std::unique_lock ul{m_};
         if (!packets_[packet_type]) {  // if previous packet has been fully processed
             packets_[packet_type] = std::move(packet);
