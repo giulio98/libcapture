@@ -34,7 +34,7 @@ class Pipeline {
     std::array<std::condition_variable, av::DataType::NumDataTypes> packets_cv_;
     std::array<std::exception_ptr, av::DataType::NumDataTypes> e_ptrs_;
     void startProcessor(av::DataType data_type);
-    void stopAndNotify();
+    void stop();
     void checkExceptions();
 
     void initDecoder(av::DataType data_type);

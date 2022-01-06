@@ -13,13 +13,13 @@ Pipeline::Pipeline(std::shared_ptr<Demuxer> demuxer, std::shared_ptr<Muxer> muxe
 }
 
 Pipeline::~Pipeline() {
-    stopAndNotify();
+    stop();
     for (auto &t : processors_) {
         if (t.joinable()) t.join();
     }
 }
 
-void Pipeline::stopAndNotify() {
+void Pipeline::stop() {
     std::unique_lock<std::mutex> ul{m_};
     stop_ = true;
     for (auto &cv : packets_cv_) cv.notify_all();
@@ -32,12 +32,12 @@ void Pipeline::checkExceptions() {
 }
 
 void Pipeline::startProcessor(av::DataType data_type) {
+    if (!av::isDataTypeValid(data_type)) throw std::runtime_error("Invalid packet type specified for processing");
+
     if (processors_[data_type].joinable()) processors_[data_type].join();
 
     processors_[data_type] = std::thread([this, data_type]() {
         try {
-            if (!av::isDataTypeValid(data_type))
-                throw std::runtime_error("Invalid packet type specified for processing");
             while (true) {
                 av::PacketUPtr packet;
                 {
@@ -49,8 +49,11 @@ void Pipeline::startProcessor(av::DataType data_type) {
                 processPacket(packet.get(), data_type);
             }
         } catch (...) {
-            e_ptrs_[data_type] = std::current_exception();
-            stopAndNotify();
+            {
+                std::unique_lock ul{m_};
+                e_ptrs_[data_type] = std::current_exception();
+            }
+            stop();
         }
     });
 }
@@ -64,6 +67,7 @@ void Pipeline::addOutputStream(av::DataType data_type) {
 }
 
 void Pipeline::initVideo(AVCodecID codec_id, const VideoDimensions &video_dims, AVPixelFormat pix_fmt) {
+    if (data_types_[av::DataType::Video]) throw std::runtime_error("Video pipeline already inited");
     data_types_[av::DataType::Video] = true;
 
     decoders_[av::DataType::Video] = std::make_unique<Decoder>(demuxer_->getVideoParams());
@@ -93,6 +97,7 @@ void Pipeline::initVideo(AVCodecID codec_id, const VideoDimensions &video_dims, 
 }
 
 void Pipeline::initAudio(AVCodecID codec_id) {
+    if (data_types_[av::DataType::Audio]) throw std::runtime_error("Audio pipeline already inited");
     data_types_[av::DataType::Audio] = true;
 
     decoders_[av::DataType::Audio] = std::make_unique<Decoder>(demuxer_->getAudioParams());
@@ -158,7 +163,10 @@ void Pipeline::processConvertedFrame(const AVFrame *frame, av::DataType data_typ
 }
 
 bool Pipeline::step(bool recovering_from_pause) {
-    checkExceptions();
+    {
+        std::unique_lock ul{m_};
+        checkExceptions();
+    }
 
     auto [packet, packet_type] = demuxer_->readPacket();
     if (!packet) return false;
@@ -187,7 +195,7 @@ void Pipeline::flushPipeline(av::DataType data_type) {
 
 void Pipeline::flush() {
     /* stop all threads working on the pipelines */
-    stopAndNotify();
+    stop();
     for (auto &t : processors_)
         if (t.joinable()) t.join();
     checkExceptions();
