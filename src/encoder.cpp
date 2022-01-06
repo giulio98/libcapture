@@ -64,4 +64,4 @@ av::PacketUPtr Encoder::getPacket() const {
 
 const AVCodecContext *Encoder::getContext() const { return codec_ctx_.get(); }
 
-std::string Encoder::getName() const { return codec_->name; }
+std::string Encoder::getName() const { return codec_->long_name; }
