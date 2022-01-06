@@ -19,18 +19,6 @@ Pipeline::~Pipeline() {
     }
 }
 
-void Pipeline::stopProcessors() {
-    std::unique_lock<std::mutex> ul{m_};
-    stop_ = true;
-    for (auto &cv : packets_cv_) cv.notify_all();
-}
-
-void Pipeline::checkExceptions() {
-    for (auto &e_ptr : e_ptrs_) {
-        if (e_ptr) std::rethrow_exception(e_ptr);
-    }
-}
-
 void Pipeline::startProcessor(av::DataType data_type) {
     if (!av::isDataTypeValid(data_type)) throw std::runtime_error("Invalid packet type specified for processing");
 
@@ -56,6 +44,18 @@ void Pipeline::startProcessor(av::DataType data_type) {
             stopProcessors();
         }
     });
+}
+
+void Pipeline::stopProcessors() {
+    std::unique_lock<std::mutex> ul{m_};
+    stop_ = true;
+    for (auto &cv : packets_cv_) cv.notify_all();
+}
+
+void Pipeline::checkExceptions() {
+    for (auto &e_ptr : e_ptrs_) {
+        if (e_ptr) std::rethrow_exception(e_ptr);
+    }
 }
 
 void Pipeline::initDecoder(av::DataType data_type) {
