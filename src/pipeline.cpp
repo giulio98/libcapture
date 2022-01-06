@@ -13,13 +13,13 @@ Pipeline::Pipeline(std::shared_ptr<Demuxer> demuxer, std::shared_ptr<Muxer> muxe
 }
 
 Pipeline::~Pipeline() {
-    stop();
+    stopProcessors();
     for (auto &t : processors_) {
         if (t.joinable()) t.join();
     }
 }
 
-void Pipeline::stop() {
+void Pipeline::stopProcessors() {
     std::unique_lock<std::mutex> ul{m_};
     stop_ = true;
     for (auto &cv : packets_cv_) cv.notify_all();
@@ -53,7 +53,7 @@ void Pipeline::startProcessor(av::DataType data_type) {
                 std::unique_lock ul{m_};
                 e_ptrs_[data_type] = std::current_exception();
             }
-            stop();
+            stopProcessors();
         }
     });
 }
@@ -196,7 +196,7 @@ void Pipeline::flushPipeline(av::DataType data_type) {
 
 void Pipeline::flush() {
     /* stop all threads working on the pipelines */
-    stop();
+    stopProcessors();
     for (auto &t : processors_)
         if (t.joinable()) t.join();
     checkExceptions();
