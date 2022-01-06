@@ -26,7 +26,6 @@ class Pipeline {
 
     int64_t pts_offset_;
     int64_t last_pts_;
-    bool adjust_pts_offset_;
 
     std::mutex m_;
     bool stop_;
@@ -57,4 +56,6 @@ public:
     bool step(bool recovering_from_pause = false);
 
     void flush();
+
+    void printInfo() const;
 };

@@ -4,7 +4,7 @@
 #include <sstream>
 
 Pipeline::Pipeline(std::shared_ptr<Demuxer> demuxer, std::shared_ptr<Muxer> muxer)
-    : demuxer_(demuxer), muxer_(muxer), pts_offset_(0), last_pts_(0), adjust_pts_offset_(false) {
+    : demuxer_(demuxer), muxer_(muxer), pts_offset_(0), last_pts_(0) {
     if (!demuxer_) throw std::runtime_error("Demuxer is NULL");
     if (!muxer_) throw std::runtime_error("Muxer is NULL");
     data_types_[av::DataType::Video] = false;
