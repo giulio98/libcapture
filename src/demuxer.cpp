@@ -93,7 +93,6 @@ std::pair<av::PacketUPtr, av::DataType> Demuxer::readPacket() const {
             break;
         }
     }
-
     if (!valid_index) throw_error("unknown packet stream index");
 
     return std::make_pair(std::move(packet), packet_type);
