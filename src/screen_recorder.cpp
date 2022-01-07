@@ -197,7 +197,9 @@ void ScreenRecorder::stop() {
 
     // std::cout << "Recording stopped, waiting for video processing to complete..." << std::flush;
     if (recorder_thread_.joinable()) recorder_thread_.join();
+#ifdef LINUX
     if (audio_recorder_thread_.joinable()) audio_recorder_thread_.join();
+#endif
     // std::cout << " done" << std::endl;
 
     muxer_->closeFile();
