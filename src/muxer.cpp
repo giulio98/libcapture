@@ -26,6 +26,8 @@ Muxer::~Muxer() {
 }
 
 void Muxer::addStream(const AVCodecContext *enc_ctx, av::DataType data_type) {
+    std::unique_lock ul{m_};
+
     if (file_opened_) throw_error("cannot add a new stream, file has already been opened");
 
     const AVStream *stream = streams_[data_type];
@@ -42,6 +44,7 @@ void Muxer::addStream(const AVCodecContext *enc_ctx, av::DataType data_type) {
 }
 
 void Muxer::openFile() {
+    std::unique_lock ul{m_};
     if (file_opened_) throw_error("cannot open file, file has already been opened");
     if (file_closed_) throw_error("cannot re-open file, file has already been closed");
     /* create empty video file */
@@ -55,6 +58,7 @@ void Muxer::openFile() {
 }
 
 void Muxer::closeFile() {
+    std::unique_lock ul{m_};
     if (!file_opened_) throw_error("cannot close file, file has not been opened");
     if (file_closed_) throw_error("cannot close file, file has already been closed");
     if (av_interleaved_write_frame(fmt_ctx_.get(), nullptr)) throw_error("failed to flush internal packet queue");
@@ -66,6 +70,8 @@ void Muxer::closeFile() {
 }
 
 void Muxer::writePacket(av::PacketUPtr packet, av::DataType packet_type) {
+    std::unique_lock ul{m_};
+
     if (!file_opened_) throw_error("cannot write packet, file has not been opened");
     if (file_closed_) throw_error("cannot write packet, file has already been closed");
 
@@ -77,10 +83,15 @@ void Muxer::writePacket(av::PacketUPtr packet, av::DataType packet_type) {
         packet->stream_index = stream->index;
     }
 
-    std::unique_lock ul{m_};
     if (av_interleaved_write_frame(fmt_ctx_.get(), packet.get())) throw_error("failed to write packet");
 }
 
-void Muxer::dumpInfo() const { av_dump_format(fmt_ctx_.get(), 0, filename_.c_str(), 1); }
+void Muxer::dumpInfo() const {
+    std::unique_lock ul{m_};
+    av_dump_format(fmt_ctx_.get(), 0, filename_.c_str(), 1);
+}
 
-int Muxer::getGlobalHeaderFlags() const { return fmt_ctx_->oformat->flags; }
+int Muxer::getGlobalHeaderFlags() const {
+    std::unique_lock ul{m_};
+    return fmt_ctx_->oformat->flags;
+}
