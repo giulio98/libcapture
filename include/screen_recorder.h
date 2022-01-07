@@ -20,6 +20,9 @@ class ScreenRecorder {
     std::mutex m_;
     std::condition_variable status_cv_;
     std::thread recorder_thread_;  // thread responsible for recording video and audio
+#ifdef LINUX
+    std::thread audio_recorder_thread_;
+#endif
 
     /* Recording parameters */
 
@@ -32,21 +35,24 @@ class ScreenRecorder {
     std::string in_audio_fmt_name_;
 #endif
 
-    /* Structures for audio-video processing */
-
-    std::shared_ptr<Demuxer> demuxer_;
-#ifdef LINUX
-    std::unique_ptr<Demuxer> audio_demuxer_;
-#endif
-    std::shared_ptr<Muxer> muxer_;
-    std::unique_ptr<Pipeline> pipeline_;
-
-    /**
-     * Start recording from the specified demuxer.
-     * WARNING: This function must be called after initializing all the processing structures
-     * @param demuxer the demuxer to read from
+    /*
+     * Structures for audio-video processing
+     * Note that on platforms where a single demuxer/pipeline is created,
+     * it will be accessible through the DataType::Video index even if it's responsible
+     * for both video and audio recording
      */
-    void capture(Demuxer *demuxer);
+
+    std::shared_ptr<Muxer> muxer_;
+    std::shared_ptr<Demuxer> demuxer_;
+    std::unique_ptr<Pipeline> pipeline_;
+#ifdef LINUX
+    std::shared_ptr<Demuxer> audio_demuxer_;
+    std::unique_ptr<Pipeline> audio_pipeline_;
+#endif
+
+    void capture(Demuxer *demuxer, Pipeline *pipeline);
+
+    void startRecorder(std::thread &recorder, Demuxer *demuxer, Pipeline *pipeline);
 
 #ifdef WINDOWS
     void setDisplayResolution() const;
@@ -68,7 +74,7 @@ public:
      * @param verbose           the level of verboseness during the recording
      */
     void start(const std::string &video_device, const std::string &audio_device, const std::string &output_file,
-               const VideoDimensions &video_dims, int framerate, bool verbose = false);
+               VideoDimensions video_dims, int framerate, bool verbose = false);
 
     /**
      * Stop the screen capture

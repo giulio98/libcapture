@@ -20,14 +20,21 @@
 
 #define DURATION_LOGGING 0
 
-static std::string getInputDeviceName(const std::string &video_device, const std::string &audio_device) {
+static std::string getInputDeviceName(const std::string &video_device, const std::string &audio_device,
+                                      const VideoDimensions &video_dims) {
     std::stringstream device_name_ss;
 #if defined(_WIN32)
     if (!audio_device.empty()) device_name_ss << "audio=" << audio_device << ":";
     device_name_ss << "video=" << video_device;
 #elif defined(LINUX)
-    device_name_ss << video_device;  // getenv("DISPLAY") << ".0+" << video_offset_x_ << "," << video_offset_y_
-    if (!audio_device.empty()) audio_device_name_ = audio_device;  // hw:0,0
+    if (!video_device.empty()) {
+        device_name_ss << video_device;
+        if (video_dims.offset_x || video_dims.offset_y) {
+            device_name_ss << "+" << video_dims.offset_x << "," << video_dims.offset_y;
+        }
+    } else {
+        device_name_ss << audio_device;
+    }
 #else  // macOS
     device_name_ss << video_device << ":" << audio_device;
 #endif
@@ -47,18 +54,12 @@ static std::map<std::string, std::string> getDemuxerOptions(const VideoDimension
         demuxer_options.insert({"framerate", framerate_ss.str()});
     }
 #ifdef LINUX
-    if (video_width_ && video_height_) {
+    if (video_dims.width && video_dims.height) {
         std::stringstream video_size_ss;
-        video_size_ss << video_width_ << "x" << video_height_;
+        video_size_ss << video_dims.width << "x" << video_dims.height;
         demuxer_options.insert({"video_size", video_size_ss.str()});
     }
-    if (video_offset_x_ || video_offset_y_) {
-        std::stringstream offset_ss;
-        offset_ss << "+" << video_offset_x_ << "," << video_offset_y_;
-        device_name_ += offset_ss.str();
-    }
     demuxer_options.insert({"show_region", "0"});
-    video_offset_x_ = video_offset_y_ = 0;  // set the offsets to 0 since they won't be used for cropping
 #else  // macOS
     demuxer_options.insert({"pixel_format", "uyvy422"});
     demuxer_options.insert({"capture_cursor", "0"});
@@ -97,6 +98,9 @@ ScreenRecorder::ScreenRecorder() {
 
 ScreenRecorder::~ScreenRecorder() {
     if (recorder_thread_.joinable()) recorder_thread_.join();
+#ifdef LINUX
+    if (audio_recorder_thread_.joinable()) audio_recorder_thread_.join();
+#endif
 }
 
 #ifdef WINDOWS
@@ -133,8 +137,7 @@ void ScreenRecorder::setDisplayResolution() const {
 #endif
 
 void ScreenRecorder::start(const std::string &video_device, const std::string &audio_device,
-                           const std::string &output_file, const VideoDimensions &video_dims, int framerate,
-                           bool verbose) {
+                           const std::string &output_file, VideoDimensions video_dims, int framerate, bool verbose) {
     checkParams(video_device, output_file, video_dims, framerate);
 
     verbose_ = verbose;
@@ -145,34 +148,44 @@ void ScreenRecorder::start(const std::string &video_device, const std::string &a
         av_log_set_level(AV_LOG_PRINT_LEVEL);
     }
 
-    std::string device_name = getInputDeviceName(video_device, audio_device);
+    /* init Muxer */
+    muxer_ = std::make_unique<Muxer>(output_file);
+    /* init Demuxer */
+    std::string device_name = getInputDeviceName(video_device, audio_device, video_dims);
     std::map<std::string, std::string> demuxer_options = getDemuxerOptions(video_dims, framerate);
     demuxer_ = std::make_unique<Demuxer>(in_fmt_name_, device_name, demuxer_options);
     demuxer_->openInput();
-    muxer_ = std::make_unique<Muxer>(output_file);
+    /* init Pipeline */
     pipeline_ = std::make_unique<Pipeline>(demuxer_, muxer_);
+#ifdef LINUX
+    video_dims.offset_x = video_dims.offset_y = 0;  // No cropping is performed on Linux
+#endif
     pipeline_->initVideo(out_video_codec_id_, video_dims, out_video_pix_fmt_);
-    pipeline_->initAudio(out_audio_codec_id_);
-    muxer_->openFile();
-
-    if (verbose_) {
-        std::cout << "\n##### Pipeline Info #####" << std::endl;
-        pipeline_->printInfo();
-        std::cout << std::endl;
+    /* init audio structures, if necessary */
+    if (!audio_device.empty()) {
+#ifdef LINUX
+        /* init audio demuxer and pipeline */
+        std::string audio_device_name = getInputDeviceName("", audio_device, video_dims);
+        audio_demuxer_ =
+            std::make_shared<Demuxer>(in_audio_fmt_name_, audio_device_name, std::map<std::string, std::string>());
+        audio_demuxer_->openInput();
+        audio_pipeline_ = std::make_unique<Pipeline>(audio_demuxer_, muxer_);
+        audio_pipeline_->initAudio(out_audio_codec_id_);
+#else
+        pipeline_->initAudio(out_audio_codec_id_);
+#endif
     }
+    muxer_->openFile();
 
     stop_capture_ = false;
     paused_ = false;
 
-    recorder_thread_ = std::thread([this]() {
-        std::cout << "Recording..." << std::endl;
-        try {
-            capture(demuxer_.get());
-        } catch (const std::exception &e) {
-            std::cerr << "Fatal error during capturing (" << e.what() << "), terminating..." << std::endl;
-            exit(1);
-        }
-    });
+    startRecorder(recorder_thread_, demuxer_.get(), pipeline_.get());
+#ifdef LINUX
+    startRecorder(audio_recorder_thread_, audio_demuxer_.get(), audio_pipeline_.get());
+#endif
+
+    std::cout << "Recording..." << std::endl;
 }
 
 void ScreenRecorder::stop() {
@@ -184,12 +197,17 @@ void ScreenRecorder::stop() {
 
     // std::cout << "Recording stopped, waiting for video processing to complete..." << std::flush;
     if (recorder_thread_.joinable()) recorder_thread_.join();
+    if (audio_recorder_thread_.joinable()) audio_recorder_thread_.join();
     // std::cout << " done" << std::endl;
 
     muxer_->closeFile();
-    pipeline_.reset();
-    demuxer_.reset();
     muxer_.reset();
+    demuxer_.reset();
+    pipeline_.reset();
+#ifdef LINUX
+    audio_demuxer_.reset();
+    audio_pipeline_.reset();
+#endif
 }
 
 void ScreenRecorder::pause() {
@@ -208,7 +226,10 @@ void ScreenRecorder::resume() {
     status_cv_.notify_all();
 }
 
-void ScreenRecorder::capture(Demuxer *demuxer) {
+void ScreenRecorder::capture(Demuxer *demuxer, Pipeline *pipeline) {
+    if (!demuxer) throw std::runtime_error("received demuxer is NULL");
+    if (!pipeline) throw std::runtime_error("received pipeline is NULL");
+
     bool recovering_from_pause = false;
     std::chrono::milliseconds sleep_interval(1);
 
@@ -236,14 +257,26 @@ void ScreenRecorder::capture(Demuxer *demuxer) {
             }
         }
 
-        if (pipeline_->step(recovering_from_pause)) {
+        if (pipeline->step(recovering_from_pause)) {
             if (recovering_from_pause) recovering_from_pause = false;
         } else {
             std::this_thread::sleep_for(sleep_interval);
         }
     }
 
-    pipeline_->flush();
+    pipeline->flush();
+}
+
+void ScreenRecorder::startRecorder(std::thread &recorder, Demuxer *demuxer, Pipeline *pipeline) {
+    if (recorder.joinable()) recorder.join();
+    recorder = std::thread([this, demuxer, pipeline]() {
+        try {
+            capture(demuxer, pipeline);
+        } catch (const std::exception &e) {
+            std::cerr << "Fatal error during capturing (" << e.what() << "), terminating..." << std::endl;
+            exit(1);
+        }
+    });
 }
 
 void ScreenRecorder::listAvailableDevices() {

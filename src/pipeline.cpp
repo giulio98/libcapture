@@ -4,6 +4,8 @@
 #include <map>
 #include <sstream>
 
+#define USE_PROCESSING_THREADS 0
+
 static void throw_error(const std::string &msg) { throw std::runtime_error("Pipeline: " + msg); }
 
 static void checkDataType(av::DataType data_type) {
@@ -19,10 +21,12 @@ Pipeline::Pipeline(std::shared_ptr<Demuxer> demuxer, std::shared_ptr<Muxer> muxe
 }
 
 Pipeline::~Pipeline() {
+#if USE_PROCESSING_THREADS
     stopProcessors();
     for (auto &p : processors_) {
         if (p.joinable()) p.join();
     }
+#endif
 }
 
 void Pipeline::startProcessor(av::DataType data_type) {
@@ -88,8 +92,10 @@ void Pipeline::initVideo(AVCodecID codec_id, const VideoDimensions &video_dims, 
         auto dec_ctx = decoders_[type]->getContext();
         int width = (video_dims.width) ? video_dims.width : dec_ctx->width;
         int height = (video_dims.height) ? video_dims.height : dec_ctx->height;
-        if (video_dims.offset_x + width > dec_ctx->width) throw std::runtime_error("Total width exceeds display");
-        if (video_dims.offset_y + height > dec_ctx->height) throw std::runtime_error("Total height exceeds display");
+        if (video_dims.offset_x + width > dec_ctx->width)
+            throw std::runtime_error("Output video width exceeds input one");
+        if (video_dims.offset_y + height > dec_ctx->height)
+            throw std::runtime_error("Output video height exceeds input one");
 
         std::map<std::string, std::string> enc_options;
         /*
@@ -108,7 +114,9 @@ void Pipeline::initVideo(AVCodecID codec_id, const VideoDimensions &video_dims, 
                                          demuxer_->getStreamTimeBase(type), video_dims.offset_x, video_dims.offset_y);
 
     addOutputStream(type);
+#if USE_PROCESSING_THREADS
     startProcessor(type);
+#endif
 }
 
 void Pipeline::initAudio(AVCodecID codec_id) {
@@ -138,7 +146,9 @@ void Pipeline::initAudio(AVCodecID codec_id) {
                                                          demuxer_->getStreamTimeBase(type));
 
     addOutputStream(type);
+#if USE_PROCESSING_THREADS
     startProcessor(type);
+#endif
 }
 
 void Pipeline::processPacket(const AVPacket *packet, av::DataType data_type) {
@@ -205,11 +215,15 @@ bool Pipeline::step(bool recovering_from_pause) {
 
     if (!recovering_from_pause) {
         packet->pts -= pts_offset_;
+#if USE_PROCESSING_THREADS
         std::unique_lock ul{m_};
         if (!packets_[packet_type]) {  // if previous packet has been fully processed
             packets_[packet_type] = std::move(packet);
             packets_cv_[packet_type].notify_all();
         }
+#else
+        processPacket(packet.get(), packet_type);
+#endif
     }
 
     return true;
@@ -221,12 +235,14 @@ void Pipeline::flushPipeline(av::DataType data_type) {
 }
 
 void Pipeline::flush() {
+#if USE_PROCESSING_THREADS
     /* stop all threads working on the pipelines */
     stopProcessors();
     for (auto &p : processors_) {
         if (p.joinable()) p.join();
     }
     checkExceptions();
+#endif
 
     /* flush the pipelines */
     for (auto type : {av::DataType::Video, av::DataType::Audio}) {
@@ -235,8 +251,6 @@ void Pipeline::flush() {
 }
 
 void Pipeline::printInfo() const {
-    if (demuxer_) demuxer_->dumpInfo();
-    if (muxer_) muxer_->dumpInfo();
     for (auto type : {av::DataType::Video, av::DataType::Audio}) {
         if (encoders_[type]) std::cout << "Encoder " << type << ": " << encoders_[type]->getName() << std::endl;
     }
