@@ -236,12 +236,11 @@ void ScreenRecorder::capture(Demuxer *demuxer) {
             }
         }
 
-        if (!pipeline_->step(recovering_from_pause)) {
+        if (pipeline_->step(recovering_from_pause)) {
+            if (recovering_from_pause) recovering_from_pause = false;
+        } else {
             std::this_thread::sleep_for(sleep_interval);
-            continue;
         }
-
-        if (recovering_from_pause) recovering_from_pause = false;
     }
 
     pipeline_->flush();
