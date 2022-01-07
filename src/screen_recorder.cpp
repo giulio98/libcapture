@@ -29,8 +29,7 @@ static std::string getInputDeviceName(const std::string &video_device, const std
     device_name_ss << video_device;  // getenv("DISPLAY") << ".0+" << video_offset_x_ << "," << video_offset_y_
     if (!audio_device.empty()) audio_device_name_ = audio_device;  // hw:0,0
 #else  // macOS
-    device_name_ss << video_device << ":";                      // 1
-    if (!audio_device.empty()) device_name_ss << audio_device;  // 0
+    device_name_ss << video_device << ":" << audio_device;
 #endif
     return device_name_ss.str();
 }
@@ -92,11 +91,6 @@ ScreenRecorder::ScreenRecorder() {
 #else  // macOS
     in_fmt_name_ = "avfoundation";
 #endif
-
-    /*
-     * Possible presets from fastest (and worst quality) to slowest (and best quality):
-     * ultrafast -> superfast -> veryfast -> faster -> fast -> medium
-     */
 
     avdevice_register_all();
 }

@@ -85,6 +85,10 @@ void Pipeline::initVideo(AVCodecID codec_id, const VideoDimensions &video_dims, 
         if (video_dims.offset_y + height > dec_ctx->height) throw std::runtime_error("Total height exceeds display");
 
         std::map<std::string, std::string> enc_options;
+        /*
+         * Possible presets from fastest (and worst quality) to slowest (and best quality):
+         * ultrafast -> superfast -> veryfast -> faster -> fast -> medium
+         */
         enc_options.insert({"preset", "ultrafast"});
 
         encoders_[type] =
