@@ -26,6 +26,9 @@ Muxer::~Muxer() {
 }
 
 void Muxer::addStream(const AVCodecContext *enc_ctx, av::DataType data_type) {
+    if (!enc_ctx) throw_error("received encoder context is NULL");
+    if (!av::isDataTypeValid(data_type)) throw_error("received data type is invalid");
+
     std::unique_lock ul{m_};
 
     if (file_opened_) throw_error("cannot add a new stream, file has already been opened");
