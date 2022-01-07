@@ -86,12 +86,12 @@ void Muxer::writePacket(av::PacketUPtr packet, av::DataType packet_type) {
     if (av_interleaved_write_frame(fmt_ctx_.get(), packet.get())) throw_error("failed to write packet");
 }
 
-void Muxer::dumpInfo() const {
+void Muxer::dumpInfo() {
     std::unique_lock ul{m_};
     av_dump_format(fmt_ctx_.get(), 0, filename_.c_str(), 1);
 }
 
-int Muxer::getGlobalHeaderFlags() const {
+int Muxer::getGlobalHeaderFlags() {
     std::unique_lock ul{m_};
     return fmt_ctx_->oformat->flags;
 }
