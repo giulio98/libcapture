@@ -4,6 +4,8 @@
 #include <map>
 #include <sstream>
 
+static void throw_error(const std::string &msg) { throw std::runtime_error("Pipeline: " + msg); }
+
 Pipeline::Pipeline(std::shared_ptr<Demuxer> demuxer, std::shared_ptr<Muxer> muxer)
     : demuxer_(demuxer), muxer_(muxer), pts_offset_(0), last_pts_(0) {
     if (!demuxer_) throw std::runtime_error("Demuxer is NULL");
@@ -14,13 +16,13 @@ Pipeline::Pipeline(std::shared_ptr<Demuxer> demuxer, std::shared_ptr<Muxer> muxe
 
 Pipeline::~Pipeline() {
     stopProcessors();
-    for (auto &t : processors_) {
-        if (t.joinable()) t.join();
+    for (auto &p : processors_) {
+        if (p.joinable()) p.join();
     }
 }
 
 void Pipeline::startProcessor(av::DataType data_type) {
-    if (!av::isDataTypeValid(data_type)) throw std::runtime_error("Invalid packet type specified for processing");
+    if (!av::isDataTypeValid(data_type)) throw_error("invalid packet type specified for processing");
 
     if (processors_[data_type].joinable()) processors_[data_type].join();
 
@@ -59,7 +61,8 @@ void Pipeline::checkExceptions() {
 }
 
 void Pipeline::initDecoder(av::DataType data_type) {
-    // TO-DO
+    if (decoders_[data_type]) throw_error("decoder already present");
+    decoders_[data_type] = std::make_unique<Decoder>(demuxer_->getStreamParams(data_type));
 }
 
 void Pipeline::addOutputStream(av::DataType data_type) {
@@ -67,58 +70,64 @@ void Pipeline::addOutputStream(av::DataType data_type) {
 }
 
 void Pipeline::initVideo(AVCodecID codec_id, const VideoDimensions &video_dims, AVPixelFormat pix_fmt) {
-    if (data_types_[av::DataType::Video]) throw std::runtime_error("Video pipeline already inited");
-    data_types_[av::DataType::Video] = true;
+    const auto type = av::DataType::Video;
 
-    decoders_[av::DataType::Video] = std::make_unique<Decoder>(demuxer_->getVideoParams());
+    if (data_types_[type]) throw_error("video pipeline already inited");
+    data_types_[type] = true;
+
+    initDecoder(type);
 
     {
-        auto dec_ctx = decoders_[av::DataType::Video]->getContext();
+        auto dec_ctx = decoders_[type]->getContext();
         int width = (video_dims.width) ? video_dims.width : dec_ctx->width;
         int height = (video_dims.height) ? video_dims.height : dec_ctx->height;
-
         if (video_dims.offset_x + width > dec_ctx->width) throw std::runtime_error("Total width exceeds display");
         if (video_dims.offset_y + height > dec_ctx->height) throw std::runtime_error("Total height exceeds display");
 
         std::map<std::string, std::string> enc_options;
         enc_options.insert({"preset", "ultrafast"});
 
-        encoders_[av::DataType::Video] =
-            std::make_unique<VideoEncoder>(codec_id, width, height, pix_fmt, demuxer_->getVideoTimeBase(),
+        encoders_[type] =
+            std::make_unique<VideoEncoder>(codec_id, width, height, pix_fmt, demuxer_->getStreamTimeBase(type),
                                            muxer_->getGlobalHeaderFlags(), enc_options);
     }
 
-    converters_[av::DataType::Video] = std::make_unique<VideoConverter>(
-        decoders_[av::DataType::Video]->getContext(), encoders_[av::DataType::Video]->getContext(),
-        demuxer_->getVideoTimeBase(), video_dims.offset_x, video_dims.offset_y);
+    converters_[type] =
+        std::make_unique<VideoConverter>(decoders_[type]->getContext(), encoders_[type]->getContext(),
+                                         demuxer_->getStreamTimeBase(type), video_dims.offset_x, video_dims.offset_y);
 
-    addOutputStream(av::DataType::Video);
-    startProcessor(av::DataType::Video);
+    addOutputStream(type);
+    startProcessor(type);
 }
 
 void Pipeline::initAudio(AVCodecID codec_id) {
-    if (data_types_[av::DataType::Audio]) throw std::runtime_error("Audio pipeline already inited");
-    data_types_[av::DataType::Audio] = true;
+    const auto type = av::DataType::Audio;
 
-    decoders_[av::DataType::Audio] = std::make_unique<Decoder>(demuxer_->getAudioParams());
+    if (data_types_[type]) throw std::runtime_error("Audio pipeline already inited");
+    data_types_[type] = true;
+
+    initDecoder(type);
 
     {
-        const AVCodecContext *dec_ctx = decoders_[av::DataType::Audio]->getContext();
-        auto channel_layout =
-            (dec_ctx->channel_layout) ? dec_ctx->channel_layout : av_get_default_channel_layout(dec_ctx->channels);
+        auto dec_ctx = decoders_[type]->getContext();
+        uint64_t channel_layout;
+        if (dec_ctx->channel_layout) {
+            channel_layout = dec_ctx->channel_layout;
+        } else {
+            channel_layout = av_get_default_channel_layout(dec_ctx->channels);
+        }
 
         std::map<std::string, std::string> enc_options;
 
-        encoders_[av::DataType::Audio] = std::make_unique<AudioEncoder>(codec_id, dec_ctx->sample_rate, channel_layout,
-                                                                        muxer_->getGlobalHeaderFlags(), enc_options);
+        encoders_[type] = std::make_unique<AudioEncoder>(codec_id, dec_ctx->sample_rate, channel_layout,
+                                                         muxer_->getGlobalHeaderFlags(), enc_options);
     }
 
-    converters_[av::DataType::Audio] =
-        std::make_unique<AudioConverter>(decoders_[av::DataType::Audio]->getContext(),
-                                         encoders_[av::DataType::Audio]->getContext(), demuxer_->getAudioTimeBase());
+    converters_[type] = std::make_unique<AudioConverter>(decoders_[type]->getContext(), encoders_[type]->getContext(),
+                                                         demuxer_->getStreamTimeBase(type));
 
-    addOutputStream(av::DataType::Audio);
-    startProcessor(av::DataType::Audio);
+    addOutputStream(type);
+    startProcessor(type);
 }
 
 void Pipeline::processPacket(const AVPacket *packet, av::DataType data_type) {
@@ -197,8 +206,9 @@ void Pipeline::flushPipeline(av::DataType data_type) {
 void Pipeline::flush() {
     /* stop all threads working on the pipelines */
     stopProcessors();
-    for (auto &t : processors_)
-        if (t.joinable()) t.join();
+    for (auto &p : processors_) {
+        if (p.joinable()) p.join();
+    }
     checkExceptions();
 
     /* flush the pipelines */
