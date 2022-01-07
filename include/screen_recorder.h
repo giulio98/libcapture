@@ -13,8 +13,6 @@
 #include "video_dimensions.h"
 
 class ScreenRecorder {
-    bool verbose_;
-
     /* Synchronization variables */
 
     bool stop_capture_;
@@ -25,12 +23,10 @@ class ScreenRecorder {
 
     /* Recording parameters */
 
+    bool verbose_;
     AVPixelFormat out_video_pix_fmt_;
     AVCodecID out_video_codec_id_;
     AVCodecID out_audio_codec_id_;
-
-    /* Format and device names */
-
     std::string in_fmt_name_;
 #ifdef LINUX
     std::string in_audio_fmt_name_;

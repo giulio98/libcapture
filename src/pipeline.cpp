@@ -188,6 +188,7 @@ bool Pipeline::step(bool recovering_from_pause) {
     if (!data_types_[packet_type]) throw std::runtime_error("No pipeline corresponding to received packet type");
 
     if (recovering_from_pause) pts_offset_ += (packet->pts - last_pts_);
+
     last_pts_ = packet->pts;
 
     if (!recovering_from_pause) {
