@@ -30,7 +30,7 @@ void Muxer::addStream(const AVCodecContext *enc_ctx, av::DataType data_type) {
 
     if (file_opened_) throw_error("cannot add a new stream, file has already been opened");
 
-    const AVStream *stream = streams_[data_type];
+    auto stream = streams_[data_type];
 
     if (stream) throw_error("stream of specified type already added");
     stream = avformat_new_stream(fmt_ctx_.get(), nullptr);
@@ -77,7 +77,7 @@ void Muxer::writePacket(av::PacketUPtr packet, av::DataType packet_type) {
 
     if (packet) {
         if (!av::isDataTypeValid(packet_type)) throw_error("received packet of unknown type");
-        const AVStream *stream = streams_[packet_type];
+        auto stream = streams_[packet_type];
         if (!stream) throw_error("stream of specified type not present");
         av_packet_rescale_ts(packet.get(), encoders_time_bases_[packet_type], stream->time_base);
         packet->stream_index = stream->index;
