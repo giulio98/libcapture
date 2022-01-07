@@ -8,13 +8,11 @@
 static void throw_error(const std::string &msg) { throw std::runtime_error("Demuxer: " + msg); }
 
 Demuxer::Demuxer(const std::string &fmt_name, std::string device_name, std::map<std::string, std::string> options)
-    : fmt_(nullptr),
-      device_name_(std::move(device_name)),
-      options_(std::move(options)),
-      video_stream_(nullptr),
-      audio_stream_(nullptr) {
+    : fmt_(nullptr), device_name_(std::move(device_name)), options_(std::move(options)) {
     fmt_ = av_find_input_format(fmt_name.c_str());
     if (!fmt_) throw_error("cannot find input format");
+    streams_[av::DataType::Audio] = nullptr;
+    streams_[av::DataType::Video] = nullptr;
 }
 
 void Demuxer::openInput() {
@@ -41,9 +39,9 @@ void Demuxer::openInput() {
     for (int i = 0; i < fmt_ctx_->nb_streams; i++) {
         const AVStream *stream = fmt_ctx_->streams[i];
         if (stream->codecpar->codec_type == AVMEDIA_TYPE_VIDEO) {
-            video_stream_ = stream;
+            streams_[av::DataType::Video] = stream;
         } else if (stream->codecpar->codec_type == AVMEDIA_TYPE_AUDIO) {
-            audio_stream_ = stream;
+            streams_[av::DataType::Audio] = stream;
         }
     }
 }
@@ -51,8 +49,8 @@ void Demuxer::openInput() {
 void Demuxer::closeInput() {
     if (!fmt_ctx_) throw_error("input is not open");
     fmt_ctx_.reset();
-    video_stream_ = nullptr;
-    audio_stream_ = nullptr;
+    streams_[av::DataType::Video] = nullptr;
+    streams_[av::DataType::Audio] = nullptr;
 }
 
 void Demuxer::flush() {
@@ -61,28 +59,18 @@ void Demuxer::flush() {
     if (avformat_flush(fmt_ctx_.get()) < 0) throw_error("failed to flush internal data");
 }
 
-const AVCodecParameters *Demuxer::getVideoParams() const {
+const AVCodecParameters *Demuxer::getStreamParams(av::DataType stream_type) const {
     if (!fmt_ctx_) throw_error("input is not open");
-    if (!video_stream_) throw_error("video stream not present");
-    return video_stream_->codecpar;
+    if (!av::isDataTypeValid(stream_type)) throw_error("invalid stream_type received");
+    if (!streams_[stream_type]) throw_error("specified stream not present");
+    return streams_[stream_type]->codecpar;
 }
 
-const AVCodecParameters *Demuxer::getAudioParams() const {
+[[nodiscard]] AVRational Demuxer::getStreamTimeBase(av::DataType stream_type) const {
     if (!fmt_ctx_) throw_error("input is not open");
-    if (!audio_stream_) throw_error("audio stream not present");
-    return audio_stream_->codecpar;
-}
-
-[[nodiscard]] AVRational Demuxer::getVideoTimeBase() const {
-    if (!fmt_ctx_) throw_error("input is not open");
-    if (!video_stream_) throw_error("video stream not present");
-    return video_stream_->time_base;
-}
-
-[[nodiscard]] AVRational Demuxer::getAudioTimeBase() const {
-    if (!fmt_ctx_) throw_error("input is not open");
-    if (!audio_stream_) throw_error("audio stream not present");
-    return audio_stream_->time_base;
+    if (!av::isDataTypeValid(stream_type)) throw_error("invalid stream_type received");
+    if (!streams_[stream_type]) throw_error("specified stream not present");
+    return streams_[stream_type]->time_base;
 }
 
 std::pair<av::PacketUPtr, av::DataType> Demuxer::readPacket() const {
@@ -97,13 +85,16 @@ std::pair<av::PacketUPtr, av::DataType> Demuxer::readPacket() const {
     if (ret == AVERROR(EAGAIN)) return std::make_pair(nullptr, packet_type);
     if (ret < 0) throw_error("failed to read a packet");
 
-    if (video_stream_ && packet->stream_index == video_stream_->index) {
-        packet_type = av::DataType::Video;
-    } else if (audio_stream_ && packet->stream_index == audio_stream_->index) {
-        packet_type = av::DataType::Audio;
-    } else {
-        throw_error("unknown packet stream index");
+    bool valid_index = false;
+    for (auto type : {av::DataType::Video, av::DataType::Audio}) {
+        if (streams_[type] && packet->stream_index == streams_[type]->index) {
+            packet_type = type;
+            valid_index = true;
+            break;
+        }
     }
+
+    if (!valid_index) throw_error("unknown packet stream index");
 
     return std::make_pair(std::move(packet), packet_type);
 }

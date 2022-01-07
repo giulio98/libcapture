@@ -1,5 +1,6 @@
 #pragma once
 
+#include <array>
 #include <map>
 #include <string>
 
@@ -10,8 +11,7 @@ class Demuxer {
     AVInputFormat *fmt_;
     std::string device_name_;
     std::map<std::string, std::string> options_;
-    const AVStream *video_stream_;
-    const AVStream *audio_stream_;
+    std::array<const AVStream *, av::DataType::NumDataTypes> streams_;
 
 public:
     /**
@@ -38,28 +38,18 @@ public:
     void flush();
 
     /**
-     * Access the video stream parameters
-     * @return an observer pointer to access the parameters
+     * Access the stream parameters
+     * @param stream_type the type of data of the stream
+     * @return an observer pointer to access the stream parameters
      */
-    [[nodiscard]] const AVCodecParameters *getVideoParams() const;
+    [[nodiscard]] const AVCodecParameters *getStreamParams(av::DataType stream_type) const;
 
     /**
-     * Access the audio stream parameters
-     * @return an observer pointer to access the parameters
+     * Get the time-base of the stream
+     * @param stream_type the type of data of the stream
+     * @return the stream time-base
      */
-    [[nodiscard]] const AVCodecParameters *getAudioParams() const;
-
-    /**
-     * Get the time-base of the video stream
-     * @return the video time-base
-     */
-    [[nodiscard]] AVRational getVideoTimeBase() const;
-
-    /**
-     * Get the time-base of the audio stream
-     * @return the audio time-base
-     */
-    [[nodiscard]] AVRational getAudioTimeBase() const;
+    [[nodiscard]] AVRational getStreamTimeBase(av::DataType stream_type) const;
 
     /**
      * Read a packet from the input device and return it together with its type
