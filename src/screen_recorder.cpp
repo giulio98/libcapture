@@ -216,7 +216,6 @@ void ScreenRecorder::capture(Demuxer *demuxer) {
         {
             std::unique_lock<std::mutex> ul{m_};
             bool handle_pause = paused_;
-            int64_t pause_start_time;
 
             if (handle_pause) {
 #ifndef MACOS
