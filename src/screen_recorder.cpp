@@ -14,7 +14,7 @@
 #include "log_callback_setter.h"
 #include "log_level_setter.h"
 
-static std::string getInputDeviceName(const std::string &video_device, const std::string &audio_device,
+static std::string generateInputDeviceName(const std::string &video_device, const std::string &audio_device,
                                       const VideoDimensions &video_dims) {
     std::stringstream device_name_ss;
 #if defined(_WIN32)
@@ -35,7 +35,7 @@ static std::string getInputDeviceName(const std::string &video_device, const std
     return device_name_ss.str();
 }
 
-static std::map<std::string, std::string> getDemuxerOptions(const VideoDimensions &video_dims, int framerate) {
+static std::map<std::string, std::string> generateDemuxerOptions(const VideoDimensions &video_dims, int framerate) {
     std::map<std::string, std::string> demuxer_options;
 
 #ifdef _WIN32
@@ -145,8 +145,8 @@ void ScreenRecorder::start(const std::string &video_device, const std::string &a
     /* init Muxer */
     muxer_ = std::make_unique<Muxer>(output_file);
     /* init Demuxer */
-    std::string device_name = getInputDeviceName(video_device, audio_device, video_dims);
-    std::map<std::string, std::string> demuxer_options = getDemuxerOptions(video_dims, framerate);
+    std::string device_name = generateInputDeviceName(video_device, audio_device, video_dims);
+    std::map<std::string, std::string> demuxer_options = generateDemuxerOptions(video_dims, framerate);
     demuxer_ = std::make_unique<Demuxer>(in_fmt_name_, device_name, demuxer_options);
     demuxer_->openInput();
     /* init Pipeline */
@@ -159,7 +159,7 @@ void ScreenRecorder::start(const std::string &video_device, const std::string &a
     if (!audio_device.empty()) {
 #ifdef LINUX
         /* init audio demuxer and pipeline */
-        std::string audio_device_name = getInputDeviceName("", audio_device, video_dims);
+        std::string audio_device_name = generateInputDeviceName("", audio_device, video_dims);
         audio_demuxer_ =
             std::make_shared<Demuxer>(in_audio_fmt_name_, audio_device_name, std::map<std::string, std::string>());
         audio_demuxer_->openInput();
