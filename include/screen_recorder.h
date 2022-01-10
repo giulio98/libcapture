@@ -18,6 +18,7 @@ class ScreenRecorder {
 
     bool stop_capture_;
     bool paused_;
+    bool stopped_;
     std::mutex m_;
     std::condition_variable status_cv_;
     std::thread recorder_thread_;  // thread responsible for recording video and audio
@@ -52,8 +53,6 @@ class ScreenRecorder {
 #endif
 
     void capture(Demuxer *demuxer, Pipeline *pipeline);
-
-    void startRecorder(std::thread &recorder, Demuxer *demuxer, Pipeline *pipeline);
 
 #ifdef WINDOWS
     void setDisplayResolution() const;

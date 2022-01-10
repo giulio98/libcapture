@@ -15,7 +15,7 @@
 #include "log_level_setter.h"
 
 static std::string generateInputDeviceName(const std::string &video_device, const std::string &audio_device,
-                                      const VideoDimensions &video_dims) {
+                                           const VideoDimensions &video_dims) {
     std::stringstream device_name_ss;
 #if defined(_WIN32)
     if (!audio_device.empty()) device_name_ss << "audio=" << audio_device << ":";
@@ -73,7 +73,7 @@ static void checkParams(const std::string &video_device, const std::string &outp
     if (output_file.empty()) throw std::runtime_error("output file not specified");
 }
 
-ScreenRecorder::ScreenRecorder() {
+ScreenRecorder::ScreenRecorder() : stopped_(true) {
     out_video_pix_fmt_ = AV_PIX_FMT_YUV420P;
     out_video_codec_id_ = AV_CODEC_ID_H264;
     out_audio_codec_id_ = AV_CODEC_ID_AAC;
@@ -134,6 +134,9 @@ void ScreenRecorder::start(const std::string &video_device, const std::string &a
                            const std::string &output_file, VideoDimensions video_dims, int framerate, bool verbose) {
     checkParams(video_device, output_file, video_dims, framerate);
 
+    std::unique_lock ul{m_};
+    if (!stopped_) throw std::runtime_error("Recording already in progress");
+
     verbose_ = verbose;
     if (verbose_) {
         av_log_set_level(AV_LOG_VERBOSE);
@@ -174,10 +177,21 @@ void ScreenRecorder::start(const std::string &video_device, const std::string &a
     stop_capture_ = false;
     paused_ = false;
 
-    startRecorder(recorder_thread_, demuxer_.get(), pipeline_.get());
+    auto recorder_fn = [this](Demuxer *demuxer, Pipeline *pipeline) {
+        try {
+            capture(demuxer, pipeline);
+        } catch (const std::exception &e) {
+            std::cerr << "Fatal error during capturing (" << e.what() << "), terminating..." << std::endl;
+            exit(1);
+        }
+    };
+
+    recorder_thread_ = std::thread(recorder_fn, demuxer_.get(), pipeline_.get());
 #ifdef LINUX
-    startRecorder(audio_recorder_thread_, audio_demuxer_.get(), audio_pipeline_.get());
+    audio_recorder_thread_ = std::thread(recorder_fn, audio_demuxer_.get(), audio_pipeline_.get());
 #endif
+
+    stopped_ = false;
 
     std::cout << "Recording..." << std::endl;
 }
@@ -204,6 +218,11 @@ void ScreenRecorder::stop() {
     audio_demuxer_.reset();
     audio_pipeline_.reset();
 #endif
+
+    {
+        std::unique_lock ul{m_};
+        stopped_ = true;
+    }
 }
 
 void ScreenRecorder::pause() {
@@ -261,18 +280,6 @@ void ScreenRecorder::capture(Demuxer *demuxer, Pipeline *pipeline) {
     }
 
     pipeline->flush();
-}
-
-void ScreenRecorder::startRecorder(std::thread &recorder, Demuxer *demuxer, Pipeline *pipeline) {
-    if (recorder.joinable()) recorder.join();
-    recorder = std::thread([this, demuxer, pipeline]() {
-        try {
-            capture(demuxer, pipeline);
-        } catch (const std::exception &e) {
-            std::cerr << "Fatal error during capturing (" << e.what() << "), terminating..." << std::endl;
-            exit(1);
-        }
-    });
 }
 
 void ScreenRecorder::listAvailableDevices() {
