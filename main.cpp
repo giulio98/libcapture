@@ -135,12 +135,21 @@ std::tuple<std::string, std::string, VideoParameters, std::string, bool> parseAr
     return std::make_tuple(video_device, audio_device, video_params, output_file, verbose);
 }
 
-static void printMenu(bool paused) {
+static void printStatus(bool paused) {
     std::cout << std::endl;
     if (paused) {
-        std::cout << "[PAUSED] - [r]esume";
+        std::cout << "Paused";
     } else {
-        std::cout << "[RECORDING] - [p]ause";
+        std::cout << "Recording...";
+    }
+    std::cout << std::endl;
+}
+
+static void printMenu(bool paused) {
+    if (paused) {
+        std::cout << "[r]esume";
+    } else {
+        std::cout << "[p]ause";
     }
     std::cout << ", [s]top: " << std::flush;
 }
@@ -193,9 +202,12 @@ int main(int argc, char **argv) {
         sc.start(video_device, audio_device, output_file, video_params, verbose);
 
         bool paused = false;
-        bool stopped = false;
 
-        while (!stopped) {
+        bool print_status = true;
+
+        while (true) {
+            if (print_status) printStatus(paused);
+            print_status = false;
             printMenu(paused);
             std::string input;
             std::getline(std::cin, input);
@@ -204,20 +216,19 @@ int main(int argc, char **argv) {
                 if (command == 'p' && !paused) {
                     sc.pause();
                     paused = true;
-                    continue;
+                    print_status = true;
                 } else if (command == 'r' && paused) {
                     sc.resume();
                     paused = false;
-                    continue;
-                } else if (command == 's' && !stopped) {
-                    std::cout << "Stopping..." << std::flush;
+                    print_status = true;
+                } else if (command == 's') {
+                    std::cout << "\nStopping..." << std::flush;
                     sc.stop();
-                    stopped = true;
                     std::cout << " done" << std::endl;
-                    continue;
+                    break;
                 }
             }
-            std::cerr << "Unknown command" << std::endl;
+            if (!print_status) std::cerr << "Unknown command" << std::endl;
         }
 
     } catch (const std::exception &e) {
