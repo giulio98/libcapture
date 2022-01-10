@@ -205,7 +205,6 @@ void ScreenRecorder::start(const std::string &video_device, const std::string &a
     auto recorder_fn = [this](std::shared_ptr<Demuxer> demuxer, std::unique_ptr<Pipeline> pipeline) {
         try {
             capture(std::move(demuxer), std::move(pipeline));
-            std::cout << "capure() returned" << std::endl;
         } catch (const std::exception &e) {
             std::cerr << "Fatal error during capturing (" << e.what() << "), terminating..." << std::endl;
             exit(1);
