@@ -4,20 +4,18 @@
 #include <map>
 #include <sstream>
 
-#ifdef LINUX
-#define USE_PROCESSING_THREADS 0
-#else
-#define USE_PROCESSING_THREADS 1
-#endif
-
 static void throw_error(const std::string &msg) { throw std::runtime_error("Pipeline: " + msg); }
 
 static void checkDataType(av::DataType data_type) {
     if (!av::isDataTypeValid(data_type)) throw_error("invalid data type received");
 }
 
-Pipeline::Pipeline(std::shared_ptr<Demuxer> demuxer, std::shared_ptr<Muxer> muxer)
-    : demuxer_(demuxer), muxer_(muxer), pts_offset_(0), last_pts_(0) {
+Pipeline::Pipeline(std::shared_ptr<Demuxer> demuxer, std::shared_ptr<Muxer> muxer, bool use_background_processors)
+    : demuxer_(demuxer),
+      muxer_(muxer),
+      use_background_processors_(use_background_processors),
+      pts_offset_(0),
+      last_pts_(0) {
     if (!demuxer_) throw std::runtime_error("Demuxer is NULL");
     if (!muxer_) throw std::runtime_error("Muxer is NULL");
     data_types_[av::DataType::Video] = false;
@@ -25,12 +23,12 @@ Pipeline::Pipeline(std::shared_ptr<Demuxer> demuxer, std::shared_ptr<Muxer> muxe
 }
 
 Pipeline::~Pipeline() {
-#if USE_PROCESSING_THREADS
-    stopProcessors();
-    for (auto &p : processors_) {
-        if (p.joinable()) p.join();
+    if (use_background_processors_) {
+        stopProcessors();
+        for (auto &p : processors_) {
+            if (p.joinable()) p.join();
+        }
     }
-#endif
 }
 
 void Pipeline::startProcessor(av::DataType data_type) {
@@ -118,9 +116,7 @@ void Pipeline::initVideo(AVCodecID codec_id, const VideoParameters &video_params
                                                          video_params.offset_y);
 
     addOutputStream(type);
-#if USE_PROCESSING_THREADS
-    startProcessor(type);
-#endif
+    if (use_background_processors_) startProcessor(type);
 }
 
 void Pipeline::initAudio(AVCodecID codec_id) {
@@ -150,9 +146,7 @@ void Pipeline::initAudio(AVCodecID codec_id) {
                                                          demuxer_->getStreamTimeBase(type));
 
     addOutputStream(type);
-#if USE_PROCESSING_THREADS
-    startProcessor(type);
-#endif
+    if (use_background_processors_) startProcessor(type);
 }
 
 void Pipeline::processPacket(const AVPacket *packet, av::DataType data_type) {
@@ -219,15 +213,15 @@ bool Pipeline::step(bool recovering_from_pause) {
 
     if (!recovering_from_pause) {
         packet->pts -= pts_offset_;
-#if USE_PROCESSING_THREADS
-        std::unique_lock ul{m_};
-        if (!packets_[packet_type]) {  // if previous packet has been fully processed
-            packets_[packet_type] = std::move(packet);
-            packets_cv_[packet_type].notify_all();
+        if (use_background_processors_) {
+            std::unique_lock ul{m_};
+            if (!packets_[packet_type]) {  // if previous packet has been fully processed
+                packets_[packet_type] = std::move(packet);
+                packets_cv_[packet_type].notify_all();
+            }
+        } else {
+            processPacket(packet.get(), packet_type);
         }
-#else
-        processPacket(packet.get(), packet_type);
-#endif
     }
 
     return true;
@@ -239,14 +233,14 @@ void Pipeline::flushPipeline(av::DataType data_type) {
 }
 
 void Pipeline::flush() {
-#if USE_PROCESSING_THREADS
-    /* stop all threads working on the pipelines */
-    stopProcessors();
-    for (auto &p : processors_) {
-        if (p.joinable()) p.join();
+    if (use_background_processors_) {
+        /* stop all threads working on the pipelines */
+        stopProcessors();
+        for (auto &p : processors_) {
+            if (p.joinable()) p.join();
+        }
+        checkExceptions();
     }
-    checkExceptions();
-#endif
 
     /* flush the pipelines */
     for (auto type : {av::DataType::Video, av::DataType::Audio}) {

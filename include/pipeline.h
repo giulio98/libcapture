@@ -13,8 +13,8 @@
 #include "thread"
 #include "thread_guard.h"
 #include "video_converter.h"
-#include "video_parameters.h"
 #include "video_encoder.h"
+#include "video_parameters.h"
 
 class Pipeline {
     std::array<bool, av::DataType::NumDataTypes> data_types_;
@@ -28,6 +28,7 @@ class Pipeline {
     int64_t pts_offset_;
     int64_t last_pts_;
 
+    bool use_background_processors_;
     std::mutex m_;
     bool stop_;
     std::array<std::thread, av::DataType::NumDataTypes> processors_;
@@ -46,7 +47,7 @@ class Pipeline {
     void flushPipeline(av::DataType data_type);
 
 public:
-    Pipeline(std::shared_ptr<Demuxer> demuxer, std::shared_ptr<Muxer> muxer);
+    Pipeline(std::shared_ptr<Demuxer> demuxer, std::shared_ptr<Muxer> muxer, bool use_background_processors = false);
 
     ~Pipeline();
 
