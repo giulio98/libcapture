@@ -20,7 +20,7 @@ class ScreenRecorder {
     bool paused_;
     bool stopped_;
     std::mutex m_;
-    std::condition_variable status_cv_;
+    std::condition_variable cv_;
     std::thread recorder_thread_;  // thread responsible for recording video and audio
 #ifdef LINUX
     std::thread audio_recorder_thread_;

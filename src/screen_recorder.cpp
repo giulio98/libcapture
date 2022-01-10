@@ -200,7 +200,7 @@ void ScreenRecorder::stop() {
     {
         std::unique_lock ul{m_};
         stop_capture_ = true;
-        status_cv_.notify_all();
+        cv_.notify_all();
     }
 
     // std::cout << "Recording stopped, waiting for video processing to complete..." << std::flush;
@@ -230,7 +230,7 @@ void ScreenRecorder::pause() {
     if (paused_ || stop_capture_) return;
     paused_ = true;
     std::cout << "Recording paused" << std::endl;
-    status_cv_.notify_all();
+    cv_.notify_all();
 }
 
 void ScreenRecorder::resume() {
@@ -238,7 +238,7 @@ void ScreenRecorder::resume() {
     if (!paused_ || stop_capture_) return;
     paused_ = false;
     std::cout << "Recording resumed..." << std::endl;
-    status_cv_.notify_all();
+    cv_.notify_all();
 }
 
 void ScreenRecorder::capture(Demuxer *demuxer, Pipeline *pipeline) {
@@ -259,7 +259,7 @@ void ScreenRecorder::capture(Demuxer *demuxer, Pipeline *pipeline) {
 #endif
             }
 
-            status_cv_.wait(ul, [this]() { return (!paused_ || stop_capture_); });
+            cv_.wait(ul, [this]() { return (!paused_ || stop_capture_); });
             if (stop_capture_) break;
 
             if (handle_pause) {
