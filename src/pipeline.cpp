@@ -4,7 +4,11 @@
 #include <map>
 #include <sstream>
 
+#ifdef LINUX
 #define USE_PROCESSING_THREADS 0
+#else
+#define USE_PROCESSING_THREADS 1
+#endif
 
 static void throw_error(const std::string &msg) { throw std::runtime_error("Pipeline: " + msg); }
 
