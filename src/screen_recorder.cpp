@@ -5,13 +5,10 @@
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
-#include <thread>
 
 #ifdef WINDOWS
 #include <windows.h>
 #include <winreg.h>
-
-#include <string>
 #endif
 
 #include "log_callback_setter.h"
