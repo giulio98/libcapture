@@ -2,6 +2,7 @@
 
 #include <chrono>
 #include <cstdlib>
+#include <iostream>
 #include <sstream>
 #include <stdexcept>
 #include <thread>
@@ -13,12 +14,8 @@
 #include <string>
 #endif
 
-#include "duration_logger.h"
 #include "log_callback_setter.h"
 #include "log_level_setter.h"
-#include "scoped_thread.h"
-
-#define DURATION_LOGGING 0
 
 static std::string getInputDeviceName(const std::string &video_device, const std::string &audio_device,
                                       const VideoDimensions &video_dims) {
