@@ -182,7 +182,7 @@ int main(int argc, char **argv) {
         }
 
         if (std::filesystem::exists(output_file)) {
-            std::cout << "The output file '" << output_file << "' already exists, override it? [y/N] ";
+            std::cout << "The output file '" << output_file << "' already exists, overwrite it? [y/N] ";
             std::string answer;
             std::getline(std::cin, answer);
             if (answer != "y" && answer != "Y") return 0;
