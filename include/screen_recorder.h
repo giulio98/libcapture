@@ -40,14 +40,8 @@ class ScreenRecorder {
     /* Structures for audio-video processing */
 
     std::shared_ptr<Muxer> muxer_;
-    std::shared_ptr<Demuxer> demuxer_;
-    std::unique_ptr<Pipeline> pipeline_;
-#ifdef LINUX
-    std::shared_ptr<Demuxer> audio_demuxer_;
-    std::unique_ptr<Pipeline> audio_pipeline_;
-#endif
 
-    void capture(Demuxer *demuxer, Pipeline *pipeline);
+    void capture(std::shared_ptr<Demuxer> demuxer, std::unique_ptr<Pipeline> pipeline);
 
 #ifdef WINDOWS
     void setDisplayResolution() const;

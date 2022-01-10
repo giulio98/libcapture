@@ -147,44 +147,44 @@ void ScreenRecorder::start(const std::string &video_device, const std::string &a
     }
 
     /* init Muxer */
-    muxer_ = std::make_unique<Muxer>(output_file);
+    muxer_ = std::make_shared<Muxer>(output_file);
     /* init Demuxer */
     std::string device_name = generateInputDeviceName(video_device, audio_device, video_params);
     std::map<std::string, std::string> demuxer_options = generateDemuxerOptions(video_params);
-    demuxer_ = std::make_unique<Demuxer>(in_fmt_name_, device_name, demuxer_options);
-    demuxer_->openInput();
+    auto demuxer = std::make_shared<Demuxer>(in_fmt_name_, device_name, demuxer_options);
+    demuxer->openInput();
     /* init Pipeline */
-    pipeline_ = std::make_unique<Pipeline>(demuxer_, muxer_);
+    auto pipeline = std::make_unique<Pipeline>(demuxer, muxer_);
 #ifdef LINUX
     video_params.offset_x = video_params.offset_y = 0;  // No cropping is performed on Linux
 #endif
-    pipeline_->initVideo(out_video_codec_id_, video_params, out_video_pix_fmt_);
+    pipeline->initVideo(out_video_codec_id_, video_params, out_video_pix_fmt_);
     /* init audio structures, if necessary */
     if (!audio_device.empty()) {
 #ifdef LINUX
         /* init audio demuxer and pipeline */
         std::string audio_device_name = generateInputDeviceName("", audio_device, video_params);
-        audio_demuxer_ =
+        auto audio_demuxer =
             std::make_shared<Demuxer>(in_audio_fmt_name_, audio_device_name, std::map<std::string, std::string>());
-        audio_demuxer_->openInput();
-        audio_pipeline_ = std::make_unique<Pipeline>(audio_demuxer_, muxer_);
-        audio_pipeline_->initAudio(out_audio_codec_id_);
+        audio_demuxer->openInput();
+        auto audio_pipeline = std::make_unique<Pipeline>(audio_demuxer_, muxer_);
+        audio_pipeline->initAudio(out_audio_codec_id_);
 #else
-        pipeline_->initAudio(out_audio_codec_id_);
+        pipeline->initAudio(out_audio_codec_id_);
 #endif
     }
     muxer_->openFile();
 
     if (verbose_) {
         std::cout << std::endl;
-        demuxer_->printInfo();
+        demuxer->printInfo();
 #ifdef LINUX
-        audio_demuxer_->printInfo();
+        audio_demuxer->printInfo();
 #endif
         muxer_->printInfo();
-        pipeline_->printInfo();
+        pipeline->printInfo();
 #ifdef LINUX
-        audio_pipeline_->printInfo();
+        audio_pipeline->printInfo();
 #endif
         std::cout << std::endl;
     }
@@ -192,18 +192,19 @@ void ScreenRecorder::start(const std::string &video_device, const std::string &a
     stop_capture_ = false;
     paused_ = false;
 
-    auto recorder_fn = [this](Demuxer *demuxer, Pipeline *pipeline) {
+    auto recorder_fn = [this](std::shared_ptr<Demuxer> demuxer, std::unique_ptr<Pipeline> pipeline) {
         try {
-            capture(demuxer, pipeline);
+            capture(std::move(demuxer), std::move(pipeline));
+            std::cout << "capure() returned" << std::endl;
         } catch (const std::exception &e) {
             std::cerr << "Fatal error during capturing (" << e.what() << "), terminating..." << std::endl;
             exit(1);
         }
     };
 
-    recorder_thread_ = std::thread(recorder_fn, demuxer_.get(), pipeline_.get());
+    recorder_thread_ = std::thread(recorder_fn, std::move(demuxer), std::move(pipeline));
 #ifdef LINUX
-    audio_recorder_thread_ = std::thread(recorder_fn, audio_demuxer_.get(), audio_pipeline_.get());
+    audio_recorder_thread_ = std::thread(recorder_fn, std::move(audio_demuxer), std::move(audio_pipeline));
 #endif
 
     stopped_ = false;
@@ -223,12 +224,6 @@ void ScreenRecorder::stop() {
 
     muxer_->closeFile();
     muxer_.reset();
-    demuxer_.reset();
-    pipeline_.reset();
-#ifdef LINUX
-    audio_demuxer_.reset();
-    audio_pipeline_.reset();
-#endif
 
     {
         std::unique_lock ul{m_};
@@ -250,7 +245,7 @@ void ScreenRecorder::resume() {
     cv_.notify_all();
 }
 
-void ScreenRecorder::capture(Demuxer *demuxer, Pipeline *pipeline) {
+void ScreenRecorder::capture(std::shared_ptr<Demuxer> demuxer, std::unique_ptr<Pipeline> pipeline) {
     if (!demuxer) throw std::runtime_error("received demuxer is NULL");
     if (!pipeline) throw std::runtime_error("received pipeline is NULL");
 
