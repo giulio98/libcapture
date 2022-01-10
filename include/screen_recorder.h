@@ -11,7 +11,7 @@
 #include "demuxer.h"
 #include "muxer.h"
 #include "pipeline.h"
-#include "video_dimensions.h"
+#include "video_parameters.h"
 
 class ScreenRecorder {
     /* Synchronization variables */
@@ -63,13 +63,13 @@ public:
      * @param video_device      the name of the video device to use
      * @param audio_device      the name of the audio device to use (if empty, audio won't be recorded)
      * @param output_file       the name of the output file to use to save the recording
-     * @param video_dims        the video dimensions (NOTE: if width/height is set to 0, the whole display will be
+     * @param video_params        the video dimensions (NOTE: if width/height is set to 0, the whole display will be
      * considered)
      * @param framerate         the video framerate to use
      * @param verbose           the level of verboseness during the recording
      */
     void start(const std::string &video_device, const std::string &audio_device, const std::string &output_file,
-               VideoDimensions video_dims, int framerate, bool verbose = false);
+               VideoParameters video_params, bool verbose = false);
 
     /**
      * Stop the screen capture

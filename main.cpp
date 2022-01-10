@@ -10,12 +10,12 @@
 #endif
 
 #include "screen_recorder.h"
-#include "video_dimensions.h"
+#include "video_parameters.h"
 
 #define DEFAULT_DEVICES 0
 
-VideoDimensions parse_video_size(const std::string &str) {
-    VideoDimensions dims;
+VideoParameters parse_video_size(const std::string &str) {
+    VideoParameters dims;
 
     auto main_delim_pos = str.find(":");
 
@@ -41,13 +41,14 @@ VideoDimensions parse_video_size(const std::string &str) {
     return dims;
 }
 
-std::tuple<std::string, std::string, VideoDimensions, int, std::string, bool> get_params(
+std::tuple<std::string, std::string, VideoParameters, std::string, bool> get_params(
     std::vector<std::string> args) {
-    VideoDimensions video_dims;
-    int framerate = 30;
+    VideoParameters video_params;
     std::string video_device;
     std::string audio_device;
     std::string output_file;
+
+    video_params.framerate = 30;
 
 #if DEFAULT_DEVICES
 #if defined(_WIN32)
@@ -87,13 +88,13 @@ std::tuple<std::string, std::string, VideoDimensions, int, std::string, bool> ge
             audio_device_set = true;
         } else if (*it == "-video_size") {
             if (video_size_set || ++it == args.end()) throw std::runtime_error(wrong_args_msg);
-            video_dims = parse_video_size(*it);
-            std::cout << "Parsed video size: " << video_dims.width << "x" << video_dims.height << std::endl;
-            std::cout << "Parsed video offset: " << video_dims.offset_x << "," << video_dims.offset_y << std::endl;
+            video_params = parse_video_size(*it);
+            std::cout << "Parsed video size: " << video_params.width << "x" << video_params.height << std::endl;
+            std::cout << "Parsed video offset: " << video_params.offset_x << "," << video_params.offset_y << std::endl;
             video_size_set = true;
         } else if (*it == "-framerate") {
             if (framerate_set || ++it == args.end()) throw std::runtime_error(wrong_args_msg);
-            framerate = std::stoi(*it);
+            video_params.framerate = std::stoi(*it);
             framerate_set = true;
         } else if (*it == "-o") {
             if (output_set || ++it == args.end()) throw std::runtime_error(wrong_args_msg);
@@ -121,11 +122,11 @@ std::tuple<std::string, std::string, VideoDimensions, int, std::string, bool> ge
         std::cout << "No output file specified, saving to " << output_file << std::endl;
     }
 
-    return std::make_tuple(video_device, audio_device, video_dims, framerate, output_file, verbose);
+    return std::make_tuple(video_device, audio_device, video_params, output_file, verbose);
 }
 
 int main(int argc, char **argv) {
-    VideoDimensions video_dims;
+    VideoParameters video_params;
     int framerate;
     std::string output_file;
     std::mutex m;
@@ -142,7 +143,7 @@ int main(int argc, char **argv) {
         for (int i = 1; i < argc; i++) {
             args.emplace_back(argv[i]);
         }
-        std::tie(video_device, audio_device, video_dims, framerate, output_file, verbose) = get_params(args);
+        std::tie(video_device, audio_device, video_params, output_file, verbose) = get_params(args);
     } catch (const std::exception &e) {
         std::string msg(e.what());
         if (msg != "") std::cerr << "ERROR: " << msg << std::endl;
@@ -173,7 +174,7 @@ int main(int argc, char **argv) {
 
         std::thread worker([&]() {
             try {
-                sc.start(video_device, audio_device, output_file, video_dims, framerate, verbose);
+                sc.start(video_device, audio_device, output_file, video_params, verbose);
                 while (true) {
                     std::unique_lock ul(m);
                     cv.wait(ul, [&]() { return pause || resume || stop; });

@@ -15,7 +15,7 @@
 #include "log_level_setter.h"
 
 static std::string generateInputDeviceName(const std::string &video_device, const std::string &audio_device,
-                                           const VideoDimensions &video_dims) {
+                                           const VideoParameters &video_params) {
     std::stringstream device_name_ss;
 #if defined(_WIN32)
     if (!audio_device.empty()) device_name_ss << "audio=" << audio_device << ":";
@@ -23,8 +23,8 @@ static std::string generateInputDeviceName(const std::string &video_device, cons
 #elif defined(LINUX)
     if (!video_device.empty()) {
         device_name_ss << video_device;
-        if (video_dims.offset_x || video_dims.offset_y) {
-            device_name_ss << "+" << video_dims.offset_x << "," << video_dims.offset_y;
+        if (video_params.offset_x || video_params.offset_y) {
+            device_name_ss << "+" << video_params.offset_x << "," << video_params.offset_y;
         }
     } else {
         device_name_ss << audio_device;
@@ -35,7 +35,7 @@ static std::string generateInputDeviceName(const std::string &video_device, cons
     return device_name_ss.str();
 }
 
-static std::map<std::string, std::string> generateDemuxerOptions(const VideoDimensions &video_dims, int framerate) {
+static std::map<std::string, std::string> generateDemuxerOptions(const VideoParameters &video_params) {
     std::map<std::string, std::string> demuxer_options;
 
 #ifdef _WIN32
@@ -44,13 +44,13 @@ static std::map<std::string, std::string> generateDemuxerOptions(const VideoDime
 #else
     {
         std::stringstream framerate_ss;
-        framerate_ss << framerate;
+        framerate_ss << video_params.framerate;
         demuxer_options.insert({"framerate", framerate_ss.str()});
     }
 #ifdef LINUX
-    if (video_dims.width && video_dims.height) {
+    if (video_params.width && video_params.height) {
         std::stringstream video_size_ss;
-        video_size_ss << video_dims.width << "x" << video_dims.height;
+        video_size_ss << video_params.width << "x" << video_params.height;
         demuxer_options.insert({"video_size", video_size_ss.str()});
     }
     demuxer_options.insert({"show_region", "0"});
@@ -63,12 +63,12 @@ static std::map<std::string, std::string> generateDemuxerOptions(const VideoDime
 }
 
 static void checkParams(const std::string &video_device, const std::string &output_file,
-                        const VideoDimensions &video_dims, int framerate) {
-    if (framerate <= 0) throw std::runtime_error("Video framerate must be a positive number");
-    if (video_dims.width < 0 || video_dims.height < 0) throw std::runtime_error("video width and height must be >= 0");
-    if (video_dims.offset_x < 0 || video_dims.offset_y < 0) throw std::runtime_error("video offsets must be >= 0");
-    if (video_dims.width % 2) throw std::runtime_error("the specified width is not an even number");
-    if (video_dims.height % 2) throw std::runtime_error("the specified height is not an even number");
+                        const VideoParameters &video_params) {
+    if (video_params.framerate <= 0) throw std::runtime_error("Video framerate must be a positive number");
+    if (video_params.width < 0 || video_params.height < 0) throw std::runtime_error("video width and height must be >= 0");
+    if (video_params.offset_x < 0 || video_params.offset_y < 0) throw std::runtime_error("video offsets must be >= 0");
+    if (video_params.width % 2) throw std::runtime_error("the specified width is not an even number");
+    if (video_params.height % 2) throw std::runtime_error("the specified height is not an even number");
     if (video_device.empty()) throw std::runtime_error("video device not specified");
     if (output_file.empty()) throw std::runtime_error("output file not specified");
 }
@@ -131,8 +131,8 @@ void ScreenRecorder::setDisplayResolution() const {
 #endif
 
 void ScreenRecorder::start(const std::string &video_device, const std::string &audio_device,
-                           const std::string &output_file, VideoDimensions video_dims, int framerate, bool verbose) {
-    checkParams(video_device, output_file, video_dims, framerate);
+                           const std::string &output_file, VideoParameters video_params, bool verbose) {
+    checkParams(video_device, output_file, video_params);
 
     std::unique_lock ul{m_};
     if (!stopped_) throw std::runtime_error("Recording already in progress");
@@ -148,21 +148,21 @@ void ScreenRecorder::start(const std::string &video_device, const std::string &a
     /* init Muxer */
     muxer_ = std::make_unique<Muxer>(output_file);
     /* init Demuxer */
-    std::string device_name = generateInputDeviceName(video_device, audio_device, video_dims);
-    std::map<std::string, std::string> demuxer_options = generateDemuxerOptions(video_dims, framerate);
+    std::string device_name = generateInputDeviceName(video_device, audio_device, video_params);
+    std::map<std::string, std::string> demuxer_options = generateDemuxerOptions(video_params);
     demuxer_ = std::make_unique<Demuxer>(in_fmt_name_, device_name, demuxer_options);
     demuxer_->openInput();
     /* init Pipeline */
     pipeline_ = std::make_unique<Pipeline>(demuxer_, muxer_);
 #ifdef LINUX
-    video_dims.offset_x = video_dims.offset_y = 0;  // No cropping is performed on Linux
+    video_params.offset_x = video_params.offset_y = 0;  // No cropping is performed on Linux
 #endif
-    pipeline_->initVideo(out_video_codec_id_, video_dims, out_video_pix_fmt_);
+    pipeline_->initVideo(out_video_codec_id_, video_params, out_video_pix_fmt_);
     /* init audio structures, if necessary */
     if (!audio_device.empty()) {
 #ifdef LINUX
         /* init audio demuxer and pipeline */
-        std::string audio_device_name = generateInputDeviceName("", audio_device, video_dims);
+        std::string audio_device_name = generateInputDeviceName("", audio_device, video_params);
         audio_demuxer_ =
             std::make_shared<Demuxer>(in_audio_fmt_name_, audio_device_name, std::map<std::string, std::string>());
         audio_demuxer_->openInput();

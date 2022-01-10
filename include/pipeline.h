@@ -13,7 +13,7 @@
 #include "thread"
 #include "thread_guard.h"
 #include "video_converter.h"
-#include "video_dimensions.h"
+#include "video_parameters.h"
 #include "video_encoder.h"
 
 class Pipeline {
@@ -50,7 +50,7 @@ public:
 
     ~Pipeline();
 
-    void initVideo(AVCodecID codec_id, const VideoDimensions &video_dims, AVPixelFormat pix_fmt);
+    void initVideo(AVCodecID codec_id, const VideoParameters &video_params, AVPixelFormat pix_fmt);
 
     void initAudio(AVCodecID codec_id);
 

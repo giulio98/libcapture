@@ -80,7 +80,7 @@ void Pipeline::addOutputStream(av::DataType data_type) {
     muxer_->addStream(encoders_[data_type]->getContext(), data_type);
 }
 
-void Pipeline::initVideo(AVCodecID codec_id, const VideoDimensions &video_dims, AVPixelFormat pix_fmt) {
+void Pipeline::initVideo(AVCodecID codec_id, const VideoParameters &video_params, AVPixelFormat pix_fmt) {
     const auto type = av::DataType::Video;
 
     if (data_types_[type]) throw_error("video pipeline already inited");
@@ -90,11 +90,11 @@ void Pipeline::initVideo(AVCodecID codec_id, const VideoDimensions &video_dims, 
 
     {
         auto dec_ctx = decoders_[type]->getContext();
-        int width = (video_dims.width) ? video_dims.width : dec_ctx->width;
-        int height = (video_dims.height) ? video_dims.height : dec_ctx->height;
-        if (video_dims.offset_x + width > dec_ctx->width)
+        int width = (video_params.width) ? video_params.width : dec_ctx->width;
+        int height = (video_params.height) ? video_params.height : dec_ctx->height;
+        if (video_params.offset_x + width > dec_ctx->width)
             throw std::runtime_error("Output video width exceeds input one");
-        if (video_dims.offset_y + height > dec_ctx->height)
+        if (video_params.offset_y + height > dec_ctx->height)
             throw std::runtime_error("Output video height exceeds input one");
 
         std::map<std::string, std::string> enc_options;
@@ -111,7 +111,7 @@ void Pipeline::initVideo(AVCodecID codec_id, const VideoDimensions &video_dims, 
 
     converters_[type] =
         std::make_unique<VideoConverter>(decoders_[type]->getContext(), encoders_[type]->getContext(),
-                                         demuxer_->getStreamTimeBase(type), video_dims.offset_x, video_dims.offset_y);
+                                         demuxer_->getStreamTimeBase(type), video_params.offset_x, video_params.offset_y);
 
     addOutputStream(type);
 #if USE_PROCESSING_THREADS
