@@ -37,12 +37,7 @@ class ScreenRecorder {
     std::string in_audio_fmt_name_;
 #endif
 
-    /*
-     * Structures for audio-video processing
-     * Note that on platforms where a single demuxer/pipeline is created,
-     * it will be accessible through the DataType::Video index even if it's responsible
-     * for both video and audio recording
-     */
+    /* Structures for audio-video processing */
 
     std::shared_ptr<Muxer> muxer_;
     std::shared_ptr<Demuxer> demuxer_;
