@@ -197,12 +197,9 @@ int main(int argc, char **argv) {
             if (answer != "y" && answer != "Y") return 0;
         }
 
-        std::cout << std::endl;  // separate client printing from the rest
-
         sc.start(video_device, audio_device, output_file, video_params, verbose);
 
         bool paused = false;
-
         bool print_status = true;
 
         while (true) {
