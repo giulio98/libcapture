@@ -65,7 +65,8 @@ static std::map<std::string, std::string> generateDemuxerOptions(const VideoPara
 static void checkParams(const std::string &video_device, const std::string &output_file,
                         const VideoParameters &video_params) {
     if (video_params.framerate <= 0) throw std::runtime_error("Video framerate must be a positive number");
-    if (video_params.width < 0 || video_params.height < 0) throw std::runtime_error("video width and height must be >= 0");
+    if (video_params.width < 0 || video_params.height < 0)
+        throw std::runtime_error("video width and height must be >= 0");
     if (video_params.offset_x < 0 || video_params.offset_y < 0) throw std::runtime_error("video offsets must be >= 0");
     if (video_params.width % 2) throw std::runtime_error("the specified width is not an even number");
     if (video_params.height % 2) throw std::runtime_error("the specified height is not an even number");
@@ -173,6 +174,20 @@ void ScreenRecorder::start(const std::string &video_device, const std::string &a
 #endif
     }
     muxer_->openFile();
+
+    if (verbose_) {
+        std::cout << std::endl;
+        demuxer_->printInfo();
+#ifdef LINUX
+        audio_demuxer_->printInfo();
+#endif
+        muxer_->printInfo();
+        pipeline_->printInfo();
+#ifdef LINUX
+        audio_pipeline_->printInfo();
+#endif
+        std::cout << std::endl;
+    }
 
     stop_capture_ = false;
     paused_ = false;

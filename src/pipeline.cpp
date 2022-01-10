@@ -109,9 +109,9 @@ void Pipeline::initVideo(AVCodecID codec_id, const VideoParameters &video_params
                                            muxer_->getGlobalHeaderFlags(), enc_options);
     }
 
-    converters_[type] =
-        std::make_unique<VideoConverter>(decoders_[type]->getContext(), encoders_[type]->getContext(),
-                                         demuxer_->getStreamTimeBase(type), video_params.offset_x, video_params.offset_y);
+    converters_[type] = std::make_unique<VideoConverter>(decoders_[type]->getContext(), encoders_[type]->getContext(),
+                                                         demuxer_->getStreamTimeBase(type), video_params.offset_x,
+                                                         video_params.offset_y);
 
     addOutputStream(type);
 #if USE_PROCESSING_THREADS
@@ -252,6 +252,7 @@ void Pipeline::flush() {
 
 void Pipeline::printInfo() const {
     for (auto type : {av::DataType::Video, av::DataType::Audio}) {
+        if (decoders_[type]) std::cout << "Decoder " << type << ": " << decoders_[type]->getName() << std::endl;
         if (encoders_[type]) std::cout << "Encoder " << type << ": " << encoders_[type]->getName() << std::endl;
     }
 }
