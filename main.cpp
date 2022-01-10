@@ -14,7 +14,7 @@
 
 #define DEFAULT_DEVICES 0
 
-VideoParameters parse_video_size(const std::string &str) {
+VideoParameters parseVideoSize(const std::string &str) {
     VideoParameters dims;
 
     auto main_delim_pos = str.find(":");
@@ -41,14 +41,12 @@ VideoParameters parse_video_size(const std::string &str) {
     return dims;
 }
 
-std::tuple<std::string, std::string, VideoParameters, std::string, bool> get_params(
-    std::vector<std::string> args) {
+std::tuple<std::string, std::string, VideoParameters, std::string, bool> parseArgs(std::vector<std::string> args) {
     VideoParameters video_params;
+    int framerate = 30;
     std::string video_device;
     std::string audio_device;
     std::string output_file;
-
-    video_params.framerate = 30;
 
 #if DEFAULT_DEVICES
 #if defined(_WIN32)
@@ -88,13 +86,13 @@ std::tuple<std::string, std::string, VideoParameters, std::string, bool> get_par
             audio_device_set = true;
         } else if (*it == "-video_size") {
             if (video_size_set || ++it == args.end()) throw std::runtime_error(wrong_args_msg);
-            video_params = parse_video_size(*it);
+            video_params = parseVideoSize(*it);
             std::cout << "Parsed video size: " << video_params.width << "x" << video_params.height << std::endl;
             std::cout << "Parsed video offset: " << video_params.offset_x << "," << video_params.offset_y << std::endl;
             video_size_set = true;
         } else if (*it == "-framerate") {
             if (framerate_set || ++it == args.end()) throw std::runtime_error(wrong_args_msg);
-            video_params.framerate = std::stoi(*it);
+            framerate = std::stoi(*it);
             framerate_set = true;
         } else if (*it == "-o") {
             if (output_set || ++it == args.end()) throw std::runtime_error(wrong_args_msg);
@@ -107,33 +105,41 @@ std::tuple<std::string, std::string, VideoParameters, std::string, bool> get_par
         }
     }
 
-    std::cout << "Parsed video device: " << video_device << std::endl;
-    std::cout << "Parsed audio device: " << audio_device;
+    video_params.framerate = framerate;
+
+    if (verbose) {
+        std::cout << "Parsed video device: " << video_device << std::endl;
+        std::cout << "Parsed audio device: " << audio_device;
 #if DEFAULT_DEVICES
-    if (audio_device == "none") {
-        audio_device = "";
-        std::cout << " (mute)";
-    }
+        if (audio_device == "none") {
+            audio_device = "";
+            std::cout << " (mute)";
+        }
 #endif
-    std::cout << std::endl;
+        std::cout << std::endl;
+    }
 
     if (!output_set) {
         output_file = "output.mp4";
-        std::cout << "No output file specified, saving to " << output_file << std::endl;
+        std::cout << "No output file specified, saving to '" << output_file << "'" << std::endl;
     }
 
     return std::make_tuple(video_device, audio_device, video_params, output_file, verbose);
 }
 
+static void printMenu(bool paused) {
+    std::cout << std::endl;
+    if (paused) {
+        std::cout << "[PAUSED] - [r]esume";
+    } else {
+        std::cout << "[RECORDING] - [p]ause";
+    }
+    std::cout << ", [s]top: " << std::flush;
+}
+
 int main(int argc, char **argv) {
     VideoParameters video_params;
-    int framerate;
     std::string output_file;
-    std::mutex m;
-    std::condition_variable cv;
-    bool pause = false;
-    bool resume = false;
-    bool stop = false;
     std::string video_device;
     std::string audio_device;
     bool verbose = false;
@@ -143,15 +149,18 @@ int main(int argc, char **argv) {
         for (int i = 1; i < argc; i++) {
             args.emplace_back(argv[i]);
         }
-        std::tie(video_device, audio_device, video_params, output_file, verbose) = get_params(args);
+        std::tie(video_device, audio_device, video_params, output_file, verbose) = parseArgs(args);
     } catch (const std::exception &e) {
         std::string msg(e.what());
         if (msg != "") std::cerr << "ERROR: " << msg << std::endl;
-        std::cerr << "Usage: " << argv[0];
-        std::cerr << " [-video_device <device_name>] [-audio_device <device_name>|none]";
-        std::cerr << " [-video_size <width>x<height>:<offset_x>,<offset_y>]";
-        std::cerr << " [-framerate <framerate>] [-o <output_file>] [-v] [-h]";
-        std::cerr << std::endl;
+        std::cerr << "Usage: " << argv[0] << std::endl;
+        std::cerr << "\t[-h]" << std::endl;
+        std::cerr << "\t[-video_device <device_name>]" << std::endl;
+        std::cerr << "\t[-audio_device <device_name>]" << std::endl;
+        std::cerr << "\t[-video_size <width>x<height>:<offset_x>,<offset_y>]" << std::endl;
+        std::cerr << "\t[-framerate <framerate>]" << std::endl;
+        std::cerr << "\t[-o <output_file>]" << std::endl;
+        std::cerr << "\t[-v]" << std::endl;
         return 1;
     }
 
@@ -165,54 +174,43 @@ int main(int argc, char **argv) {
         }
 
         if (std::filesystem::exists(output_file)) {
+            std::cout << "The output file '" << output_file << "' already exists, override it? [y/N] ";
             std::string answer;
-            std::cout << "The output file " << output_file << " already exists, override it? [y/N] ";
             std::getline(std::cin, answer);
             if (answer != "y" && answer != "Y") return 0;
         }
+
         std::cout << std::endl;  // separate client printing from the rest
 
-        std::thread worker([&]() {
-            try {
-                sc.start(video_device, audio_device, output_file, video_params, verbose);
-                while (true) {
-                    std::unique_lock ul(m);
-                    cv.wait(ul, [&]() { return pause || resume || stop; });
-                    if (stop) {
-                        sc.stop();
-                        break;
-                    } else if (pause) {
-                        sc.pause();
-                        pause = false;
-                    } else if (resume) {
-                        sc.resume();
-                        resume = false;
-                    }
+        sc.start(video_device, audio_device, output_file, video_params, verbose);
+
+        bool paused = false;
+        bool stopped = false;
+
+        while (!stopped) {
+            printMenu(paused);
+            std::string input;
+            std::getline(std::cin, input);
+            if (input.length() == 1) {
+                char command = std::tolower(input.front());
+                if (command == 'p' && !paused) {
+                    sc.pause();
+                    paused = true;
+                    continue;
+                } else if (command == 'r' && paused) {
+                    sc.resume();
+                    paused = false;
+                    continue;
+                } else if (command == 's' && !stopped) {
+                    std::cout << "Stopping..." << std::flush;
+                    sc.stop();
+                    stopped = true;
+                    std::cout << " done" << std::endl;
+                    continue;
                 }
-            } catch (const std::exception &e) {
-                std::cerr << e.what() << ", terminating..." << std::endl;
-                exit(1);
             }
-        });
-
-        while (!stop) {
-            int input = getchar();
-            std::unique_lock ul(m);
-            if (input == 'p') {
-                pause = true;
-            } else if (input == 'r') {
-                resume = true;
-            } else if (input == 's') {
-                stop = true;
-            } else {
-                if (input != 10)  // ignore CR
-                    std::cerr << "Unknown option, possible options are: p[ause], r[esume], s[top]" << std::endl;
-                continue;
-            }
-            cv.notify_one();
+            std::cerr << "Unknown command" << std::endl;
         }
-
-        if (worker.joinable()) worker.join();
 
     } catch (const std::exception &e) {
         std::cerr << e.what() << ", terminating..." << std::endl;
