@@ -182,7 +182,7 @@ int main(int argc, char **argv) {
     }
 
     try {
-        ScreenRecorder sc;
+        ScreenRecorder sc(verbose);
 
         if (video_device.empty()) {
             std::cerr << "ERROR: No video device specified" << std::endl << std::endl;
@@ -197,7 +197,7 @@ int main(int argc, char **argv) {
             if (answer != "y" && answer != "Y") return 0;
         }
 
-        sc.start(video_device, audio_device, output_file, video_params, verbose);
+        sc.start(video_device, audio_device, output_file, video_params);
 
         bool paused = false;
         bool print_status = true;
