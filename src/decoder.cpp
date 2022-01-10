@@ -36,3 +36,5 @@ av::FrameUPtr Decoder::getFrame() const {
 }
 
 const AVCodecContext *Decoder::getContext() const { return codec_ctx_.get(); }
+
+std::string Decoder::getName() const { return codec_->long_name; }
