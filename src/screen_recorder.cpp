@@ -14,8 +14,31 @@
 #include "log_callback_setter.h"
 #include "log_level_setter.h"
 
-static std::string generateInputDeviceName(const std::string &video_device, const std::string &audio_device,
-                                           const VideoParameters &video_params) {
+static void makeAvVerbose(bool verbose) {
+    if (verbose) {
+        av_log_set_level(AV_LOG_VERBOSE);
+        // av_log_set_level(AV_LOG_DEBUG);
+    } else {
+        av_log_set_level(AV_LOG_PRINT_LEVEL);
+    }
+}
+
+static const std::string getInputFormatName(bool audio = false) {
+#if defined(LINUX)
+    if (audio) {
+        return "alsa";
+    } else {
+        return "x11grab";
+    }
+#elif defined(WINDOWS)
+    return "dshow";
+#else  // macOS
+    return "avfoundation";
+#endif
+}
+
+static const std::string generateInputDeviceName(const std::string &video_device, const std::string &audio_device,
+                                                 const VideoParameters &video_params) {
     std::stringstream device_name_ss;
 #if defined(_WIN32)
     if (!audio_device.empty()) device_name_ss << "audio=" << audio_device << ":";
@@ -35,11 +58,43 @@ static std::string generateInputDeviceName(const std::string &video_device, cons
     return device_name_ss.str();
 }
 
-static std::map<std::string, std::string> generateDemuxerOptions(const VideoParameters &video_params) {
-    std::map<std::string, std::string> demuxer_options;
+#ifdef WINDOWS
+static void setDisplayResolution(int framerate) {
+    int x1, y1, x2, y2, resolution_width, resolution_height;
+    x1 = GetSystemMetrics(SM_XVIRTUALSCREEN);
+    y1 = GetSystemMetrics(SM_YVIRTUALSCREEN);
+    x2 = GetSystemMetrics(SM_CXVIRTUALSCREEN);
+    y2 = GetSystemMetrics(SM_CYVIRTUALSCREEN);
+    resolution_width = x2 - x1;
+    resolution_height = y2 - y1;
+    HKEY hkey;
+    DWORD dwDisposition;
+    if (RegCreateKeyEx(HKEY_CURRENT_USER, TEXT("Software\\screen-capture-recorder"), 0, nullptr, 0, KEY_WRITE, nullptr,
+                       &hkey, &dwDisposition) == ERROR_SUCCESS) {
+        DWORD dwType, dwSize;
+        dwType = REG_DWORD;
+        dwSize = sizeof(DWORD);
+        DWORD rofl = framerate;
+        RegSetValueEx(hkey, TEXT("default_max_fps"), 0, dwType, (PBYTE)&rofl, dwSize);
+        rofl = resolution_width;
+        RegSetValueEx(hkey, TEXT("capture_width"), 0, dwType, (PBYTE)&rofl, dwSize);
+        rofl = resolution_height;
+        RegSetValueEx(hkey, TEXT("capture_height"), 0, dwType, (PBYTE)&rofl, dwSize);
+        rofl = 0;
+        RegSetValueEx(hkey, TEXT("start_x"), 0, dwType, (PBYTE)&rofl, dwSize);
+        rofl = 0;
+        RegSetValueEx(hkey, TEXT("start_y"), 0, dwType, (PBYTE)&rofl, dwSize);
+        RegCloseKey(hkey);
+    } else {
+        throw std::runtime_error("Error opening key when setting display resolution");
+    }
+}
+#endif
 
+static const std::map<std::string, std::string> generateDemuxerOptions(const VideoParameters &video_params) {
+    std::map<std::string, std::string> demuxer_options;
 #ifdef _WIN32
-    setDisplayResolution();
+    setDisplayResolution(video_params.framerate);
     demuxer_options.insert({"rtbufsize", "1024M"});
 #else
     {
@@ -74,20 +129,8 @@ static void checkParams(const std::string &video_device, const std::string &outp
     if (output_file.empty()) throw std::runtime_error("output file not specified");
 }
 
-ScreenRecorder::ScreenRecorder() : stopped_(true) {
-    out_video_pix_fmt_ = AV_PIX_FMT_YUV420P;
-    out_video_codec_id_ = AV_CODEC_ID_H264;
-    out_audio_codec_id_ = AV_CODEC_ID_AAC;
-
-#if defined(LINUX)
-    in_fmt_name_ = "x11grab";
-    in_audio_fmt_name_ = "alsa";
-#elif defined(WINDOWS)
-    in_fmt_name_ = "dshow";
-#else  // macOS
-    in_fmt_name_ = "avfoundation";
-#endif
-
+ScreenRecorder::ScreenRecorder(bool verbose) : stopped_(true), verbose_(verbose) {
+    makeAvVerbose(verbose_);
     avdevice_register_all();
 }
 
@@ -98,81 +141,48 @@ ScreenRecorder::~ScreenRecorder() {
 #endif
 }
 
-#ifdef WINDOWS
-void ScreenRecorder::setDisplayResolution() const {
-    int x1, y1, x2, y2, resolution_width, resolution_height;
-    x1 = GetSystemMetrics(SM_XVIRTUALSCREEN);
-    y1 = GetSystemMetrics(SM_YVIRTUALSCREEN);
-    x2 = GetSystemMetrics(SM_CXVIRTUALSCREEN);
-    y2 = GetSystemMetrics(SM_CYVIRTUALSCREEN);
-    resolution_width = x2 - x1;
-    resolution_height = y2 - y1;
-    HKEY hkey;
-    DWORD dwDisposition;
-    if (RegCreateKeyEx(HKEY_CURRENT_USER, TEXT("Software\\screen-capture-recorder"), 0, nullptr, 0, KEY_WRITE, nullptr,
-                       &hkey, &dwDisposition) == ERROR_SUCCESS) {
-        DWORD dwType, dwSize;
-        dwType = REG_DWORD;
-        dwSize = sizeof(DWORD);
-        DWORD rofl = video_framerate_;
-        RegSetValueEx(hkey, TEXT("default_max_fps"), 0, dwType, (PBYTE)&rofl, dwSize);
-        rofl = resolution_width;
-        RegSetValueEx(hkey, TEXT("capture_width"), 0, dwType, (PBYTE)&rofl, dwSize);
-        rofl = resolution_height;
-        RegSetValueEx(hkey, TEXT("capture_height"), 0, dwType, (PBYTE)&rofl, dwSize);
-        rofl = 0;
-        RegSetValueEx(hkey, TEXT("start_x"), 0, dwType, (PBYTE)&rofl, dwSize);
-        rofl = 0;
-        RegSetValueEx(hkey, TEXT("start_y"), 0, dwType, (PBYTE)&rofl, dwSize);
-        RegCloseKey(hkey);
-    } else {
-        throw std::runtime_error("Error opening key when setting display resolution");
-    }
-}
-#endif
-
 void ScreenRecorder::start(const std::string &video_device, const std::string &audio_device,
-                           const std::string &output_file, VideoParameters video_params, bool verbose) {
+                           const std::string &output_file, VideoParameters video_params) {
     checkParams(video_device, output_file, video_params);
 
     std::unique_lock ul{m_};
     if (!stopped_) throw std::runtime_error("Recording already in progress");
 
-    verbose_ = verbose;
-    if (verbose_) {
-        av_log_set_level(AV_LOG_VERBOSE);
-        // av_log_set_level(AV_LOG_DEBUG);
-    } else {
-        av_log_set_level(AV_LOG_PRINT_LEVEL);
-    }
+    AVPixelFormat video_pix_fmt = AV_PIX_FMT_YUV420P;
+    AVCodecID video_codec_id = AV_CODEC_ID_H264;
+    AVCodecID audio_codec_id = AV_CODEC_ID_AAC;
 
     /* init Muxer */
     muxer_ = std::make_shared<Muxer>(output_file);
+
     /* init Demuxer */
-    std::string device_name = generateInputDeviceName(video_device, audio_device, video_params);
-    std::map<std::string, std::string> demuxer_options = generateDemuxerOptions(video_params);
-    auto demuxer = std::make_shared<Demuxer>(in_fmt_name_, device_name, demuxer_options);
+    const std::string device_name = generateInputDeviceName(video_device, audio_device, video_params);
+    const std::map<std::string, std::string> demuxer_options = generateDemuxerOptions(video_params);
+    auto demuxer = std::make_shared<Demuxer>(getInputFormatName(), device_name, demuxer_options);
     demuxer->openInput();
+
     /* init Pipeline */
     auto pipeline = std::make_unique<Pipeline>(demuxer, muxer_);
 #ifdef LINUX
     video_params.offset_x = video_params.offset_y = 0;  // No cropping is performed on Linux
 #endif
-    pipeline->initVideo(out_video_codec_id_, video_params, out_video_pix_fmt_);
+    pipeline->initVideo(video_codec_id, video_params, video_pix_fmt);
+
     /* init audio structures, if necessary */
     if (!audio_device.empty()) {
 #ifdef LINUX
         /* init audio demuxer and pipeline */
-        std::string audio_device_name = generateInputDeviceName("", audio_device, video_params);
-        auto audio_demuxer =
-            std::make_shared<Demuxer>(in_audio_fmt_name_, audio_device_name, std::map<std::string, std::string>());
+        const std::string audio_device_name = generateInputDeviceName("", audio_device, video_params);
+        auto audio_demuxer = std::make_shared<Demuxer>(getInputFormatName(true), audio_device_name,
+                                                       std::map<std::string, std::string>());
         audio_demuxer->openInput();
-        auto audio_pipeline = std::make_unique<Pipeline>(audio_demuxer_, muxer_);
-        audio_pipeline->initAudio(out_audio_codec_id_);
+        auto audio_pipeline = std::make_unique<Pipeline>(audio_demuxer, muxer);
+        audio_pipeline->initAudio(audio_codec_id);
 #else
-        pipeline->initAudio(out_audio_codec_id_);
+        pipeline->initAudio(audio_codec_id);
 #endif
     }
+
     muxer_->openFile();
 
     if (verbose_) {
@@ -286,6 +296,11 @@ void ScreenRecorder::capture(std::shared_ptr<Demuxer> demuxer, std::unique_ptr<P
     pipeline->flush();
 }
 
+void ScreenRecorder::setVerbose(bool verbose) {
+    verbose_ = verbose;
+    makeAvVerbose(verbose_);
+}
+
 void ScreenRecorder::listAvailableDevices() {
     std::string dummy_device_name;
     std::map<std::string, std::string> options;
@@ -295,7 +310,7 @@ void ScreenRecorder::listAvailableDevices() {
     dummy_device_name = "dummy";
 #endif
 
-    Demuxer demuxer(in_fmt_name_, dummy_device_name, options);
+    Demuxer demuxer(getInputFormatName(), dummy_device_name, options);
     std::cout << "##### Available Devices #####" << std::endl;
     {
         // LogCallbackSetter lcs(log_callback);

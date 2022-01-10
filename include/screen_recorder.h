@@ -29,13 +29,6 @@ class ScreenRecorder {
     /* Recording parameters */
 
     bool verbose_;
-    AVPixelFormat out_video_pix_fmt_;
-    AVCodecID out_video_codec_id_;
-    AVCodecID out_audio_codec_id_;
-    std::string in_fmt_name_;
-#ifdef LINUX
-    std::string in_audio_fmt_name_;
-#endif
 
     /* Structures for audio-video processing */
 
@@ -43,12 +36,8 @@ class ScreenRecorder {
 
     void capture(std::shared_ptr<Demuxer> demuxer, std::unique_ptr<Pipeline> pipeline);
 
-#ifdef WINDOWS
-    void setDisplayResolution() const;
-#endif
-
 public:
-    ScreenRecorder();
+    ScreenRecorder(bool verbose = false);
 
     ~ScreenRecorder();
 
@@ -59,11 +48,9 @@ public:
      * @param output_file       the name of the output file to use to save the recording
      * @param video_params        the video dimensions (NOTE: if width/height is set to 0, the whole display will be
      * considered)
-     * @param framerate         the video framerate to use
-     * @param verbose           the level of verboseness during the recording
      */
     void start(const std::string &video_device, const std::string &audio_device, const std::string &output_file,
-               VideoParameters video_params, bool verbose = false);
+               VideoParameters video_params);
 
     /**
      * Stop the screen capture
@@ -81,6 +68,8 @@ public:
      * If the recording is already proceeding/stopped, nothing will be done
      */
     void resume();
+
+    void setVerbose(bool verbose);
 
     /**
      * Print a list of the devices available for capturing
