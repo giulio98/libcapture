@@ -98,7 +98,7 @@ std::pair<av::PacketUPtr, av::DataType> Demuxer::readPacket() const {
     return std::make_pair(std::move(packet), packet_type);
 }
 
-void Demuxer::dumpInfo(int index) const {
+void Demuxer::printInfo(int index) const {
     if (!fmt_ctx_) throw_error("input is not open");
     av_dump_format(fmt_ctx_.get(), index, device_name_.c_str(), 0);
 }

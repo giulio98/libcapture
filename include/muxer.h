@@ -55,7 +55,7 @@ public:
     /**
      * Print informations about the streams
      */
-    void dumpInfo();
+    void printInfo();
 
     /**
      * Get the global header flags of the output format
