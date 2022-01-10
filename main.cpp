@@ -87,8 +87,6 @@ std::tuple<std::string, std::string, VideoParameters, std::string, bool> parseAr
         } else if (*it == "-video_size") {
             if (video_size_set || ++it == args.end()) throw std::runtime_error(wrong_args_msg);
             video_params = parseVideoSize(*it);
-            std::cout << "Parsed video size: " << video_params.width << "x" << video_params.height << std::endl;
-            std::cout << "Parsed video offset: " << video_params.offset_x << "," << video_params.offset_y << std::endl;
             video_size_set = true;
         } else if (*it == "-framerate") {
             if (framerate_set || ++it == args.end()) throw std::runtime_error(wrong_args_msg);
@@ -107,6 +105,11 @@ std::tuple<std::string, std::string, VideoParameters, std::string, bool> parseAr
 
     video_params.framerate = framerate;
 
+    if (!output_set) {
+        output_file = "output.mp4";
+        std::cout << "No output file specified, saving to '" << output_file << "'" << std::endl;
+    }
+
     if (verbose) {
         std::cout << "Parsed video device: " << video_device << std::endl;
         std::cout << "Parsed audio device: " << audio_device;
@@ -117,11 +120,16 @@ std::tuple<std::string, std::string, VideoParameters, std::string, bool> parseAr
         }
 #endif
         std::cout << std::endl;
-    }
-
-    if (!output_set) {
-        output_file = "output.mp4";
-        std::cout << "No output file specified, saving to '" << output_file << "'" << std::endl;
+        if (framerate_set) {
+            std::cout << "Parsed framerate: " << framerate << std::endl;
+        }
+        if (video_size_set) {
+            std::cout << "Parsed video size: " << video_params.width << "x" << video_params.height << std::endl;
+            std::cout << "Parsed video offset: " << video_params.offset_x << "," << video_params.offset_y << std::endl;
+        }
+        if (output_set) {
+            std::cout << "Parsed output file: " << output_file << std::endl;
+        }
     }
 
     return std::make_tuple(video_device, audio_device, video_params, output_file, verbose);
