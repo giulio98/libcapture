@@ -192,8 +192,6 @@ void ScreenRecorder::start(const std::string &video_device, const std::string &a
 #endif
 
     stopped_ = false;
-
-    std::cout << "Recording..." << std::endl;
 }
 
 void ScreenRecorder::stop() {
@@ -203,12 +201,10 @@ void ScreenRecorder::stop() {
         cv_.notify_all();
     }
 
-    // std::cout << "Recording stopped, waiting for video processing to complete..." << std::flush;
     if (recorder_thread_.joinable()) recorder_thread_.join();
 #ifdef LINUX
     if (audio_recorder_thread_.joinable()) audio_recorder_thread_.join();
 #endif
-    // std::cout << " done" << std::endl;
 
     muxer_->closeFile();
     muxer_.reset();
@@ -229,7 +225,6 @@ void ScreenRecorder::pause() {
     std::unique_lock<std::mutex> ul{m_};
     if (paused_ || stop_capture_) return;
     paused_ = true;
-    std::cout << "Recording paused" << std::endl;
     cv_.notify_all();
 }
 
@@ -237,7 +232,6 @@ void ScreenRecorder::resume() {
     std::unique_lock<std::mutex> ul{m_};
     if (!paused_ || stop_capture_) return;
     paused_ = false;
-    std::cout << "Recording resumed..." << std::endl;
     cv_.notify_all();
 }
 
