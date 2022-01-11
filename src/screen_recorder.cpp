@@ -184,7 +184,7 @@ void ScreenRecorder::start(const std::string &video_device, const std::string &a
             const std::string audio_device_name = generateInputDeviceName("", audio_device, video_params);
             auto audio_demuxer = std::make_unique<Demuxer>(getInputFormatName(true), audio_device_name,
                                                       std::map<std::string, std::string>());
-            audio_pipeline = std::make_unique<Pipeline>(std::ove(audio_demuxer), muxer_);
+            audio_pipeline = std::make_unique<Pipeline>(std::move(audio_demuxer), muxer_);
             audio_pipeline->initAudio(audio_codec_id);
 #else
             pipeline->initAudio(audio_codec_id);
