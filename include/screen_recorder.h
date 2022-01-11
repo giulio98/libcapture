@@ -34,9 +34,10 @@ class ScreenRecorder {
 
     /**
      * Capture frames using the provided pipeline for processing
-     * @param pipeline the pipeline to use for capturing and processing
+     * @param demuxer   the demuxer to read from and to flush on pause
+     * @param pipeline  the pipeline to use for capturing and processing
      */
-    void capture(std::unique_ptr<Pipeline> pipeline);
+    void capture(std::shared_ptr<Demuxer> demuxer, std::unique_ptr<Pipeline> pipeline);
 
 public:
     /**

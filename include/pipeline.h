@@ -18,7 +18,7 @@
 
 class Pipeline {
     std::array<bool, av::DataType::NumDataTypes> data_types_;
-    std::unique_ptr<Demuxer> demuxer_;
+    std::shared_ptr<Demuxer> demuxer_;
     std::shared_ptr<Muxer> muxer_;
     std::array<std::unique_ptr<Decoder>, av::DataType::NumDataTypes> decoders_;
     std::array<std::unique_ptr<Encoder>, av::DataType::NumDataTypes> encoders_;
@@ -53,7 +53,7 @@ public:
      * @param use_background_processors whether the pipeline should use background threads to handle the processing
      * (recommended when the demuxer will provide both video and audio packets)
      */
-    Pipeline(std::unique_ptr<Demuxer> demuxer, std::shared_ptr<Muxer> muxer, bool use_background_processors = false);
+    Pipeline(std::shared_ptr<Demuxer> demuxer, std::shared_ptr<Muxer> muxer, bool use_background_processors = false);
 
     ~Pipeline();
 
@@ -77,9 +77,9 @@ public:
      * the background threads will handle the packet processing and this function will
      * return immediately after the read, otherwise the processing will be handled in
      * a synchronous way and this function will return only when it's completed
-     * @param recovering_from_pause when set to true, the pipeline will flush the demuxer and
-     * use the next packet to adjust its internal PTS offset, without processing it (note that
-     * the PTS adjustment will be performed only if it was possible to actually read a packet)
+     * @param recovering_from_pause when set to true, the pipeline will use the next packet
+     * to adjust its internal PTS offset, without processing it (note that the PTS adjustment
+     * will be performed only if it was possible to actually read a packet)
      * @return true if it was possible to read a packet from the demuxer, false if there was nothing to read
      */
     bool step(bool recovering_from_pause = false);

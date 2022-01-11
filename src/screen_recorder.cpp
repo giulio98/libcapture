@@ -153,8 +153,10 @@ void ScreenRecorder::start(const std::string &video_device, const std::string &a
     AVCodecID audio_codec_id = AV_CODEC_ID_AAC;
 
     std::unique_ptr<Pipeline> pipeline;
+    std::shared_ptr<Demuxer> demuxer;
 #ifdef LINUX
     std::unique_ptr<Pipeline> audio_pipeline;
+    std::shared_ptr<Demuxer> audio_demuxer;
 #endif
 
     {
@@ -164,7 +166,8 @@ void ScreenRecorder::start(const std::string &video_device, const std::string &a
         /* init Demuxer */
         const std::string device_name = generateInputDeviceName(video_device, audio_device, video_params);
         const std::map<std::string, std::string> demuxer_options = generateDemuxerOptions(video_params);
-        auto demuxer = std::make_unique<Demuxer>(getInputFormatName(), device_name, demuxer_options);
+        demuxer = std::make_unique<Demuxer>(getInputFormatName(), device_name, demuxer_options);
+        demuxer->openInput();
 
         bool use_processors;
 #ifdef LINUX
@@ -174,7 +177,7 @@ void ScreenRecorder::start(const std::string &video_device, const std::string &a
         use_processors = true;
 #endif
         /* init Pipeline */
-        pipeline = std::make_unique<Pipeline>(std::move(demuxer), muxer_, use_processors);
+        pipeline = std::make_unique<Pipeline>(demuxer, muxer_, use_processors);
         pipeline->initVideo(video_codec_id, video_params, video_pix_fmt);
 
         /* init audio structures, if necessary */
@@ -182,9 +185,10 @@ void ScreenRecorder::start(const std::string &video_device, const std::string &a
 #ifdef LINUX
             /* init audio demuxer and pipeline */
             const std::string audio_device_name = generateInputDeviceName("", audio_device, video_params);
-            auto audio_demuxer = std::make_unique<Demuxer>(getInputFormatName(true), audio_device_name,
-                                                           std::map<std::string, std::string>());
-            audio_pipeline = std::make_unique<Pipeline>(std::move(audio_demuxer), muxer_);
+            audio_demuxer = std::make_unique<Demuxer>(getInputFormatName(true), audio_device_name,
+                                                      std::map<std::string, std::string>());
+            audio_demuxer->openInput();
+            audio_pipeline = std::make_unique<Pipeline>(audio_demuxer, muxer_);
             audio_pipeline->initAudio(audio_codec_id);
 #else
             pipeline->initAudio(audio_codec_id);
@@ -196,29 +200,33 @@ void ScreenRecorder::start(const std::string &video_device, const std::string &a
 
     if (verbose_) {
         std::cout << std::endl;
+        demuxer->printInfo();
+#ifdef LINUX
+        audio_demuxer->printInfo();
+#endif
+        muxer_->printInfo();
         pipeline->printInfo();
 #ifdef LINUX
         audio_pipeline->printInfo();
 #endif
-        muxer_->printInfo();
         std::cout << std::endl;
     }
 
     stop_capture_ = false;
     paused_ = false;
 
-    auto recorder_fn = [this](std::unique_ptr<Pipeline> pipeline) {
+    auto recorder_fn = [this](std::shared_ptr<Demuxer> demuxer, std::unique_ptr<Pipeline> pipeline) {
         try {
-            capture(std::move(pipeline));
+            capture(std::move(demuxer), std::move(pipeline));
         } catch (const std::exception &e) {
             std::cerr << "Fatal error during capturing (" << e.what() << "), terminating..." << std::endl;
             exit(1);
         }
     };
 
-    recorder_thread_ = std::thread(recorder_fn, std::move(pipeline));
+    recorder_thread_ = std::thread(recorder_fn, std::move(demuxer), std::move(pipeline));
 #ifdef LINUX
-    audio_recorder_thread_ = std::thread(recorder_fn, std::move(audio_pipeline));
+    audio_recorder_thread_ = std::thread(recorder_fn, std::move(audio_demuxer), std::move(audio_pipeline));
 #endif
 
     stopped_ = false;
@@ -259,7 +267,8 @@ void ScreenRecorder::resume() {
     cv_.notify_all();
 }
 
-void ScreenRecorder::capture(std::unique_ptr<Pipeline> pipeline) {
+void ScreenRecorder::capture(std::shared_ptr<Demuxer> demuxer, std::unique_ptr<Pipeline> pipeline) {
+    if (!demuxer) throw std::runtime_error("received demuxer is NULL");
     if (!pipeline) throw std::runtime_error("received pipeline is NULL");
 
     bool recovering_from_pause = false;
@@ -268,9 +277,23 @@ void ScreenRecorder::capture(std::unique_ptr<Pipeline> pipeline) {
     while (true) {
         {
             std::unique_lock<std::mutex> ul{m_};
-            if (paused_) recovering_from_pause = true;
+            bool handle_pause = paused_;
+
+#ifndef MACOS
+            if (handle_pause) demuxer->closeInput();
+#endif
+
             cv_.wait(ul, [this]() { return (!paused_ || stop_capture_); });
             if (stop_capture_) break;
+
+            if (handle_pause) {
+                recovering_from_pause = true;
+#ifdef MACOS
+                demuxer->flush();
+#else
+                demuxer->openInput();
+#endif
+            }
         }
 
         if (pipeline->step(recovering_from_pause)) {

@@ -4,23 +4,20 @@
 #include <map>
 #include <sstream>
 
-#define REOPEN_INPUT_ON_PAUSE 0
-
 static void throw_error(const std::string &msg) { throw std::runtime_error("Pipeline: " + msg); }
 
 static void checkDataType(av::DataType data_type) {
     if (!av::isDataTypeValid(data_type)) throw_error("invalid data type received");
 }
 
-Pipeline::Pipeline(std::unique_ptr<Demuxer> demuxer, std::shared_ptr<Muxer> muxer, bool use_background_processors)
+Pipeline::Pipeline(std::shared_ptr<Demuxer> demuxer, std::shared_ptr<Muxer> muxer, bool use_background_processors)
     : demuxer_(std::move(demuxer)),
-      muxer_(muxer),
+      muxer_(std::move(muxer)),
       use_background_processors_(use_background_processors),
       pts_offset_(0),
       last_pts_(0) {
     if (!demuxer_) throw std::runtime_error("Demuxer is NULL");
     if (!muxer_) throw std::runtime_error("Muxer is NULL");
-    if (!demuxer_->isInputOpen()) demuxer_->openInput();
     data_types_[av::DataType::Video] = false;
     data_types_[av::DataType::Audio] = false;
 }
@@ -204,15 +201,6 @@ bool Pipeline::step(bool recovering_from_pause) {
         checkExceptions();
     }
 
-    if (recovering_from_pause) {
-#if defined(MACOS) || !REOPEN_INPUT_ON_PAUSE
-        demuxer_->flush();
-#else
-        demuxer_->closeInput();
-        demuxer_->openInput();
-#endif
-    }
-
     auto [packet, packet_type] = demuxer_->readPacket();
     if (!packet) return false;
 
@@ -261,7 +249,6 @@ void Pipeline::flush() {
 }
 
 void Pipeline::printInfo() const {
-    demuxer_->printInfo();
     for (auto type : {av::DataType::Video, av::DataType::Audio}) {
         if (decoders_[type]) std::cout << "Decoder " << type << ": " << decoders_[type]->getName() << std::endl;
         if (encoders_[type]) std::cout << "Encoder " << type << ": " << encoders_[type]->getName() << std::endl;
