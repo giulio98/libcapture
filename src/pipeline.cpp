@@ -10,7 +10,7 @@ static void checkDataType(av::DataType data_type) {
     if (!av::isDataTypeValid(data_type)) throw_error("invalid data type received");
 }
 
-Pipeline::Pipeline(std::shared_ptr<const Demuxer> demuxer, std::shared_ptr<Muxer> muxer, bool use_background_processors)
+Pipeline::Pipeline(std::shared_ptr<Demuxer> demuxer, std::shared_ptr<Muxer> muxer, bool use_background_processors)
     : demuxer_(demuxer),
       muxer_(muxer),
       use_background_processors_(use_background_processors),
@@ -152,8 +152,8 @@ void Pipeline::initAudio(AVCodecID codec_id) {
 void Pipeline::processPacket(const AVPacket *packet, av::DataType data_type) {
     checkDataType(data_type);
 
-    const Decoder *decoder = decoders_[data_type].get();
-    const Converter *converter = converters_[data_type].get();
+    Decoder *decoder = decoders_[data_type].get();
+    Converter *converter = converters_[data_type].get();
 
     if (!decoder) throw_error("no decoder prsent for the specified data type");
     if (!converter) throw_error("no decoder prsent for the specified data type");
@@ -179,7 +179,7 @@ void Pipeline::processPacket(const AVPacket *packet, av::DataType data_type) {
 void Pipeline::processConvertedFrame(const AVFrame *frame, av::DataType data_type) {
     checkDataType(data_type);
 
-    const Encoder *encoder = encoders_[data_type].get();
+    Encoder *encoder = encoders_[data_type].get();
 
     if (!encoder) throw_error("no decoder prsent for the specified data type");
 

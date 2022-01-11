@@ -313,7 +313,7 @@ void ScreenRecorder::setVerbose(bool verbose) {
     makeAvVerbose(verbose_);
 }
 
-void ScreenRecorder::listAvailableDevices() {
+void ScreenRecorder::listAvailableDevices() const {
     std::string dummy_device_name;
     std::map<std::string, std::string> options;
     options.insert({"list_devices", "true"});

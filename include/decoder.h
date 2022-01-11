@@ -20,14 +20,14 @@ public:
      * @param packet the packet to send to the decoder. It can be nullptr to flush the decoder
      * @return true if the packet has been correctly sent, false if the decoder could not receive it
      */
-    bool sendPacket(const AVPacket *packet) const;
+    bool sendPacket(const AVPacket *packet);
 
     /**
      * Get a converted Frame from the decoder
      * @return a frame if it was possible to get it, nullptr if the decoder had nothing to write
      * because it is empty or flushed
      */
-    [[nodiscard]] av::FrameUPtr getFrame() const;
+    [[nodiscard]] av::FrameUPtr getFrame();
 
     /**
      * Access the internal codec context

@@ -53,7 +53,7 @@ void Demuxer::closeInput() {
     streams_[av::DataType::Audio] = nullptr;
 }
 
-void Demuxer::flush() const {
+void Demuxer::flush() {
     if (!fmt_ctx_) throw_error("input is not open");
     if (fmt_ctx_->pb) avio_flush(fmt_ctx_->pb);
     if (avformat_flush(fmt_ctx_.get()) < 0) throw_error("failed to flush internal data");
@@ -73,7 +73,7 @@ const AVCodecParameters *Demuxer::getStreamParams(av::DataType stream_type) cons
     return streams_[stream_type]->time_base;
 }
 
-std::pair<av::PacketUPtr, av::DataType> Demuxer::readPacket() const {
+std::pair<av::PacketUPtr, av::DataType> Demuxer::readPacket() {
     if (!fmt_ctx_) throw_error("input is not open");
 
     av::PacketUPtr packet(av_packet_alloc());

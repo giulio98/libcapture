@@ -27,7 +27,7 @@ Encoder::Encoder(AVCodecID codec_id) : codec_(nullptr) {
 
 const AVCodec *Encoder::getCodec() const { return codec_; }
 
-AVCodecContext *Encoder::getContextMod() const { return codec_ctx_.get(); }
+AVCodecContext *Encoder::getContextMod() { return codec_ctx_.get(); }
 
 void Encoder::init(const std::map<std::string, std::string> &options) {
     av::DictionaryUPtr dict = av::map2dict(options);
@@ -43,7 +43,7 @@ void Encoder::init(const std::map<std::string, std::string> &options) {
 #endif
 }
 
-bool Encoder::sendFrame(const AVFrame *frame) const {
+bool Encoder::sendFrame(const AVFrame *frame) {
     int ret = avcodec_send_frame(codec_ctx_.get(), frame);
     if (ret == AVERROR(EAGAIN)) return false;
     if (ret == AVERROR_EOF) throw_error("has already been flushed");
@@ -51,7 +51,7 @@ bool Encoder::sendFrame(const AVFrame *frame) const {
     return true;
 }
 
-av::PacketUPtr Encoder::getPacket() const {
+av::PacketUPtr Encoder::getPacket() {
     av::PacketUPtr packet(av_packet_alloc());
     if (!packet) throw_error("failed to allocate packet");
 

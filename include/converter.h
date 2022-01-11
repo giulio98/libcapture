@@ -35,11 +35,11 @@ public:
     /**
      * Send a frame to convert
      */
-    void sendFrame(av::FrameUPtr frame) const;
+    void sendFrame(av::FrameUPtr frame);
 
     /**
      * Get a converted frame
      * @return a new converted frame if it was possible to build it, nullptr otherwise
      */
-    [[nodiscard]] av::FrameUPtr getFrame() const;
+    [[nodiscard]] av::FrameUPtr getFrame();
 };

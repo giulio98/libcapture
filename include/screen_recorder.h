@@ -74,5 +74,5 @@ public:
     /**
      * Print a list of the devices available for capturing
      */
-    void listAvailableDevices();
+    void listAvailableDevices() const;
 };

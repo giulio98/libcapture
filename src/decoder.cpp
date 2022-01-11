@@ -17,7 +17,7 @@ Decoder::Decoder(const AVCodecParameters *params) : codec_(nullptr) {
     if (avcodec_open2(codec_ctx_.get(), codec_, nullptr) < 0) throw_error("unable to open the av codec");
 }
 
-bool Decoder::sendPacket(const AVPacket *packet) const {
+bool Decoder::sendPacket(const AVPacket *packet) {
     int ret = avcodec_send_packet(codec_ctx_.get(), packet);
     if (ret == AVERROR(EAGAIN)) return false;
     if (ret == AVERROR_EOF) throw_error("has already been flushed");
@@ -25,7 +25,7 @@ bool Decoder::sendPacket(const AVPacket *packet) const {
     return true;
 }
 
-av::FrameUPtr Decoder::getFrame() const {
+av::FrameUPtr Decoder::getFrame() {
     av::FrameUPtr frame(av_frame_alloc());
     if (!frame) throw_error("failed to allocate frame");
 

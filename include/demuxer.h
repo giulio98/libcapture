@@ -37,7 +37,7 @@ public:
     /**
      * Flush the internal buffered data
      */
-    void flush() const;
+    void flush();
 
     /**
      * Access the stream parameters
@@ -58,7 +58,7 @@ public:
      * @return a packet and its type if it was possible to read it, nullptr and a random meaningless type
      * if there was nothing to read
      */
-    [[nodiscard]] std::pair<av::PacketUPtr, av::DataType> readPacket() const;
+    [[nodiscard]] std::pair<av::PacketUPtr, av::DataType> readPacket();
 
     /**
      * Print informations about the streams
