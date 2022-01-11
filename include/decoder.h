@@ -7,6 +7,7 @@
 class Decoder {
     AVCodec *codec_;
     av::CodecContextUPtr codec_ctx_;
+    av::FrameUPtr frame_;
 
 public:
     /**

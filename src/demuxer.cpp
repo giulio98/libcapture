@@ -76,18 +76,20 @@ const AVCodecParameters *Demuxer::getStreamParams(av::DataType stream_type) cons
 std::pair<av::PacketUPtr, av::DataType> Demuxer::readPacket() {
     if (!fmt_ctx_) throw_error("input is not open");
 
-    av::PacketUPtr packet(av_packet_alloc());
-    if (!packet) throw_error("failed to allocate packet");
+    if (!packet_) {
+        packet_ = av::PacketUPtr(av_packet_alloc());
+        if (!packet_) throw_error("failed to allocate packet");
+    }
 
     av::DataType packet_type;
 
-    int ret = av_read_frame(fmt_ctx_.get(), packet.get());
+    int ret = av_read_frame(fmt_ctx_.get(), packet_.get());
     if (ret == AVERROR(EAGAIN)) return std::make_pair(nullptr, packet_type);
     if (ret < 0) throw_error("failed to read a packet");
 
     bool valid_index = false;
     for (auto type : {av::DataType::Video, av::DataType::Audio}) {
-        if (streams_[type] && packet->stream_index == streams_[type]->index) {
+        if (streams_[type] && packet_->stream_index == streams_[type]->index) {
             packet_type = type;
             valid_index = true;
             break;
@@ -95,7 +97,7 @@ std::pair<av::PacketUPtr, av::DataType> Demuxer::readPacket() {
     }
     if (!valid_index) throw_error("unknown packet stream index");
 
-    return std::make_pair(std::move(packet), packet_type);
+    return std::make_pair(std::move(packet_), packet_type);
 }
 
 void Demuxer::printInfo(int index) const {

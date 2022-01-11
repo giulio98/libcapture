@@ -12,6 +12,7 @@ class Demuxer {
     std::string device_name_;
     std::map<std::string, std::string> options_;
     std::array<const AVStream *, av::DataType::NumDataTypes> streams_;
+    av::PacketUPtr packet_;
 
 public:
     /**

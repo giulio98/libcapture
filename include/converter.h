@@ -6,6 +6,7 @@ class Converter {
     av::FilterGraphUPtr filter_graph_;
     AVFilterContext *buffersrc_ctx_;
     AVFilterContext *buffersink_ctx_;
+    av::FrameUPtr frame_;
 
 protected:
     /**

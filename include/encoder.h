@@ -8,6 +8,7 @@
 class Encoder {
     AVCodec *codec_;
     av::CodecContextUPtr codec_ctx_;
+    av::PacketUPtr packet_;
 
 protected:
     /** Create a new encoder
