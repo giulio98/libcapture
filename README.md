@@ -1,9 +1,9 @@
 # screen-recorder C++ library
 
 <p align="center">
+<img alt="c++" src="https://img.shields.io/badge/C++-20-blue.svg?style=flat&logo=c%2B%2B"/> 
  <img alt="CI build" src="https://github.com/giulio98/screen-recorder/actions/workflows/build.yml/badge.svg"/> 
- <!-- <img alt="License"  src="https://img.shields.io/github/license/giulio98/screen-recorder"/> -->
- <!-- <img alt="Release"  src ="https://img.shields.io/github/v/release/giulio98/screen-recorder"/> -->
+ <img alt="License"  src="https://img.shields.io/github/license/giulio98/screen-recorder"/> 
 </p> 
 
 
@@ -12,9 +12,11 @@ screen-recorder is a multiplatform C++ library that allows to capture your scree
 ## Dependences
 * cmake >= 2.8
 * ffmpeg >= 4.3.2
+* screen-capture-recorder-to-video-windows-free >= 0.12.11 (*only for Windows*) 
 
 Under **Windows**, you can install FFmpeg clicking [here](https://www.gyan.dev/ffmpeg/builds/packages/ffmpeg-4.3.2-full_build-shared.7z).
 Make sure to add "C:\FFmpeg\FFmpeg\bin" on your Path variable.
+Additionally, to ensure proper operation of screen-capture you need to install [screen-capture-recorder-to-video-windows-free](https://github.com/rdp/screen-capture-recorder-to-video-windows-free/releases)
 
 Under **Linux**, you can install FFmpeg opening your terminal and executing the following command
 ```bash
