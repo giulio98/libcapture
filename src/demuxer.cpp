@@ -53,7 +53,7 @@ void Demuxer::closeInput() {
     streams_[av::DataType::Audio] = nullptr;
 }
 
-void Demuxer::flush() {
+void Demuxer::flush() const {
     if (!fmt_ctx_) throw_error("input is not open");
     if (fmt_ctx_->pb) avio_flush(fmt_ctx_->pb);
     if (avformat_flush(fmt_ctx_.get()) < 0) throw_error("failed to flush internal data");

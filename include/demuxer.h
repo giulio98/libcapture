@@ -35,9 +35,9 @@ public:
     void closeInput();
 
     /**
-     * Flush he internal buffered data
+     * Flush the internal buffered data
      */
-    void flush();
+    void flush() const;
 
     /**
      * Access the stream parameters
