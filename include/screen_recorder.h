@@ -34,7 +34,7 @@ class ScreenRecorder {
 
     std::shared_ptr<Muxer> muxer_;
 
-    void capture(std::shared_ptr<Demuxer> demuxer, std::unique_ptr<Pipeline> pipeline);
+    void capture(std::unique_ptr<Pipeline> pipeline);
 
 public:
     ScreenRecorder(bool verbose = false);

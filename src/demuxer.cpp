@@ -59,6 +59,8 @@ void Demuxer::flush() {
     if (avformat_flush(fmt_ctx_.get()) < 0) throw_error("failed to flush internal data");
 }
 
+bool Demuxer::isInputOpen() const { return (fmt_ctx_ != nullptr); }
+
 const AVCodecParameters *Demuxer::getStreamParams(av::DataType stream_type) const {
     if (!fmt_ctx_) throw_error("input is not open");
     if (!av::isDataTypeValid(stream_type)) throw_error("invalid stream_type received");

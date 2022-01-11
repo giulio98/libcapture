@@ -18,7 +18,7 @@
 
 class Pipeline {
     std::array<bool, av::DataType::NumDataTypes> data_types_;
-    std::shared_ptr<Demuxer> demuxer_;
+    std::unique_ptr<Demuxer> demuxer_;
     std::shared_ptr<Muxer> muxer_;
     std::array<std::unique_ptr<Decoder>, av::DataType::NumDataTypes> decoders_;
     std::array<std::unique_ptr<Encoder>, av::DataType::NumDataTypes> encoders_;
@@ -46,7 +46,7 @@ class Pipeline {
     void flushPipeline(av::DataType data_type);
 
 public:
-    Pipeline(std::shared_ptr<Demuxer> demuxer, std::shared_ptr<Muxer> muxer, bool use_background_processors = false);
+    Pipeline(std::unique_ptr<Demuxer> demuxer, std::shared_ptr<Muxer> muxer, bool use_background_processors = false);
 
     ~Pipeline();
 

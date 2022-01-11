@@ -40,6 +40,8 @@ public:
      */
     void flush();
 
+    [[nodiscard]] bool isInputOpen() const;
+
     /**
      * Access the stream parameters
      * @param stream_type the type of data of the stream
