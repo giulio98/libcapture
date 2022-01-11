@@ -27,7 +27,7 @@ Encoder::Encoder(AVCodecID codec_id) : codec_(nullptr) {
 
 const AVCodec *Encoder::getCodec() const { return codec_; }
 
-AVCodecContext *Encoder::getContextMod() { return codec_ctx_.get(); }
+AVCodecContext *Encoder::getContextMod() const { return codec_ctx_.get(); }
 
 void Encoder::init(const std::map<std::string, std::string> &options) {
     av::DictionaryUPtr dict = av::map2dict(options);
