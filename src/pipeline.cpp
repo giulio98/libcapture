@@ -203,12 +203,12 @@ bool Pipeline::step(bool recovering_from_pause) {
     }
 
     if (recovering_from_pause) {
-#ifdef MACOS
+// #ifdef MACOS
         demuxer_->flush();
-#else
-        demuxer_->closeInput();
-        demuxer_->openInput();
-#endif
+// #else
+//         demuxer_->closeInput();
+//         demuxer_->openInput();
+// #endif
     }
 
     auto [packet, packet_type] = demuxer_->readPacket();
