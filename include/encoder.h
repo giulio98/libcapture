@@ -49,7 +49,7 @@ public:
      * @return a packet if it was possible to get it, nullptr if the encoder had nothing to write
      * because it is empty or flushed
      */
-    [[nodiscard]] av::PacketUPtr getPacket();
+    av::PacketUPtr getPacket();
 
     /**
      * Access the internal codec context

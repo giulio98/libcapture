@@ -42,5 +42,5 @@ public:
      * Get a converted frame
      * @return a new converted frame if it was possible to build it, nullptr otherwise
      */
-    [[nodiscard]] av::FrameUPtr getFrame();
+    av::FrameUPtr getFrame();
 };
