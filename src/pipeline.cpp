@@ -4,6 +4,8 @@
 #include <map>
 #include <sstream>
 
+#define REOPEN_INPUT_ON_PAUSE 0
+
 static void throw_error(const std::string &msg) { throw std::runtime_error("Pipeline: " + msg); }
 
 static void checkDataType(av::DataType data_type) {
@@ -203,12 +205,12 @@ bool Pipeline::step(bool recovering_from_pause) {
     }
 
     if (recovering_from_pause) {
-// #ifdef MACOS
+#if defined(MACOS) || !REOPEN_INPUT_ON_PAUSE
         demuxer_->flush();
-// #else
-//         demuxer_->closeInput();
-//         demuxer_->openInput();
-// #endif
+#else
+        demuxer_->closeInput();
+        demuxer_->openInput();
+#endif
     }
 
     auto [packet, packet_type] = demuxer_->readPacket();
