@@ -10,7 +10,7 @@ static void checkDataType(av::DataType data_type) {
     if (!av::isDataTypeValid(data_type)) throw_error("invalid data type received");
 }
 
-Pipeline::Pipeline(std::shared_ptr<Demuxer> demuxer, std::shared_ptr<Muxer> muxer, bool use_background_processors)
+Pipeline::Pipeline(std::shared_ptr<const Demuxer> demuxer, std::shared_ptr<Muxer> muxer, bool use_background_processors)
     : demuxer_(demuxer),
       muxer_(muxer),
       use_background_processors_(use_background_processors),
