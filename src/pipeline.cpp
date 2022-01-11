@@ -136,10 +136,10 @@ void Pipeline::initAudio(AVCodecID codec_id) {
             channel_layout = av_get_default_channel_layout(dec_ctx->channels);
         }
 
-        std::map<std::string, std::string> dec_options;
+        std::map<std::string, std::string> enc_options;
 
         encoders_[type] = std::make_unique<AudioEncoder>(codec_id, dec_ctx->sample_rate, channel_layout,
-                                                         muxer_->getGlobalHeaderFlags(), dec_options);
+                                                         muxer_->getGlobalHeaderFlags(), enc_options);
     }
 
     converters_[type] = std::make_unique<AudioConverter>(decoders_[type]->getContext(), encoders_[type]->getContext(),
