@@ -14,6 +14,9 @@
 #include "video_parameters.h"
 
 class ScreenRecorder {
+    /* Whether the recorder should be verbose or not */
+    bool verbose_;
+
     /* Synchronization variables */
 
     bool stop_capture_;
@@ -21,22 +24,25 @@ class ScreenRecorder {
     bool stopped_;
     std::mutex m_;
     std::condition_variable cv_;
-    std::thread recorder_thread_;  // thread responsible for recording video and audio
+    std::thread recorder_thread_;
 #ifdef LINUX
     std::thread audio_recorder_thread_;
 #endif
 
-    /* Recording parameters */
-
-    bool verbose_;
-
-    /* Structures for audio-video processing */
-
+    /* The muxer managing the output file */
     std::shared_ptr<Muxer> muxer_;
 
+    /**
+     * Capture frames using the provided pipeline for processing
+     * @param pipeline the pipeline to use for capturing and processing
+     */
     void capture(std::unique_ptr<Pipeline> pipeline);
 
 public:
+    /**
+     * Create a new Screen Recorder
+     * @param verbose true to make the recorder verbose, false to use the default verbosity
+     */
     ScreenRecorder(bool verbose = false);
 
     ~ScreenRecorder();
@@ -69,6 +75,10 @@ public:
      */
     void resume();
 
+    /**
+     * Set the verbosity of the screen recorder
+     * @param verbose true to make the recorder verbose, false to use the default verbosity
+     */
     void setVerbose(bool verbose);
 
     /**

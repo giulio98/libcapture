@@ -16,7 +16,7 @@ class Demuxer {
 
 public:
     /**
-     * Create a new demuxer
+     * Create a new demuxer (whose input device will be in a "closed" state)
      * @param fmt_name      the name of the input format
      * @param device_name   the name of the device to open
      * @param options       a map containing the options to use when opening the input device
@@ -27,19 +27,26 @@ public:
 
     /**
      * Open the input device
+     * WARNING: calling this function when the input is already open will throw an exception
      */
     void openInput();
 
     /**
      * Close the input device
+     * WARNING: calling this function when the input is already closed will throw an exception
      */
     void closeInput();
 
     /**
      * Flush the internal buffered data
+     * WARNING: calling this function when the input is closed will throw an exception
      */
     void flush();
 
+    /**
+     * Check whether the input managed by the demuxer is open or not
+     * @return true if the input is open, false otherwise
+     */
     [[nodiscard]] bool isInputOpen() const;
 
     /**

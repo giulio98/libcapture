@@ -18,7 +18,8 @@ public:
 
     /**
      * Send a packet to the decoder
-     * @param packet the packet to send to the decoder. It can be nullptr to flush the decoder
+     * @param packet the packet to send to the decoder. It can be nullptr to flush the decoder (WARNING:
+     * sending more than one flush packet will throw an exception).
      * @return true if the packet has been correctly sent, false if the decoder could not receive it
      */
     bool sendPacket(const AVPacket *packet);
@@ -36,5 +37,9 @@ public:
      */
     [[nodiscard]] const AVCodecContext *getContext() const;
 
+    /**
+     * Get the name of the decoder
+     * @return the name of the decoder
+     */
     [[nodiscard]] std::string getName() const;
 };
