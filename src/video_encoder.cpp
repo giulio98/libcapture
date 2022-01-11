@@ -4,7 +4,6 @@ VideoEncoder::VideoEncoder(AVCodecID codec_id, int width, int height, AVPixelFor
                            int global_header_flags, const std::map<std::string, std::string> &options)
     : Encoder(codec_id) {
     AVCodecContext *enc_ctx = getContextMod();
-    const AVCodec *codec = getCodec();
 
     enc_ctx->width = width;
     enc_ctx->height = height;
