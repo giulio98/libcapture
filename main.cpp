@@ -49,7 +49,7 @@ std::tuple<std::string, std::string, VideoParameters, std::string, bool> parseAr
     std::string output_file;
 
 #if DEFAULT_DEVICES
-#if defined(_WIN32)
+#if defined(WINDOWS)
     video_device = "screen-capture-recorder";
     audio_device = "Gruppo microfoni (Realtek High Definition Audio(SST))";
 #elif defined(LINUX)

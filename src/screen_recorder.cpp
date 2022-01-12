@@ -40,7 +40,7 @@ static const std::string getInputFormatName(bool audio = false) {
 static const std::string generateInputDeviceName(const std::string &video_device, const std::string &audio_device,
                                                  const VideoParameters &video_params) {
     std::stringstream device_name_ss;
-#if defined(_WIN32)
+#if defined(WINDOWS)
     if (!audio_device.empty()) device_name_ss << "audio=" << audio_device << ":";
     device_name_ss << "video=" << video_device;
 #elif defined(LINUX)
@@ -93,7 +93,7 @@ static void setDisplayResolution(int framerate) {
 
 static const std::map<std::string, std::string> generateDemuxerOptions(const VideoParameters &video_params) {
     std::map<std::string, std::string> demuxer_options;
-#ifdef _WIN32
+#ifdef WINDOWS
     setDisplayResolution(video_params.framerate);
     demuxer_options.insert({"rtbufsize", "1024M"});
 #else
