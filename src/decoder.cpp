@@ -36,6 +36,7 @@ av::FrameUPtr Decoder::getFrame() {
     int ret = avcodec_receive_frame(codec_ctx_.get(), frame_.get());
     if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) return nullptr;
     if (ret < 0) throw_error("failed to receive frame from decoder");
+
     return std::move(frame_);
 }
 
