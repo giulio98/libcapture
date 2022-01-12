@@ -157,16 +157,17 @@ void ScreenRecorder::start(const std::string &video_device, const std::string &a
     std::unique_ptr<Demuxer> audio_demuxer;
 #endif
 
-    {
-        /* init Muxer */
-        muxer_ = std::make_shared<Muxer>(output_file);
+    /* init Muxer */
+    muxer_ = std::make_shared<Muxer>(output_file);
 
-        /* init Demuxer */
+    { /* init Demuxer */
         const std::string device_name = generateInputDeviceName(video_device, audio_device, video_params);
         const std::map<std::string, std::string> demuxer_options = generateDemuxerOptions(video_params);
         demuxer = std::make_unique<Demuxer>(getInputFormatName(), device_name, demuxer_options);
         demuxer->openInput();
+    }
 
+    { /* init Pipeline */
         bool use_processors;
 #ifdef LINUX
         video_params.offset_x = video_params.offset_y = 0;  // No cropping is performed on Linux
@@ -176,25 +177,28 @@ void ScreenRecorder::start(const std::string &video_device, const std::string &a
 #endif
         /* init Pipeline */
         pipeline_ = std::make_unique<Pipeline>(muxer_, use_processors);
-        pipeline_->initVideo(demuxer.get(), video_codec_id, video_params, video_pix_fmt);
-
-        /* init audio structures, if necessary */
-        if (!audio_device.empty()) {
-#ifdef LINUX
-            /* init audio demuxer and pipeline */
-            const std::string audio_device_name = generateInputDeviceName("", audio_device, video_params);
-            audio_demuxer = std::make_unique<Demuxer>(getInputFormatName(true), audio_device_name,
-                                                      std::map<std::string, std::string>());
-            audio_demuxer->openInput();
-            pipeline_->initAudio(audio_demuxer.get(), audio_codec_id);
-#else
-            pipeline_->initAudio(demuxer.get(), audio_codec_id);
-#endif
-        }
     }
 
+    pipeline_->initVideo(demuxer.get(), video_codec_id, video_params, video_pix_fmt);
+
+    /* init audio structures, if necessary */
+    if (!audio_device.empty()) {
+#ifdef LINUX
+        /* init audio demuxer and pipeline */
+        const std::string audio_device_name = generateInputDeviceName("", audio_device, video_params);
+        audio_demuxer = std::make_unique<Demuxer>(getInputFormatName(true), audio_device_name,
+                                                  std::map<std::string, std::string>());
+        audio_demuxer->openInput();
+        pipeline_->initAudio(audio_demuxer.get(), audio_codec_id);
+#else
+        pipeline_->initAudio(demuxer.get(), audio_codec_id);
+#endif
+    }
+
+    /* Open output file */
     muxer_->openFile();
 
+    /* Print info about structures (if verbose) */
     if (verbose_) {
         std::cout << std::endl;
         demuxer->printInfo();

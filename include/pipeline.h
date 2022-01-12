@@ -44,9 +44,10 @@ class Pipeline {
 public:
     /**
      * Create a new Pipeline for processing packets
-     * @param muxer                     the muxer to send the processed packets to, for writing
+     * @param muxer                     the muxer to send the processed packets to (WARNING: the muxer must not be opened
+     *                                  until the Pipeline initialization is complete)
      * @param use_background_processors whether the pipeline should use background threads to handle the processing
-     * (recommended when the demuxer will provide both video and audio packets)
+     * (recommended when a single demuxer will provide both video and audio packets)
      */
     Pipeline(std::shared_ptr<Muxer> muxer, bool use_background_processors = false);
 
@@ -54,7 +55,7 @@ public:
 
     /**
      * Initialize the video processing, by creating the corresponding decoder, converter and encoder
-     * @param demuxer       the demuxer containing the input stream
+     * @param demuxer       the demuxer containing the input stream of packets
      * @param codec_id      the ID of the codec to use for the output video
      * @param video_params  the parameters to use for the output video
      * @param pix_fmt       the pixel format to use for the output video
@@ -64,7 +65,7 @@ public:
 
     /**
      * Initialize the audio processing, by creating the corresponding decoder, converter and encoder
-     * @param demuxer       the demuxer containing the input stream
+     * @param demuxer       the demuxer containing the input stream of packets
      * @param codec_id      the ID of the codec to use for the output audio
      */
     void initAudio(const Demuxer *demuxer, AVCodecID codec_id);
@@ -74,7 +75,7 @@ public:
      * If 'use_background_processors' was set to true when building the Pipeline,
      * the background threads will handle the packet processing and this function will
      * return immediately, otherwise the processing will be handled in
-     * a synchronous way and this function will return only when it's completed
+     * a synchronous way and this function will return only once it's completed
      * @param packet        the packet to send to che processing chain
      * @param packet_type   the type of the packet to process
      */

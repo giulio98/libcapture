@@ -29,15 +29,15 @@ class ScreenRecorder {
     std::thread audio_recorder_thread_;
 #endif
 
+    /* The pipeline used for audio/video processing */
     std::unique_ptr<Pipeline> pipeline_;
 
     /* The muxer managing the output file */
     std::shared_ptr<Muxer> muxer_;
 
     /**
-     * Capture frames using the provided pipeline for processing
-     * @param demuxer   the demuxer to read from and to flush on pause
-     * @param pipeline  the pipeline to use for capturing and processing
+     * Capture packets from a demuxer and send them to the pipeline
+     * @param demuxer the demuxer to read packets from
      */
     void capture(std::unique_ptr<Demuxer> demuxer);
 
