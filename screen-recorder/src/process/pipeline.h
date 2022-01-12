@@ -1,20 +1,19 @@
 #pragma once
 
+#include <common/common.h>
+#include <convert/audio_converter.h>
+#include <convert/video_converter.h>
+#include <decode/decoder.h>
+#include <encode/audio_encoder.h>
+#include <encode/video_encoder.h>
+#include <format/demuxer.h>
+#include <format/muxer.h>
+#include <video_parameters.h>
+
 #include <array>
 #include <condition_variable>
+#include <thread>
 #include <vector>
-
-#include "audio_converter.h"
-#include "audio_encoder.h"
-#include "common.h"
-#include "decoder.h"
-#include "demuxer.h"
-#include "muxer.h"
-#include "thread"
-#include "thread_guard.h"
-#include "video_converter.h"
-#include "video_encoder.h"
-#include "video_parameters.h"
 
 class Pipeline {
     std::array<bool, av::DataType::NumTypes> data_types_;
@@ -41,8 +40,8 @@ class Pipeline {
 public:
     /**
      * Create a new Pipeline for processing packets
-     * @param muxer                     the muxer to send the processed packets to (WARNING: the muxer must not be opened
-     *                                  until the Pipeline initialization is complete)
+     * @param muxer                     the muxer to send the processed packets to (WARNING: the muxer must not be
+     * opened until the Pipeline initialization is complete)
      * @param use_background_processors whether the pipeline should use background threads to handle the processing
      * (recommended when a single demuxer will provide both video and audio packets)
      */

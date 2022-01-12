@@ -1,8 +1,8 @@
 #pragma once
 
-#include <memory>
+#include <common/common.h>
 
-#include "common.h"
+#include <memory>
 
 class Decoder {
     AVCodec *codec_;

@@ -1,9 +1,9 @@
 #pragma once
 
+#include <common/common.h>
+
 #include <map>
 #include <string>
-
-#include "common.h"
 
 class Encoder {
     AVCodec *codec_;

@@ -3,25 +3,22 @@ project(screen-recorder)
 
 set(CMAKE_CXX_STANDARD 20)
 
-set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
-
-
-add_executable(screen-recorder
-    main.cpp
-    src/screen_recorder.cpp
-    src/demuxer.cpp
-    src/muxer.cpp
-    src/decoder.cpp
-    src/encoder.cpp
-    src/converter.cpp
-    src/video_encoder.cpp
-    src/audio_encoder.cpp
-    src/video_converter.cpp
-    src/audio_converter.cpp
-    src/pipeline.cpp
+add_library(screen-recorder
+    src/recorder/screen_recorder.cpp
+    src/format/demuxer.cpp
+    src/format/muxer.cpp
+    src/decode/decoder.cpp
+    src/encode/encoder.cpp
+    src/encode/video_encoder.cpp
+    src/encode/audio_encoder.cpp
+    src/convert/converter.cpp
+    src/convert/video_converter.cpp
+    src/convert/audio_converter.cpp
+    src/process/pipeline.cpp
 )
 
-target_include_directories(screen-recorder PRIVATE src include)
+target_include_directories(screen-recorder PRIVATE src)
+target_include_directories(screen-recorder PUBLIC include)
 
 
 IF(WIN32)

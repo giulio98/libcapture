@@ -11,8 +11,8 @@
 #include <winreg.h>
 #endif
 
-#include "log_callback_setter.h"
-#include "log_level_setter.h"
+#include <utils/log_callback_setter.h>
+#include <utils/log_level_setter.h>
 
 static void makeAvVerbose(bool verbose) {
     if (verbose) {

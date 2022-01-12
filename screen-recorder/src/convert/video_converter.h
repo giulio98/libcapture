@@ -1,7 +1,7 @@
 #pragma once
 
-#include "common.h"
-#include "converter.h"
+#include <common/common.h>
+#include <convert/converter.h>
 
 class VideoConverter : public Converter {
 public:

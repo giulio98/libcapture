@@ -1,5 +1,10 @@
 #pragma once
 
+#include <common/common.h>
+#include <format/demuxer.h>
+#include <format/muxer.h>
+#include <process/pipeline.h>
+
 #include <array>
 #include <condition_variable>
 #include <memory>
@@ -7,10 +12,6 @@
 #include <string>
 #include <thread>
 
-#include "common.h"
-#include "demuxer.h"
-#include "muxer.h"
-#include "pipeline.h"
 #include "video_parameters.h"
 
 class ScreenRecorder {
