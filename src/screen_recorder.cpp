@@ -199,7 +199,7 @@ void ScreenRecorder::start(const std::string &video_device, const std::string &a
         std::cout << std::endl;
         demuxer->printInfo();
 #ifdef LINUX
-        audio_demuxer->printInfo();
+        if (audio_demuxer) audio_demuxer->printInfo(1);
 #endif
         muxer_->printInfo();
         pipeline_->printInfo();
@@ -220,7 +220,7 @@ void ScreenRecorder::start(const std::string &video_device, const std::string &a
 
     recorder_thread_ = std::thread(recorder_fn, std::move(demuxer));
 #ifdef LINUX
-    audio_recorder_thread_ = std::thread(recorder_fn, std::move(audio_demuxer));
+    if (audio_demuxer) audio_recorder_thread_ = std::thread(recorder_fn, std::move(audio_demuxer));
 #endif
 
     stopped_ = false;
