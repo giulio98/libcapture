@@ -159,13 +159,11 @@ void ScreenRecorder::start(const std::string &video_device, const std::string &a
 
     /* init Muxer */
     muxer_ = std::make_shared<Muxer>(output_file);
-    if (!muxer_) throw std::runtime_error("failed to allocate demuxer");
 
     { /* init Demuxer */
         const std::string device_name = generateInputDeviceName(video_device, audio_device, video_params);
         const std::map<std::string, std::string> demuxer_options = generateDemuxerOptions(video_params);
         demuxer = std::make_unique<Demuxer>(getInputFormatName(), device_name, demuxer_options);
-        if (!demuxer) throw std::runtime_error("failed to allocate demuxer");
         demuxer->openInput();
     }
 
@@ -179,7 +177,6 @@ void ScreenRecorder::start(const std::string &video_device, const std::string &a
 #endif
         /* init Pipeline */
         pipeline_ = std::make_unique<Pipeline>(muxer_, use_processors);
-        if (!pipeline_) throw std::runtime_error("failed to allocate pipeline");
     }
 
     pipeline_->initVideo(demuxer.get(), video_codec_id, video_params, video_pix_fmt);
@@ -191,7 +188,6 @@ void ScreenRecorder::start(const std::string &video_device, const std::string &a
         const std::string audio_device_name = generateInputDeviceName("", audio_device, video_params);
         audio_demuxer = std::make_unique<Demuxer>(getInputFormatName(true), audio_device_name,
                                                   std::map<std::string, std::string>());
-        if (!audio_demuxer) throw std::runtime_error("failed to allocate audio demuxer");
         audio_demuxer->openInput();
         pipeline_->initAudio(audio_demuxer.get(), audio_codec_id);
 #else

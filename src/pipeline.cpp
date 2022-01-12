@@ -76,7 +76,6 @@ void Pipeline::initVideo(const Demuxer *demuxer, AVCodecID codec_id, const Video
 
     /* Init decoder */
     decoders_[type] = std::make_unique<Decoder>(demuxer->getStreamParams(type));
-    if (!decoders_[type]) throw_error("failed to allocate decoder");
 
     { /* Init encoder */
         auto dec_ctx = decoders_[type]->getContext();
@@ -97,14 +96,12 @@ void Pipeline::initVideo(const Demuxer *demuxer, AVCodecID codec_id, const Video
         encoders_[type] =
             std::make_unique<VideoEncoder>(codec_id, width, height, pix_fmt, demuxer->getStreamTimeBase(type),
                                            muxer_->getGlobalHeaderFlags(), enc_options);
-        if (!encoders_[type]) throw_error("failed to allocate encoder");
     }
 
     /* Init converter */
     converters_[type] = std::make_unique<VideoConverter>(decoders_[type]->getContext(), encoders_[type]->getContext(),
                                                          demuxer->getStreamTimeBase(type), video_params.offset_x,
                                                          video_params.offset_y);
-    if (!converters_[type]) throw_error("failed to allocate converter");
 
     muxer_->addStream(encoders_[type]->getContext(), type);
 
@@ -121,7 +118,6 @@ void Pipeline::initAudio(const Demuxer *demuxer, AVCodecID codec_id) {
 
     /* Init decoder */
     decoders_[type] = std::make_unique<Decoder>(demuxer->getStreamParams(type));
-    if (!decoders_[type]) throw_error("failed to allocate decoder");
 
     { /* Init encoder */
         auto dec_ctx = decoders_[type]->getContext();
@@ -136,13 +132,11 @@ void Pipeline::initAudio(const Demuxer *demuxer, AVCodecID codec_id) {
 
         encoders_[type] = std::make_unique<AudioEncoder>(codec_id, dec_ctx->sample_rate, channel_layout,
                                                          muxer_->getGlobalHeaderFlags(), enc_options);
-        if (!encoders_[type]) throw_error("failed to allocate encoder");
     }
 
     /* Init converter */
     converters_[type] = std::make_unique<AudioConverter>(decoders_[type]->getContext(), encoders_[type]->getContext(),
                                                          demuxer->getStreamTimeBase(type));
-    if (!converters_[type]) throw_error("failed to allocate converter");
 
     muxer_->addStream(encoders_[type]->getContext(), type);
 
