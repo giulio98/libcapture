@@ -34,9 +34,6 @@ class Pipeline {
     void stopProcessors();
     void checkExceptions();
 
-    void initDecoder(const Demuxer *demuxer, av::DataType data_type);
-    void addOutputStream(av::DataType data_type);
-
     void processPacket(const AVPacket *packet, av::DataType data_type);
     void processConvertedFrame(const AVFrame *frame, av::DataType data_type);
     void flushPipeline(av::DataType data_type);

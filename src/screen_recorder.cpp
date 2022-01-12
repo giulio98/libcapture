@@ -159,11 +159,13 @@ void ScreenRecorder::start(const std::string &video_device, const std::string &a
 
     /* init Muxer */
     muxer_ = std::make_shared<Muxer>(output_file);
+    if (!muxer_) throw std::runtime_error("failed to allocate demuxer");
 
     { /* init Demuxer */
         const std::string device_name = generateInputDeviceName(video_device, audio_device, video_params);
         const std::map<std::string, std::string> demuxer_options = generateDemuxerOptions(video_params);
         demuxer = std::make_unique<Demuxer>(getInputFormatName(), device_name, demuxer_options);
+        if (!demuxer) throw std::runtime_error("failed to allocate demuxer");
         demuxer->openInput();
     }
 
@@ -177,6 +179,7 @@ void ScreenRecorder::start(const std::string &video_device, const std::string &a
 #endif
         /* init Pipeline */
         pipeline_ = std::make_unique<Pipeline>(muxer_, use_processors);
+        if (!pipeline_) throw std::runtime_error("failed to allocate pipeline");
     }
 
     pipeline_->initVideo(demuxer.get(), video_codec_id, video_params, video_pix_fmt);
@@ -188,6 +191,7 @@ void ScreenRecorder::start(const std::string &video_device, const std::string &a
         const std::string audio_device_name = generateInputDeviceName("", audio_device, video_params);
         audio_demuxer = std::make_unique<Demuxer>(getInputFormatName(true), audio_device_name,
                                                   std::map<std::string, std::string>());
+        if (!audio_demuxer) throw std::runtime_error("failed to allocate audio demuxer");
         audio_demuxer->openInput();
         pipeline_->initAudio(audio_demuxer.get(), audio_codec_id);
 #else
@@ -233,6 +237,7 @@ void ScreenRecorder::start(const std::string &video_device, const std::string &a
 void ScreenRecorder::stop() {
     {
         std::unique_lock ul{m_};
+        if (stop_capture_ || stopped_) throw std::runtime_error("Recorder already stopped");
         stop_capture_ = true;
         cv_.notify_all();
     }
@@ -244,6 +249,7 @@ void ScreenRecorder::stop() {
 
     {
         std::unique_lock ul{m_};
+        if (stopped_) throw std::runtime_error("Recorder already stopped");
         pipeline_->flush();
         muxer_->closeFile();
         pipeline_.reset();
@@ -267,7 +273,7 @@ void ScreenRecorder::resume() {
 }
 
 void ScreenRecorder::capture(std::unique_ptr<Demuxer> demuxer) {
-    if (!demuxer) throw std::runtime_error("received demuxer is NULL");
+    if (!demuxer) throw std::runtime_error("received demuxer is null");
 
     int64_t last_pts = 0;
     int64_t pts_offset = 0;

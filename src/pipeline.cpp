@@ -12,7 +12,7 @@ static void checkDataType(av::DataType data_type) {
 
 Pipeline::Pipeline(std::shared_ptr<Muxer> muxer, bool use_background_processors)
     : muxer_(std::move(muxer)), use_background_processors_(use_background_processors) {
-    if (!muxer_) throw std::runtime_error("Muxer is NULL");
+    if (!muxer_) throw_error("received Muxer is null");
     data_types_[av::DataType::Video] = false;
     data_types_[av::DataType::Audio] = false;
 }
@@ -65,28 +65,20 @@ void Pipeline::checkExceptions() {
     }
 }
 
-void Pipeline::initDecoder(const Demuxer *demuxer, av::DataType data_type) {
-    checkDataType(data_type);
-    if (decoders_[data_type]) throw_error("decoder already present");
-    decoders_[data_type] = std::make_unique<Decoder>(demuxer->getStreamParams(data_type));
-}
-
-void Pipeline::addOutputStream(av::DataType data_type) {
-    checkDataType(data_type);
-    if (!encoders_[data_type]) throw_error("no encoder for the specified data type");
-    muxer_->addStream(encoders_[data_type]->getContext(), data_type);
-}
-
 void Pipeline::initVideo(const Demuxer *demuxer, AVCodecID codec_id, const VideoParameters &video_params,
                          AVPixelFormat pix_fmt) {
     const auto type = av::DataType::Video;
 
+    if (!demuxer) throw_error("received demuxer for video pipeline is null");
+
     if (data_types_[type]) throw_error("video pipeline already inited");
     data_types_[type] = true;
 
-    initDecoder(demuxer, type);
+    /* Init decoder */
+    decoders_[type] = std::make_unique<Decoder>(demuxer->getStreamParams(type));
+    if (!decoders_[type]) throw_error("failed to allocate decoder");
 
-    {
+    { /* Init encoder */
         auto dec_ctx = decoders_[type]->getContext();
         int width = (video_params.width) ? video_params.width : dec_ctx->width;
         int height = (video_params.height) ? video_params.height : dec_ctx->height;
@@ -105,25 +97,33 @@ void Pipeline::initVideo(const Demuxer *demuxer, AVCodecID codec_id, const Video
         encoders_[type] =
             std::make_unique<VideoEncoder>(codec_id, width, height, pix_fmt, demuxer->getStreamTimeBase(type),
                                            muxer_->getGlobalHeaderFlags(), enc_options);
+        if (!encoders_[type]) throw_error("failed to allocate encoder");
     }
 
+    /* Init converter */
     converters_[type] = std::make_unique<VideoConverter>(decoders_[type]->getContext(), encoders_[type]->getContext(),
                                                          demuxer->getStreamTimeBase(type), video_params.offset_x,
                                                          video_params.offset_y);
+    if (!converters_[type]) throw_error("failed to allocate converter");
 
-    addOutputStream(type);
+    muxer_->addStream(encoders_[type]->getContext(), type);
+
     if (use_background_processors_) startProcessor(type);
 }
 
 void Pipeline::initAudio(const Demuxer *demuxer, AVCodecID codec_id) {
     const auto type = av::DataType::Audio;
 
-    if (data_types_[type]) throw std::runtime_error("Audio pipeline already inited");
+    if (!demuxer) throw_error("received demuxer for audio pipeline is null");
+
+    if (data_types_[type]) throw_error("audio pipeline already inited");
     data_types_[type] = true;
 
-    initDecoder(demuxer, type);
+    /* Init decoder */
+    decoders_[type] = std::make_unique<Decoder>(demuxer->getStreamParams(type));
+    if (!decoders_[type]) throw_error("failed to allocate decoder");
 
-    {
+    { /* Init encoder */
         auto dec_ctx = decoders_[type]->getContext();
         uint64_t channel_layout;
         if (dec_ctx->channel_layout) {
@@ -136,12 +136,16 @@ void Pipeline::initAudio(const Demuxer *demuxer, AVCodecID codec_id) {
 
         encoders_[type] = std::make_unique<AudioEncoder>(codec_id, dec_ctx->sample_rate, channel_layout,
                                                          muxer_->getGlobalHeaderFlags(), enc_options);
+        if (!encoders_[type]) throw_error("failed to allocate encoder");
     }
 
+    /* Init converter */
     converters_[type] = std::make_unique<AudioConverter>(decoders_[type]->getContext(), encoders_[type]->getContext(),
                                                          demuxer->getStreamTimeBase(type));
+    if (!converters_[type]) throw_error("failed to allocate converter");
 
-    addOutputStream(type);
+    muxer_->addStream(encoders_[type]->getContext(), type);
+
     if (use_background_processors_) startProcessor(type);
 }
 
@@ -151,8 +155,8 @@ void Pipeline::processPacket(const AVPacket *packet, av::DataType data_type) {
     Decoder *decoder = decoders_[data_type].get();
     Converter *converter = converters_[data_type].get();
 
-    if (!decoder) throw_error("no decoder prsent for the specified data type");
-    if (!converter) throw_error("no decoder prsent for the specified data type");
+    if (!decoder) throw_error("no decoder present for the specified data type");
+    if (!converter) throw_error("no decoder present for the specified data type");
 
     bool decoder_received = false;
     while (!decoder_received) {
@@ -177,7 +181,7 @@ void Pipeline::processConvertedFrame(const AVFrame *frame, av::DataType data_typ
 
     Encoder *encoder = encoders_[data_type].get();
 
-    if (!encoder) throw_error("no decoder prsent for the specified data type");
+    if (!encoder) throw_error("no decoder present for the specified data type");
 
     bool encoder_received = false;
     while (!encoder_received) {
@@ -197,7 +201,7 @@ void Pipeline::feed(av::PacketUPtr packet, av::DataType packet_type) {
         checkExceptions();
     }
 
-    if (!packet) throw_error("Sent packet is null");
+    if (!packet) throw_error("received packet is null");
     checkDataType(packet_type);
     if (!data_types_[packet_type]) throw std::runtime_error("No pipeline corresponding to received packet type");
 
