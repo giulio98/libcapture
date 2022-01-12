@@ -5,6 +5,8 @@
 static void throw_error(const std::string &msg) { throw std::runtime_error("Decoder: " + msg); }
 
 Decoder::Decoder(const AVCodecParameters *params) : codec_(nullptr) {
+    if (!params) throw_error("received stream parameters ptr is null");
+
     codec_ = avcodec_find_decoder(params->codec_id);
     if (!codec_) throw_error("cannot find codec");
 
