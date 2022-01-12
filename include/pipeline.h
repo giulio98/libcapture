@@ -18,14 +18,10 @@
 
 class Pipeline {
     std::array<bool, av::DataType::NumDataTypes> data_types_;
-    std::shared_ptr<Demuxer> demuxer_;
     std::shared_ptr<Muxer> muxer_;
     std::array<std::unique_ptr<Decoder>, av::DataType::NumDataTypes> decoders_;
     std::array<std::unique_ptr<Encoder>, av::DataType::NumDataTypes> encoders_;
     std::array<std::unique_ptr<Converter>, av::DataType::NumDataTypes> converters_;
-
-    int64_t pts_offset_;
-    int64_t last_pts_;
 
     bool use_background_processors_;
     std::mutex m_;
@@ -38,7 +34,7 @@ class Pipeline {
     void stopProcessors();
     void checkExceptions();
 
-    void initDecoder(av::DataType data_type);
+    void initDecoder(const Demuxer *demuxer, av::DataType data_type);
     void addOutputStream(av::DataType data_type);
 
     void processPacket(const AVPacket *packet, av::DataType data_type);
@@ -48,41 +44,41 @@ class Pipeline {
 public:
     /**
      * Create a new Pipeline for processing packets
-     * @param demuxer                   the demuxer to read the input packets from
      * @param muxer                     the muxer to send the processed packets to, for writing
      * @param use_background_processors whether the pipeline should use background threads to handle the processing
      * (recommended when the demuxer will provide both video and audio packets)
      */
-    Pipeline(std::shared_ptr<Demuxer> demuxer, std::shared_ptr<Muxer> muxer, bool use_background_processors = false);
+    Pipeline(std::shared_ptr<Muxer> muxer, bool use_background_processors = false);
 
     ~Pipeline();
 
     /**
      * Initialize the video processing, by creating the corresponding decoder, converter and encoder
+     * @param demuxer       the demuxer containing the input stream
      * @param codec_id      the ID of the codec to use for the output video
      * @param video_params  the parameters to use for the output video
      * @param pix_fmt       the pixel format to use for the output video
      */
-    void initVideo(AVCodecID codec_id, const VideoParameters &video_params, AVPixelFormat pix_fmt);
+    void initVideo(const Demuxer *demuxer, AVCodecID codec_id, const VideoParameters &video_params,
+                   AVPixelFormat pix_fmt);
 
     /**
      * Initialize the audio processing, by creating the corresponding decoder, converter and encoder
+     * @param demuxer       the demuxer containing the input stream
      * @param codec_id      the ID of the codec to use for the output audio
      */
-    void initAudio(AVCodecID codec_id);
+    void initAudio(const Demuxer *demuxer, AVCodecID codec_id);
 
     /**
-     * Try to read a packet from the demuxer and send it to the processing chain.
+     * Send the packet to the processing chain corresponding to its type.
      * If 'use_background_processors' was set to true when building the Pipeline,
      * the background threads will handle the packet processing and this function will
-     * return immediately after the read, otherwise the processing will be handled in
+     * return immediately, otherwise the processing will be handled in
      * a synchronous way and this function will return only when it's completed
-     * @param recovering_from_pause when set to true, the pipeline will use the next packet
-     * to adjust its internal PTS offset, without processing it (note that the PTS adjustment
-     * will be performed only if it was possible to actually read a packet)
-     * @return true if it was possible to read a packet from the demuxer, false if there was nothing to read
+     * @param packet        the packet to send to che processing chain
+     * @param packet_type   the type of the packet to process
      */
-    bool step(bool recovering_from_pause = false);
+    void feed(av::PacketUPtr packet, av::DataType packet_type);
 
     /**
      * Flush the processing pipelines.

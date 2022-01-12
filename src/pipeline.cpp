@@ -10,13 +10,8 @@ static void checkDataType(av::DataType data_type) {
     if (!av::isDataTypeValid(data_type)) throw_error("invalid data type received");
 }
 
-Pipeline::Pipeline(std::shared_ptr<Demuxer> demuxer, std::shared_ptr<Muxer> muxer, bool use_background_processors)
-    : demuxer_(std::move(demuxer)),
-      muxer_(std::move(muxer)),
-      use_background_processors_(use_background_processors),
-      pts_offset_(0),
-      last_pts_(0) {
-    if (!demuxer_) throw std::runtime_error("Demuxer is NULL");
+Pipeline::Pipeline(std::shared_ptr<Muxer> muxer, bool use_background_processors)
+    : muxer_(std::move(muxer)), use_background_processors_(use_background_processors) {
     if (!muxer_) throw std::runtime_error("Muxer is NULL");
     data_types_[av::DataType::Video] = false;
     data_types_[av::DataType::Audio] = false;
@@ -70,10 +65,10 @@ void Pipeline::checkExceptions() {
     }
 }
 
-void Pipeline::initDecoder(av::DataType data_type) {
+void Pipeline::initDecoder(const Demuxer *demuxer, av::DataType data_type) {
     checkDataType(data_type);
     if (decoders_[data_type]) throw_error("decoder already present");
-    decoders_[data_type] = std::make_unique<Decoder>(demuxer_->getStreamParams(data_type));
+    decoders_[data_type] = std::make_unique<Decoder>(demuxer->getStreamParams(data_type));
 }
 
 void Pipeline::addOutputStream(av::DataType data_type) {
@@ -82,13 +77,14 @@ void Pipeline::addOutputStream(av::DataType data_type) {
     muxer_->addStream(encoders_[data_type]->getContext(), data_type);
 }
 
-void Pipeline::initVideo(AVCodecID codec_id, const VideoParameters &video_params, AVPixelFormat pix_fmt) {
+void Pipeline::initVideo(const Demuxer *demuxer, AVCodecID codec_id, const VideoParameters &video_params,
+                         AVPixelFormat pix_fmt) {
     const auto type = av::DataType::Video;
 
     if (data_types_[type]) throw_error("video pipeline already inited");
     data_types_[type] = true;
 
-    initDecoder(type);
+    initDecoder(demuxer, type);
 
     {
         auto dec_ctx = decoders_[type]->getContext();
@@ -107,25 +103,25 @@ void Pipeline::initVideo(AVCodecID codec_id, const VideoParameters &video_params
         enc_options.insert({"preset", "ultrafast"});
 
         encoders_[type] =
-            std::make_unique<VideoEncoder>(codec_id, width, height, pix_fmt, demuxer_->getStreamTimeBase(type),
+            std::make_unique<VideoEncoder>(codec_id, width, height, pix_fmt, demuxer->getStreamTimeBase(type),
                                            muxer_->getGlobalHeaderFlags(), enc_options);
     }
 
     converters_[type] = std::make_unique<VideoConverter>(decoders_[type]->getContext(), encoders_[type]->getContext(),
-                                                         demuxer_->getStreamTimeBase(type), video_params.offset_x,
+                                                         demuxer->getStreamTimeBase(type), video_params.offset_x,
                                                          video_params.offset_y);
 
     addOutputStream(type);
     if (use_background_processors_) startProcessor(type);
 }
 
-void Pipeline::initAudio(AVCodecID codec_id) {
+void Pipeline::initAudio(const Demuxer *demuxer, AVCodecID codec_id) {
     const auto type = av::DataType::Audio;
 
     if (data_types_[type]) throw std::runtime_error("Audio pipeline already inited");
     data_types_[type] = true;
 
-    initDecoder(type);
+    initDecoder(demuxer, type);
 
     {
         auto dec_ctx = decoders_[type]->getContext();
@@ -143,7 +139,7 @@ void Pipeline::initAudio(AVCodecID codec_id) {
     }
 
     converters_[type] = std::make_unique<AudioConverter>(decoders_[type]->getContext(), encoders_[type]->getContext(),
-                                                         demuxer_->getStreamTimeBase(type));
+                                                         demuxer->getStreamTimeBase(type));
 
     addOutputStream(type);
     if (use_background_processors_) startProcessor(type);
@@ -195,36 +191,25 @@ void Pipeline::processConvertedFrame(const AVFrame *frame, av::DataType data_typ
     }
 }
 
-bool Pipeline::step(bool recovering_from_pause) {
+void Pipeline::feed(av::PacketUPtr packet, av::DataType packet_type) {
     {
         std::unique_lock ul{m_};
         checkExceptions();
     }
 
-    auto [packet, packet_type] = demuxer_->readPacket();
-    if (!packet) return false;
-
+    if (!packet) throw_error("Sent packet is null");
     checkDataType(packet_type);
     if (!data_types_[packet_type]) throw std::runtime_error("No pipeline corresponding to received packet type");
 
-    if (recovering_from_pause) pts_offset_ += (packet->pts - last_pts_);
-
-    last_pts_ = packet->pts;
-
-    if (!recovering_from_pause) {
-        packet->pts -= pts_offset_;
-        if (use_background_processors_) {
-            std::unique_lock ul{m_};
-            if (!packets_[packet_type]) {  // if previous packet has been fully processed
-                packets_[packet_type] = std::move(packet);
-                packets_cv_[packet_type].notify_all();
-            }
-        } else {
-            processPacket(packet.get(), packet_type);
+    if (use_background_processors_) {
+        std::unique_lock ul{m_};
+        if (!packets_[packet_type]) {  // if previous packet has been fully processed
+            packets_[packet_type] = std::move(packet);
+            packets_cv_[packet_type].notify_all();
         }
+    } else {
+        processPacket(packet.get(), packet_type);
     }
-
-    return true;
 }
 
 void Pipeline::flushPipeline(av::DataType data_type) {

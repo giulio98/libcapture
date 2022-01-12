@@ -29,6 +29,8 @@ class ScreenRecorder {
     std::thread audio_recorder_thread_;
 #endif
 
+    std::unique_ptr<Pipeline> pipeline_;
+
     /* The muxer managing the output file */
     std::shared_ptr<Muxer> muxer_;
 
@@ -37,7 +39,7 @@ class ScreenRecorder {
      * @param demuxer   the demuxer to read from and to flush on pause
      * @param pipeline  the pipeline to use for capturing and processing
      */
-    void capture(std::shared_ptr<Demuxer> demuxer, std::unique_ptr<Pipeline> pipeline);
+    void capture(std::unique_ptr<Demuxer> demuxer);
 
 public:
     /**
