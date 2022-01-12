@@ -271,18 +271,18 @@ void ScreenRecorder::capture(std::unique_ptr<Demuxer> demuxer) {
     std::chrono::milliseconds sleep_interval(1);
 
     while (true) {
-        bool handle_pause;
+        bool after_pause;
         {
             std::unique_lock<std::mutex> ul{m_};
 #ifndef MACOS
             if (paused_) demuxer->closeInput();
 #endif
-            handle_pause = paused_;
+            after_pause = paused_;
             cv_.wait(ul, [this]() { return (!paused_ || stop_capture_); });
             if (stop_capture_) break;
         }
 
-        if (handle_pause) {
+        if (after_pause) {
             adjust_pts_offset = true;
 #ifdef MACOS
             demuxer->flush();
