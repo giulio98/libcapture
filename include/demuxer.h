@@ -11,7 +11,7 @@ class Demuxer {
     AVInputFormat *fmt_;
     std::string device_name_;
     std::map<std::string, std::string> options_;
-    std::array<const AVStream *, av::DataType::NumDataTypes> streams_;
+    std::array<const AVStream *, av::DataType::NumTypes> streams_;
     av::PacketUPtr packet_;
 
 public:

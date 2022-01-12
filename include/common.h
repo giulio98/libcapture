@@ -33,7 +33,7 @@ extern "C" {
 
 namespace av {
 /* DO NOT change the order */
-enum DataType { Audio = 0, Video, NumDataTypes }; /* Data types (audio or video) */
+enum DataType { Audio, Video, NumTypes }; /* Data types (audio or video) */
 
 using PacketUPtr = std::unique_ptr<AVPacket, DeleterPP<av_packet_free>>;
 using FrameUPtr = std::unique_ptr<AVFrame, DeleterPP<av_frame_free>>;
@@ -67,8 +67,6 @@ inline std::map<std::string, std::string> dict2map(const AVDictionary *dict) {
     return map;
 }
 
-inline bool isDataTypeValid(DataType data_type) {
-    return (data_type == DataType::Audio || data_type == DataType::Video);
-}
+inline bool isDataTypeValid(DataType data_type) { return (data_type >= 0 && data_type < DataType::NumTypes); }
 
 }  // namespace av

@@ -17,19 +17,19 @@
 #include "video_parameters.h"
 
 class Pipeline {
-    std::array<bool, av::DataType::NumDataTypes> data_types_;
+    std::array<bool, av::DataType::NumTypes> data_types_;
     std::shared_ptr<Muxer> muxer_;
-    std::array<std::unique_ptr<Decoder>, av::DataType::NumDataTypes> decoders_;
-    std::array<std::unique_ptr<Encoder>, av::DataType::NumDataTypes> encoders_;
-    std::array<std::unique_ptr<Converter>, av::DataType::NumDataTypes> converters_;
+    std::array<std::unique_ptr<Decoder>, av::DataType::NumTypes> decoders_;
+    std::array<std::unique_ptr<Encoder>, av::DataType::NumTypes> encoders_;
+    std::array<std::unique_ptr<Converter>, av::DataType::NumTypes> converters_;
 
     bool use_background_processors_;
     std::mutex m_;
     bool stop_;
-    std::array<std::thread, av::DataType::NumDataTypes> processors_;
-    std::array<av::PacketUPtr, av::DataType::NumDataTypes> packets_;
-    std::array<std::condition_variable, av::DataType::NumDataTypes> packets_cv_;
-    std::array<std::exception_ptr, av::DataType::NumDataTypes> e_ptrs_;
+    std::array<std::thread, av::DataType::NumTypes> processors_;
+    std::array<av::PacketUPtr, av::DataType::NumTypes> packets_;
+    std::array<std::condition_variable, av::DataType::NumTypes> packets_cv_;
+    std::array<std::exception_ptr, av::DataType::NumTypes> e_ptrs_;
     void startProcessor(av::DataType data_type);
     void stopProcessors();
     void checkExceptions();
