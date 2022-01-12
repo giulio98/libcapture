@@ -24,9 +24,9 @@ class ScreenRecorder {
     bool stopped_;
     std::mutex m_;
     std::condition_variable cv_;
-    std::thread recorder_thread_;
+    std::thread capturer_;
 #ifdef LINUX
-    std::thread audio_recorder_thread_;
+    std::thread audio_capturer_;
 #endif
 
     /* The pipeline used for audio/video processing */

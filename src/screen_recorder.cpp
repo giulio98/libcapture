@@ -135,9 +135,9 @@ ScreenRecorder::ScreenRecorder(bool verbose) : stopped_(true), verbose_(verbose)
 }
 
 ScreenRecorder::~ScreenRecorder() {
-    if (recorder_thread_.joinable()) recorder_thread_.join();
+    if (capturer_.joinable()) capturer_.join();
 #ifdef LINUX
-    if (audio_recorder_thread_.joinable()) audio_recorder_thread_.join();
+    if (audio_capturer_.joinable()) audio_capturer_.join();
 #endif
 }
 
@@ -213,7 +213,7 @@ void ScreenRecorder::start(const std::string &video_device, const std::string &a
     stop_capture_ = false;
     paused_ = false;
 
-    auto recorder_fn = [this](std::unique_ptr<Demuxer> demuxer) {
+    auto capturer_fn = [this](std::unique_ptr<Demuxer> demuxer) {
         try {
             capture(std::move(demuxer));
         } catch (const std::exception &e) {
@@ -222,9 +222,9 @@ void ScreenRecorder::start(const std::string &video_device, const std::string &a
         }
     };
 
-    recorder_thread_ = std::thread(recorder_fn, std::move(demuxer));
+    capturer_ = std::thread(capturer_fn, std::move(demuxer));
 #ifdef LINUX
-    if (audio_demuxer) audio_recorder_thread_ = std::thread(recorder_fn, std::move(audio_demuxer));
+    if (audio_demuxer) audio_capturer_ = std::thread(capturer_fn, std::move(audio_demuxer));
 #endif
 
     stopped_ = false;
@@ -237,9 +237,9 @@ void ScreenRecorder::stop() {
         cv_.notify_all();
     }
 
-    if (recorder_thread_.joinable()) recorder_thread_.join();
+    if (capturer_.joinable()) capturer_.join();
 #ifdef LINUX
-    if (audio_recorder_thread_.joinable()) audio_recorder_thread_.join();
+    if (audio_capturer_.joinable()) audio_capturer_.join();
 #endif
 
     {
