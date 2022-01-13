@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.16)
 set(CMAKE_CXX_STANDARD 17)
 
+set(LIBRARY_NAME screen-recorder)
+
 set(SOURCES
     src/recorder/screen_recorder.cpp
     src/format/demuxer.cpp
@@ -15,14 +17,16 @@ set(SOURCES
     src/process/pipeline.cpp
 )
 
-add_library(screen-recorder ${SOURCES})
+add_library(${LIBRARY_NAME} STATIC ${SOURCES})
 
-target_include_directories(screen-recorder PUBLIC
-    include
+target_include_directories(${LIBRARY_NAME} PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/${LIBRARY_NAME}
+    ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
-target_include_directories(screen-recorder PRIVATE
-    src
+
+target_include_directories(${LIBRARY_NAME} PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
 
@@ -64,19 +68,19 @@ if(WIN32)
         endif()        
     endif()
 
-    target_link_libraries(screen-recorder PRIVATE
+    target_link_libraries(${LIBRARY_NAME} PRIVATE
         $<$<BOOL:${MINGW}>:mingw32>
         FFmpeg::FFmpeg
     )
 
     if(MSVC)
         set(INSTALL_DIR ".")
-        install(TARGETS screen-recorder RUNTIME DESTINATION ${INSTALL_DIR})
+        install(TARGETS ${LIBRARY_NAME} RUNTIME DESTINATION ${INSTALL_DIR})
 
         set(CPACK_PACKAGE_DIRECTORY dist)
         set(CPACK_GENERATOR WIX ZIP)
         set(CPACK_PACKAGE_NAME ScreenRecorder)
-        set(CPACK_PACKAGE_EXECUTABLES screen-recorder ScreenRecorder)
+        set(CPACK_PACKAGE_EXECUTABLES ${LIBRARY_NAME} ScreenRecorder)
         set(CPACK_PACKAGE_INSTALL_DIRECTORY ${CPACK_PACKAGE_NAME})
 
         include(CPack)
@@ -95,7 +99,7 @@ else()
         find_package(X11 REQUIRED)
         include_directories(${X11_INCLUDE_DIR})
         link_directories(${X11_LIBRARIES})
-        target_link_libraries(screen-recorder ${X11_LIBRARIES})
+        target_link_libraries(${LIBRARY_NAME} ${X11_LIBRARIES})
     endif()
 
     find_package(PkgConfig REQUIRED)
@@ -108,6 +112,6 @@ else()
         libswscale
         libavutil
     )
-    target_link_libraries(screen-recorder PkgConfig::LIBAV)
+    target_link_libraries(${LIBRARY_NAME} PkgConfig::LIBAV)
 
 endif()
