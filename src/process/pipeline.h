@@ -6,12 +6,13 @@
 #include <vector>
 
 #include "common/common.h"
-#include "convert/converter.h"
-#include "decode/decoder.h"
-#include "encode/encoder.h"
-#include "format/demuxer.h"
-#include "format/muxer.h"
 #include "video_parameters.h"
+
+class Demuxer;
+class Muxer;
+class Decoder;
+class Encoder;
+class Converter;
 
 class Pipeline {
     std::array<bool, av::DataType::NumTypes> data_types_;
