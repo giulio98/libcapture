@@ -1,9 +1,7 @@
 cmake_minimum_required(VERSION 3.16)
-project(screen-recorder)
-
 set(CMAKE_CXX_STANDARD 17)
 
-add_library(screen-recorder
+set(SOURCES
     src/recorder/screen_recorder.cpp
     src/format/demuxer.cpp
     src/format/muxer.cpp
@@ -17,8 +15,11 @@ add_library(screen-recorder
     src/process/pipeline.cpp
 )
 
-target_include_directories(screen-recorder PRIVATE src)
-target_include_directories(screen-recorder PUBLIC include)
+set(INCLUDES include src)
+
+add_library(screen-recorder ${SOURCES})
+
+target_include_directories(screen-recorder PUBLIC ${INCLUDES})
 
 
 #### Platform specific configuration

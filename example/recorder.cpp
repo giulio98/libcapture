@@ -9,8 +9,8 @@
 #include <X11/cursorfont.h>
 #endif
 
-#include "screen_recorder.h"
-#include "video_parameters.h"
+#include <screen_recorder.h>
+#include <video_parameters.h>
 
 #define DEFAULT_DEVICES 0
 
