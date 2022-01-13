@@ -15,11 +15,15 @@ set(SOURCES
     src/process/pipeline.cpp
 )
 
-set(INCLUDES include src)
-
 add_library(screen-recorder ${SOURCES})
 
-target_include_directories(screen-recorder PUBLIC ${INCLUDES})
+target_include_directories(screen-recorder PUBLIC
+    include
+)
+
+target_include_directories(screen-recorder PRIVATE
+    src
+)
 
 
 #### Platform specific configuration

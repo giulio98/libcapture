@@ -1,4 +1,8 @@
-#include <screen_recorder.h>
+#include "screen_recorder.h"
+
+#include <format/demuxer.h>
+#include <format/muxer.h>
+#include <process/pipeline.h>
 
 #include <chrono>
 #include <cstdlib>

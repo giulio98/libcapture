@@ -1,10 +1,5 @@
 #pragma once
 
-#include <common/common.h>
-#include <format/demuxer.h>
-#include <format/muxer.h>
-#include <process/pipeline.h>
-
 #include <array>
 #include <condition_variable>
 #include <memory>
@@ -13,6 +8,12 @@
 #include <thread>
 
 #include "video_parameters.h"
+
+/* Forward declarations */
+
+class Muxer;
+class Demuxer;
+class Pipeline;
 
 class ScreenRecorder {
     /* Whether the recorder should be verbose or not */
