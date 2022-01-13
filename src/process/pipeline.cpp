@@ -6,6 +6,7 @@
 
 #include "convert/audio_converter.h"
 #include "convert/video_converter.h"
+#include "decode/decoder.h"
 #include "encode/audio_encoder.h"
 #include "encode/video_encoder.h"
 #include "format/demuxer.h"
