@@ -23,8 +23,13 @@ extern "C" {
 }
 
 namespace av {
-/* DO NOT change the order */
-enum DataType { Audio, Video, NumTypes }; /* Data types (audio or video) */
+
+/**
+ * Data types (Audio or Video).
+ * WARNING: NumTypes is NOT a valid data type and it's only used to properly size data structures
+ * (DO NOT change the order)
+ */
+enum DataType { Audio, Video, NumTypes };
 
 using PacketUPtr = std::unique_ptr<AVPacket, DeleterPP<av_packet_free>>;
 using FrameUPtr = std::unique_ptr<AVFrame, DeleterPP<av_frame_free>>;
@@ -56,6 +61,11 @@ inline std::map<std::string, std::string> dict2map(const AVDictionary *dict) {
     return map;
 }
 
+/**
+ * Whether the given data_type is valid
+ * @param data_type the data type to check
+ * @return whether the data type is a valid one
+ */
 inline bool isDataTypeValid(DataType data_type) { return (data_type >= 0 && data_type < DataType::NumTypes); }
 
 }  // namespace av
