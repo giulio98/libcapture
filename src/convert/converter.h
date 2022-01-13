@@ -1,11 +1,12 @@
 #pragma once
 
-#include "common.h"
+#include "common/common.h"
 
 class Converter {
     av::FilterGraphUPtr filter_graph_;
     AVFilterContext *buffersrc_ctx_;
     AVFilterContext *buffersink_ctx_;
+    av::FrameUPtr frame_;
 
 protected:
     /**
@@ -16,7 +17,7 @@ protected:
     /**
      * Initialize the converter (note that the converter won't be usable without initialization)
      * @param src_filter_name   the name of the src filter to use
-     * @param sunk_filter_name  the name of the sink filter to use
+     * @param sink_filter_name  the name of the sink filter to use
      * @param src_filter_args   the arguments to use for the src filter
      * @param filter_spec       the specifications of the conversion filter
      */
@@ -35,11 +36,11 @@ public:
     /**
      * Send a frame to convert
      */
-    void sendFrame(av::FrameUPtr frame) const;
+    void sendFrame(av::FrameUPtr frame);
 
     /**
      * Get a converted frame
      * @return a new converted frame if it was possible to build it, nullptr otherwise
      */
-    [[nodiscard]] av::FrameUPtr getFrame() const;
+    av::FrameUPtr getFrame();
 };

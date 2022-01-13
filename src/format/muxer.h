@@ -4,13 +4,13 @@
 #include <mutex>
 #include <string>
 
-#include "common.h"
+#include "common/common.h"
 
 class Muxer {
     av::FormatContextUPtr fmt_ctx_;
     std::string filename_;
-    std::array<const AVStream *, av::DataType::NumDataTypes> streams_;
-    std::array<AVRational, av::DataType::NumDataTypes> encoders_time_bases_;
+    std::array<const AVStream *, av::DataType::NumTypes> streams_;
+    std::array<AVRational, av::DataType::NumTypes> encoders_time_bases_;
     bool file_opened_;
     bool file_closed_;
     std::mutex m_;
@@ -55,11 +55,11 @@ public:
     /**
      * Print informations about the streams
      */
-    void dumpInfo() const;
+    void printInfo();
 
     /**
      * Get the global header flags of the output format
      * @return the global header flags
      */
-    [[nodiscard]] int getGlobalHeaderFlags() const;
+    [[nodiscard]] int getGlobalHeaderFlags();
 };

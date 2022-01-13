@@ -1,10 +1,10 @@
 #pragma once
 
-#include <libavutil/time.h>
-
 #include <iostream>
 #include <string>
 #include <utility>
+
+#include "common/common.h"
 
 class DurationLogger {
     std::string msg_;

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "common.h"
+#include "common/common.h"
 #include "encoder.h"
 
 class AudioEncoder : public Encoder {
