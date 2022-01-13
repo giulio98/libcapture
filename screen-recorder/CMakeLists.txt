@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.16)
 project(screen-recorder)
 
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 17)
 
 add_library(screen-recorder
     src/recorder/screen_recorder.cpp
@@ -21,12 +21,14 @@ target_include_directories(screen-recorder PRIVATE src)
 target_include_directories(screen-recorder PUBLIC include)
 
 
-IF(WIN32)
+#### Platform specific configuration
 
-    MESSAGE(STATUS "Platform is Windows")
+if(WIN32)
+
+    message(STATUS "Platform is Windows")
     add_definitions(-DWINDOWS)
 
-    IF(NOT MSVC)
+    if(NOT MSVC)
         add_library(FFmpeg::FFmpeg INTERFACE IMPORTED)
         set_target_properties(FFmpeg::FFmpeg
             PROPERTIES
@@ -37,14 +39,14 @@ IF(WIN32)
         )
         file(COPY ${screen-recorder_SOURCE_DIR}/ffmpeg/bin/
                 DESTINATION ${PROJECT_SOURCE_DIR}/bin)
-    ELSE()
-        INCLUDE(FetchContent)
+    else()
+        include(FetchContent)
         FetchContent_Declare(
             FFmpeg
             URL https://www.gyan.dev/ffmpeg/builds/packages/ffmpeg-4.3.2-full_build-shared.7z
         )
         FetchContent_GetProperties(FFmpeg)
-        IF(NOT ffmpeg_POPULATED)
+        if(NOT ffmpeg_POPULATED)
             FetchContent_Populate(FFmpeg)
             add_library(FFmpeg::FFmpeg INTERFACE IMPORTED)
             set_target_properties(FFmpeg::FFmpeg PROPERTIES
@@ -54,25 +56,42 @@ IF(WIN32)
             )
             set(FFMPEG_DLLS  avdevice-58.dll avfilter-7.dll avformat-58.dll avcodec-58.dll swresample-3.dll swscale-5.dll avutil-56.dll)
             list(TRANSFORM FFMPEG_DLLS PREPEND "${ffmpeg_SOURCE_DIR}/bin/")
-        ENDIF()        
-    ENDIF()
+        endif()        
+    endif()
 
-ELSE()
+    target_link_libraries(screen-recorder PRIVATE
+        $<$<BOOL:${MINGW}>:mingw32>
+        FFmpeg::FFmpeg
+    )
 
-    IF(APPLE)
-        MESSAGE(STATUS "Platform is macOS")
+    if(MSVC)
+        set(INSTALL_DIR ".")
+        install(TARGETS screen-recorder RUNTIME DESTINATION ${INSTALL_DIR})
+
+        set(CPACK_PACKAGE_DIRECTORY dist)
+        set(CPACK_GENERATOR WIX ZIP)
+        set(CPACK_PACKAGE_NAME ScreenRecorder)
+        set(CPACK_PACKAGE_EXECUTABLES screen-recorder ScreenRecorder)
+        set(CPACK_PACKAGE_INSTALL_DIRECTORY ${CPACK_PACKAGE_NAME})
+
+        include(CPack)
+    endif()
+
+else()
+
+    if(APPLE)
+        message(STATUS "Platform is macOS")
         add_definitions(-DMACOS)
-    ELSEIF(UNIX)
+    elseif(UNIX)   # LINUX
         set(LINUX TRUE)
-        MESSAGE(STATUS "Platform is Linux")
+        message(STATUS "Platform is Linux")
         add_definitions(-DLINUX)
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -pthread")
-
         find_package(X11 REQUIRED)
         include_directories(${X11_INCLUDE_DIR})
         link_directories(${X11_LIBRARIES})
         target_link_libraries(screen-recorder ${X11_LIBRARIES})
-    ENDIF()
+    endif()
 
     find_package(PkgConfig REQUIRED)
     pkg_check_modules(LIBAV REQUIRED IMPORTED_TARGET
@@ -86,24 +105,4 @@ ELSE()
     )
     target_link_libraries(screen-recorder PkgConfig::LIBAV)
 
-ENDIF()
-
-
-IF(WIN32)
-    target_link_libraries(screen-recorder PRIVATE
-        $<$<BOOL:${MINGW}>:mingw32>
-        FFmpeg::FFmpeg
-    )
-    IF(MSVC)
-        set(INSTALL_DIR ".")
-        install(TARGETS screen-recorder RUNTIME DESTINATION ${INSTALL_DIR})
-
-        set(CPACK_PACKAGE_DIRECTORY dist)
-        set(CPACK_GENERATOR WIX ZIP)
-        set(CPACK_PACKAGE_NAME ScreenRecorder)
-        set(CPACK_PACKAGE_EXECUTABLES screen-recorder ScreenRecorder)
-        set(CPACK_PACKAGE_INSTALL_DIRECTORY ${CPACK_PACKAGE_NAME})
-
-        include(CPack)
-    ENDIF()
-ENDIF()
+endif()
