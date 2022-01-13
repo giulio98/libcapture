@@ -1,7 +1,8 @@
 #pragma once
 
 #include <common/common.h>
-#include <convert/converter.h>
+
+#include "converter.h"
 
 class AudioConverter : public Converter {
 public:
