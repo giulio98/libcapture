@@ -3,7 +3,6 @@
 /* FFmpeg Libraries */
 extern "C" {
 #include <libavcodec/avcodec.h>
-#include <libavcodec/codec.h>
 #include <libavcodec/packet.h>
 #include <libavdevice/avdevice.h>
 #include <libavfilter/avfilter.h>
