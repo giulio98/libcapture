@@ -2,9 +2,30 @@
 
 void Converter::throwError(const std::string &msg) const { throw std::runtime_error("Converter: " + msg); }
 
-Converter::Converter() : buffersrc_ctx_(nullptr), buffersink_ctx_(nullptr) {
+Converter::Converter() {
     filter_graph_ = av::FilterGraphUPtr(avfilter_graph_alloc());
     if (!filter_graph_) throwError("failed to allocate filter graph");
+}
+
+Converter::Converter(Converter &&other) {
+    filter_graph_ = std::move(other.filter_graph_);
+    buffersrc_ctx_ = other.buffersrc_ctx_;
+    other.buffersrc_ctx_ = nullptr;
+    buffersink_ctx_ = other.buffersink_ctx_;
+    other.buffersink_ctx_ = nullptr;
+    frame_ = std::move(other.frame_);
+}
+
+Converter &Converter::operator=(Converter &&other) {
+    if (this != &other) {
+        filter_graph_ = std::move(other.filter_graph_);
+        buffersrc_ctx_ = other.buffersrc_ctx_;
+        other.buffersrc_ctx_ = nullptr;
+        buffersink_ctx_ = other.buffersink_ctx_;
+        other.buffersink_ctx_ = nullptr;
+        frame_ = std::move(other.frame_);
+    }
+    return *this;
 }
 
 void Converter::init(const std::string &src_filter_name, const std::string &sink_filter_name,

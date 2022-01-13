@@ -8,13 +8,15 @@
 
 class Demuxer {
     av::InFormatContextUPtr fmt_ctx_;
-    AVInputFormat *fmt_;
+    AVInputFormat *fmt_ = nullptr;
     std::string device_name_;
     std::map<std::string, std::string> options_;
-    std::array<const AVStream *, av::DataType::NumTypes> streams_;
+    std::array<const AVStream *, av::DataType::NumTypes> streams_ = {nullptr, nullptr};
     av::PacketUPtr packet_;
 
 public:
+    Demuxer() = default;
+
     /**
      * Create a new demuxer (whose input device will be in a "closed" state)
      * @param fmt_name      the name of the input format
@@ -23,7 +25,15 @@ public:
      */
     Demuxer(const std::string &fmt_name, std::string device_name, std::map<std::string, std::string> options);
 
+    Demuxer(const Demuxer &) = delete;
+
+    Demuxer(Demuxer &&other);
+
     ~Demuxer() = default;
+
+    Demuxer &operator=(const Demuxer &) = delete;
+
+    Demuxer &operator=(Demuxer &&other);
 
     /**
      * Open the input device

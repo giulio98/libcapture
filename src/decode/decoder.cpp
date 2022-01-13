@@ -4,7 +4,7 @@
 
 static void throw_error(const std::string &msg) { throw std::runtime_error("Decoder: " + msg); }
 
-Decoder::Decoder(const AVCodecParameters *params) : codec_(nullptr) {
+Decoder::Decoder(const AVCodecParameters *params) {
     if (!params) throw_error("received stream parameters ptr is null");
 
     codec_ = avcodec_find_decoder(params->codec_id);
@@ -17,6 +17,23 @@ Decoder::Decoder(const AVCodecParameters *params) : codec_(nullptr) {
         throw_error("failed to copy codec params to codec context");
 
     if (avcodec_open2(codec_ctx_.get(), codec_, nullptr) < 0) throw_error("unable to open the av codec");
+}
+
+Decoder::Decoder(Decoder &&other) {
+    codec_ = other.codec_;
+    other.codec_ = nullptr;
+    codec_ctx_ = std::move(other.codec_ctx_);
+    frame_ = std::move(frame_);
+}
+
+Decoder &Decoder::operator=(Decoder &&other) {
+    if (this != &other) {
+        codec_ = other.codec_;
+        other.codec_ = nullptr;
+        codec_ctx_ = std::move(other.codec_ctx_);
+        frame_ = std::move(frame_);
+    }
+    return *this;
 }
 
 bool Decoder::sendPacket(const AVPacket *packet) {

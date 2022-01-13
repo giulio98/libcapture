@@ -24,3 +24,12 @@ VideoConverter::VideoConverter(const AVCodecContext *dec_ctx, const AVCodecConte
 
     init("buffer", "buffersink", src_args_ss.str(), filter_spec_ss.str());
 }
+
+VideoConverter::VideoConverter(VideoConverter &&other) : Converter(std::move(other)) {}
+
+VideoConverter &VideoConverter::operator=(VideoConverter &&other) {
+    if (this != &other) {
+        Converter::operator=(std::move(other));
+    }
+    return *this;
+}

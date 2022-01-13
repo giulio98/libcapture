@@ -5,16 +5,28 @@
 #include "common/common.h"
 
 class Decoder {
-    AVCodec *codec_;
+    AVCodec *codec_ = nullptr;
     av::CodecContextUPtr codec_ctx_;
     av::FrameUPtr frame_;
 
 public:
+    Decoder() = default;
+
     /**
      * Create a new decoder
      * @param params the parameters of the stream to decode (likely taken from a demuxer)
      */
     explicit Decoder(const AVCodecParameters *params);
+
+    Decoder(const Decoder &) = delete;
+
+    Decoder(Decoder &&other);
+
+    ~Decoder() = default;
+
+    Decoder &operator=(const Decoder &) = delete;
+
+    Decoder &operator=(Decoder &&other);
 
     /**
      * Send a packet to the decoder

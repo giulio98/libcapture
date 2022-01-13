@@ -5,6 +5,8 @@
 
 class VideoConverter : public Converter {
 public:
+    VideoConverter() = default;
+
     /**
      * Create a new video converter converting the pixel-format and cropping the frame to the output size
      * WARNING: Even if the time-base of the encoder differs from the decoder's one, the timestamps of the frames
@@ -17,4 +19,14 @@ public:
      */
     VideoConverter(const AVCodecContext *dec_ctx, const AVCodecContext *enc_ctx, AVRational in_time_base,
                    int offset_x = 0, int offset_y = 0);
+
+    VideoConverter(const VideoConverter &) = delete;
+
+    VideoConverter(VideoConverter &&other);
+
+    ~VideoConverter() = default;
+
+    VideoConverter &operator=(const VideoConverter &) = delete;
+
+    VideoConverter &operator=(VideoConverter &&other);
 };

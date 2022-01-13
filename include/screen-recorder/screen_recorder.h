@@ -23,7 +23,7 @@ class ScreenRecorder {
 
     bool stop_capture_;
     bool paused_;
-    bool stopped_;
+    bool stopped_ = true;
     std::mutex m_;
     std::condition_variable cv_;
     std::thread capturer_;
@@ -48,9 +48,13 @@ public:
      * Create a new Screen Recorder
      * @param verbose true to make the recorder verbose, false to use the default verbosity
      */
-    ScreenRecorder(bool verbose = false);
+    explicit ScreenRecorder(bool verbose = false);
+
+    ScreenRecorder(const ScreenRecorder &) = delete;
 
     ~ScreenRecorder();
+
+    ScreenRecorder &operator=(const ScreenRecorder &) = delete;
 
     /**
      * Start the video[and audio] recording

@@ -44,9 +44,13 @@ public:
      * @param use_background_processors whether the pipeline should use background threads to handle the processing
      * (recommended when a single demuxer will provide both video and audio packets)
      */
-    Pipeline(std::shared_ptr<Muxer> muxer, bool use_background_processors = false);
+    explicit Pipeline(std::shared_ptr<Muxer> muxer, bool use_background_processors = false);
+
+    Pipeline(const Pipeline &) = delete;
 
     ~Pipeline();
+
+    Pipeline &operator=(const Pipeline &) = delete;
 
     /**
      * Initialize the video processing, by creating the corresponding decoder, converter and encoder

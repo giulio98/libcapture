@@ -5,6 +5,8 @@
 
 class VideoEncoder : public Encoder {
 public:
+    VideoEncoder() = default;
+
     /**
      * Create a new video encoder
      * @param codec_id              the ID of the codec to which encode the frames
@@ -19,4 +21,14 @@ public:
      */
     VideoEncoder(AVCodecID codec_id, int width, int height, AVPixelFormat pix_fmt, AVRational time_base,
                  int global_header_flags, const std::map<std::string, std::string> &options);
+
+    VideoEncoder(const VideoEncoder &) = delete;
+
+    VideoEncoder(VideoEncoder &&other);
+
+    ~VideoEncoder() = default;
+
+    VideoEncoder &operator=(const VideoEncoder &) = delete;
+
+    VideoEncoder &operator=(VideoEncoder &&other);
 };

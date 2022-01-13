@@ -5,9 +5,7 @@
 
 static void throw_error(const std::string &msg) { throw std::runtime_error("Muxer: " + msg); }
 
-Muxer::Muxer(std::string filename) : filename_(std::move(filename)), file_opened_(false), file_closed_(false) {
-    streams_[av::DataType::Audio] = nullptr;
-    streams_[av::DataType::Video] = nullptr;
+Muxer::Muxer(std::string filename) : filename_(std::move(filename)) {
     AVFormatContext *fmt_ctx = nullptr;
     if (avformat_alloc_output_context2(&fmt_ctx, nullptr, nullptr, filename_.c_str()) < 0)
         throw_error("failed to allocate output format context");

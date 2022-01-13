@@ -14,3 +14,12 @@ VideoEncoder::VideoEncoder(AVCodecID codec_id, int width, int height, AVPixelFor
 
     init(options);
 }
+
+VideoEncoder::VideoEncoder(VideoEncoder &&other) : Encoder(std::move(other)) {}
+
+VideoEncoder &VideoEncoder::operator=(VideoEncoder &&other) {
+    if (this != &other) {
+        Encoder::operator=(std::move(other));
+    }
+    return *this;
+}

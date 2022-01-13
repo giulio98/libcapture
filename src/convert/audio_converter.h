@@ -5,6 +5,8 @@
 
 class AudioConverter : public Converter {
 public:
+    AudioConverter() = default;
+
     /**
      * Create a new audio converter converting the sample-format, sample-rate and channel layout.
      * WARNING: Even if the time-base of the encoder differs from the decoder's one, the timestamps of the frames
@@ -14,4 +16,14 @@ public:
      * @param in_time_base  the time-base of the frames sent to the converter
      */
     AudioConverter(const AVCodecContext *dec_ctx, const AVCodecContext *enc_ctx, AVRational in_time_base);
+
+    AudioConverter(const AudioConverter &) = delete;
+
+    AudioConverter(AudioConverter &&other);
+
+    ~AudioConverter() = default;
+
+    AudioConverter &operator=(const AudioConverter &) = delete;
+
+    AudioConverter &operator=(AudioConverter &&other);
 };

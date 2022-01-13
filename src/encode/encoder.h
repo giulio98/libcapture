@@ -6,15 +6,21 @@
 #include "common/common.h"
 
 class Encoder {
-    AVCodec *codec_;
+    AVCodec *codec_ = nullptr;
     av::CodecContextUPtr codec_ctx_;
     av::PacketUPtr packet_;
 
 protected:
+    Encoder() = default;
+
     /** Create a new encoder
      * @param codec_id the ID of the codec to which encode the frames
      */
     explicit Encoder(AVCodecID codec_id);
+
+    Encoder(Encoder &&other);
+
+    Encoder &operator=(Encoder &&other);
 
     /**
      * Access the internal encoder
@@ -37,6 +43,12 @@ protected:
     void init(const std::map<std::string, std::string> &options);
 
 public:
+    ~Encoder() = default;
+
+    Encoder(const Encoder &) = delete;
+
+    Encoder &operator=(const Encoder &) = delete;
+
     /**
      * Send a frame to the encoder
      * @param frame the frame to send to the encoder. It can be nullptr to flush the encoder

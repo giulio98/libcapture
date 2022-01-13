@@ -36,3 +36,12 @@ AudioConverter::AudioConverter(const AVCodecContext *dec_ctx, const AVCodecConte
 
     init("abuffer", "abuffersink", src_args_ss.str(), filter_spec_ss.str());
 }
+
+AudioConverter::AudioConverter(AudioConverter &&other) : Converter(std::move(other)) {}
+
+AudioConverter &AudioConverter::operator=(AudioConverter &&other) {
+    if (this != &other) {
+        Converter::operator=(std::move(other));
+    }
+    return *this;
+}

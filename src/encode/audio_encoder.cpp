@@ -18,3 +18,12 @@ AudioEncoder::AudioEncoder(AVCodecID codec_id, int sample_rate, uint64_t channel
 
     init(options);
 }
+
+AudioEncoder::AudioEncoder(AudioEncoder &&other) : Encoder(std::move(other)) {}
+
+AudioEncoder &AudioEncoder::operator=(AudioEncoder &&other) {
+    if (this != &other) {
+        Encoder::operator=(std::move(other));
+    }
+    return *this;
+}

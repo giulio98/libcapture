@@ -4,8 +4,8 @@
 
 class Converter {
     av::FilterGraphUPtr filter_graph_;
-    AVFilterContext *buffersrc_ctx_;
-    AVFilterContext *buffersink_ctx_;
+    AVFilterContext *buffersrc_ctx_ = nullptr;
+    AVFilterContext *buffersink_ctx_ = nullptr;
     av::FrameUPtr frame_;
 
 protected:
@@ -13,6 +13,10 @@ protected:
      * Create a new converter
      */
     Converter();
+
+    Converter(Converter &&other);
+
+    Converter &operator=(Converter &&other);
 
     /**
      * Initialize the converter (note that the converter won't be usable without initialization)
@@ -31,7 +35,11 @@ protected:
     void throwError(const std::string &msg) const;
 
 public:
+    Converter(const Converter &) = delete;
+
     ~Converter() = default;
+
+    Converter &operator=(const Converter &) = delete;
 
     /**
      * Send a frame to convert

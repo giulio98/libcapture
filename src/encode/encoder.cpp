@@ -25,6 +25,23 @@ Encoder::Encoder(AVCodecID codec_id) : codec_(nullptr) {
     if (!codec_ctx_) throw_error("failed to allocated memory for AVCodecContext");
 }
 
+Encoder::Encoder(Encoder &&other) {
+    codec_ = other.codec_;
+    other.codec_ = nullptr;
+    codec_ctx_ = std::move(other.codec_ctx_);
+    packet_ = std::move(other.packet_);
+}
+
+Encoder &Encoder::operator=(Encoder &&other) {
+    if (this != &other) {
+        codec_ = other.codec_;
+        other.codec_ = nullptr;
+        codec_ctx_ = std::move(other.codec_ctx_);
+        packet_ = std::move(other.packet_);
+    }
+    return *this;
+}
+
 const AVCodec *Encoder::getCodec() const { return codec_; }
 
 AVCodecContext *Encoder::getContextMod() const { return codec_ctx_.get(); }
