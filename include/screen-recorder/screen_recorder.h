@@ -11,8 +11,8 @@
 
 /* Forward declarations */
 
-class Muxer;
 class Demuxer;
+class Muxer;
 class Pipeline;
 
 class ScreenRecorder {

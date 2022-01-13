@@ -4,6 +4,11 @@
 #include <map>
 #include <sstream>
 
+#include "convert/audio_converter.h"
+#include "convert/video_converter.h"
+#include "encode/audio_encoder.h"
+#include "encode/video_encoder.h"
+
 static void throw_error(const std::string &msg) { throw std::runtime_error("Pipeline: " + msg); }
 
 static void checkDataType(av::DataType data_type) {

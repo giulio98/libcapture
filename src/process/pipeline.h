@@ -6,11 +6,9 @@
 #include <vector>
 
 #include "common/common.h"
-#include "convert/audio_converter.h"
-#include "convert/video_converter.h"
+#include "convert/converter.h"
 #include "decode/decoder.h"
-#include "encode/audio_encoder.h"
-#include "encode/video_encoder.h"
+#include "encode/encoder.h"
 #include "format/demuxer.h"
 #include "format/muxer.h"
 #include "video_parameters.h"
