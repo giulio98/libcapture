@@ -1,7 +1,7 @@
 # screen-recorder C++ library
 
 <p align="center">
-<img alt="c++" src="https://img.shields.io/badge/C++-20-blue.svg?style=flat&logo=c%2B%2B"/> 
+<img alt="c++" src="https://img.shields.io/badge/C++-17-blue.svg?style=flat&logo=c%2B%2B"/> 
  <img alt="CI build" src="https://github.com/giulio98/screen-recorder/actions/workflows/build.yml/badge.svg"/> 
  <img alt="License"  src="https://img.shields.io/github/license/giulio98/screen-recorder"/> 
 </p> 
