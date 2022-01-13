@@ -1,7 +1,6 @@
 #pragma once
 
-#include <common/common.h>
-
+#include "common/common.h"
 #include "encoder.h"
 
 class VideoEncoder : public Encoder {

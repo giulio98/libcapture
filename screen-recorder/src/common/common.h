@@ -1,12 +1,5 @@
 #pragma once
 
-#include <map>
-#include <memory>
-#include <stdexcept>
-#include <string>
-
-#include "deleter.h"
-
 /* FFmpeg Libraries */
 extern "C" {
 #include <libavcodec/avcodec.h>
@@ -21,6 +14,13 @@ extern "C" {
 #include <libavutil/frame.h>
 #include <libavutil/time.h>
 }
+
+#include <map>
+#include <memory>
+#include <stdexcept>
+#include <string>
+
+#include "deleter.h"
 
 namespace av {
 

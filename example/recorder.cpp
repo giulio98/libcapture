@@ -1,9 +1,3 @@
-#include <filesystem>
-#include <iostream>
-#include <stdexcept>
-#include <string>
-#include <vector>
-
 #ifdef LINUX
 #include <X11/Xlib.h>
 #include <X11/cursorfont.h>
@@ -11,6 +5,12 @@
 
 #include <screen-recorder/screen_recorder.h>
 #include <screen-recorder/video_parameters.h>
+
+#include <filesystem>
+#include <iostream>
+#include <stdexcept>
+#include <string>
+#include <vector>
 
 #define DEFAULT_DEVICES 0
 

@@ -1,19 +1,19 @@
 #pragma once
 
-#include <common/common.h>
-#include <convert/audio_converter.h>
-#include <convert/video_converter.h>
-#include <decode/decoder.h>
-#include <encode/audio_encoder.h>
-#include <encode/video_encoder.h>
-#include <format/demuxer.h>
-#include <format/muxer.h>
-#include <video_parameters.h>
-
 #include <array>
 #include <condition_variable>
 #include <thread>
 #include <vector>
+
+#include "common/common.h"
+#include "convert/audio_converter.h"
+#include "convert/video_converter.h"
+#include "decode/decoder.h"
+#include "encode/audio_encoder.h"
+#include "encode/video_encoder.h"
+#include "format/demuxer.h"
+#include "format/muxer.h"
+#include "video_parameters.h"
 
 class Pipeline {
     std::array<bool, av::DataType::NumTypes> data_types_;

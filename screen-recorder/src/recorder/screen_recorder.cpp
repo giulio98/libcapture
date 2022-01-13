@@ -1,8 +1,9 @@
 #include "screen_recorder.h"
 
-#include <format/demuxer.h>
-#include <format/muxer.h>
-#include <process/pipeline.h>
+#ifdef WINDOWS
+#include <windows.h>
+#include <winreg.h>
+#endif
 
 #include <chrono>
 #include <cstdlib>
@@ -10,13 +11,11 @@
 #include <sstream>
 #include <stdexcept>
 
-#ifdef WINDOWS
-#include <windows.h>
-#include <winreg.h>
-#endif
-
-#include <utils/log_callback_setter.h>
-#include <utils/log_level_setter.h>
+#include "format/demuxer.h"
+#include "format/muxer.h"
+#include "process/pipeline.h"
+#include "utils/log_callback_setter.h"
+#include "utils/log_level_setter.h"
 
 static void makeAvVerbose(bool verbose) {
     if (verbose) {
