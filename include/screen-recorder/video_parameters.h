@@ -23,6 +23,7 @@ public:
     VideoParameters(int width, int height, int offset_x, int offset_y, int framerate) {
         setVideoSize(width, height);
         setVideoOffset(offset_x, offset_y);
+        setFramerate(framerate);
     }
 
     void setVideoSize(int width, int height) {
