@@ -75,7 +75,7 @@ public:
      * the background threads will handle the packet processing and this function will
      * return immediately, otherwise the processing will be handled in
      * a synchronous way and this function will return only once it's completed
-     * @param packet        the packet to send to che processing chain
+     * @param packet        the packet to send to che processing chain (if NULL, an exception will be thrown)
      * @param packet_type   the type of the packet to process
      */
     void feed(av::PacketUPtr packet, av::MediaType packet_type);
