@@ -59,10 +59,3 @@ jobs:
         with:
           name: "screen-recorder-${{runner.os}}"
           path: bin
-      - name: Windows badge
-        uses: RubbaBoy/BYOB@v1.2.1
-        with:
-          NAME: windows
-          ICON: 'windows'
-          LABEL: 'Windows Build'
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
