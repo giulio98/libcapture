@@ -13,14 +13,7 @@ Muxer::Muxer(std::string filename) : filename_(std::move(filename)) {
 }
 
 Muxer::~Muxer() {
-    if (file_opened_ && !file_closed_) {
-        std::cerr << "Demuxer: WARNING, the output file " << filename_
-                  << " has not been closed, trying to close now...";
-        if (fmt_ctx_->pb) {
-            if (avio_close(fmt_ctx_->pb) < 0) std::cerr << " failed to close file";
-        }
-        std::cerr << std::endl;
-    }
+    if (fmt_ctx_ && fmt_ctx_->pb) avio_closep(&(fmt_ctx_->pb));
 }
 
 void Muxer::addStream(const AVCodecContext *enc_ctx) {
@@ -73,7 +66,7 @@ void Muxer::closeFile() {
     if (av_interleaved_write_frame(fmt_ctx_.get(), nullptr)) throw_error("failed to flush internal packet queue");
     if (av_write_trailer(fmt_ctx_.get()) < 0) throw_error("failed to write file trailer");
     if (fmt_ctx_->pb) {
-        if (avio_close(fmt_ctx_->pb) < 0) throw_error("failed to close file");
+        if (avio_closep(&(fmt_ctx_->pb)) < 0) throw_error("failed to close file");
     }
     file_closed_ = true;
 }
