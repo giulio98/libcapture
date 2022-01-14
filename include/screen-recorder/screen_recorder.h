@@ -76,7 +76,6 @@ public:
      * Stop the recording.
      * When this function returns, the recorder internal state will have been complemetely cleaned up
      * (including all processing threads)
-     * WARNING: if there is no recording in progress, calling this function will throw an exception
      */
     void stop();
 
