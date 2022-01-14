@@ -148,9 +148,6 @@ void ScreenRecorder::start(const std::string &video_device, const std::string &a
                            const std::string &output_file, VideoParameters video_params) {
     checkParams(video_device, output_file, video_params);
 
-    std::unique_lock ul{m_};
-    if (!stopped_) throw std::runtime_error("Recording already in progress");
-
     bool capture_audio = !audio_device.empty();
 
     AVPixelFormat video_pix_fmt = AV_PIX_FMT_YUV420P;
@@ -161,6 +158,9 @@ void ScreenRecorder::start(const std::string &video_device, const std::string &a
 #ifdef LINUX
     Demuxer audio_demuxer;
 #endif
+
+    std::unique_lock ul{m_};
+    if (!stopped_) throw std::runtime_error("Recording already in progress");
 
     /* init Muxer */
     muxer_ = std::make_shared<Muxer>(output_file);
