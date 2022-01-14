@@ -172,17 +172,13 @@ void Pipeline::processConvertedFrame(const AVFrame *frame, av::MediaType type) {
 }
 
 void Pipeline::feed(av::PacketUPtr packet, av::MediaType packet_type) {
-    {
-        std::unique_lock ul{m_};
-        checkExceptions();
-    }
-
     if (!packet) throw_error("received packet is null");
     checkMediaType(packet_type);
     if (!managed_type_[packet_type]) throw std::runtime_error("No pipeline corresponding to received packet type");
 
     if (use_background_processors_) {
         std::unique_lock ul{m_};
+        checkExceptions();
         if (!packets_[packet_type]) {  // if previous packet has been fully processed
             packets_[packet_type] = std::move(packet);
             packets_cv_[packet_type].notify_all();
