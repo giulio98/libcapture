@@ -41,6 +41,11 @@ class ScreenRecorder {
      */
     void capture(Demuxer demuxer);
 
+    /**
+     * Stop and join the capturer threads
+     */
+    void stopCapturers();
+
 public:
     /**
      * Create a new Screen Recorder

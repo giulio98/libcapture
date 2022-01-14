@@ -126,7 +126,14 @@ ScreenRecorder::ScreenRecorder(bool verbose) : verbose_(verbose) {
     avdevice_register_all();
 }
 
-ScreenRecorder::~ScreenRecorder() {
+ScreenRecorder::~ScreenRecorder() { stopCapturers(); }
+
+void ScreenRecorder::stopCapturers() {
+    {
+        std::unique_lock ul{m_};
+        stop_capture_ = true;
+        cv_.notify_all();
+    }
     if (capturer_.joinable()) capturer_.join();
 #ifdef LINUX
     if (audio_capturer_.joinable()) audio_capturer_.join();
@@ -226,21 +233,13 @@ void ScreenRecorder::start(const std::string &video_device, const std::string &a
 void ScreenRecorder::stop() {
     if (stopped_) throw std::runtime_error("Recording is already stopped");
 
-    {
-        std::unique_lock ul{m_};
-        stop_capture_ = true;
-        cv_.notify_all();
-    }
-
-    if (capturer_.joinable()) capturer_.join();
-#ifdef LINUX
-    if (audio_capturer_.joinable()) audio_capturer_.join();
-#endif
+    stopCapturers();
 
     pipeline_->flush();
     muxer_->closeFile();
     pipeline_.reset();
     muxer_.reset();
+
     stopped_ = true;
 }
 

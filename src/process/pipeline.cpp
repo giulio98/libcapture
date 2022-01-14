@@ -19,12 +19,7 @@ Pipeline::Pipeline(std::shared_ptr<Muxer> muxer, bool use_background_processors)
 }
 
 Pipeline::~Pipeline() {
-    if (use_background_processors_) {
-        stopProcessors();
-        for (auto &p : processors_) {
-            if (p.joinable()) p.join();
-        }
-    }
+    if (use_background_processors_) stopProcessors();
 }
 
 void Pipeline::startProcessor(av::MediaType media_type) {
@@ -45,19 +40,21 @@ void Pipeline::startProcessor(av::MediaType media_type) {
                 processPacket(packet.get(), media_type);
             }
         } catch (...) {
-            {
-                std::unique_lock ul{m_};
-                e_ptrs_[media_type] = std::current_exception();
-            }
-            stopProcessors();
+            std::unique_lock ul{m_};
+            e_ptrs_[media_type] = std::current_exception();
         }
     });
 }
 
 void Pipeline::stopProcessors() {
-    std::unique_lock<std::mutex> ul{m_};
-    stop_ = true;
-    for (auto &cv : packets_cv_) cv.notify_all();
+    {
+        std::unique_lock<std::mutex> ul{m_};
+        stop_ = true;
+        for (auto &cv : packets_cv_) cv.notify_all();
+    }
+    for (auto &p : processors_) {
+        if (p.joinable()) p.join();
+    }
 }
 
 void Pipeline::checkExceptions() {
@@ -204,9 +201,6 @@ void Pipeline::flush() {
     if (use_background_processors_) {
         /* stop all threads working on the pipelines */
         stopProcessors();
-        for (auto &p : processors_) {
-            if (p.joinable()) p.join();
-        }
         checkExceptions();
     }
 
