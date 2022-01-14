@@ -12,8 +12,8 @@ void swap(Demuxer &lhs, Demuxer &rhs) {
     std::swap(lhs.fmt_, rhs.fmt_);
     std::swap(lhs.device_name_, rhs.device_name_);
     std::swap(lhs.options_, rhs.options_);
-    std::swap(lhs.streams_[av::DataType::Audio], rhs.streams_[av::DataType::Audio]);
-    std::swap(lhs.streams_[av::DataType::Video], rhs.streams_[av::DataType::Video]);
+    std::swap(lhs.streams_[av::MediaType::Audio], rhs.streams_[av::MediaType::Audio]);
+    std::swap(lhs.streams_[av::MediaType::Video], rhs.streams_[av::MediaType::Video]);
     std::swap(lhs.packet_, rhs.packet_);
 }
 
@@ -55,9 +55,9 @@ void Demuxer::openInput() {
     for (int i = 0; i < fmt_ctx_->nb_streams; i++) {
         const AVStream *stream = fmt_ctx_->streams[i];
         if (stream->codecpar->codec_type == AVMEDIA_TYPE_VIDEO) {
-            streams_[av::DataType::Video] = stream;
+            streams_[av::MediaType::Video] = stream;
         } else if (stream->codecpar->codec_type == AVMEDIA_TYPE_AUDIO) {
-            streams_[av::DataType::Audio] = stream;
+            streams_[av::MediaType::Audio] = stream;
         }
     }
 }
@@ -65,8 +65,8 @@ void Demuxer::openInput() {
 void Demuxer::closeInput() {
     if (!fmt_ctx_) throw_error("failed to close input (input is not open)");
     fmt_ctx_.reset();
-    streams_[av::DataType::Video] = nullptr;
-    streams_[av::DataType::Audio] = nullptr;
+    streams_[av::MediaType::Video] = nullptr;
+    streams_[av::MediaType::Audio] = nullptr;
 }
 
 void Demuxer::flush() {
@@ -77,21 +77,21 @@ void Demuxer::flush() {
 
 bool Demuxer::isInputOpen() const { return (fmt_ctx_ != nullptr); }
 
-const AVCodecParameters *Demuxer::getStreamParams(av::DataType stream_type) const {
+const AVCodecParameters *Demuxer::getStreamParams(av::MediaType stream_type) const {
     if (!fmt_ctx_) throw_error("failed to acess stream (input is not open)");
-    if (!av::isDataTypeValid(stream_type)) throw_error("invalid stream_type received");
+    if (!av::validMediaType(stream_type)) throw_error("invalid stream_type received");
     if (!streams_[stream_type]) throw_error("specified stream not present");
     return streams_[stream_type]->codecpar;
 }
 
-AVRational Demuxer::getStreamTimeBase(av::DataType stream_type) const {
+AVRational Demuxer::getStreamTimeBase(av::MediaType stream_type) const {
     if (!fmt_ctx_) throw_error("failed to acess stream (input is not open)");
-    if (!av::isDataTypeValid(stream_type)) throw_error("invalid stream_type received");
+    if (!av::validMediaType(stream_type)) throw_error("invalid stream_type received");
     if (!streams_[stream_type]) throw_error("specified stream not present");
     return streams_[stream_type]->time_base;
 }
 
-std::pair<av::PacketUPtr, av::DataType> Demuxer::readPacket() {
+std::pair<av::PacketUPtr, av::MediaType> Demuxer::readPacket() {
     if (!fmt_ctx_) throw_error("failed to read packet (input is not open)");
 
     if (!packet_) {
@@ -99,21 +99,19 @@ std::pair<av::PacketUPtr, av::DataType> Demuxer::readPacket() {
         if (!packet_) throw_error("failed to allocate packet");
     }
 
-    av::DataType packet_type;
+    auto packet_type = av::MediaType::None;
 
     int ret = av_read_frame(fmt_ctx_.get(), packet_.get());
     if (ret == AVERROR(EAGAIN)) return std::make_pair(nullptr, packet_type);
     if (ret < 0) throw_error("failed to read a packet");
 
-    bool valid_index = false;
-    for (auto type : {av::DataType::Video, av::DataType::Audio}) {
+    for (auto type : av::validMediaTypes) {
         if (streams_[type] && packet_->stream_index == streams_[type]->index) {
             packet_type = type;
-            valid_index = true;
             break;
         }
     }
-    if (!valid_index) throw_error("unknown packet stream index");
+    if (packet_type == av::MediaType::None) throw_error("unknown packet stream index");
 
     return std::make_pair(std::move(packet_), packet_type);
 }

@@ -26,11 +26,11 @@ Muxer::~Muxer() {
 void Muxer::addStream(const AVCodecContext *enc_ctx) {
     if (!enc_ctx) throw_error("received encoder context is NULL");
 
-    av::DataType type;
-    if (enc_ctx->codec_type == AVMEDIA_TYPE_AUDIO) {
-        type = av::DataType::Audio;
-    } else if (enc_ctx->codec_type == AVMEDIA_TYPE_VIDEO) {
-        type = av::DataType::Video;
+    av::MediaType type;
+    if (enc_ctx->codec_type == AVMEDIA_TYPE_VIDEO) {
+        type = av::MediaType::Video;
+    } else if (enc_ctx->codec_type == AVMEDIA_TYPE_AUDIO) {
+        type = av::MediaType::Audio;
     } else {
         throw_error("received encoder context is ok unknown media type");
     }
@@ -78,14 +78,14 @@ void Muxer::closeFile() {
     file_closed_ = true;
 }
 
-void Muxer::writePacket(av::PacketUPtr packet, av::DataType packet_type) {
+void Muxer::writePacket(av::PacketUPtr packet, av::MediaType packet_type) {
     std::unique_lock ul{m_};
 
     if (!file_opened_) throw_error("cannot write packet, file has not been opened");
     if (file_closed_) throw_error("cannot write packet, file has already been closed");
 
     if (packet) {
-        if (!av::isDataTypeValid(packet_type)) throw_error("received packet of unknown type");
+        if (!av::validMediaType(packet_type)) throw_error("received packet of unknown type");
         auto stream = streams_[packet_type];
         if (!stream) throw_error("stream of specified type not present");
         av_packet_rescale_ts(packet.get(), encoders_time_bases_[packet_type], stream->time_base);

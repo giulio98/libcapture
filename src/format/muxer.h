@@ -9,8 +9,8 @@
 class Muxer {
     av::FormatContextUPtr fmt_ctx_;
     std::string filename_;
-    std::array<const AVStream *, av::DataType::NumTypes> streams_ = {nullptr, nullptr};
-    std::array<AVRational, av::DataType::NumTypes> encoders_time_bases_;
+    std::array<const AVStream *, av::MediaType::NumTypes> streams_ = {nullptr, nullptr};
+    std::array<AVRational, av::MediaType::NumTypes> encoders_time_bases_;
     bool file_opened_ = false;
     bool file_closed_ = false;
     std::mutex m_;
@@ -53,7 +53,7 @@ public:
      * @param packet_type   the type of the packet (audio or video). If the packet is nullptr,
      * this parameter is irrelevant
      */
-    void writePacket(av::PacketUPtr packet, av::DataType packet_type);
+    void writePacket(av::PacketUPtr packet, av::MediaType packet_type);
 
     /**
      * Print informations about the streams

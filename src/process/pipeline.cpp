@@ -9,8 +9,8 @@
 
 static void throw_error(const std::string &msg) { throw std::runtime_error("Pipeline: " + msg); }
 
-static void checkDataType(av::DataType data_type) {
-    if (!av::isDataTypeValid(data_type)) throw_error("invalid data type received");
+static void checkMediaType(av::MediaType type) {
+    if (!av::validMediaType(type)) throw_error("invalid data type received");
 }
 
 Pipeline::Pipeline(std::shared_ptr<Muxer> muxer, bool use_background_processors)
@@ -27,27 +27,27 @@ Pipeline::~Pipeline() {
     }
 }
 
-void Pipeline::startProcessor(av::DataType data_type) {
-    checkDataType(data_type);
+void Pipeline::startProcessor(av::MediaType media_type) {
+    checkMediaType(media_type);
 
-    if (processors_[data_type].joinable()) processors_[data_type].join();
+    if (processors_[media_type].joinable()) processors_[media_type].join();
 
-    processors_[data_type] = std::thread([this, data_type]() {
+    processors_[media_type] = std::thread([this, media_type]() {
         try {
             while (true) {
                 av::PacketUPtr packet;
                 {
                     std::unique_lock ul{m_};
-                    packets_cv_[data_type].wait(ul, [this, data_type]() { return (packets_[data_type] || stop_); });
-                    if (!packets_[data_type] && stop_) break;
-                    packet = std::move(packets_[data_type]);
+                    packets_cv_[media_type].wait(ul, [this, media_type]() { return (packets_[media_type] || stop_); });
+                    if (!packets_[media_type] && stop_) break;
+                    packet = std::move(packets_[media_type]);
                 }
-                processPacket(packet.get(), data_type);
+                processPacket(packet.get(), media_type);
             }
         } catch (...) {
             {
                 std::unique_lock ul{m_};
-                e_ptrs_[data_type] = std::current_exception();
+                e_ptrs_[media_type] = std::current_exception();
             }
             stopProcessors();
         }
@@ -68,10 +68,10 @@ void Pipeline::checkExceptions() {
 
 void Pipeline::initVideo(const Demuxer &demuxer, AVCodecID codec_id, const VideoParameters &video_params,
                          AVPixelFormat pix_fmt) {
-    const auto type = av::DataType::Video;
+    const auto type = av::MediaType::Video;
 
-    if (data_types_[type]) throw_error("video pipeline already inited");
-    data_types_[type] = true;
+    if (managed_type_[type]) throw_error("video pipeline already inited");
+    managed_type_[type] = true;
 
     /* Init decoder */
     decoders_[type] = Decoder(demuxer.getStreamParams(type));
@@ -104,10 +104,10 @@ void Pipeline::initVideo(const Demuxer &demuxer, AVCodecID codec_id, const Video
 }
 
 void Pipeline::initAudio(const Demuxer &demuxer, AVCodecID codec_id) {
-    const auto type = av::DataType::Audio;
+    const auto type = av::MediaType::Audio;
 
-    if (data_types_[type]) throw_error("audio pipeline already inited");
-    data_types_[type] = true;
+    if (managed_type_[type]) throw_error("audio pipeline already inited");
+    managed_type_[type] = true;
 
     /* Init decoder */
     decoders_[type] = Decoder(demuxer.getStreamParams(type));
@@ -133,11 +133,11 @@ void Pipeline::initAudio(const Demuxer &demuxer, AVCodecID codec_id) {
     if (use_background_processors_) startProcessor(type);
 }
 
-void Pipeline::processPacket(const AVPacket *packet, av::DataType data_type) {
-    checkDataType(data_type);
+void Pipeline::processPacket(const AVPacket *packet, av::MediaType type) {
+    checkMediaType(type);
 
-    Decoder &decoder = decoders_[data_type];
-    Converter &converter = converters_[data_type];
+    Decoder &decoder = decoders_[type];
+    Converter &converter = converters_[type];
 
     bool decoder_received = false;
     while (!decoder_received) {
@@ -151,16 +151,16 @@ void Pipeline::processPacket(const AVPacket *packet, av::DataType data_type) {
             while (true) {
                 auto converted_frame = converter.getFrame();
                 if (!converted_frame) break;
-                processConvertedFrame(converted_frame.get(), data_type);
+                processConvertedFrame(converted_frame.get(), type);
             }
         }
     }
 }
 
-void Pipeline::processConvertedFrame(const AVFrame *frame, av::DataType data_type) {
-    checkDataType(data_type);
+void Pipeline::processConvertedFrame(const AVFrame *frame, av::MediaType type) {
+    checkMediaType(type);
 
-    Encoder &encoder = encoders_[data_type];
+    Encoder &encoder = encoders_[type];
 
     bool encoder_received = false;
     while (!encoder_received) {
@@ -169,20 +169,20 @@ void Pipeline::processConvertedFrame(const AVFrame *frame, av::DataType data_typ
         while (true) {
             auto packet = encoder.getPacket();
             if (!packet) break;
-            muxer_->writePacket(std::move(packet), data_type);
+            muxer_->writePacket(std::move(packet), type);
         }
     }
 }
 
-void Pipeline::feed(av::PacketUPtr packet, av::DataType packet_type) {
+void Pipeline::feed(av::PacketUPtr packet, av::MediaType packet_type) {
     {
         std::unique_lock ul{m_};
         checkExceptions();
     }
 
     if (!packet) throw_error("received packet is null");
-    checkDataType(packet_type);
-    if (!data_types_[packet_type]) throw std::runtime_error("No pipeline corresponding to received packet type");
+    checkMediaType(packet_type);
+    if (!managed_type_[packet_type]) throw std::runtime_error("No pipeline corresponding to received packet type");
 
     if (use_background_processors_) {
         std::unique_lock ul{m_};
@@ -195,9 +195,9 @@ void Pipeline::feed(av::PacketUPtr packet, av::DataType packet_type) {
     }
 }
 
-void Pipeline::flushPipeline(av::DataType data_type) {
-    processPacket(nullptr, data_type);
-    processConvertedFrame(nullptr, data_type);
+void Pipeline::flushPipeline(av::MediaType type) {
+    processPacket(nullptr, type);
+    processConvertedFrame(nullptr, type);
 }
 
 void Pipeline::flush() {
@@ -211,14 +211,14 @@ void Pipeline::flush() {
     }
 
     /* flush the pipelines */
-    for (auto type : {av::DataType::Video, av::DataType::Audio}) {
-        if (data_types_[type]) flushPipeline(type);
+    for (auto type : av::validMediaTypes) {
+        if (managed_type_[type]) flushPipeline(type);
     }
 }
 
 void Pipeline::printInfo() const {
-    for (auto type : {av::DataType::Video, av::DataType::Audio}) {
-        if (data_types_[type]) {
+    for (auto type : av::validMediaTypes) {
+        if (managed_type_[type]) {
             std::cout << "Decoder " << type << ": " << decoders_[type].getName() << std::endl;
             std::cout << "Encoder " << type << ": " << encoders_[type].getName() << std::endl;
         }

@@ -15,26 +15,26 @@ class Demuxer;
 class Muxer;
 
 class Pipeline {
-    std::array<bool, av::DataType::NumTypes> data_types_ = {false, false};
+    std::array<bool, av::MediaType::NumTypes> managed_type_ = {false, false};
     std::shared_ptr<Muxer> muxer_;
-    std::array<Decoder, av::DataType::NumTypes> decoders_;
-    std::array<Encoder, av::DataType::NumTypes> encoders_;
-    std::array<Converter, av::DataType::NumTypes> converters_;
+    std::array<Decoder, av::MediaType::NumTypes> decoders_;
+    std::array<Encoder, av::MediaType::NumTypes> encoders_;
+    std::array<Converter, av::MediaType::NumTypes> converters_;
 
     bool use_background_processors_;
     std::mutex m_;
     bool stop_;
-    std::array<std::thread, av::DataType::NumTypes> processors_;
-    std::array<av::PacketUPtr, av::DataType::NumTypes> packets_;
-    std::array<std::condition_variable, av::DataType::NumTypes> packets_cv_;
-    std::array<std::exception_ptr, av::DataType::NumTypes> e_ptrs_;
-    void startProcessor(av::DataType data_type);
+    std::array<std::thread, av::MediaType::NumTypes> processors_;
+    std::array<av::PacketUPtr, av::MediaType::NumTypes> packets_;
+    std::array<std::condition_variable, av::MediaType::NumTypes> packets_cv_;
+    std::array<std::exception_ptr, av::MediaType::NumTypes> e_ptrs_;
+    void startProcessor(av::MediaType media_type);
     void stopProcessors();
     void checkExceptions();
 
-    void processPacket(const AVPacket *packet, av::DataType data_type);
-    void processConvertedFrame(const AVFrame *frame, av::DataType data_type);
-    void flushPipeline(av::DataType data_type);
+    void processPacket(const AVPacket *packet, av::MediaType type);
+    void processConvertedFrame(const AVFrame *frame, av::MediaType type);
+    void flushPipeline(av::MediaType type);
 
 public:
     /**
@@ -78,7 +78,7 @@ public:
      * @param packet        the packet to send to che processing chain
      * @param packet_type   the type of the packet to process
      */
-    void feed(av::PacketUPtr packet, av::DataType packet_type);
+    void feed(av::PacketUPtr packet, av::MediaType packet_type);
 
     /**
      * Flush the processing pipelines.

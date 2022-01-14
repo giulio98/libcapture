@@ -11,7 +11,7 @@ class Demuxer {
     AVInputFormat *fmt_ = nullptr;
     std::string device_name_;
     std::map<std::string, std::string> options_;
-    std::array<const AVStream *, av::DataType::NumTypes> streams_ = {nullptr, nullptr};
+    std::array<const AVStream *, av::MediaType::NumTypes> streams_ = {nullptr, nullptr};
     av::PacketUPtr packet_;
 
     friend void swap(Demuxer &lhs, Demuxer &rhs);
@@ -64,21 +64,21 @@ public:
      * @param stream_type the type of data of the stream
      * @return an observer pointer to access the stream parameters
      */
-    [[nodiscard]] const AVCodecParameters *getStreamParams(av::DataType stream_type) const;
+    [[nodiscard]] const AVCodecParameters *getStreamParams(av::MediaType stream_type) const;
 
     /**
      * Get the time-base of the stream
      * @param stream_type the type of data of the stream
      * @return the stream time-base
      */
-    [[nodiscard]] AVRational getStreamTimeBase(av::DataType stream_type) const;
+    [[nodiscard]] AVRational getStreamTimeBase(av::MediaType stream_type) const;
 
     /**
      * Read a packet from the input device and return it together with its type
      * @return a packet and its type if it was possible to read it, nullptr and a random meaningless type
      * if there was nothing to read
      */
-    std::pair<av::PacketUPtr, av::DataType> readPacket();
+    std::pair<av::PacketUPtr, av::MediaType> readPacket();
 
     /**
      * Print informations about the streams

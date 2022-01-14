@@ -29,7 +29,7 @@ public:
      * @param offset_x      (video-only) the horizontal offset to use when performing the cropping of the frames
      * @param offset_y      (video-only) the vertical offset to use when performing the cropping of the frames
      */
-    Converter(av::DataType type, const AVCodecContext *dec_ctx, const AVCodecContext *enc_ctx, AVRational in_time_base,
+    Converter(av::MediaType type, const AVCodecContext *dec_ctx, const AVCodecContext *enc_ctx, AVRational in_time_base,
               int offset_x = 0, int offset_y = 0);
 
     Converter(const Converter &) = delete;

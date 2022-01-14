@@ -290,7 +290,7 @@ void ScreenRecorder::capture(Demuxer demuxer) {
             std::this_thread::sleep_for(sleep_interval);
             continue;
         }
-        if (!av::isDataTypeValid(packet_type)) throw std::runtime_error("Invalid packet type received from demuxer");
+        if (!av::validMediaType(packet_type)) throw std::runtime_error("Invalid packet type received from demuxer");
 
         if (adjust_pts_offset) pts_offset += (packet->pts - last_pts);
         last_pts = packet->pts;

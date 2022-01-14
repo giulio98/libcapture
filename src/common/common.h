@@ -11,6 +11,7 @@ extern "C" {
 #include <libavutil/time.h>
 }
 
+#include <array>
 #include <map>
 #include <memory>
 #include <stdexcept>
@@ -23,9 +24,22 @@ namespace av {
 /**
  * Data types (Audio or Video).
  * WARNING: NumTypes is NOT a valid data type and it's only used to properly size data structures
+ * in order to use Video and Audio as indices
  * (DO NOT change the order)
  */
-enum DataType { Audio, Video, NumTypes };
+enum MediaType { None = -1, Video, Audio, NumTypes };
+
+/**
+ * Array of media types valid as indices
+ */
+constexpr std::array<MediaType, MediaType::NumTypes> validMediaTypes = {MediaType::Video, MediaType::Audio};
+
+/**
+ * Whether the given type is valid
+ * @param type the data type to check
+ * @return whether the data type is a valid one
+ */
+constexpr bool validMediaType(MediaType type) { return (type > MediaType::None && type < MediaType::NumTypes); }
 
 using PacketUPtr = std::unique_ptr<AVPacket, DeleterPP<av_packet_free>>;
 using FrameUPtr = std::unique_ptr<AVFrame, DeleterPP<av_frame_free>>;
@@ -56,12 +70,5 @@ inline std::map<std::string, std::string> dict2map(const AVDictionary *dict) {
     } while (entry);
     return map;
 }
-
-/**
- * Whether the given data_type is valid
- * @param data_type the data type to check
- * @return whether the data type is a valid one
- */
-inline bool isDataTypeValid(DataType data_type) { return (data_type >= 0 && data_type < DataType::NumTypes); }
 
 }  // namespace av

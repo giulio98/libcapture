@@ -69,21 +69,21 @@ static std::pair<std::string, std::string> getVideoFilterSpec(const AVCodecConte
     return std::make_pair(src_args_ss.str(), filter_spec_ss.str());
 }
 
-Converter::Converter(av::DataType type, const AVCodecContext *dec_ctx, const AVCodecContext *enc_ctx,
+Converter::Converter(av::MediaType type, const AVCodecContext *dec_ctx, const AVCodecContext *enc_ctx,
                      AVRational in_time_base, int offset_x, int offset_y) {
     std::string src_filter_name;
     std::string sink_filter_name;
     std::string src_args;
     std::string filter_spec;
 
-    if (type == av::DataType::Audio) {
+    if (type == av::MediaType::Audio) {
         if (dec_ctx->codec_type != AVMEDIA_TYPE_AUDIO) throwError("received decoder is not of audio type");
         if (enc_ctx->codec_type != AVMEDIA_TYPE_AUDIO) throwError("received encoder is not of audio type");
         if (offset_x || offset_y) throwError("video offset specified specified for audio converter constructor");
         src_filter_name = "abuffer";
         sink_filter_name = "abuffersink";
         std::tie(src_args, filter_spec) = getAudioFilterSpec(dec_ctx, enc_ctx, in_time_base);
-    } else if (type == av::DataType::Video) {
+    } else if (type == av::MediaType::Video) {
         if (dec_ctx->codec_type != AVMEDIA_TYPE_VIDEO) throwError("received decoder is not of video type");
         if (enc_ctx->codec_type != AVMEDIA_TYPE_VIDEO) throwError("received encoder is not of video type");
         src_filter_name = "buffer";
