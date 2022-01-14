@@ -131,7 +131,7 @@ ScreenRecorder::~ScreenRecorder() { stopCapturers(); }
 void ScreenRecorder::stopCapturers() {
     {
         std::unique_lock ul{m_};
-        stop_capture_ = true;
+        stopped_ = true;
         cv_.notify_all();
     }
     if (capturer_.joinable()) capturer_.join();
@@ -210,7 +210,7 @@ void ScreenRecorder::start(const std::string &video_device, const std::string &a
         std::cout << std::endl;
     }
 
-    stop_capture_ = false;
+    stopped_ = false;
     paused_ = false;
 
     auto capturer_fn = [this](Demuxer demuxer) {
@@ -226,33 +226,26 @@ void ScreenRecorder::start(const std::string &video_device, const std::string &a
 #ifdef LINUX
     if (capture_audio) audio_capturer_ = std::thread(capturer_fn, std::move(audio_demuxer));
 #endif
-
-    stopped_ = false;
 }
 
 void ScreenRecorder::stop() {
-    if (stopped_) throw std::runtime_error("Recording is already stopped");
-
     stopCapturers();
-
     pipeline_->flush();
     muxer_->closeFile();
     pipeline_.reset();
     muxer_.reset();
-
-    stopped_ = true;
 }
 
 void ScreenRecorder::pause() {
     std::unique_lock<std::mutex> ul{m_};
-    if (paused_ || stop_capture_) return;
+    if (paused_ || stopped_) return;
     paused_ = true;
     cv_.notify_all();
 }
 
 void ScreenRecorder::resume() {
     std::unique_lock<std::mutex> ul{m_};
-    if (!paused_ || stop_capture_) return;
+    if (!paused_ || stopped_) return;
     paused_ = false;
     cv_.notify_all();
 }
@@ -271,8 +264,8 @@ void ScreenRecorder::capture(Demuxer demuxer) {
             if (paused_) demuxer.closeInput();
 #endif
             after_pause = paused_;
-            cv_.wait(ul, [this]() { return (!paused_ || stop_capture_); });
-            if (stop_capture_) break;
+            cv_.wait(ul, [this]() { return (!paused_ || stopped_); });
+            if (stopped_) break;
         }
 
         if (after_pause) {
