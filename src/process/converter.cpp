@@ -71,6 +71,9 @@ static std::pair<std::string, std::string> getVideoFilterSpec(const AVCodecConte
 
 Converter::Converter(const AVCodecContext *dec_ctx, const AVCodecContext *enc_ctx, AVRational in_time_base,
                      int offset_x, int offset_y) {
+    if (!dec_ctx) throwError("dec_ctx is NULL");
+    if (!enc_ctx) throwError("enc_ctx is NULL");
+
     std::string src_filter_name;
     std::string sink_filter_name;
     std::string src_args;
