@@ -55,7 +55,10 @@ public:
     ScreenRecorder &operator=(const ScreenRecorder &) = delete;
 
     /**
-     * Start the video[and audio] recording
+     * Start the video [and audio] recording.
+     * When this function returns, the recorder internal state will be fully initialized
+     * and the recording will be in progress.
+     * WARNING: if there is already a recording in progress, calling this function will throw an exception
      * @param video_device      the name of the video device to use
      * @param audio_device      the name of the audio device to use (if empty, audio won't be recorded)
      * @param output_file       the name of the output file to use to save the recording
@@ -66,7 +69,10 @@ public:
                VideoParameters video_params);
 
     /**
-     * Stop the screen capture
+     * Stop the recording.
+     * When this function returns, the recorder internal state will have been complemetely cleaned up
+     * (including all processing threads)
+     * WARNING: if there is no recording in progress, calling this function will throw an exception
      */
     void stop();
 
@@ -77,7 +83,7 @@ public:
     void pause();
 
     /**
-     * Resume the screen capture
+     * Resume the screen capture.
      * If the recording is already proceeding/stopped, nothing will be done
      */
     void resume();
