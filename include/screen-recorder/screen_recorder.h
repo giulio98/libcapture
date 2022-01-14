@@ -39,7 +39,7 @@ class ScreenRecorder {
      * Capture packets from a demuxer and send them to the pipeline
      * @param demuxer the demuxer to read packets from
      */
-    void capture(std::unique_ptr<Demuxer> demuxer);
+    void capture(Demuxer demuxer);
 
 public:
     /**

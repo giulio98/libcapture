@@ -66,17 +66,15 @@ void Pipeline::checkExceptions() {
     }
 }
 
-void Pipeline::initVideo(const Demuxer *demuxer, AVCodecID codec_id, const VideoParameters &video_params,
+void Pipeline::initVideo(const Demuxer &demuxer, AVCodecID codec_id, const VideoParameters &video_params,
                          AVPixelFormat pix_fmt) {
     const auto type = av::DataType::Video;
-
-    if (!demuxer) throw_error("received demuxer for video pipeline is null");
 
     if (data_types_[type]) throw_error("video pipeline already inited");
     data_types_[type] = true;
 
     /* Init decoder */
-    decoders_[type] = Decoder(demuxer->getStreamParams(type));
+    decoders_[type] = Decoder(demuxer.getStreamParams(type));
 
     { /* Init encoder */
         auto dec_ctx = decoders_[type].getContext();
@@ -94,29 +92,27 @@ void Pipeline::initVideo(const Demuxer *demuxer, AVCodecID codec_id, const Video
          */
         enc_options.insert({"preset", "ultrafast"});
 
-        encoders_[type] = Encoder(codec_id, width, height, pix_fmt, demuxer->getStreamTimeBase(type),
+        encoders_[type] = Encoder(codec_id, width, height, pix_fmt, demuxer.getStreamTimeBase(type),
                                   muxer_->getGlobalHeaderFlags(), enc_options);
     }
 
     /* Init converter */
     converters_[type] = Converter(type, decoders_[type].getContext(), encoders_[type].getContext(),
-                                  demuxer->getStreamTimeBase(type), video_params.offset_x, video_params.offset_y);
+                                  demuxer.getStreamTimeBase(type), video_params.offset_x, video_params.offset_y);
 
     muxer_->addStream(encoders_[type].getContext(), type);
 
     if (use_background_processors_) startProcessor(type);
 }
 
-void Pipeline::initAudio(const Demuxer *demuxer, AVCodecID codec_id) {
+void Pipeline::initAudio(const Demuxer &demuxer, AVCodecID codec_id) {
     const auto type = av::DataType::Audio;
-
-    if (!demuxer) throw_error("received demuxer for audio pipeline is null");
 
     if (data_types_[type]) throw_error("audio pipeline already inited");
     data_types_[type] = true;
 
     /* Init decoder */
-    decoders_[type] = Decoder(demuxer->getStreamParams(type));
+    decoders_[type] = Decoder(demuxer.getStreamParams(type));
 
     { /* Init encoder */
         auto dec_ctx = decoders_[type].getContext();
@@ -135,7 +131,7 @@ void Pipeline::initAudio(const Demuxer *demuxer, AVCodecID codec_id) {
 
     /* Init converter */
     converters_[type] =
-        Converter(type, decoders_[type].getContext(), encoders_[type].getContext(), demuxer->getStreamTimeBase(type));
+        Converter(type, decoders_[type].getContext(), encoders_[type].getContext(), demuxer.getStreamTimeBase(type));
 
     muxer_->addStream(encoders_[type].getContext(), type);
 
