@@ -23,19 +23,18 @@ VideoParameters parseVideoSize(const std::string &str) {
         std::string video_size = str.substr(0, main_delim_pos);
         auto delim_pos = video_size.find("x");
         if (delim_pos == std::string::npos) throw std::runtime_error("Wrong video-size format");
-        dims.width = std::stoi(video_size.substr(0, delim_pos));
-        dims.height = std::stoi(video_size.substr(delim_pos + 1));
-        if (dims.width < 0 || dims.height < 0)
-            throw std::runtime_error("width and height must be not-negative numbers");
+        int width = std::stoi(video_size.substr(0, delim_pos));
+        int height = std::stoi(video_size.substr(delim_pos + 1));
+        dims.setVideoSize(width, height);
     }
 
     if (main_delim_pos != std::string::npos) {
         std::string offsets = str.substr(main_delim_pos + 1);
         auto delim_pos = offsets.find(",");
         if (delim_pos == std::string::npos) throw std::runtime_error("Wrong offsets");
-        dims.offset_x = std::stoi(offsets.substr(0, delim_pos));
-        dims.offset_y = std::stoi(offsets.substr(delim_pos + 1));
-        if (dims.offset_x < 0 || dims.offset_y < 0) throw std::runtime_error("offsets must be not-negative numbers");
+        int offset_x = std::stoi(offsets.substr(0, delim_pos));
+        int offset_y = std::stoi(offsets.substr(delim_pos + 1));
+        dims.setVideoOffset(offset_x, offset_y);
     }
 
     return dims;
@@ -103,7 +102,7 @@ std::tuple<std::string, std::string, VideoParameters, std::string, bool> parseAr
         }
     }
 
-    video_params.framerate = framerate;
+    video_params.setFramerate(framerate);
 
     if (!output_set) {
         output_file = "output.mp4";
@@ -124,8 +123,10 @@ std::tuple<std::string, std::string, VideoParameters, std::string, bool> parseAr
             std::cout << "Parsed framerate: " << framerate << std::endl;
         }
         if (video_size_set) {
-            std::cout << "Parsed video size: " << video_params.width << "x" << video_params.height << std::endl;
-            std::cout << "Parsed video offset: " << video_params.offset_x << "," << video_params.offset_y << std::endl;
+            auto [width, height] = video_params.getVideoSize();
+            auto [offset_x, offset_y] = video_params.getVideoOffset();
+            std::cout << "Parsed video size: " << width << "x" << height << std::endl;
+            std::cout << "Parsed video offset: " << offset_x << "," << offset_y << std::endl;
         }
         if (output_set) {
             std::cout << "Parsed output file: " << output_file << std::endl;

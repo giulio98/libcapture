@@ -76,29 +76,27 @@ void Pipeline::initVideo(const Demuxer &demuxer, AVCodecID codec_id, const Video
     /* Init decoder */
     decoders_[type] = Decoder(demuxer.getStreamParams(type));
 
-    { /* Init encoder */
-        auto dec_ctx = decoders_[type].getContext();
-        int width = (video_params.width) ? video_params.width : dec_ctx->width;
-        int height = (video_params.height) ? video_params.height : dec_ctx->height;
-        if (video_params.offset_x + width > dec_ctx->width)
-            throw std::runtime_error("Output video width exceeds input one");
-        if (video_params.offset_y + height > dec_ctx->height)
-            throw std::runtime_error("Output video height exceeds input one");
+    auto dec_ctx = decoders_[type].getContext();
+    auto [width, height] = video_params.getVideoSize();
+    auto [offset_x, offset_y] = video_params.getVideoOffset();
+    if (!width) width = dec_ctx->width;
+    if (!height) height = dec_ctx->height;
+    if (offset_x + width > dec_ctx->width) throw std::runtime_error("Output video width exceeds input one");
+    if (offset_y + height > dec_ctx->height) throw std::runtime_error("Output video height exceeds input one");
 
-        std::map<std::string, std::string> enc_options;
-        /*
-         * Possible presets from fastest (and worst quality) to slowest (and best quality):
-         * ultrafast -> superfast -> veryfast -> faster -> fast -> medium
-         */
-        enc_options.insert({"preset", "ultrafast"});
-
-        encoders_[type] = Encoder(codec_id, width, height, pix_fmt, demuxer.getStreamTimeBase(type),
-                                  muxer_->getGlobalHeaderFlags(), enc_options);
-    }
+    /* Init encoder */
+    std::map<std::string, std::string> enc_options;
+    /*
+     * Possible presets from fastest (and worst quality) to slowest (and best quality):
+     * ultrafast -> superfast -> veryfast -> faster -> fast -> medium
+     */
+    enc_options.insert({"preset", "ultrafast"});
+    encoders_[type] = Encoder(codec_id, width, height, pix_fmt, demuxer.getStreamTimeBase(type),
+                              muxer_->getGlobalHeaderFlags(), enc_options);
 
     /* Init converter */
     converters_[type] = Converter(type, decoders_[type].getContext(), encoders_[type].getContext(),
-                                  demuxer.getStreamTimeBase(type), video_params.offset_x, video_params.offset_y);
+                                  demuxer.getStreamTimeBase(type), offset_x, offset_y);
 
     muxer_->addStream(encoders_[type].getContext(), type);
 
@@ -114,20 +112,17 @@ void Pipeline::initAudio(const Demuxer &demuxer, AVCodecID codec_id) {
     /* Init decoder */
     decoders_[type] = Decoder(demuxer.getStreamParams(type));
 
-    { /* Init encoder */
-        auto dec_ctx = decoders_[type].getContext();
-        uint64_t channel_layout;
-        if (dec_ctx->channel_layout) {
-            channel_layout = dec_ctx->channel_layout;
-        } else {
-            channel_layout = av_get_default_channel_layout(dec_ctx->channels);
-        }
-
-        std::map<std::string, std::string> enc_options;
-
-        encoders_[type] =
-            Encoder(codec_id, dec_ctx->sample_rate, channel_layout, muxer_->getGlobalHeaderFlags(), enc_options);
+    auto dec_ctx = decoders_[type].getContext();
+    uint64_t channel_layout;
+    if (dec_ctx->channel_layout) {
+        channel_layout = dec_ctx->channel_layout;
+    } else {
+        channel_layout = av_get_default_channel_layout(dec_ctx->channels);
     }
+
+    /* Init encoder */
+    encoders_[type] = Encoder(codec_id, dec_ctx->sample_rate, channel_layout, muxer_->getGlobalHeaderFlags(),
+                              std::map<std::string, std::string>());
 
     /* Init converter */
     converters_[type] =

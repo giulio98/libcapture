@@ -14,7 +14,6 @@
 #include "format/demuxer.h"
 #include "format/muxer.h"
 #include "process/pipeline.h"
-#include "utils/log_callback_setter.h"
 #include "utils/log_level_setter.h"
 
 static void makeAvVerbose(bool verbose) {
@@ -49,8 +48,9 @@ static const std::string generateInputDeviceName(const std::string &video_device
 #elif defined(LINUX)
     if (!video_device.empty()) {
         device_name_ss << video_device;
-        if (video_params.offset_x || video_params.offset_y) {
-            device_name_ss << "+" << video_params.offset_x << "," << video_params.offset_y;
+        auto [offset_x, offset_y] = video_params.getVideoOffset();
+        if (offset_x || offset_y) {
+            device_name_ss << "+" << offset_x << "," << offset_y;
         }
     } else {
         device_name_ss << audio_device;
@@ -97,18 +97,19 @@ static void setDisplayResolution(int framerate) {
 static const std::map<std::string, std::string> generateDemuxerOptions(const VideoParameters &video_params) {
     std::map<std::string, std::string> demuxer_options;
 #ifdef WINDOWS
-    setDisplayResolution(video_params.framerate);
+    setDisplayResolution(video_params.getFramerate());
     demuxer_options.insert({"rtbufsize", "1024M"});
 #else
     {
         std::stringstream framerate_ss;
-        framerate_ss << video_params.framerate;
+        framerate_ss << video_params.getFramerate();
         demuxer_options.insert({"framerate", framerate_ss.str()});
     }
 #ifdef LINUX
-    if (video_params.width && video_params.height) {
+    auto [width, height] = video_params.getVideoSize();
+    if (width && height) {
         std::stringstream video_size_ss;
-        video_size_ss << video_params.width << "x" << video_params.height;
+        video_size_ss << width << "x" << height;
         demuxer_options.insert({"video_size", video_size_ss.str()});
     }
     demuxer_options.insert({"show_region", "0"});
@@ -118,18 +119,6 @@ static const std::map<std::string, std::string> generateDemuxerOptions(const Vid
 #endif
 #endif
     return demuxer_options;
-}
-
-static void checkParams(const std::string &video_device, const std::string &output_file,
-                        const VideoParameters &video_params) {
-    if (video_params.framerate <= 0) throw std::runtime_error("Video framerate must be a positive number");
-    if (video_params.width < 0 || video_params.height < 0)
-        throw std::runtime_error("video width and height must be >= 0");
-    if (video_params.offset_x < 0 || video_params.offset_y < 0) throw std::runtime_error("video offsets must be >= 0");
-    if (video_params.width % 2) throw std::runtime_error("the specified width is not an even number");
-    if (video_params.height % 2) throw std::runtime_error("the specified height is not an even number");
-    if (video_device.empty()) throw std::runtime_error("video device not specified");
-    if (output_file.empty()) throw std::runtime_error("output file not specified");
 }
 
 ScreenRecorder::ScreenRecorder(bool verbose) : verbose_(verbose) {
@@ -146,7 +135,10 @@ ScreenRecorder::~ScreenRecorder() {
 
 void ScreenRecorder::start(const std::string &video_device, const std::string &audio_device,
                            const std::string &output_file, VideoParameters video_params) {
-    checkParams(video_device, output_file, video_params);
+    if (!stopped_) throw std::runtime_error("Recording already in progress");
+
+    if (video_device.empty()) throw std::runtime_error("Video device not specified");
+    if (output_file.empty()) throw std::runtime_error("Output file not specified");
 
     bool capture_audio = !audio_device.empty();
 
@@ -158,9 +150,6 @@ void ScreenRecorder::start(const std::string &video_device, const std::string &a
 #ifdef LINUX
     Demuxer audio_demuxer;
 #endif
-
-    std::unique_lock ul{m_};
-    if (!stopped_) throw std::runtime_error("Recording already in progress");
 
     /* init Muxer */
     muxer_ = std::make_shared<Muxer>(output_file);
@@ -175,7 +164,7 @@ void ScreenRecorder::start(const std::string &video_device, const std::string &a
     { /* init Pipeline */
         bool use_processors;
 #ifdef LINUX
-        video_params.offset_x = video_params.offset_y = 0;  // No cropping is performed on Linux
+        video_params.setVideoOffset(0, 0);  // No cropping is performed on Linux
         use_processors = false;
 #else
         use_processors = true;
@@ -235,9 +224,10 @@ void ScreenRecorder::start(const std::string &video_device, const std::string &a
 }
 
 void ScreenRecorder::stop() {
+    if (stopped_) throw std::runtime_error("Recording is already stopped");
+
     {
         std::unique_lock ul{m_};
-        if (stop_capture_ || stopped_) throw std::runtime_error("Recorder already stopped");
         stop_capture_ = true;
         cv_.notify_all();
     }
@@ -247,15 +237,11 @@ void ScreenRecorder::stop() {
     if (audio_capturer_.joinable()) audio_capturer_.join();
 #endif
 
-    {
-        std::unique_lock ul{m_};
-        if (stopped_) throw std::runtime_error("Recorder already stopped");
-        pipeline_->flush();
-        muxer_->closeFile();
-        pipeline_.reset();
-        muxer_.reset();
-        stopped_ = true;
-    }
+    pipeline_->flush();
+    muxer_->closeFile();
+    pipeline_.reset();
+    muxer_.reset();
+    stopped_ = true;
 }
 
 void ScreenRecorder::pause() {
@@ -273,8 +259,6 @@ void ScreenRecorder::resume() {
 }
 
 void ScreenRecorder::capture(Demuxer demuxer) {
-    // if (!demuxer) throw std::runtime_error("received demuxer is null");
-
     int64_t last_pts = 0;
     int64_t pts_offset = 0;
     bool adjust_pts_offset = false;
@@ -336,7 +320,6 @@ void ScreenRecorder::listAvailableDevices() const {
     Demuxer demuxer(getInputFormatName(), dummy_device_name, options);
     std::cout << "##### Available Devices #####" << std::endl;
     {
-        // LogCallbackSetter lcs(log_callback);
         LogLevelSetter lls(AV_LOG_INFO);
         try {
             demuxer.openInput();
