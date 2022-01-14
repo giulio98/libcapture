@@ -13,35 +13,35 @@ static void checkMediaType(av::MediaType type) {
     if (!av::validMediaType(type)) throw_error("invalid data type received");
 }
 
-Pipeline::Pipeline(std::shared_ptr<Muxer> muxer, bool use_background_processors)
-    : muxer_(std::move(muxer)), use_background_processors_(use_background_processors) {
+Pipeline::Pipeline(std::shared_ptr<Muxer> muxer, bool async) : muxer_(std::move(muxer)), async_(async) {
     if (!muxer_) throw_error("received Muxer is null");
+    if (async_) stopped_ = false;
 }
 
 Pipeline::~Pipeline() {
-    if (use_background_processors_) stopProcessors();
+    if (async_) stopProcessors();
 }
 
-void Pipeline::startProcessor(av::MediaType media_type) {
-    checkMediaType(media_type);
+void Pipeline::startProcessor(av::MediaType type) {
+    checkMediaType(type);
 
-    if (processors_[media_type].joinable()) processors_[media_type].join();
+    if (processors_[type].joinable()) throw_error("processor for specified type was already started");
 
-    processors_[media_type] = std::thread([this, media_type]() {
+    processors_[type] = std::thread([this, type]() {
         try {
             while (true) {
                 av::PacketUPtr packet;
                 {
                     std::unique_lock ul{m_};
-                    packets_cv_[media_type].wait(ul, [this, media_type]() { return (packets_[media_type] || stop_); });
-                    if (!packets_[media_type] && stop_) break;
-                    packet = std::move(packets_[media_type]);
+                    packets_cv_[type].wait(ul, [this, type]() { return (packets_[type] || stopped_); });
+                    if (!packets_[type] && stopped_) break;
+                    packet = std::move(packets_[type]);
                 }
-                processPacket(packet.get(), media_type);
+                processPacket(packet.get(), type);
             }
         } catch (...) {
             std::unique_lock ul{m_};
-            e_ptrs_[media_type] = std::current_exception();
+            e_ptrs_[type] = std::current_exception();
         }
     });
 }
@@ -49,7 +49,7 @@ void Pipeline::startProcessor(av::MediaType media_type) {
 void Pipeline::stopProcessors() {
     {
         std::unique_lock<std::mutex> ul{m_};
-        stop_ = true;
+        stopped_ = true;
         for (auto &cv : packets_cv_) cv.notify_all();
     }
     for (auto &p : processors_) {
@@ -97,7 +97,7 @@ void Pipeline::initVideo(const Demuxer &demuxer, AVCodecID codec_id, const Video
 
     muxer_->addStream(encoders_[type].getContext());
 
-    if (use_background_processors_) startProcessor(type);
+    if (async_) startProcessor(type);
 }
 
 void Pipeline::initAudio(const Demuxer &demuxer, AVCodecID codec_id) {
@@ -127,7 +127,7 @@ void Pipeline::initAudio(const Demuxer &demuxer, AVCodecID codec_id) {
 
     muxer_->addStream(encoders_[type].getContext());
 
-    if (use_background_processors_) startProcessor(type);
+    if (async_) startProcessor(type);
 }
 
 void Pipeline::processPacket(const AVPacket *packet, av::MediaType type) {
@@ -176,8 +176,9 @@ void Pipeline::feed(av::PacketUPtr packet, av::MediaType packet_type) {
     checkMediaType(packet_type);
     if (!managed_type_[packet_type]) throw std::runtime_error("No pipeline corresponding to received packet type");
 
-    if (use_background_processors_) {
+    if (async_) {
         std::unique_lock ul{m_};
+        if (stopped_) throw_error("already stopped");
         checkExceptions();
         if (!packets_[packet_type]) {  // if previous packet has been fully processed
             packets_[packet_type] = std::move(packet);
@@ -194,7 +195,7 @@ void Pipeline::flushPipeline(av::MediaType type) {
 }
 
 void Pipeline::flush() {
-    if (use_background_processors_) {
+    if (async_) {
         /* stop all threads working on the pipelines */
         stopProcessors();
         checkExceptions();

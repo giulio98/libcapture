@@ -21,9 +21,9 @@ class Pipeline {
     std::array<Encoder, av::MediaType::NumTypes> encoders_;
     std::array<Converter, av::MediaType::NumTypes> converters_;
 
-    const bool use_background_processors_;
+    const bool async_;
     std::mutex m_;
-    bool stop_;
+    bool stopped_;
     std::array<std::thread, av::MediaType::NumTypes> processors_;
     std::array<av::PacketUPtr, av::MediaType::NumTypes> packets_;
     std::array<std::condition_variable, av::MediaType::NumTypes> packets_cv_;
@@ -39,12 +39,12 @@ class Pipeline {
 public:
     /**
      * Create a new Pipeline for processing packets
-     * @param muxer                     the muxer to send the processed packets to (WARNING: the muxer must not be
+     * @param muxer the muxer to send the processed packets to (WARNING: the muxer must not be
      * opened until the Pipeline initialization is complete)
-     * @param use_background_processors whether the pipeline should use background threads to handle the processing
+     * @param async whether the pipeline should use background threads to handle the processing
      * (recommended when a single demuxer will provide both video and audio packets)
      */
-    explicit Pipeline(std::shared_ptr<Muxer> muxer, bool use_background_processors = false);
+    explicit Pipeline(std::shared_ptr<Muxer> muxer, bool async = false);
 
     Pipeline(const Pipeline &) = delete;
 
@@ -71,7 +71,7 @@ public:
 
     /**
      * Send the packet to the processing chain corresponding to its type.
-     * If 'use_background_processors' was set to true when building the Pipeline,
+     * If 'async' was set to true when building the Pipeline,
      * the background threads will handle the packet processing and this function will
      * return immediately, otherwise the processing will be handled in
      * a synchronous way and this function will return only once it's completed
@@ -82,7 +82,7 @@ public:
 
     /**
      * Flush the processing pipelines.
-     * If 'use_background_processors' was set to true when building the Pipeline,
+     * If 'async' was set to true when building the Pipeline,
      * the background threads will be completely stopped before the actual flushing.
      * WARNING: this function must be called BEFORE closing the output file with Muxer::closeFile,
      * otherwise some packets/frames will be left in the processing structures and eventual background workers
