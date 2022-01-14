@@ -58,10 +58,3 @@ jobs:
         with:
           name: "screen-recorder-${{runner.os}}"
           path: bin
-      - name: Time badge
-        uses: RubbaBoy/BYOB@v1.2.1
-        with:
-          NAME: linux
-          ICON: 'linux'
-          LABEL: 'Linux Build'
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
