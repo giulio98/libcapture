@@ -132,7 +132,7 @@ static void checkParams(const std::string &video_device, const std::string &outp
     if (output_file.empty()) throw std::runtime_error("output file not specified");
 }
 
-ScreenRecorder::ScreenRecorder(bool verbose) : stopped_(true), verbose_(verbose) {
+ScreenRecorder::ScreenRecorder(bool verbose) : verbose_(verbose) {
     makeAvVerbose(verbose_);
     avdevice_register_all();
 }
