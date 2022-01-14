@@ -52,7 +52,7 @@ if(WIN32)
         set(FFMPEG_DLLS  avdevice-58.dll avfilter-7.dll avformat-58.dll avcodec-58.dll swresample-3.dll swscale-5.dll avutil-56.dll)
         list(TRANSFORM FFMPEG_DLLS PREPEND "${ffmpeg_SOURCE_DIR}/bin/")
     endif()
-    
+
 
     target_link_libraries(${PROJECT_NAME} PRIVATE
         $<$<BOOL:${MINGW}>:mingw32>
