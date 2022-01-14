@@ -66,9 +66,13 @@ target_link_libraries(myexe screen-recorder)
 ```
 As an example "main.cpp" can be [recorder.cpp](example/recorder.cpp).
 
+If your project doesn't compile, probably it's because you are not using a proper compiler, you must use either MSVC or minGW64
+you can find [here](https://www.msys2.org/) a guide to install minGW64, make sure to add  "C:\msys64\mingw64\bin"
+in the path of your environment variable.
+
 At this step you will have under bin your executable
 ![bin-before](assets/windows-bin-before.jpg)
-In order to run your executable you must add the [ffmpeg dlls](utils/ffmpeg_dlls) in the same folder of your executable.
+In order to run your executable you must add the ffmpeg dlls, that you can find under "C:\FFmpeg\FFmpeg\bin", in the same folder of your executable.
 <p align="center">
   <img src="assets/ffmpeg-dll.gif" alt="animated" />
 </p>
