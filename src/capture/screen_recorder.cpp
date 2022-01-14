@@ -169,15 +169,15 @@ void ScreenRecorder::start(const std::string &video_device, const std::string &a
     }
 
     { /* init Pipeline */
-        bool use_processors;
+        bool async;
 #ifdef LINUX
         video_params.setVideoOffset(0, 0);  // No cropping is performed on Linux
-        use_processors = false;
+        async = false;
 #else
-        use_processors = true;
+        async = true;
 #endif
         /* init Pipeline */
-        pipeline_ = std::make_unique<Pipeline>(muxer_, use_processors);
+        pipeline_ = std::make_unique<Pipeline>(muxer_, async);
     }
 
     pipeline_->initVideo(demuxer, video_codec_id, video_params, video_pix_fmt);
