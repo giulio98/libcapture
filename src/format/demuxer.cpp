@@ -31,7 +31,8 @@ Demuxer &Demuxer::operator=(Demuxer other) {
 }
 
 void Demuxer::openInput() {
-    if (fmt_ctx_) throw_error("input is already open");
+    if (fmt_ctx_) throw_error("failed to open input device (input is already open)");
+    if (!fmt_) throw_error("failed to open input device (missing input format)");
 
     {
         AVFormatContext *fmt_ctx = nullptr;
@@ -62,14 +63,14 @@ void Demuxer::openInput() {
 }
 
 void Demuxer::closeInput() {
-    if (!fmt_ctx_) throw_error("input is not open");
+    if (!fmt_ctx_) throw_error("failed to close input (input is not open)");
     fmt_ctx_.reset();
     streams_[av::DataType::Video] = nullptr;
     streams_[av::DataType::Audio] = nullptr;
 }
 
 void Demuxer::flush() {
-    if (!fmt_ctx_) throw_error("input is not open");
+    if (!fmt_ctx_) throw_error("failed to flush (input is not open)");
     if (fmt_ctx_->pb) avio_flush(fmt_ctx_->pb);
     if (avformat_flush(fmt_ctx_.get()) < 0) throw_error("failed to flush internal data");
 }
@@ -77,21 +78,21 @@ void Demuxer::flush() {
 bool Demuxer::isInputOpen() const { return (fmt_ctx_ != nullptr); }
 
 const AVCodecParameters *Demuxer::getStreamParams(av::DataType stream_type) const {
-    if (!fmt_ctx_) throw_error("input is not open");
+    if (!fmt_ctx_) throw_error("failed to acess stream (input is not open)");
     if (!av::isDataTypeValid(stream_type)) throw_error("invalid stream_type received");
     if (!streams_[stream_type]) throw_error("specified stream not present");
     return streams_[stream_type]->codecpar;
 }
 
 [[nodiscard]] AVRational Demuxer::getStreamTimeBase(av::DataType stream_type) const {
-    if (!fmt_ctx_) throw_error("input is not open");
+    if (!fmt_ctx_) throw_error("failed to acess stream (input is not open)");
     if (!av::isDataTypeValid(stream_type)) throw_error("invalid stream_type received");
     if (!streams_[stream_type]) throw_error("specified stream not present");
     return streams_[stream_type]->time_base;
 }
 
 std::pair<av::PacketUPtr, av::DataType> Demuxer::readPacket() {
-    if (!fmt_ctx_) throw_error("input is not open");
+    if (!fmt_ctx_) throw_error("failed to read packet (input is not open)");
 
     if (!packet_) {
         packet_ = av::PacketUPtr(av_packet_alloc());
@@ -118,6 +119,6 @@ std::pair<av::PacketUPtr, av::DataType> Demuxer::readPacket() {
 }
 
 void Demuxer::printInfo(int index) const {
-    if (!fmt_ctx_) throw_error("input is not open");
+    if (!fmt_ctx_) throw_error("failed to print info (input is not open)");
     av_dump_format(fmt_ctx_.get(), index, device_name_.c_str(), 0);
 }
