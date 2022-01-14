@@ -6,16 +6,12 @@ set(PROJECT_NAME screen-recorder)
 project(${PROJECT_NAME})
 
 set(SOURCES
-    src/recorder/screen_recorder.cpp
+    src/capture/screen_recorder.cpp
     src/format/demuxer.cpp
     src/format/muxer.cpp
-    src/decode/decoder.cpp
-    src/encode/encoder.cpp
-    src/encode/video_encoder.cpp
-    src/encode/audio_encoder.cpp
-    src/convert/converter.cpp
-    src/convert/video_converter.cpp
-    src/convert/audio_converter.cpp
+    src/process/decoder.cpp
+    src/process/encoder.cpp
+    src/process/converter.cpp
     src/process/pipeline.cpp
 )
 

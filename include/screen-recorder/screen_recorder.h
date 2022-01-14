@@ -9,8 +9,6 @@
 
 #include "video_parameters.h"
 
-/* Forward declarations */
-
 class Demuxer;
 class Muxer;
 class Pipeline;

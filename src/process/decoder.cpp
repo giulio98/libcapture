@@ -37,6 +37,7 @@ Decoder &Decoder::operator=(Decoder &&other) {
 }
 
 bool Decoder::sendPacket(const AVPacket *packet) {
+    if (!codec_ctx_) throw_error("decoder was not initialized yet");
     int ret = avcodec_send_packet(codec_ctx_.get(), packet);
     if (ret == AVERROR(EAGAIN)) return false;
     if (ret == AVERROR_EOF) throw_error("has already been flushed");
@@ -45,6 +46,8 @@ bool Decoder::sendPacket(const AVPacket *packet) {
 }
 
 av::FrameUPtr Decoder::getFrame() {
+    if (!codec_ctx_) throw_error("decoder was not initialized yet");
+
     if (!frame_) {
         frame_ = av::FrameUPtr(av_frame_alloc());
         if (!frame_) throw_error("failed to allocate frame");
@@ -59,4 +62,7 @@ av::FrameUPtr Decoder::getFrame() {
 
 const AVCodecContext *Decoder::getContext() const { return codec_ctx_.get(); }
 
-std::string Decoder::getName() const { return codec_->long_name; }
+std::string Decoder::getName() const {
+    if (codec_) return codec_->long_name;
+    return std::string{};
+}

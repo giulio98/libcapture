@@ -4,11 +4,6 @@
 #include <map>
 #include <sstream>
 
-#include "convert/audio_converter.h"
-#include "convert/video_converter.h"
-#include "decode/decoder.h"
-#include "encode/audio_encoder.h"
-#include "encode/video_encoder.h"
 #include "format/demuxer.h"
 #include "format/muxer.h"
 
@@ -21,8 +16,6 @@ static void checkDataType(av::DataType data_type) {
 Pipeline::Pipeline(std::shared_ptr<Muxer> muxer, bool use_background_processors)
     : muxer_(std::move(muxer)), use_background_processors_(use_background_processors) {
     if (!muxer_) throw_error("received Muxer is null");
-    data_types_[av::DataType::Video] = false;
-    data_types_[av::DataType::Audio] = false;
 }
 
 Pipeline::~Pipeline() {
@@ -83,10 +76,10 @@ void Pipeline::initVideo(const Demuxer *demuxer, AVCodecID codec_id, const Video
     data_types_[type] = true;
 
     /* Init decoder */
-    decoders_[type] = std::make_unique<Decoder>(demuxer->getStreamParams(type));
+    decoders_[type] = Decoder(demuxer->getStreamParams(type));
 
     { /* Init encoder */
-        auto dec_ctx = decoders_[type]->getContext();
+        auto dec_ctx = decoders_[type].getContext();
         int width = (video_params.width) ? video_params.width : dec_ctx->width;
         int height = (video_params.height) ? video_params.height : dec_ctx->height;
         if (video_params.offset_x + width > dec_ctx->width)
@@ -101,17 +94,15 @@ void Pipeline::initVideo(const Demuxer *demuxer, AVCodecID codec_id, const Video
          */
         enc_options.insert({"preset", "ultrafast"});
 
-        encoders_[type] =
-            std::make_unique<VideoEncoder>(codec_id, width, height, pix_fmt, demuxer->getStreamTimeBase(type),
-                                           muxer_->getGlobalHeaderFlags(), enc_options);
+        encoders_[type] = Encoder(codec_id, width, height, pix_fmt, demuxer->getStreamTimeBase(type),
+                                  muxer_->getGlobalHeaderFlags(), enc_options);
     }
 
     /* Init converter */
-    converters_[type] = std::make_unique<VideoConverter>(decoders_[type]->getContext(), encoders_[type]->getContext(),
-                                                         demuxer->getStreamTimeBase(type), video_params.offset_x,
-                                                         video_params.offset_y);
+    converters_[type] = Converter(type, decoders_[type].getContext(), encoders_[type].getContext(),
+                                  demuxer->getStreamTimeBase(type), video_params.offset_x, video_params.offset_y);
 
-    muxer_->addStream(encoders_[type]->getContext(), type);
+    muxer_->addStream(encoders_[type].getContext(), type);
 
     if (use_background_processors_) startProcessor(type);
 }
@@ -125,10 +116,10 @@ void Pipeline::initAudio(const Demuxer *demuxer, AVCodecID codec_id) {
     data_types_[type] = true;
 
     /* Init decoder */
-    decoders_[type] = std::make_unique<Decoder>(demuxer->getStreamParams(type));
+    decoders_[type] = Decoder(demuxer->getStreamParams(type));
 
     { /* Init encoder */
-        auto dec_ctx = decoders_[type]->getContext();
+        auto dec_ctx = decoders_[type].getContext();
         uint64_t channel_layout;
         if (dec_ctx->channel_layout) {
             channel_layout = dec_ctx->channel_layout;
@@ -138,15 +129,15 @@ void Pipeline::initAudio(const Demuxer *demuxer, AVCodecID codec_id) {
 
         std::map<std::string, std::string> enc_options;
 
-        encoders_[type] = std::make_unique<AudioEncoder>(codec_id, dec_ctx->sample_rate, channel_layout,
-                                                         muxer_->getGlobalHeaderFlags(), enc_options);
+        encoders_[type] =
+            Encoder(codec_id, dec_ctx->sample_rate, channel_layout, muxer_->getGlobalHeaderFlags(), enc_options);
     }
 
     /* Init converter */
-    converters_[type] = std::make_unique<AudioConverter>(decoders_[type]->getContext(), encoders_[type]->getContext(),
-                                                         demuxer->getStreamTimeBase(type));
+    converters_[type] =
+        Converter(type, decoders_[type].getContext(), encoders_[type].getContext(), demuxer->getStreamTimeBase(type));
 
-    muxer_->addStream(encoders_[type]->getContext(), type);
+    muxer_->addStream(encoders_[type].getContext(), type);
 
     if (use_background_processors_) startProcessor(type);
 }
@@ -154,23 +145,20 @@ void Pipeline::initAudio(const Demuxer *demuxer, AVCodecID codec_id) {
 void Pipeline::processPacket(const AVPacket *packet, av::DataType data_type) {
     checkDataType(data_type);
 
-    Decoder *decoder = decoders_[data_type].get();
-    Converter *converter = converters_[data_type].get();
-
-    if (!decoder) throw_error("no decoder present for the specified data type");
-    if (!converter) throw_error("no decoder present for the specified data type");
+    Decoder &decoder = decoders_[data_type];
+    Converter &converter = converters_[data_type];
 
     bool decoder_received = false;
     while (!decoder_received) {
-        decoder_received = decoder->sendPacket(packet);
+        decoder_received = decoder.sendPacket(packet);
 
         while (true) {
-            auto frame = decoder->getFrame();
+            auto frame = decoder.getFrame();
             if (!frame) break;
-            converter->sendFrame(std::move(frame));
+            converter.sendFrame(std::move(frame));
 
             while (true) {
-                auto converted_frame = converter->getFrame();
+                auto converted_frame = converter.getFrame();
                 if (!converted_frame) break;
                 processConvertedFrame(converted_frame.get(), data_type);
             }
@@ -181,16 +169,14 @@ void Pipeline::processPacket(const AVPacket *packet, av::DataType data_type) {
 void Pipeline::processConvertedFrame(const AVFrame *frame, av::DataType data_type) {
     checkDataType(data_type);
 
-    Encoder *encoder = encoders_[data_type].get();
-
-    if (!encoder) throw_error("no decoder present for the specified data type");
+    Encoder &encoder = encoders_[data_type];
 
     bool encoder_received = false;
     while (!encoder_received) {
-        encoder_received = encoder->sendFrame(frame);
+        encoder_received = encoder.sendFrame(frame);
 
         while (true) {
-            auto packet = encoder->getPacket();
+            auto packet = encoder.getPacket();
             if (!packet) break;
             muxer_->writePacket(std::move(packet), data_type);
         }
@@ -241,7 +227,9 @@ void Pipeline::flush() {
 
 void Pipeline::printInfo() const {
     for (auto type : {av::DataType::Video, av::DataType::Audio}) {
-        if (decoders_[type]) std::cout << "Decoder " << type << ": " << decoders_[type]->getName() << std::endl;
-        if (encoders_[type]) std::cout << "Encoder " << type << ": " << encoders_[type]->getName() << std::endl;
+        if (data_types_[type]) {
+            std::cout << "Decoder " << type << ": " << decoders_[type].getName() << std::endl;
+            std::cout << "Encoder " << type << ": " << encoders_[type].getName() << std::endl;
+        }
     }
 }

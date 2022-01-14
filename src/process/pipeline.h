@@ -6,20 +6,20 @@
 #include <vector>
 
 #include "common/common.h"
+#include "converter.h"
+#include "decoder.h"
+#include "encoder.h"
 #include "video_parameters.h"
 
 class Demuxer;
 class Muxer;
-class Decoder;
-class Encoder;
-class Converter;
 
 class Pipeline {
-    std::array<bool, av::DataType::NumTypes> data_types_;
+    std::array<bool, av::DataType::NumTypes> data_types_ = {false, false};
     std::shared_ptr<Muxer> muxer_;
-    std::array<std::unique_ptr<Decoder>, av::DataType::NumTypes> decoders_;
-    std::array<std::unique_ptr<Encoder>, av::DataType::NumTypes> encoders_;
-    std::array<std::unique_ptr<Converter>, av::DataType::NumTypes> converters_;
+    std::array<Decoder, av::DataType::NumTypes> decoders_;
+    std::array<Encoder, av::DataType::NumTypes> encoders_;
+    std::array<Converter, av::DataType::NumTypes> converters_;
 
     bool use_background_processors_;
     std::mutex m_;
