@@ -45,7 +45,7 @@ FetchContent_MakeAvailable(screen-recorder)
 target_link_libraries(<your_executable> screen-recorder)
 ```
 ### Windows
-After installing ffmpeg as described in [Install FFmpeg](#Install FFmpeg) your CMakeLists.txt should look like this
+After installing ffmpeg as described in [Install FFmpeg](## Install FFmpeg) your CMakeLists.txt should look like this
 ```cmake
 cmake_minimum_required(VERSION 3.20)
 project(myproject)
