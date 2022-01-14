@@ -77,11 +77,15 @@ Converter::Converter(av::DataType type, const AVCodecContext *dec_ctx, const AVC
     std::string filter_spec;
 
     if (type == av::DataType::Audio) {
-        if (offset_x || offset_y) throwError("video offset specified specified for audio converter");
+        if (dec_ctx->codec_type != AVMEDIA_TYPE_AUDIO) throwError("received decoder is not of audio type");
+        if (enc_ctx->codec_type != AVMEDIA_TYPE_AUDIO) throwError("received encoder is not of audio type");
+        if (offset_x || offset_y) throwError("video offset specified specified for audio converter constructor");
         src_filter_name = "abuffer";
         sink_filter_name = "abuffersink";
         std::tie(src_args, filter_spec) = getAudioFilterSpec(dec_ctx, enc_ctx, in_time_base);
     } else if (type == av::DataType::Video) {
+        if (dec_ctx->codec_type != AVMEDIA_TYPE_VIDEO) throwError("received decoder is not of video type");
+        if (enc_ctx->codec_type != AVMEDIA_TYPE_VIDEO) throwError("received encoder is not of video type");
         src_filter_name = "buffer";
         sink_filter_name = "buffersink";
         std::tie(src_args, filter_spec) = getVideoFilterSpec(dec_ctx, enc_ctx, in_time_base, offset_x, offset_y);

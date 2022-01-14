@@ -34,6 +34,9 @@ Encoder::Encoder(AVCodecID codec_id) {
 Encoder::Encoder(AVCodecID codec_id, int sample_rate, uint64_t channel_layout, int global_header_flags,
                  const std::map<std::string, std::string> &options)
     : Encoder(codec_id) {
+    if (codec_->type != AVMEDIA_TYPE_AUDIO)
+        throw_error("failed to create audio encoder (received codec ID is not of type audio)");
+
     codec_ctx_->sample_rate = sample_rate;
     codec_ctx_->channel_layout = channel_layout;
     codec_ctx_->channels = av_get_channel_layout_nb_channels(codec_ctx_->channel_layout);
@@ -48,6 +51,9 @@ Encoder::Encoder(AVCodecID codec_id, int sample_rate, uint64_t channel_layout, i
 Encoder::Encoder(AVCodecID codec_id, int width, int height, AVPixelFormat pix_fmt, AVRational time_base,
                  int global_header_flags, const std::map<std::string, std::string> &options)
     : Encoder(codec_id) {
+    if (codec_->type != AVMEDIA_TYPE_VIDEO)
+        throw_error("failed to create video encoder (received codec ID is not of type video)");
+
     codec_ctx_->width = width;
     codec_ctx_->height = height;
     codec_ctx_->pix_fmt = pix_fmt;
