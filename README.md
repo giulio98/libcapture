@@ -13,6 +13,16 @@ screen-recorder is a multiplatform C++ library that allows to capture your scree
 * cmake >= 2.8
 * ffmpeg >= 4.3.2
 * screen-capture-recorder-to-video-windows-free >= 0.12.11 (*only for Windows*) 
+## Currently supported audio/video formats
+|      Type of Format     	     | Linux     	| MacOS             	| Windows        	| 
+|:------------------------------:|--------------|-----------------------|-------------------|
+| Video Format       	         |    x11grab   |     avfoundation      |     dshow         |           
+| Audio Format       	         |    alsa      |     avfoundation      |     dshow         |           
+## Currently supported audio/video devices
+|      Type of Device     	     | Linux     	  | MacOS             	| Windows        	            | 
+|:------------------------------:|----------------|---------------------|-------------------------------|
+| Video device       	         |    screen      |     screen, webcam  |     screen, webcam            |           
+| Audio device       	         |    microphone  |     microphone      |     microphone, system audio  | 
 ## Install FFmpeg
 Under **Windows**, you can install FFmpeg by clicking [here](https://www.gyan.dev/ffmpeg/builds/packages/ffmpeg-4.3.2-full_build-shared.7z).
 Make sure to add "C:\FFmpeg\FFmpeg\bin" on your Path variable.
