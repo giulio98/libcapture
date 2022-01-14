@@ -32,9 +32,8 @@ public:
      * Add a stream to the muxer.
      * WARNING: This function must be called before opening the file with openFile()
      * @param enc_ctx   the context of the encoder generating the packet stream
-     * @param data_type the type of data of the stream
      */
-    void addStream(const AVCodecContext *enc_ctx, av::DataType data_type);
+    void addStream(const AVCodecContext *enc_ctx);
 
     /**
      * Open the file and write the header.

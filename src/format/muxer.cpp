@@ -23,25 +23,33 @@ Muxer::~Muxer() {
     }
 }
 
-void Muxer::addStream(const AVCodecContext *enc_ctx, av::DataType data_type) {
+void Muxer::addStream(const AVCodecContext *enc_ctx) {
     if (!enc_ctx) throw_error("received encoder context is NULL");
-    if (!av::isDataTypeValid(data_type)) throw_error("received data type is invalid");
+
+    av::DataType type;
+    if (enc_ctx->codec_type == AVMEDIA_TYPE_AUDIO) {
+        type = av::DataType::Audio;
+    } else if (enc_ctx->codec_type == AVMEDIA_TYPE_VIDEO) {
+        type = av::DataType::Video;
+    } else {
+        throw_error("received encoder context is ok unknown media type");
+    }
 
     std::unique_lock ul{m_};
 
     if (file_opened_) throw_error("cannot add a new stream, file has already been opened");
 
-    auto stream = streams_[data_type];
+    auto stream = streams_[type];
 
-    if (stream) throw_error("stream of specified type already added");
+    if (stream) throw_error("stream of specified type already present");
     stream = avformat_new_stream(fmt_ctx_.get(), nullptr);
     if (!stream) throw_error("failed to create a new stream");
 
     if (avcodec_parameters_from_context(stream->codecpar, enc_ctx) < 0)
         throw_error("failed to write video stream parameters");
 
-    streams_[data_type] = stream;
-    encoders_time_bases_[data_type] = enc_ctx->time_base;
+    streams_[type] = stream;
+    encoders_time_bases_[type] = enc_ctx->time_base;
 }
 
 void Muxer::openFile() {

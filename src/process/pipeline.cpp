@@ -98,7 +98,7 @@ void Pipeline::initVideo(const Demuxer &demuxer, AVCodecID codec_id, const Video
     converters_[type] = Converter(type, decoders_[type].getContext(), encoders_[type].getContext(),
                                   demuxer.getStreamTimeBase(type), offset_x, offset_y);
 
-    muxer_->addStream(encoders_[type].getContext(), type);
+    muxer_->addStream(encoders_[type].getContext());
 
     if (use_background_processors_) startProcessor(type);
 }
@@ -128,7 +128,7 @@ void Pipeline::initAudio(const Demuxer &demuxer, AVCodecID codec_id) {
     converters_[type] =
         Converter(type, decoders_[type].getContext(), encoders_[type].getContext(), demuxer.getStreamTimeBase(type));
 
-    muxer_->addStream(encoders_[type].getContext(), type);
+    muxer_->addStream(encoders_[type].getContext());
 
     if (use_background_processors_) startProcessor(type);
 }
