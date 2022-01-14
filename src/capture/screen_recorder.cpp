@@ -151,6 +151,8 @@ void ScreenRecorder::start(const std::string &video_device, const std::string &a
     std::unique_lock ul{m_};
     if (!stopped_) throw std::runtime_error("Recording already in progress");
 
+    bool capture_audio = !audio_device.empty();
+
     AVPixelFormat video_pix_fmt = AV_PIX_FMT_YUV420P;
     AVCodecID video_codec_id = AV_CODEC_ID_H264;
     AVCodecID audio_codec_id = AV_CODEC_ID_AAC;
@@ -185,7 +187,7 @@ void ScreenRecorder::start(const std::string &video_device, const std::string &a
     pipeline_->initVideo(demuxer, video_codec_id, video_params, video_pix_fmt);
 
     /* init audio structures, if necessary */
-    if (!audio_device.empty()) {
+    if (capture_audio) {
 #ifdef LINUX
         /* init audio demuxer and pipeline */
         const std::string audio_device_name = generateInputDeviceName("", audio_device, video_params);
@@ -205,7 +207,7 @@ void ScreenRecorder::start(const std::string &video_device, const std::string &a
         std::cout << std::endl;
         demuxer.printInfo();
 #ifdef LINUX
-        if (audio_demuxer) audio_demuxer.printInfo(1);
+        if (capture_audio) audio_demuxer.printInfo(1);
 #endif
         muxer_->printInfo();
         pipeline_->printInfo();
@@ -226,7 +228,7 @@ void ScreenRecorder::start(const std::string &video_device, const std::string &a
 
     capturer_ = std::thread(capturer_fn, std::move(demuxer));
 #ifdef LINUX
-    if (audio_demuxer) audio_capturer_ = std::thread(capturer_fn, std::move(audio_demuxer));
+    if (capture_audio) audio_capturer_ = std::thread(capturer_fn, std::move(audio_demuxer));
 #endif
 
     stopped_ = false;
