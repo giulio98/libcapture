@@ -59,10 +59,3 @@ jobs:
         with:
           name: "screen-recorder-${{runner.os}}"
           path: bin
-      - name: MacOs badge
-        uses: RubbaBoy/BYOB@v1.2.1
-        with:
-          NAME: macos
-          ICON: 'apple'
-          LABEL: 'MacOs Build'
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
