@@ -84,7 +84,7 @@ const AVCodecParameters *Demuxer::getStreamParams(av::DataType stream_type) cons
     return streams_[stream_type]->codecpar;
 }
 
-[[nodiscard]] AVRational Demuxer::getStreamTimeBase(av::DataType stream_type) const {
+AVRational Demuxer::getStreamTimeBase(av::DataType stream_type) const {
     if (!fmt_ctx_) throw_error("failed to acess stream (input is not open)");
     if (!av::isDataTypeValid(stream_type)) throw_error("invalid stream_type received");
     if (!streams_[stream_type]) throw_error("specified stream not present");
