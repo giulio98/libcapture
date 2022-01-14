@@ -34,36 +34,25 @@ if(WIN32)
     message(STATUS "Platform is Windows")
     add_definitions(-DWINDOWS)
 
-    if(NOT MSVC)
-        add_library(FFmpeg::FFmpeg INTERFACE IMPORTED)
-        set_target_properties(FFmpeg::FFmpeg
-            PROPERTIES
-            INTERFACE_LINK_DIRECTORIES "${screen-recorder_SOURCE_DIR}/ffmpeg/lib/"
-            INTERFACE_INCLUDE_DIRECTORIES "${screen-recorder_SOURCE_DIR}/ffmpeg/include/"
-            INTERFACE_LINK_LIBRARIES "avdevice;avfilter;avformat;avcodec;swresample;swscale;avutil"
 
-        )
-        file(COPY ${screen-recorder_SOURCE_DIR}/ffmpeg/bin/
-                DESTINATION ${PROJECT_SOURCE_DIR}/bin)
-    else()
-        include(FetchContent)
-        FetchContent_Declare(
+    include(FetchContent)
+    FetchContent_Declare(
             FFmpeg
             URL https://www.gyan.dev/ffmpeg/builds/packages/ffmpeg-4.3.2-full_build-shared.7z
-        )
-        FetchContent_GetProperties(FFmpeg)
-        if(NOT ffmpeg_POPULATED)
-            FetchContent_Populate(FFmpeg)
-            add_library(FFmpeg::FFmpeg INTERFACE IMPORTED)
-            set_target_properties(FFmpeg::FFmpeg PROPERTIES
+    )
+    FetchContent_GetProperties(FFmpeg)
+    if(NOT ffmpeg_POPULATED)
+        FetchContent_Populate(FFmpeg)
+        add_library(FFmpeg::FFmpeg INTERFACE IMPORTED)
+        set_target_properties(FFmpeg::FFmpeg PROPERTIES
                 INTERFACE_LINK_DIRECTORIES "${ffmpeg_SOURCE_DIR}/lib"
                 INTERFACE_INCLUDE_DIRECTORIES "${ffmpeg_SOURCE_DIR}/include/"
                 INTERFACE_LINK_LIBRARIES "avdevice;avfilter;avformat;avcodec;swresample;swscale;avutil"
-            )
-            set(FFMPEG_DLLS  avdevice-58.dll avfilter-7.dll avformat-58.dll avcodec-58.dll swresample-3.dll swscale-5.dll avutil-56.dll)
-            list(TRANSFORM FFMPEG_DLLS PREPEND "${ffmpeg_SOURCE_DIR}/bin/")
-        endif()        
+                )
+        set(FFMPEG_DLLS  avdevice-58.dll avfilter-7.dll avformat-58.dll avcodec-58.dll swresample-3.dll swscale-5.dll avutil-56.dll)
+        list(TRANSFORM FFMPEG_DLLS PREPEND "${ffmpeg_SOURCE_DIR}/bin/")
     endif()
+    
 
     target_link_libraries(${PROJECT_NAME} PRIVATE
         $<$<BOOL:${MINGW}>:mingw32>
