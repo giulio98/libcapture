@@ -2,7 +2,9 @@
 
 <p align="center">
 <img alt="c++" src="https://img.shields.io/badge/C++-17-blue.svg?style=flat&logo=c%2B%2B"/> 
- <img alt="CI build" src="https://github.com/giulio98/screen-recorder/actions/workflows/build.yml/badge.svg"/> 
+ <img alt="CI build" src="https://github.com/giulio98/screen-recorder/actions/workflows/linux_build.yml/badge.svg"/> 
+<img alt="CI build" src="https://github.com/giulio98/screen-recorder/actions/workflows/macos_build.yml/badge.svg"/> 
+<img alt="CI build" src="https://github.com/giulio98/screen-recorder/actions/workflows/windows_build.yml/badge.svg"/> 
  <img alt="License"  src="https://img.shields.io/github/license/giulio98/screen-recorder"/> 
 </p> 
 
