@@ -59,7 +59,7 @@ public:
      * @param video_device      the name of the video device to use
      * @param audio_device      the name of the audio device to use (if empty, audio won't be recorded)
      * @param output_file       the name of the output file to use to save the recording
-     * @param video_params        the video dimensions (NOTE: if width/height is set to 0, the whole display will be
+     * @param video_params      the video dimensions (NOTE: if width/height is set to 0, the whole display will be
      * considered)
      */
     void start(const std::string &video_device, const std::string &audio_device, const std::string &output_file,
