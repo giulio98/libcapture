@@ -14,6 +14,8 @@ class Demuxer {
     std::array<const AVStream *, av::DataType::NumTypes> streams_ = {nullptr, nullptr};
     av::PacketUPtr packet_;
 
+    friend void swap(Demuxer &lhs, Demuxer &rhs);
+
 public:
     Demuxer() = default;
 
@@ -31,9 +33,7 @@ public:
 
     ~Demuxer() = default;
 
-    Demuxer &operator=(const Demuxer &) = delete;
-
-    Demuxer &operator=(Demuxer &&other);
+    Demuxer &operator=(Demuxer other);
 
     /**
      * Open the input device

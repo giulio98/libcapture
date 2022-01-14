@@ -9,6 +9,8 @@ class Decoder {
     av::CodecContextUPtr codec_ctx_;
     av::FrameUPtr frame_;
 
+    friend void swap(Decoder &lhs, Decoder &rhs);
+
 public:
     Decoder() = default;
 
@@ -24,9 +26,7 @@ public:
 
     ~Decoder() = default;
 
-    Decoder &operator=(const Decoder &) = delete;
-
-    Decoder &operator=(Decoder &&other);
+    Decoder &operator=(Decoder other);
 
     /**
      * Send a packet to the decoder

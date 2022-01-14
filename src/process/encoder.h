@@ -10,6 +10,8 @@ class Encoder {
     av::CodecContextUPtr codec_ctx_;
     av::PacketUPtr packet_;
 
+    friend void swap(Encoder &lhs, Encoder &rhs);
+
     /** Create a new encoder
      * @param codec_id the ID of the codec to which encode the frames
      */
@@ -56,15 +58,13 @@ public:
     Encoder(AVCodecID codec_id, int width, int height, AVPixelFormat pix_fmt, AVRational time_base,
             int global_header_flags, const std::map<std::string, std::string> &options);
 
+    Encoder(const Encoder &) = delete;
+
     Encoder(Encoder &&other);
 
     ~Encoder() = default;
 
-    Encoder(const Encoder &) = delete;
-
-    Encoder &operator=(const Encoder &) = delete;
-
-    Encoder &operator=(Encoder &&other);
+    Encoder &operator=(Encoder other);
 
     /**
      * Send a frame to the encoder

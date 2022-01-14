@@ -4,6 +4,12 @@
 
 static void throw_error(const std::string &msg) { throw std::runtime_error("Decoder: " + msg); }
 
+void swap(Decoder &lhs, Decoder &rhs) {
+    std::swap(lhs.codec_, rhs.codec_);
+    std::swap(lhs.codec_ctx_, rhs.codec_ctx_);
+    std::swap(lhs.frame_, rhs.frame_);
+}
+
 Decoder::Decoder(const AVCodecParameters *params) {
     if (!params) throw_error("received stream parameters ptr is null");
 
@@ -19,20 +25,10 @@ Decoder::Decoder(const AVCodecParameters *params) {
     if (avcodec_open2(codec_ctx_.get(), codec_, nullptr) < 0) throw_error("unable to open the av codec");
 }
 
-Decoder::Decoder(Decoder &&other) {
-    codec_ = other.codec_;
-    other.codec_ = nullptr;
-    codec_ctx_ = std::move(other.codec_ctx_);
-    frame_ = std::move(frame_);
-}
+Decoder::Decoder(Decoder &&other) : Decoder() { swap(*this, other); }
 
-Decoder &Decoder::operator=(Decoder &&other) {
-    if (this != &other) {
-        codec_ = other.codec_;
-        other.codec_ = nullptr;
-        codec_ctx_ = std::move(other.codec_ctx_);
-        frame_ = std::move(frame_);
-    }
+Decoder &Decoder::operator=(Decoder other) {
+    swap(*this, other);
     return *this;
 }
 

@@ -7,6 +7,12 @@
 
 static void throw_error(const std::string &msg) { throw std::runtime_error("Encoder: " + msg); }
 
+void swap(Encoder &lhs, Encoder &rhs) {
+    std::swap(lhs.codec_, rhs.codec_);
+    std::swap(lhs.codec_ctx_, rhs.codec_ctx_);
+    std::swap(lhs.packet_, rhs.packet_);
+}
+
 Encoder::Encoder(AVCodecID codec_id) {
 #ifdef MACOS
     // if (codec_id == AV_CODEC_ID_H264) {
@@ -50,20 +56,10 @@ Encoder::Encoder(AVCodecID codec_id, int width, int height, AVPixelFormat pix_fm
     init(global_header_flags, options);
 }
 
-Encoder::Encoder(Encoder &&other) {
-    codec_ = other.codec_;
-    other.codec_ = nullptr;
-    codec_ctx_ = std::move(other.codec_ctx_);
-    packet_ = std::move(other.packet_);
-}
+Encoder::Encoder(Encoder &&other) : Encoder() { swap(*this, other); }
 
-Encoder &Encoder::operator=(Encoder &&other) {
-    if (this != &other) {
-        codec_ = other.codec_;
-        other.codec_ = nullptr;
-        codec_ctx_ = std::move(other.codec_ctx_);
-        packet_ = std::move(other.packet_);
-    }
+Encoder &Encoder::operator=(Encoder other) {
+    swap(*this, other);
     return *this;
 }
 

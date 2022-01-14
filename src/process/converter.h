@@ -8,6 +8,8 @@ class Converter {
     AVFilterContext *buffersink_ctx_ = nullptr;
     av::FrameUPtr frame_;
 
+    friend void swap(Converter &lhs, Converter &rhs);
+
 public:
     /**
      * Create a new empty converter
@@ -36,9 +38,7 @@ public:
 
     ~Converter() = default;
 
-    Converter &operator=(const Converter &) = delete;
-
-    Converter &operator=(Converter &&other);
+    Converter &operator=(Converter other);
 
     /**
      * Send a frame to convert

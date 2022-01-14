@@ -7,38 +7,26 @@
 
 static void throw_error(const std::string &msg) { throw std::runtime_error("Demuxer: " + msg); }
 
+void swap(Demuxer &lhs, Demuxer &rhs) {
+    std::swap(lhs.fmt_ctx_, rhs.fmt_ctx_);
+    std::swap(lhs.fmt_, rhs.fmt_);
+    std::swap(lhs.device_name_, rhs.device_name_);
+    std::swap(lhs.options_, rhs.options_);
+    std::swap(lhs.streams_[av::DataType::Audio], rhs.streams_[av::DataType::Audio]);
+    std::swap(lhs.streams_[av::DataType::Video], rhs.streams_[av::DataType::Video]);
+    std::swap(lhs.packet_, rhs.packet_);
+}
+
 Demuxer::Demuxer(const std::string &fmt_name, std::string device_name, std::map<std::string, std::string> options)
     : device_name_(std::move(device_name)), options_(std::move(options)) {
     fmt_ = av_find_input_format(fmt_name.c_str());
     if (!fmt_) throw_error("cannot find input format");
 }
 
-Demuxer::Demuxer(Demuxer &&other) {
-    device_name_ = std::move(other.device_name_);
-    options_ = std::move(options_);
-    fmt_ = other.fmt_;
-    other.fmt_ = nullptr;
-    fmt_ctx_ = std::move(other.fmt_ctx_);
-    for (auto type : {av::DataType::Audio, av::DataType::Video}) {
-        streams_[type] = other.streams_[type];
-        other.streams_[type] = nullptr;
-    }
-    packet_ = std::move(other.packet_);
-}
+Demuxer::Demuxer(Demuxer &&other) : Demuxer() { swap(*this, other); }
 
-Demuxer &Demuxer::operator=(Demuxer &&other) {
-    if (this != &other) {
-        device_name_ = std::move(other.device_name_);
-        options_ = std::move(options_);
-        fmt_ = other.fmt_;
-        other.fmt_ = nullptr;
-        fmt_ctx_ = std::move(other.fmt_ctx_);
-        for (auto type : {av::DataType::Audio, av::DataType::Video}) {
-            streams_[type] = other.streams_[type];
-            other.streams_[type] = nullptr;
-        }
-        packet_ = std::move(other.packet_);
-    }
+Demuxer &Demuxer::operator=(Demuxer other) {
+    swap(*this, other);
     return *this;
 }
 

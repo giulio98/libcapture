@@ -4,6 +4,13 @@
 
 static void throwError(const std::string &msg) { throw std::runtime_error("Converter: " + msg); }
 
+void swap(Converter &lhs, Converter &rhs) {
+    std::swap(lhs.filter_graph_, rhs.filter_graph_);
+    std::swap(lhs.buffersrc_ctx_, rhs.buffersrc_ctx_);
+    std::swap(lhs.buffersink_ctx_, rhs.buffersink_ctx_);
+    std::swap(lhs.frame_, rhs.frame_);
+}
+
 static std::pair<std::string, std::string> getAudioFilterSpec(const AVCodecContext *dec_ctx,
                                                               const AVCodecContext *enc_ctx, AVRational in_time_base) {
     if (!dec_ctx) throwError("dec_ctx is NULL");
@@ -62,8 +69,8 @@ static std::pair<std::string, std::string> getVideoFilterSpec(const AVCodecConte
     return std::make_pair(src_args_ss.str(), filter_spec_ss.str());
 }
 
-Converter::Converter(av::DataType type, const AVCodecContext *dec_ctx, const AVCodecContext *enc_ctx, AVRational in_time_base,
-                     int offset_x, int offset_y) {
+Converter::Converter(av::DataType type, const AVCodecContext *dec_ctx, const AVCodecContext *enc_ctx,
+                     AVRational in_time_base, int offset_x, int offset_y) {
     std::string src_filter_name;
     std::string sink_filter_name;
     std::string src_args;
@@ -128,24 +135,10 @@ Converter::Converter(av::DataType type, const AVCodecContext *dec_ctx, const AVC
     if (avfilter_graph_config(filter_graph_.get(), nullptr) < 0) throwError("failed to configure the filter graph");
 }
 
-Converter::Converter(Converter &&other) {
-    filter_graph_ = std::move(other.filter_graph_);
-    buffersrc_ctx_ = other.buffersrc_ctx_;
-    other.buffersrc_ctx_ = nullptr;
-    buffersink_ctx_ = other.buffersink_ctx_;
-    other.buffersink_ctx_ = nullptr;
-    frame_ = std::move(other.frame_);
-}
+Converter::Converter(Converter &&other) : Converter() { swap(*this, other); }
 
-Converter &Converter::operator=(Converter &&other) {
-    if (this != &other) {
-        filter_graph_ = std::move(other.filter_graph_);
-        buffersrc_ctx_ = other.buffersrc_ctx_;
-        other.buffersrc_ctx_ = nullptr;
-        buffersink_ctx_ = other.buffersink_ctx_;
-        other.buffersink_ctx_ = nullptr;
-        frame_ = std::move(other.frame_);
-    }
+Converter &Converter::operator=(Converter other) {
+    swap(*this, other);
     return *this;
 }
 
