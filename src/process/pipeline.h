@@ -21,7 +21,7 @@ class Pipeline {
     std::array<Encoder, av::MediaType::NumTypes> encoders_;
     std::array<Converter, av::MediaType::NumTypes> converters_;
 
-    bool use_background_processors_;
+    const bool use_background_processors_;
     std::mutex m_;
     bool stop_;
     std::array<std::thread, av::MediaType::NumTypes> processors_;
