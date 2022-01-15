@@ -30,12 +30,12 @@ Under **Windows**, you can install FFmpeg by clicking [here](https://www.gyan.de
 Make sure to add "C:\FFmpeg\FFmpeg\bin" on your Path variable.
 Additionally, to ensure proper operation of screen-capture you need to install [screen-capture-recorder-to-video-windows-free](https://github.com/rdp/screen-capture-recorder-to-video-windows-free/releases).
 
-Under **Linux**, you can install FFmpeg by opening your terminal and executing the following command
+Under **Linux**, you can install FFmpeg by opening your terminal and running the following command
 ```bash
 sudo apt-get -yq update && sudo apt-get -yq install cmake libsdl2-dev libavcodec-dev libavfilter-dev libpostproc-dev libavformat-dev libavutil-dev  libswresample-dev libswscale-dev libavdevice-dev
 ```
 
-Finally, under **MacOS**, you can install FFmpeg by opening your terminal and executing the following command
+Finally, under **MacOS**, you can install FFmpeg by opening your terminal and running the following command
 ```bash
 brew install cmake ffmpeg
 ```
@@ -57,7 +57,7 @@ FetchContent_MakeAvailable(screen-recorder)
 target_link_libraries(<your_executable> screen-recorder)
 ```
 ### Windows
-After installing ffmpeg as described in [Install FFmpeg](#install-ffmpeg) your CMakeLists.txt should look like this
+After installing ffmpeg, as described in [Install FFmpeg](#install-ffmpeg), your CMakeLists.txt should look like this
 ```cmake
 cmake_minimum_required(VERSION 3.20)
 project(myproject)
@@ -78,7 +78,7 @@ target_link_libraries(myexe screen-recorder)
 ```
 As an example "main.cpp" can be [recorder.cpp](example/recorder.cpp).
 
-If your project doesn't compile, probably it's because you are not using a proper compiler, you must use either MSVC or minGW64
+If your project doesn't compile, probably it's because you are not using a proper compiler, you can use either MSVC or minGW64
 you can find [here](https://www.msys2.org/) a guide to install minGW64, make sure to add  "C:\msys64\mingw64\bin"
 in the path of your environment variable.
 
