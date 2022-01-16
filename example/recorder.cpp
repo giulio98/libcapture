@@ -198,36 +198,47 @@ int main(int argc, char **argv) {
             if (answer != "y" && answer != "Y") return 0;
         }
 
-        sc.start(video_device, audio_device, output_file, video_params);
+        auto f = sc.start(video_device, audio_device, output_file, video_params);
 
-        bool paused = false;
-        bool print_status = true;
+        auto listener = std::thread([&sc]() {
+            bool paused = false;
+            bool print_status = true;
 
-        while (true) {
-            if (print_status) printStatus(paused);
-            print_status = false;
-            printMenu(paused);
-            std::string input;
-            std::getline(std::cin, input);
-            if (input.length() == 1) {
-                char command = std::tolower(input.front());
-                if (command == 'p' && !paused) {
-                    sc.pause();
-                    paused = true;
-                    print_status = true;
-                } else if (command == 'r' && paused) {
-                    sc.resume();
-                    paused = false;
-                    print_status = true;
-                } else if (command == 's') {
-                    std::cout << "\nStopping..." << std::flush;
-                    sc.stop();
-                    std::cout << " done" << std::endl;
-                    break;
+            while (true) {
+                if (print_status) printStatus(paused);
+                print_status = false;
+                printMenu(paused);
+                std::string input;
+                std::getline(std::cin, input);
+                if (input.length() == 1) {
+                    char command = std::tolower(input.front());
+                    if (command == 'p' && !paused) {
+                        sc.pause();
+                        paused = true;
+                        print_status = true;
+                    } else if (command == 'r' && paused) {
+                        sc.resume();
+                        paused = false;
+                        print_status = true;
+                    } else if (command == 's') {
+                        std::cout << "\nStopping..." << std::flush;
+                        sc.stop();
+                        std::cout << " done" << std::endl;
+                        break;
+                    }
                 }
+                if (!print_status) std::cerr << "Unknown command" << std::endl;
             }
-            if (!print_status) std::cerr << "Unknown command" << std::endl;
+        });
+
+        try {
+            f.get();
+        } catch (...) {
+            listener.detach();
+            throw;
         }
+
+        if (listener.joinable()) listener.join();
 
     } catch (const std::exception &e) {
         std::cerr << e.what() << ", terminating..." << std::endl;

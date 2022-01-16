@@ -2,6 +2,7 @@
 
 #include <array>
 #include <condition_variable>
+#include <future>
 #include <memory>
 #include <mutex>
 #include <string>
@@ -24,9 +25,6 @@ class ScreenRecorder {
     std::mutex m_;
     std::condition_variable cv_;
     std::thread capturer_;
-#ifdef LINUX
-    std::thread audio_capturer_;
-#endif
 
     /* The pipeline used for audio/video processing */
     std::unique_ptr<Pipeline> pipeline_;
@@ -35,15 +33,22 @@ class ScreenRecorder {
     std::shared_ptr<Muxer> muxer_;
 
     /**
-     * Capture packets from a demuxer and send them to the pipeline
-     * @param demuxer the demuxer to read packets from
+     * Capture streams from the demuxer (and optionally audio_demuxer)
+     * @param demuxer       the main demuxer to read packets from (if null, an exception will be thrown)
+     * @param audio_demuxer the audio demuxer to read packets from (can be null, in which case it will just be ignored)
      */
-    void capture(Demuxer demuxer);
+    void capture(Demuxer *demuxer, Demuxer *audio_demuxer);
 
     /**
-     * Stop and join the capturer threads
+     * Read packets from a demuxer and pass them to the processing pipeline
+     * @param demuxer the demuxer to read the packets from (if null, an exception will be thrown)
      */
-    void stopCapturers();
+    void readPackets(Demuxer *demuxer);
+
+    /**
+     * Stop the capturer thread
+     */
+    void stopCapture();
 
 public:
     /**
@@ -71,9 +76,10 @@ public:
      * @param output_file       the name of the output file to use to save the recording
      * @param video_params      the video dimensions (NOTE: if width/height is set to 0, the whole display will be
      * considered)
+     * @return a future that can be used to check for exceptions occurring in the recording thread
      */
-    void start(const std::string &video_device, const std::string &audio_device, const std::string &output_file,
-               VideoParameters video_params);
+    std::future<void> start(const std::string &video_device, const std::string &audio_device,
+                            const std::string &output_file, VideoParameters video_params);
 
     /**
      * Stop the recording.
