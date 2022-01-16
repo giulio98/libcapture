@@ -180,7 +180,7 @@ void ScreenRecorder::start(const std::string &video_device, const std::string &a
         pipeline_ = std::make_unique<Pipeline>(muxer_, async);
     }
 
-    pipeline_->initVideo(demuxer, video_codec_id, video_params, video_pix_fmt);
+    pipeline_->initVideo(demuxer, video_codec_id, video_pix_fmt, video_params);
 
     /* init audio structures, if necessary */
     if (capture_audio) {

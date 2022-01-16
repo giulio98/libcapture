@@ -59,8 +59,8 @@ void Pipeline::checkExceptions() {
     }
 }
 
-void Pipeline::initVideo(const Demuxer &demuxer, AVCodecID codec_id, const VideoParameters &video_params,
-                         AVPixelFormat pix_fmt) {
+void Pipeline::initVideo(const Demuxer &demuxer, AVCodecID codec_id, AVPixelFormat pix_fmt,
+                         const VideoParameters &video_params) {
     const auto type = av::MediaType::Video;
 
     if (managed_types_[type]) throwError("video pipeline already inited");

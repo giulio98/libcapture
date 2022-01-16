@@ -56,11 +56,11 @@ public:
      * Initialize the video processing, by creating the corresponding decoder, converter and encoder
      * @param demuxer       the demuxer containing the input stream of packets
      * @param codec_id      the ID of the codec to use for the output video
-     * @param video_params  the parameters to use for the output video
      * @param pix_fmt       the pixel format to use for the output video
+     * @param video_params  the parameters to use for the output video
      */
-    void initVideo(const Demuxer &demuxer, AVCodecID codec_id, const VideoParameters &video_params,
-                   AVPixelFormat pix_fmt);
+    void initVideo(const Demuxer &demuxer, AVCodecID codec_id, AVPixelFormat pix_fmt,
+                   const VideoParameters &video_params);
 
     /**
      * Initialize the audio processing, by creating the corresponding decoder, converter and encoder
