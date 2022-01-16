@@ -57,6 +57,7 @@ FetchContent_MakeAvailable(screen-recorder)
 target_link_libraries(<your_executable> screen-recorder)
 ```
 ### Windows
+Let's see an example on how to install and use screen-recorder in Windows.
 After installing ffmpeg, as described in [Install FFmpeg](#install-ffmpeg), your `CMakeLists.txt` should look like this
 ```cmake
 cmake_minimum_required(VERSION 3.20)
@@ -85,3 +86,34 @@ in the path of your environment variable.
 At this step you will have under bin your executable.
 
 In order to run your executable you must add the ffmpeg dlls, that you can find under `C:\FFmpeg\FFmpeg\bin`, in the same folder of your executable.
+
+### Linux
+Let's see another example on how to install screen-recorder in Linux.
+After installing ffmpeg, your `CMakeLists.txt` should look like this
+```cmake
+cmake_minimum_required(VERSION 3.20)
+project(myproject)
+
+set(CMAKE_CXX_STANDARD 20)
+
+set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -pthread")
+include(FetchContent)
+
+FetchContent_Declare(
+        screen-recorder
+        GIT_REPOSITORY https://github.com/giulio98/screen-recorder.git
+)
+FetchContent_MakeAvailable(screen-recorder)
+add_executable(myexe main.cpp)
+target_link_libraries(myexe screen-recorder)
+```
+As you can see it's the same for Windows except for the line
+```cmake
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -pthread")
+```
+As before, you can fill `main.cpp` with the code provided in [recorder.cpp](example/recorder.cpp).
+Then you can run your executable.
+
+## Usage
+
