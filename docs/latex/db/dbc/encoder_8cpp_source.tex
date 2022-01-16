@@ -1,0 +1,126 @@
+\hypertarget{encoder_8cpp_source}{}\doxysection{encoder.\+cpp}
+\label{encoder_8cpp_source}\index{src/process/encoder.cpp@{src/process/encoder.cpp}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00001}00001 \textcolor{preprocessor}{\#include "{}encoder.h"{}}}
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00002}00002 }
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00003}00003 \textcolor{preprocessor}{\#include <iostream>}}
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00004}00004 \textcolor{preprocessor}{\#include <stdexcept>}}
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00005}00005 }
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00006}00006 \textcolor{preprocessor}{\#define VERBOSE 0}}
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00007}00007 }
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00008}00008 \textcolor{keyword}{static} \textcolor{keywordtype}{void} throwError(\textcolor{keyword}{const} std::string \&msg) \{ \textcolor{keywordflow}{throw} std::runtime\_error(\textcolor{stringliteral}{"{}Encoder: "{}} + msg); \}}
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00009}00009 }
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00010}00010 \textcolor{keywordtype}{void} swap(\mbox{\hyperlink{classEncoder}{Encoder}} \&lhs, \mbox{\hyperlink{classEncoder}{Encoder}} \&rhs) \{}
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00011}00011     std::swap(lhs.codec\_, rhs.codec\_);}
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00012}00012     std::swap(lhs.codec\_ctx\_, rhs.codec\_ctx\_);}
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00013}00013     std::swap(lhs.packet\_, rhs.packet\_);}
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00014}00014 \}}
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00015}00015 }
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00016}00016 \mbox{\hyperlink{classEncoder_a1517231ea520edcfe81a75ca6f3923ff}{Encoder::Encoder}}(AVCodecID codec\_id) \{}
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00017}00017 \textcolor{preprocessor}{\#ifdef MACOS}}
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00018}00018     \textcolor{comment}{// if (codec\_id == AV\_CODEC\_ID\_H264) \{}}
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00019}00019     \textcolor{comment}{//     codec\_ = avcodec\_find\_encoder\_by\_name("{}h264\_videotoolbox"{});}}
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00020}00020     \textcolor{comment}{// \} else if (codec\_id == AV\_CODEC\_ID\_AAC) \{}}
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00021}00021     \textcolor{comment}{//     codec\_ = avcodec\_find\_encoder\_by\_name("{}aac\_at"{});}}
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00022}00022     \textcolor{comment}{// \}}}
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00023}00023 \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00024}00024 }
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00025}00025     \textcolor{keywordflow}{if} (!codec\_) \{}
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00026}00026         codec\_ = avcodec\_find\_encoder(codec\_id);}
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00027}00027         \textcolor{keywordflow}{if} (!codec\_) throwError(\textcolor{stringliteral}{"{}cannot find codec"{}});}
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00028}00028     \}}
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00029}00029 }
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00030}00030     codec\_ctx\_ = av::CodecContextUPtr(avcodec\_alloc\_context3(codec\_));}
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00031}00031     \textcolor{keywordflow}{if} (!codec\_ctx\_) throwError(\textcolor{stringliteral}{"{}failed to allocated memory for AVCodecContext"{}});}
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00032}00032 \}}
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00033}00033 }
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00034}\mbox{\hyperlink{classEncoder_a469ec925c331a574fe05c55972ee9675}{00034}} \mbox{\hyperlink{classEncoder_a1517231ea520edcfe81a75ca6f3923ff}{Encoder::Encoder}}(AVCodecID codec\_id, \textcolor{keywordtype}{int} sample\_rate, uint64\_t channel\_layout, \textcolor{keywordtype}{int} global\_header\_flags,}
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00035}00035                  \textcolor{keyword}{const} std::map<std::string, std::string> \&options)}
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00036}00036     : \mbox{\hyperlink{classEncoder}{Encoder}}(codec\_id) \{}
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00037}00037     \textcolor{keywordflow}{if} (codec\_-\/>type != AVMEDIA\_TYPE\_AUDIO)}
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00038}00038         throwError(\textcolor{stringliteral}{"{}failed to create audio encoder (received codec ID is not of type audio)"{}});}
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00039}00039 }
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00040}00040     codec\_ctx\_-\/>sample\_rate = sample\_rate;}
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00041}00041     codec\_ctx\_-\/>channel\_layout = channel\_layout;}
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00042}00042     codec\_ctx\_-\/>channels = av\_get\_channel\_layout\_nb\_channels(codec\_ctx\_-\/>channel\_layout);}
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00043}00043     \textcolor{keywordflow}{if} (codec\_-\/>sample\_fmts) codec\_ctx\_-\/>sample\_fmt = codec\_-\/>sample\_fmts[0];}
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00044}00044     \textcolor{comment}{/* for audio, the time base will be automatically set by init() */}}
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00045}00045     \textcolor{comment}{// codec\_ctx\_-\/>time\_base.num = 1;}}
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00046}00046     \textcolor{comment}{// codec\_ctx\_-\/>time\_base.den = codec\_ctx\_-\/>sample\_rate;}}
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00047}00047 }
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00048}00048     init(global\_header\_flags, options);}
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00049}00049 \}}
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00050}00050 }
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00051}\mbox{\hyperlink{classEncoder_a94b724152efb9215eae86025efc5c730}{00051}} \mbox{\hyperlink{classEncoder_a1517231ea520edcfe81a75ca6f3923ff}{Encoder::Encoder}}(AVCodecID codec\_id, \textcolor{keywordtype}{int} width, \textcolor{keywordtype}{int} height, AVPixelFormat pix\_fmt, AVRational time\_base,}
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00052}00052                  \textcolor{keywordtype}{int} global\_header\_flags, \textcolor{keyword}{const} std::map<std::string, std::string> \&options)}
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00053}00053     : \mbox{\hyperlink{classEncoder}{Encoder}}(codec\_id) \{}
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00054}00054     \textcolor{keywordflow}{if} (codec\_-\/>type != AVMEDIA\_TYPE\_VIDEO)}
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00055}00055         throwError(\textcolor{stringliteral}{"{}failed to create video encoder (received codec ID is not of type video)"{}});}
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00056}00056 }
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00057}00057     codec\_ctx\_-\/>width = width;}
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00058}00058     codec\_ctx\_-\/>height = height;}
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00059}00059     codec\_ctx\_-\/>pix\_fmt = pix\_fmt;}
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00060}00060     codec\_ctx\_-\/>time\_base = time\_base;}
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00061}00061 }
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00062}00062     init(global\_header\_flags, options);}
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00063}00063 \}}
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00064}00064 }
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00065}00065 \mbox{\hyperlink{classEncoder_a1517231ea520edcfe81a75ca6f3923ff}{Encoder::Encoder}}(\mbox{\hyperlink{classEncoder}{Encoder}} \&\&other) : \mbox{\hyperlink{classEncoder}{Encoder}}() \{ swap(*\textcolor{keyword}{this}, other); \}}
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00066}00066 }
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00067}00067 \mbox{\hyperlink{classEncoder}{Encoder}} \&Encoder::operator=(\mbox{\hyperlink{classEncoder}{Encoder}} other) \{}
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00068}00068     swap(*\textcolor{keyword}{this}, other);}
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00069}00069     \textcolor{keywordflow}{return} *\textcolor{keyword}{this};}
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00070}00070 \}}
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00071}00071 }
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00072}00072 \textcolor{keywordtype}{void} Encoder::init(\textcolor{keywordtype}{int} global\_header\_flags, \textcolor{keyword}{const} std::map<std::string, std::string> \&options) \{}
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00073}00073     \textcolor{keywordflow}{if} (!codec\_) throwError(\textcolor{stringliteral}{"{}initialization failed, internal codec is null"{}});}
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00074}00074     \textcolor{keywordflow}{if} (!codec\_ctx\_) throwError(\textcolor{stringliteral}{"{}initialization failed, internal codec ctx is null"{}});}
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00075}00075 }
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00076}00076     \textcolor{keywordflow}{if} (global\_header\_flags \& AVFMT\_GLOBALHEADER) codec\_ctx\_-\/>flags |= AV\_CODEC\_FLAG\_GLOBAL\_HEADER;}
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00077}00077 }
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00078}00078     av::DictionaryUPtr dict = av::map2dict(options);}
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00079}00079     AVDictionary *dict\_raw = dict.release();}
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00080}00080     \textcolor{keywordtype}{int} ret = avcodec\_open2(codec\_ctx\_.get(), codec\_, dict\_raw ? \&dict\_raw : \textcolor{keyword}{nullptr});}
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00081}00081     dict = av::DictionaryUPtr(dict\_raw);}
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00082}00082     \textcolor{keywordflow}{if} (ret) throwError(\textcolor{stringliteral}{"{}failed to initialize Codec Context"{}});}
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00083}00083 \textcolor{preprocessor}{\#if VERBOSE}}
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00084}00084     \textcolor{keyword}{auto} map = av::dict2map(dict.get());}
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00085}00085     \textcolor{keywordflow}{for} (\textcolor{keyword}{const} \textcolor{keyword}{auto} \&[key, val] : map) \{}
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00086}00086         std::cerr << \textcolor{stringliteral}{"{}Encoder: couldn't find any '"{}} << key << \textcolor{stringliteral}{"{}' option"{}} << std::endl;}
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00087}00087     \}}
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00088}00088 \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00089}00089 \}}
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00090}00090 }
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00091}\mbox{\hyperlink{classEncoder_ad2ebcbb8d7563591b970f5b36e66d219}{00091}} \textcolor{keywordtype}{bool} \mbox{\hyperlink{classEncoder_ad2ebcbb8d7563591b970f5b36e66d219}{Encoder::sendFrame}}(\textcolor{keyword}{const} AVFrame *frame) \{}
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00092}00092     \textcolor{keywordflow}{if} (!codec\_ctx\_) throwError(\textcolor{stringliteral}{"{}encoder was not initialized yet"{}});}
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00093}00093     \textcolor{keywordtype}{int} ret = avcodec\_send\_frame(codec\_ctx\_.get(), frame);}
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00094}00094     \textcolor{keywordflow}{if} (ret == AVERROR(EAGAIN)) \textcolor{keywordflow}{return} \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00095}00095     \textcolor{keywordflow}{if} (ret == AVERROR\_EOF) throwError(\textcolor{stringliteral}{"{}has already been flushed"{}});}
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00096}00096     \textcolor{keywordflow}{if} (ret < 0) throwError(\textcolor{stringliteral}{"{}failed to send frame to encoder"{}});}
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00097}00097     \textcolor{keywordflow}{return} \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00098}00098 \}}
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00099}00099 }
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00100}\mbox{\hyperlink{classEncoder_ae2928eeba00c04d53bd5bdcccd372d31}{00100}} av::PacketUPtr \mbox{\hyperlink{classEncoder_ae2928eeba00c04d53bd5bdcccd372d31}{Encoder::getPacket}}() \{}
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00101}00101     \textcolor{keywordflow}{if} (!codec\_ctx\_) throwError(\textcolor{stringliteral}{"{}encoder was not initialized yet"{}});}
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00102}00102 }
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00103}00103     \textcolor{keywordflow}{if} (!packet\_) \{}
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00104}00104         packet\_ = av::PacketUPtr(av\_packet\_alloc());}
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00105}00105         \textcolor{keywordflow}{if} (!packet\_) throwError(\textcolor{stringliteral}{"{}failed to allocate packet"{}});}
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00106}00106     \}}
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00107}00107 }
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00108}00108     \textcolor{keywordtype}{int} ret = avcodec\_receive\_packet(codec\_ctx\_.get(), packet\_.get());}
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00109}00109     \textcolor{keywordflow}{if} (ret == AVERROR(EAGAIN) || ret == AVERROR\_EOF) \textcolor{keywordflow}{return} \textcolor{keyword}{nullptr};}
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00110}00110     \textcolor{keywordflow}{if} (ret < 0) throwError(\textcolor{stringliteral}{"{}failed to receive frame from decoder"{}});}
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00111}00111 }
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00112}00112     \textcolor{keywordflow}{return} std::move(packet\_);}
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00113}00113 \}}
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00114}00114 }
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00115}\mbox{\hyperlink{classEncoder_ab23d5e384fb8c29c2f9f0cf06bf41c33}{00115}} \textcolor{keyword}{const} AVCodecContext *\mbox{\hyperlink{classEncoder_ab23d5e384fb8c29c2f9f0cf06bf41c33}{Encoder::getContext}}()\textcolor{keyword}{ const }\{ \textcolor{keywordflow}{return} codec\_ctx\_.get(); \}}
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00116}00116 }
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00117}\mbox{\hyperlink{classEncoder_af35f7ed35c1ecce6d863cae81526b78a}{00117}} std::string \mbox{\hyperlink{classEncoder_af35f7ed35c1ecce6d863cae81526b78a}{Encoder::getName}}()\textcolor{keyword}{ const }\{}
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00118}00118     \textcolor{keywordflow}{if} (codec\_) \textcolor{keywordflow}{return} codec\_-\/>long\_name;}
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00119}00119     \textcolor{keywordflow}{return} std::string\{\};}
+\DoxyCodeLine{\Hypertarget{encoder_8cpp_source_l00120}00120 \}}
+
+\end{DoxyCode}

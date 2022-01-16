@@ -1,0 +1,53 @@
+\hypertarget{demuxer_8h_source}{}\doxysection{demuxer.\+h}
+\label{demuxer_8h_source}\index{src/format/demuxer.h@{src/format/demuxer.h}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{demuxer_8h_source_l00001}00001 \textcolor{preprocessor}{\#pragma once}}
+\DoxyCodeLine{\Hypertarget{demuxer_8h_source_l00002}00002 }
+\DoxyCodeLine{\Hypertarget{demuxer_8h_source_l00003}00003 \textcolor{preprocessor}{\#include <array>}}
+\DoxyCodeLine{\Hypertarget{demuxer_8h_source_l00004}00004 \textcolor{preprocessor}{\#include <map>}}
+\DoxyCodeLine{\Hypertarget{demuxer_8h_source_l00005}00005 \textcolor{preprocessor}{\#include <string>}}
+\DoxyCodeLine{\Hypertarget{demuxer_8h_source_l00006}00006 }
+\DoxyCodeLine{\Hypertarget{demuxer_8h_source_l00007}00007 \textcolor{preprocessor}{\#include "{}common/common.h"{}}}
+\DoxyCodeLine{\Hypertarget{demuxer_8h_source_l00008}00008 }
+\DoxyCodeLine{\Hypertarget{demuxer_8h_source_l00009}\mbox{\hyperlink{classDemuxer}{00009}} \textcolor{keyword}{class }\mbox{\hyperlink{classDemuxer}{Demuxer}} \{}
+\DoxyCodeLine{\Hypertarget{demuxer_8h_source_l00010}00010     av::InFormatContextUPtr fmt\_ctx\_;}
+\DoxyCodeLine{\Hypertarget{demuxer_8h_source_l00011}00011     AVInputFormat *fmt\_ = \textcolor{keyword}{nullptr};}
+\DoxyCodeLine{\Hypertarget{demuxer_8h_source_l00012}00012     std::string device\_name\_;}
+\DoxyCodeLine{\Hypertarget{demuxer_8h_source_l00013}00013     std::map<std::string, std::string> options\_;}
+\DoxyCodeLine{\Hypertarget{demuxer_8h_source_l00014}00014     std::array<const AVStream *, av::MediaType::NumTypes> streams\_ = \{\textcolor{keyword}{nullptr}, \textcolor{keyword}{nullptr}\};}
+\DoxyCodeLine{\Hypertarget{demuxer_8h_source_l00015}00015     av::PacketUPtr packet\_;}
+\DoxyCodeLine{\Hypertarget{demuxer_8h_source_l00016}00016 }
+\DoxyCodeLine{\Hypertarget{demuxer_8h_source_l00017}00017     \textcolor{keyword}{friend} \textcolor{keywordtype}{void} swap(\mbox{\hyperlink{classDemuxer}{Demuxer}} \&lhs, \mbox{\hyperlink{classDemuxer}{Demuxer}} \&rhs);}
+\DoxyCodeLine{\Hypertarget{demuxer_8h_source_l00018}00018 }
+\DoxyCodeLine{\Hypertarget{demuxer_8h_source_l00019}00019 \textcolor{keyword}{public}:}
+\DoxyCodeLine{\Hypertarget{demuxer_8h_source_l00020}00020     \mbox{\hyperlink{classDemuxer}{Demuxer}}() = \textcolor{keywordflow}{default};}
+\DoxyCodeLine{\Hypertarget{demuxer_8h_source_l00021}00021 }
+\DoxyCodeLine{\Hypertarget{demuxer_8h_source_l00028}00028     \mbox{\hyperlink{classDemuxer}{Demuxer}}(\textcolor{keyword}{const} std::string \&fmt\_name, std::string device\_name, std::map<std::string, std::string> options);}
+\DoxyCodeLine{\Hypertarget{demuxer_8h_source_l00029}00029 }
+\DoxyCodeLine{\Hypertarget{demuxer_8h_source_l00030}00030     \mbox{\hyperlink{classDemuxer}{Demuxer}}(\textcolor{keyword}{const} \mbox{\hyperlink{classDemuxer}{Demuxer}} \&) = \textcolor{keyword}{delete};}
+\DoxyCodeLine{\Hypertarget{demuxer_8h_source_l00031}00031 }
+\DoxyCodeLine{\Hypertarget{demuxer_8h_source_l00032}00032     \mbox{\hyperlink{classDemuxer}{Demuxer}}(\mbox{\hyperlink{classDemuxer}{Demuxer}} \&\&other);}
+\DoxyCodeLine{\Hypertarget{demuxer_8h_source_l00033}00033 }
+\DoxyCodeLine{\Hypertarget{demuxer_8h_source_l00034}00034     \mbox{\hyperlink{classDemuxer}{\string~Demuxer}}() = \textcolor{keywordflow}{default};}
+\DoxyCodeLine{\Hypertarget{demuxer_8h_source_l00035}00035 }
+\DoxyCodeLine{\Hypertarget{demuxer_8h_source_l00036}00036     \mbox{\hyperlink{classDemuxer}{Demuxer}} \&operator=(\mbox{\hyperlink{classDemuxer}{Demuxer}} other);}
+\DoxyCodeLine{\Hypertarget{demuxer_8h_source_l00037}00037 }
+\DoxyCodeLine{\Hypertarget{demuxer_8h_source_l00042}00042     \textcolor{keywordtype}{void} \mbox{\hyperlink{classDemuxer_adb7d8df640f876555025a6ca7d7b2cdb}{openInput}}();}
+\DoxyCodeLine{\Hypertarget{demuxer_8h_source_l00043}00043 }
+\DoxyCodeLine{\Hypertarget{demuxer_8h_source_l00048}00048     \textcolor{keywordtype}{void} \mbox{\hyperlink{classDemuxer_a1e344d76a4d8f3770d5673c04a9792cb}{closeInput}}();}
+\DoxyCodeLine{\Hypertarget{demuxer_8h_source_l00049}00049 }
+\DoxyCodeLine{\Hypertarget{demuxer_8h_source_l00054}00054     \textcolor{keywordtype}{void} \mbox{\hyperlink{classDemuxer_ac5c00fad73efc9fd745fd6c484e1555b}{flush}}();}
+\DoxyCodeLine{\Hypertarget{demuxer_8h_source_l00055}00055 }
+\DoxyCodeLine{\Hypertarget{demuxer_8h_source_l00060}00060     [[nodiscard]] \textcolor{keywordtype}{bool} \mbox{\hyperlink{classDemuxer_aced5dab1a996da140fc55cda3b8c6822}{isInputOpen}}() \textcolor{keyword}{const};}
+\DoxyCodeLine{\Hypertarget{demuxer_8h_source_l00061}00061 }
+\DoxyCodeLine{\Hypertarget{demuxer_8h_source_l00067}00067     [[nodiscard]] \textcolor{keyword}{const} AVCodecParameters *\mbox{\hyperlink{classDemuxer_a21dcade74fec8cb4a30e312c79dd1274}{getStreamParams}}(av::MediaType stream\_type) \textcolor{keyword}{const};}
+\DoxyCodeLine{\Hypertarget{demuxer_8h_source_l00068}00068 }
+\DoxyCodeLine{\Hypertarget{demuxer_8h_source_l00074}00074     [[nodiscard]] AVRational \mbox{\hyperlink{classDemuxer_a5465f2d641af3ddfb253ff2cbd87ba37}{getStreamTimeBase}}(av::MediaType stream\_type) \textcolor{keyword}{const};}
+\DoxyCodeLine{\Hypertarget{demuxer_8h_source_l00075}00075 }
+\DoxyCodeLine{\Hypertarget{demuxer_8h_source_l00081}00081     std::pair<av::PacketUPtr, av::MediaType> \mbox{\hyperlink{classDemuxer_aef8feef99ec38bd3cc579e3339a18aec}{readPacket}}();}
+\DoxyCodeLine{\Hypertarget{demuxer_8h_source_l00082}00082 }
+\DoxyCodeLine{\Hypertarget{demuxer_8h_source_l00087}00087     \textcolor{keywordtype}{void} \mbox{\hyperlink{classDemuxer_a85f970c6ef269fd10729fea1995a130d}{printInfo}}(\textcolor{keywordtype}{int} index = 0) \textcolor{keyword}{const};}
+\DoxyCodeLine{\Hypertarget{demuxer_8h_source_l00088}00088 \};}
+
+\end{DoxyCode}

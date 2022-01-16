@@ -1,0 +1,362 @@
+\hypertarget{classDemuxer}{}\doxysection{Demuxer Class Reference}
+\label{classDemuxer}\index{Demuxer@{Demuxer}}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classDemuxer_abc638bf9a3d659daa1a60e80a9332c64}{Demuxer}} (const std\+::string \&fmt\+\_\+name, std\+::string device\+\_\+name, std\+::map$<$ std\+::string, std\+::string $>$ options)
+\item 
+\mbox{\Hypertarget{classDemuxer_ad532a3e573edf0d81620afc920db85e1}\label{classDemuxer_ad532a3e573edf0d81620afc920db85e1}} 
+{\bfseries Demuxer} (const \mbox{\hyperlink{classDemuxer}{Demuxer}} \&)=delete
+\item 
+\mbox{\hyperlink{classDemuxer_ae860d5d9dd83e89326c7d51113396dd5}{Demuxer}} (\mbox{\hyperlink{classDemuxer}{Demuxer}} \&\&other)
+\item 
+\mbox{\hyperlink{classDemuxer}{Demuxer}} \& \mbox{\hyperlink{classDemuxer_a1882826b9c85071bdae8d7cc7e404f26}{operator=}} (\mbox{\hyperlink{classDemuxer}{Demuxer}} other)
+\item 
+void \mbox{\hyperlink{classDemuxer_adb7d8df640f876555025a6ca7d7b2cdb}{open\+Input}} ()
+\item 
+void \mbox{\hyperlink{classDemuxer_a1e344d76a4d8f3770d5673c04a9792cb}{close\+Input}} ()
+\item 
+void \mbox{\hyperlink{classDemuxer_ac5c00fad73efc9fd745fd6c484e1555b}{flush}} ()
+\item 
+bool \mbox{\hyperlink{classDemuxer_aced5dab1a996da140fc55cda3b8c6822}{is\+Input\+Open}} () const
+\item 
+const AVCodec\+Parameters $\ast$ \mbox{\hyperlink{classDemuxer_a21dcade74fec8cb4a30e312c79dd1274}{get\+Stream\+Params}} (av\+::\+Media\+Type stream\+\_\+type) const
+\item 
+AVRational \mbox{\hyperlink{classDemuxer_a5465f2d641af3ddfb253ff2cbd87ba37}{get\+Stream\+Time\+Base}} (av\+::\+Media\+Type stream\+\_\+type) const
+\item 
+std\+::pair$<$ av\+::\+Packet\+UPtr, av\+::\+Media\+Type $>$ \mbox{\hyperlink{classDemuxer_aef8feef99ec38bd3cc579e3339a18aec}{read\+Packet}} ()
+\item 
+void \mbox{\hyperlink{classDemuxer_a85f970c6ef269fd10729fea1995a130d}{print\+Info}} (int index=0) const
+\end{DoxyCompactItemize}
+\doxysubsection*{Friends}
+\begin{DoxyCompactItemize}
+\item 
+void \mbox{\hyperlink{classDemuxer_a82a17238c6f18f81e88eda961b10436f}{swap}} (\mbox{\hyperlink{classDemuxer}{Demuxer}} \&lhs, \mbox{\hyperlink{classDemuxer}{Demuxer}} \&rhs)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+
+
+Definition at line \mbox{\hyperlink{demuxer_8h_source_l00009}{9}} of file \mbox{\hyperlink{demuxer_8h_source}{demuxer.\+h}}.
+
+
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classDemuxer_abc638bf9a3d659daa1a60e80a9332c64}\label{classDemuxer_abc638bf9a3d659daa1a60e80a9332c64}} 
+\index{Demuxer@{Demuxer}!Demuxer@{Demuxer}}
+\index{Demuxer@{Demuxer}!Demuxer@{Demuxer}}
+\doxysubsubsection{\texorpdfstring{Demuxer()}{Demuxer()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily Demuxer\+::\+Demuxer (\begin{DoxyParamCaption}\item[{const std\+::string \&}]{fmt\+\_\+name,  }\item[{std\+::string}]{device\+\_\+name,  }\item[{std\+::map$<$ std\+::string, std\+::string $>$}]{options }\end{DoxyParamCaption})}
+
+Create a new demuxer (whose input device will be in a \char`\"{}closed\char`\"{} state) 
+\begin{DoxyParams}{Parameters}
+{\em fmt\+\_\+name} & the name of the input format \\
+\hline
+{\em device\+\_\+name} & the name of the device to open \\
+\hline
+{\em options} & a map containing the options to use when opening the input device \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line \mbox{\hyperlink{demuxer_8cpp_source_l00020}{20}} of file \mbox{\hyperlink{demuxer_8cpp_source}{demuxer.\+cpp}}.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00021     : device\_name\_(std::move(device\_name)), options\_(std::move(options)) \{}
+\DoxyCodeLine{00022     fmt\_ = av\_find\_input\_format(fmt\_name.c\_str());}
+\DoxyCodeLine{00023     \textcolor{keywordflow}{if} (!fmt\_) throwError(\textcolor{stringliteral}{"{}cannot find input format"{}});}
+\DoxyCodeLine{00024 \}}
+
+\end{DoxyCode}
+\mbox{\Hypertarget{classDemuxer_ae860d5d9dd83e89326c7d51113396dd5}\label{classDemuxer_ae860d5d9dd83e89326c7d51113396dd5}} 
+\index{Demuxer@{Demuxer}!Demuxer@{Demuxer}}
+\index{Demuxer@{Demuxer}!Demuxer@{Demuxer}}
+\doxysubsubsection{\texorpdfstring{Demuxer()}{Demuxer()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily Demuxer\+::\+Demuxer (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classDemuxer}{Demuxer}} \&\&}]{other }\end{DoxyParamCaption})}
+
+
+
+Definition at line \mbox{\hyperlink{demuxer_8cpp_source_l00026}{26}} of file \mbox{\hyperlink{demuxer_8cpp_source}{demuxer.\+cpp}}.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00026 : \mbox{\hyperlink{classDemuxer}{Demuxer}}() \{ swap(*\textcolor{keyword}{this}, other); \}}
+
+\end{DoxyCode}
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classDemuxer_a1e344d76a4d8f3770d5673c04a9792cb}\label{classDemuxer_a1e344d76a4d8f3770d5673c04a9792cb}} 
+\index{Demuxer@{Demuxer}!closeInput@{closeInput}}
+\index{closeInput@{closeInput}!Demuxer@{Demuxer}}
+\doxysubsubsection{\texorpdfstring{closeInput()}{closeInput()}}
+{\footnotesize\ttfamily void Demuxer\+::close\+Input (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+Close the input device WARNING\+: calling this function when the input is already closed will throw an exception 
+
+Definition at line \mbox{\hyperlink{demuxer_8cpp_source_l00065}{65}} of file \mbox{\hyperlink{demuxer_8cpp_source}{demuxer.\+cpp}}.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00065                          \{}
+\DoxyCodeLine{00066     \textcolor{keywordflow}{if} (!fmt\_ctx\_) throwError(\textcolor{stringliteral}{"{}failed to close input (input is not open)"{}});}
+\DoxyCodeLine{00067     fmt\_ctx\_.reset();}
+\DoxyCodeLine{00068     streams\_[av::MediaType::Video] = \textcolor{keyword}{nullptr};}
+\DoxyCodeLine{00069     streams\_[av::MediaType::Audio] = \textcolor{keyword}{nullptr};}
+\DoxyCodeLine{00070 \}}
+
+\end{DoxyCode}
+\mbox{\Hypertarget{classDemuxer_ac5c00fad73efc9fd745fd6c484e1555b}\label{classDemuxer_ac5c00fad73efc9fd745fd6c484e1555b}} 
+\index{Demuxer@{Demuxer}!flush@{flush}}
+\index{flush@{flush}!Demuxer@{Demuxer}}
+\doxysubsubsection{\texorpdfstring{flush()}{flush()}}
+{\footnotesize\ttfamily void Demuxer\+::flush (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+Flush the internal buffered data WARNING\+: calling this function when the input is closed will throw an exception 
+
+Definition at line \mbox{\hyperlink{demuxer_8cpp_source_l00072}{72}} of file \mbox{\hyperlink{demuxer_8cpp_source}{demuxer.\+cpp}}.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00072                     \{}
+\DoxyCodeLine{00073     \textcolor{keywordflow}{if} (!fmt\_ctx\_) throwError(\textcolor{stringliteral}{"{}failed to flush (input is not open)"{}});}
+\DoxyCodeLine{00074     \textcolor{keywordflow}{if} (fmt\_ctx\_-\/>pb) avio\_flush(fmt\_ctx\_-\/>pb);}
+\DoxyCodeLine{00075     \textcolor{keywordflow}{if} (avformat\_flush(fmt\_ctx\_.get()) < 0) throwError(\textcolor{stringliteral}{"{}failed to flush internal data"{}});}
+\DoxyCodeLine{00076 \}}
+
+\end{DoxyCode}
+\mbox{\Hypertarget{classDemuxer_a21dcade74fec8cb4a30e312c79dd1274}\label{classDemuxer_a21dcade74fec8cb4a30e312c79dd1274}} 
+\index{Demuxer@{Demuxer}!getStreamParams@{getStreamParams}}
+\index{getStreamParams@{getStreamParams}!Demuxer@{Demuxer}}
+\doxysubsubsection{\texorpdfstring{getStreamParams()}{getStreamParams()}}
+{\footnotesize\ttfamily const AVCodec\+Parameters $\ast$ Demuxer\+::get\+Stream\+Params (\begin{DoxyParamCaption}\item[{av\+::\+Media\+Type}]{stream\+\_\+type }\end{DoxyParamCaption}) const}
+
+Access the stream parameters 
+\begin{DoxyParams}{Parameters}
+{\em stream\+\_\+type} & the type of data of the stream \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+an observer pointer to access the stream parameters 
+\end{DoxyReturn}
+
+
+Definition at line \mbox{\hyperlink{demuxer_8cpp_source_l00080}{80}} of file \mbox{\hyperlink{demuxer_8cpp_source}{demuxer.\+cpp}}.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00080                                                                                \{}
+\DoxyCodeLine{00081     \textcolor{keywordflow}{if} (!fmt\_ctx\_) throwError(\textcolor{stringliteral}{"{}failed to acess stream (input is not open)"{}});}
+\DoxyCodeLine{00082     \textcolor{keywordflow}{if} (!av::validMediaType(stream\_type)) throwError(\textcolor{stringliteral}{"{}invalid stream\_type received"{}});}
+\DoxyCodeLine{00083     \textcolor{keywordflow}{if} (!streams\_[stream\_type]) throwError(\textcolor{stringliteral}{"{}specified stream not present"{}});}
+\DoxyCodeLine{00084     \textcolor{keywordflow}{return} streams\_[stream\_type]-\/>codecpar;}
+\DoxyCodeLine{00085 \}}
+
+\end{DoxyCode}
+\mbox{\Hypertarget{classDemuxer_a5465f2d641af3ddfb253ff2cbd87ba37}\label{classDemuxer_a5465f2d641af3ddfb253ff2cbd87ba37}} 
+\index{Demuxer@{Demuxer}!getStreamTimeBase@{getStreamTimeBase}}
+\index{getStreamTimeBase@{getStreamTimeBase}!Demuxer@{Demuxer}}
+\doxysubsubsection{\texorpdfstring{getStreamTimeBase()}{getStreamTimeBase()}}
+{\footnotesize\ttfamily AVRational Demuxer\+::get\+Stream\+Time\+Base (\begin{DoxyParamCaption}\item[{av\+::\+Media\+Type}]{stream\+\_\+type }\end{DoxyParamCaption}) const}
+
+Get the time-\/base of the stream 
+\begin{DoxyParams}{Parameters}
+{\em stream\+\_\+type} & the type of data of the stream \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+the stream time-\/base 
+\end{DoxyReturn}
+
+
+Definition at line \mbox{\hyperlink{demuxer_8cpp_source_l00087}{87}} of file \mbox{\hyperlink{demuxer_8cpp_source}{demuxer.\+cpp}}.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00087                                                                    \{}
+\DoxyCodeLine{00088     \textcolor{keywordflow}{if} (!fmt\_ctx\_) throwError(\textcolor{stringliteral}{"{}failed to acess stream (input is not open)"{}});}
+\DoxyCodeLine{00089     \textcolor{keywordflow}{if} (!av::validMediaType(stream\_type)) throwError(\textcolor{stringliteral}{"{}invalid stream\_type received"{}});}
+\DoxyCodeLine{00090     \textcolor{keywordflow}{if} (!streams\_[stream\_type]) throwError(\textcolor{stringliteral}{"{}specified stream not present"{}});}
+\DoxyCodeLine{00091     \textcolor{keywordflow}{return} streams\_[stream\_type]-\/>time\_base;}
+\DoxyCodeLine{00092 \}}
+
+\end{DoxyCode}
+\mbox{\Hypertarget{classDemuxer_aced5dab1a996da140fc55cda3b8c6822}\label{classDemuxer_aced5dab1a996da140fc55cda3b8c6822}} 
+\index{Demuxer@{Demuxer}!isInputOpen@{isInputOpen}}
+\index{isInputOpen@{isInputOpen}!Demuxer@{Demuxer}}
+\doxysubsubsection{\texorpdfstring{isInputOpen()}{isInputOpen()}}
+{\footnotesize\ttfamily bool Demuxer\+::is\+Input\+Open (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const}
+
+Check whether the input managed by the demuxer is open or not \begin{DoxyReturn}{Returns}
+true if the input is open, false otherwise 
+\end{DoxyReturn}
+
+
+Definition at line \mbox{\hyperlink{demuxer_8cpp_source_l00078}{78}} of file \mbox{\hyperlink{demuxer_8cpp_source}{demuxer.\+cpp}}.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00078 \{ \textcolor{keywordflow}{return} (fmt\_ctx\_ != \textcolor{keyword}{nullptr}); \}}
+
+\end{DoxyCode}
+\mbox{\Hypertarget{classDemuxer_adb7d8df640f876555025a6ca7d7b2cdb}\label{classDemuxer_adb7d8df640f876555025a6ca7d7b2cdb}} 
+\index{Demuxer@{Demuxer}!openInput@{openInput}}
+\index{openInput@{openInput}!Demuxer@{Demuxer}}
+\doxysubsubsection{\texorpdfstring{openInput()}{openInput()}}
+{\footnotesize\ttfamily void Demuxer\+::open\+Input (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+Open the input device WARNING\+: calling this function when the input is already open will throw an exception 
+
+Definition at line \mbox{\hyperlink{demuxer_8cpp_source_l00033}{33}} of file \mbox{\hyperlink{demuxer_8cpp_source}{demuxer.\+cpp}}.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00033                         \{}
+\DoxyCodeLine{00034     \textcolor{keywordflow}{if} (fmt\_ctx\_) throwError(\textcolor{stringliteral}{"{}failed to open input device (input is already open)"{}});}
+\DoxyCodeLine{00035     \textcolor{keywordflow}{if} (!fmt\_) throwError(\textcolor{stringliteral}{"{}failed to open input device (missing input format)"{}});}
+\DoxyCodeLine{00036 }
+\DoxyCodeLine{00037     \{}
+\DoxyCodeLine{00038         AVFormatContext *fmt\_ctx = \textcolor{keyword}{nullptr};}
+\DoxyCodeLine{00039         av::DictionaryUPtr dict = av::map2dict(options\_);}
+\DoxyCodeLine{00040         AVDictionary *dict\_raw = dict.release();}
+\DoxyCodeLine{00041         \textcolor{keywordtype}{int} ret = avformat\_open\_input(\&fmt\_ctx, device\_name\_.c\_str(), fmt\_, dict\_raw ? \&dict\_raw : \textcolor{keyword}{nullptr});}
+\DoxyCodeLine{00042         dict = av::DictionaryUPtr(dict\_raw);}
+\DoxyCodeLine{00043         fmt\_ctx\_ = av::InFormatContextUPtr(fmt\_ctx);}
+\DoxyCodeLine{00044         \textcolor{keywordflow}{if} (ret) throwError(\textcolor{stringliteral}{"{}cannot open input format"{}});}
+\DoxyCodeLine{00045 \textcolor{preprocessor}{\#if VERBOSE}}
+\DoxyCodeLine{00046         \textcolor{keyword}{auto} map = av::dict2map(dict.get());}
+\DoxyCodeLine{00047         \textcolor{keywordflow}{for} (\textcolor{keyword}{const} \textcolor{keyword}{auto} \&[key, val] : map) \{}
+\DoxyCodeLine{00048             std::cerr << \textcolor{stringliteral}{"{}Encoder: couldn't find any '"{}} << key << \textcolor{stringliteral}{"{}' option"{}} << std::endl;}
+\DoxyCodeLine{00049         \}}
+\DoxyCodeLine{00050 \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00051     \}}
+\DoxyCodeLine{00052 }
+\DoxyCodeLine{00053     \textcolor{keywordflow}{if} (avformat\_find\_stream\_info(fmt\_ctx\_.get(), \textcolor{keyword}{nullptr}) < 0) throwError(\textcolor{stringliteral}{"{}Failed to find stream info"{}});}
+\DoxyCodeLine{00054 }
+\DoxyCodeLine{00055     \textcolor{keywordflow}{for} (\textcolor{keywordtype}{int} i = 0; i < fmt\_ctx\_-\/>nb\_streams; i++) \{}
+\DoxyCodeLine{00056         \textcolor{keyword}{const} AVStream *stream = fmt\_ctx\_-\/>streams[i];}
+\DoxyCodeLine{00057         \textcolor{keywordflow}{if} (stream-\/>codecpar-\/>codec\_type == AVMEDIA\_TYPE\_VIDEO) \{}
+\DoxyCodeLine{00058             streams\_[av::MediaType::Video] = stream;}
+\DoxyCodeLine{00059         \} \textcolor{keywordflow}{else} \textcolor{keywordflow}{if} (stream-\/>codecpar-\/>codec\_type == AVMEDIA\_TYPE\_AUDIO) \{}
+\DoxyCodeLine{00060             streams\_[av::MediaType::Audio] = stream;}
+\DoxyCodeLine{00061         \}}
+\DoxyCodeLine{00062     \}}
+\DoxyCodeLine{00063 \}}
+
+\end{DoxyCode}
+\mbox{\Hypertarget{classDemuxer_a1882826b9c85071bdae8d7cc7e404f26}\label{classDemuxer_a1882826b9c85071bdae8d7cc7e404f26}} 
+\index{Demuxer@{Demuxer}!operator=@{operator=}}
+\index{operator=@{operator=}!Demuxer@{Demuxer}}
+\doxysubsubsection{\texorpdfstring{operator=()}{operator=()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{classDemuxer}{Demuxer}} \& Demuxer\+::operator= (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classDemuxer}{Demuxer}}}]{other }\end{DoxyParamCaption})}
+
+
+
+Definition at line \mbox{\hyperlink{demuxer_8cpp_source_l00028}{28}} of file \mbox{\hyperlink{demuxer_8cpp_source}{demuxer.\+cpp}}.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00028                                          \{}
+\DoxyCodeLine{00029     swap(*\textcolor{keyword}{this}, other);}
+\DoxyCodeLine{00030     \textcolor{keywordflow}{return} *\textcolor{keyword}{this};}
+\DoxyCodeLine{00031 \}}
+
+\end{DoxyCode}
+\mbox{\Hypertarget{classDemuxer_a85f970c6ef269fd10729fea1995a130d}\label{classDemuxer_a85f970c6ef269fd10729fea1995a130d}} 
+\index{Demuxer@{Demuxer}!printInfo@{printInfo}}
+\index{printInfo@{printInfo}!Demuxer@{Demuxer}}
+\doxysubsubsection{\texorpdfstring{printInfo()}{printInfo()}}
+{\footnotesize\ttfamily void Demuxer\+::print\+Info (\begin{DoxyParamCaption}\item[{int}]{index = {\ttfamily 0} }\end{DoxyParamCaption}) const}
+
+Print informations about the streams 
+\begin{DoxyParams}{Parameters}
+{\em index} & the index to print for this device \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line \mbox{\hyperlink{demuxer_8cpp_source_l00119}{119}} of file \mbox{\hyperlink{demuxer_8cpp_source}{demuxer.\+cpp}}.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00119                                        \{}
+\DoxyCodeLine{00120     \textcolor{keywordflow}{if} (!fmt\_ctx\_) throwError(\textcolor{stringliteral}{"{}failed to print info (input is not open)"{}});}
+\DoxyCodeLine{00121     av\_dump\_format(fmt\_ctx\_.get(), index, device\_name\_.c\_str(), 0);}
+\DoxyCodeLine{00122 \}}
+
+\end{DoxyCode}
+\mbox{\Hypertarget{classDemuxer_aef8feef99ec38bd3cc579e3339a18aec}\label{classDemuxer_aef8feef99ec38bd3cc579e3339a18aec}} 
+\index{Demuxer@{Demuxer}!readPacket@{readPacket}}
+\index{readPacket@{readPacket}!Demuxer@{Demuxer}}
+\doxysubsubsection{\texorpdfstring{readPacket()}{readPacket()}}
+{\footnotesize\ttfamily std\+::pair$<$ av\+::\+Packet\+UPtr, av\+::\+Media\+Type $>$ Demuxer\+::read\+Packet (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+Read a packet from the input device and return it together with its type \begin{DoxyReturn}{Returns}
+a packet and its type if it was possible to read it, nullptr and a random meaningless type if there was nothing to read 
+\end{DoxyReturn}
+
+
+Definition at line \mbox{\hyperlink{demuxer_8cpp_source_l00094}{94}} of file \mbox{\hyperlink{demuxer_8cpp_source}{demuxer.\+cpp}}.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00094                                                        \{}
+\DoxyCodeLine{00095     \textcolor{keywordflow}{if} (!fmt\_ctx\_) throwError(\textcolor{stringliteral}{"{}failed to read packet (input is not open)"{}});}
+\DoxyCodeLine{00096 }
+\DoxyCodeLine{00097     \textcolor{keywordflow}{if} (!packet\_) \{}
+\DoxyCodeLine{00098         packet\_ = av::PacketUPtr(av\_packet\_alloc());}
+\DoxyCodeLine{00099         \textcolor{keywordflow}{if} (!packet\_) throwError(\textcolor{stringliteral}{"{}failed to allocate packet"{}});}
+\DoxyCodeLine{00100     \}}
+\DoxyCodeLine{00101 }
+\DoxyCodeLine{00102     \textcolor{keyword}{auto} packet\_type = av::MediaType::None;}
+\DoxyCodeLine{00103 }
+\DoxyCodeLine{00104     \textcolor{keywordtype}{int} ret = av\_read\_frame(fmt\_ctx\_.get(), packet\_.get());}
+\DoxyCodeLine{00105     \textcolor{keywordflow}{if} (ret == AVERROR(EAGAIN)) \textcolor{keywordflow}{return} std::make\_pair(\textcolor{keyword}{nullptr}, packet\_type);}
+\DoxyCodeLine{00106     \textcolor{keywordflow}{if} (ret < 0) throwError(\textcolor{stringliteral}{"{}failed to read a packet"{}});}
+\DoxyCodeLine{00107 }
+\DoxyCodeLine{00108     \textcolor{keywordflow}{for} (\textcolor{keyword}{auto} type : av::validMediaTypes) \{}
+\DoxyCodeLine{00109         \textcolor{keywordflow}{if} (streams\_[type] \&\& packet\_-\/>stream\_index == streams\_[type]-\/>index) \{}
+\DoxyCodeLine{00110             packet\_type = type;}
+\DoxyCodeLine{00111             \textcolor{keywordflow}{break};}
+\DoxyCodeLine{00112         \}}
+\DoxyCodeLine{00113     \}}
+\DoxyCodeLine{00114     \textcolor{keywordflow}{if} (packet\_type == av::MediaType::None) throwError(\textcolor{stringliteral}{"{}unknown packet stream index"{}});}
+\DoxyCodeLine{00115 }
+\DoxyCodeLine{00116     \textcolor{keywordflow}{return} std::make\_pair(std::move(packet\_), packet\_type);}
+\DoxyCodeLine{00117 \}}
+
+\end{DoxyCode}
+
+
+\doxysubsection{Friends And Related Function Documentation}
+\mbox{\Hypertarget{classDemuxer_a82a17238c6f18f81e88eda961b10436f}\label{classDemuxer_a82a17238c6f18f81e88eda961b10436f}} 
+\index{Demuxer@{Demuxer}!swap@{swap}}
+\index{swap@{swap}!Demuxer@{Demuxer}}
+\doxysubsubsection{\texorpdfstring{swap}{swap}}
+{\footnotesize\ttfamily void swap (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classDemuxer}{Demuxer}} \&}]{lhs,  }\item[{\mbox{\hyperlink{classDemuxer}{Demuxer}} \&}]{rhs }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [friend]}}
+
+
+
+Definition at line \mbox{\hyperlink{demuxer_8cpp_source_l00010}{10}} of file \mbox{\hyperlink{demuxer_8cpp_source}{demuxer.\+cpp}}.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00010                                       \{}
+\DoxyCodeLine{00011     std::swap(lhs.fmt\_ctx\_, rhs.fmt\_ctx\_);}
+\DoxyCodeLine{00012     std::swap(lhs.fmt\_, rhs.fmt\_);}
+\DoxyCodeLine{00013     std::swap(lhs.device\_name\_, rhs.device\_name\_);}
+\DoxyCodeLine{00014     std::swap(lhs.options\_, rhs.options\_);}
+\DoxyCodeLine{00015     std::swap(lhs.streams\_[av::MediaType::Audio], rhs.streams\_[av::MediaType::Audio]);}
+\DoxyCodeLine{00016     std::swap(lhs.streams\_[av::MediaType::Video], rhs.streams\_[av::MediaType::Video]);}
+\DoxyCodeLine{00017     std::swap(lhs.packet\_, rhs.packet\_);}
+\DoxyCodeLine{00018 \}}
+
+\end{DoxyCode}
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+src/format/demuxer.\+h\item 
+src/format/demuxer.\+cpp\end{DoxyCompactItemize}

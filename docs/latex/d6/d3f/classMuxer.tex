@@ -1,0 +1,261 @@
+\hypertarget{classMuxer}{}\doxysection{Muxer Class Reference}
+\label{classMuxer}\index{Muxer@{Muxer}}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classMuxer_aa8f6bb4ae0e395ace716a7b895967002}{Muxer}} (std\+::string filename)
+\item 
+\mbox{\Hypertarget{classMuxer_aca29c863e313a025289a6bb6af79d28e}\label{classMuxer_aca29c863e313a025289a6bb6af79d28e}} 
+{\bfseries Muxer} (const \mbox{\hyperlink{classMuxer}{Muxer}} \&)=delete
+\item 
+\mbox{\Hypertarget{classMuxer_aed46547705a6aa521605ec8cd40657f3}\label{classMuxer_aed46547705a6aa521605ec8cd40657f3}} 
+\mbox{\hyperlink{classMuxer}{Muxer}} \& {\bfseries operator=} (const \mbox{\hyperlink{classMuxer}{Muxer}} \&)=delete
+\item 
+void \mbox{\hyperlink{classMuxer_a6f0721584a75b82716c8d0e543ad4122}{add\+Stream}} (const AVCodec\+Context $\ast$enc\+\_\+ctx)
+\item 
+void \mbox{\hyperlink{classMuxer_abc4baad299ce984680e87c0ef2246d77}{open\+File}} ()
+\item 
+void \mbox{\hyperlink{classMuxer_a11f0ea0fda943312eb42a7f6701dd08e}{close\+File}} ()
+\item 
+void \mbox{\hyperlink{classMuxer_a0cf18ee009cfebeab6d024ab157c9c85}{write\+Packet}} (av\+::\+Packet\+UPtr packet, av\+::\+Media\+Type packet\+\_\+type)
+\item 
+void \mbox{\hyperlink{classMuxer_a0ea26e33f92375ae6a6244226c5e4648}{print\+Info}} ()
+\item 
+int \mbox{\hyperlink{classMuxer_ae3952023b57203281a2e58705e0804c6}{get\+Global\+Header\+Flags}} ()
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+
+
+Definition at line \mbox{\hyperlink{muxer_8h_source_l00009}{9}} of file \mbox{\hyperlink{muxer_8h_source}{muxer.\+h}}.
+
+
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classMuxer_aa8f6bb4ae0e395ace716a7b895967002}\label{classMuxer_aa8f6bb4ae0e395ace716a7b895967002}} 
+\index{Muxer@{Muxer}!Muxer@{Muxer}}
+\index{Muxer@{Muxer}!Muxer@{Muxer}}
+\doxysubsubsection{\texorpdfstring{Muxer()}{Muxer()}}
+{\footnotesize\ttfamily Muxer\+::\+Muxer (\begin{DoxyParamCaption}\item[{std\+::string}]{filename }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [explicit]}}
+
+Create a new muxer 
+\begin{DoxyParams}{Parameters}
+{\em filename} & the name of the output file \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line \mbox{\hyperlink{muxer_8cpp_source_l00008}{8}} of file \mbox{\hyperlink{muxer_8cpp_source}{muxer.\+cpp}}.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00008                                : filename\_(std::move(filename)) \{}
+\DoxyCodeLine{00009     AVFormatContext *fmt\_ctx = \textcolor{keyword}{nullptr};}
+\DoxyCodeLine{00010     \textcolor{keywordflow}{if} (avformat\_alloc\_output\_context2(\&fmt\_ctx, \textcolor{keyword}{nullptr}, \textcolor{keyword}{nullptr}, filename\_.c\_str()) < 0)}
+\DoxyCodeLine{00011         throwError(\textcolor{stringliteral}{"{}failed to allocate output format context"{}});}
+\DoxyCodeLine{00012     fmt\_ctx\_ = av::FormatContextUPtr(fmt\_ctx);}
+\DoxyCodeLine{00013 \}}
+
+\end{DoxyCode}
+\mbox{\Hypertarget{classMuxer_a5a1accea8db837c7504383790e456e95}\label{classMuxer_a5a1accea8db837c7504383790e456e95}} 
+\index{Muxer@{Muxer}!````~Muxer@{$\sim$Muxer}}
+\index{````~Muxer@{$\sim$Muxer}!Muxer@{Muxer}}
+\doxysubsubsection{\texorpdfstring{$\sim$Muxer()}{~Muxer()}}
+{\footnotesize\ttfamily Muxer\+::$\sim$\+Muxer (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Definition at line \mbox{\hyperlink{muxer_8cpp_source_l00015}{15}} of file \mbox{\hyperlink{muxer_8cpp_source}{muxer.\+cpp}}.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00015               \{}
+\DoxyCodeLine{00016     \textcolor{keywordflow}{if} (fmt\_ctx\_ \&\& fmt\_ctx\_-\/>pb) avio\_closep(\&(fmt\_ctx\_-\/>pb));}
+\DoxyCodeLine{00017 \}}
+
+\end{DoxyCode}
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classMuxer_a6f0721584a75b82716c8d0e543ad4122}\label{classMuxer_a6f0721584a75b82716c8d0e543ad4122}} 
+\index{Muxer@{Muxer}!addStream@{addStream}}
+\index{addStream@{addStream}!Muxer@{Muxer}}
+\doxysubsubsection{\texorpdfstring{addStream()}{addStream()}}
+{\footnotesize\ttfamily void Muxer\+::add\+Stream (\begin{DoxyParamCaption}\item[{const AVCodec\+Context $\ast$}]{enc\+\_\+ctx }\end{DoxyParamCaption})}
+
+Add a stream to the muxer. WARNING\+: This function must be called before opening the file with \mbox{\hyperlink{classMuxer_abc4baad299ce984680e87c0ef2246d77}{open\+File()}} 
+\begin{DoxyParams}{Parameters}
+{\em enc\+\_\+ctx} & the context of the encoder generating the packet stream \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line \mbox{\hyperlink{muxer_8cpp_source_l00019}{19}} of file \mbox{\hyperlink{muxer_8cpp_source}{muxer.\+cpp}}.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00019                                                    \{}
+\DoxyCodeLine{00020     \textcolor{keywordflow}{if} (!enc\_ctx) throwError(\textcolor{stringliteral}{"{}received encoder context is NULL"{}});}
+\DoxyCodeLine{00021 }
+\DoxyCodeLine{00022     av::MediaType type;}
+\DoxyCodeLine{00023     \textcolor{keywordflow}{if} (enc\_ctx-\/>codec\_type == AVMEDIA\_TYPE\_VIDEO) \{}
+\DoxyCodeLine{00024         type = av::MediaType::Video;}
+\DoxyCodeLine{00025     \} \textcolor{keywordflow}{else} \textcolor{keywordflow}{if} (enc\_ctx-\/>codec\_type == AVMEDIA\_TYPE\_AUDIO) \{}
+\DoxyCodeLine{00026         type = av::MediaType::Audio;}
+\DoxyCodeLine{00027     \} \textcolor{keywordflow}{else} \{}
+\DoxyCodeLine{00028         throwError(\textcolor{stringliteral}{"{}received encoder context is ok unknown media type"{}});}
+\DoxyCodeLine{00029     \}}
+\DoxyCodeLine{00030 }
+\DoxyCodeLine{00031     std::unique\_lock ul\{m\_\};}
+\DoxyCodeLine{00032 }
+\DoxyCodeLine{00033     \textcolor{keywordflow}{if} (file\_opened\_) throwError(\textcolor{stringliteral}{"{}cannot add a new stream, file has already been opened"{}});}
+\DoxyCodeLine{00034 }
+\DoxyCodeLine{00035     \textcolor{keyword}{auto} stream = streams\_[type];}
+\DoxyCodeLine{00036 }
+\DoxyCodeLine{00037     \textcolor{keywordflow}{if} (stream) throwError(\textcolor{stringliteral}{"{}stream of specified type already present"{}});}
+\DoxyCodeLine{00038     stream = avformat\_new\_stream(fmt\_ctx\_.get(), \textcolor{keyword}{nullptr});}
+\DoxyCodeLine{00039     \textcolor{keywordflow}{if} (!stream) throwError(\textcolor{stringliteral}{"{}failed to create a new stream"{}});}
+\DoxyCodeLine{00040 }
+\DoxyCodeLine{00041     \textcolor{keywordflow}{if} (avcodec\_parameters\_from\_context(stream-\/>codecpar, enc\_ctx) < 0)}
+\DoxyCodeLine{00042         throwError(\textcolor{stringliteral}{"{}failed to write video stream parameters"{}});}
+\DoxyCodeLine{00043 }
+\DoxyCodeLine{00044     streams\_[type] = stream;}
+\DoxyCodeLine{00045     encoders\_time\_bases\_[type] = enc\_ctx-\/>time\_base;}
+\DoxyCodeLine{00046 \}}
+
+\end{DoxyCode}
+\mbox{\Hypertarget{classMuxer_a11f0ea0fda943312eb42a7f6701dd08e}\label{classMuxer_a11f0ea0fda943312eb42a7f6701dd08e}} 
+\index{Muxer@{Muxer}!closeFile@{closeFile}}
+\index{closeFile@{closeFile}!Muxer@{Muxer}}
+\doxysubsubsection{\texorpdfstring{closeFile()}{closeFile()}}
+{\footnotesize\ttfamily void Muxer\+::close\+File (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+Write the trailer and close the file. WARNING\+: After calling this function, it won\textquotesingle{}t be possible to open the file again 
+
+Definition at line \mbox{\hyperlink{muxer_8cpp_source_l00062}{62}} of file \mbox{\hyperlink{muxer_8cpp_source}{muxer.\+cpp}}.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00062                       \{}
+\DoxyCodeLine{00063     std::unique\_lock ul\{m\_\};}
+\DoxyCodeLine{00064     \textcolor{keywordflow}{if} (!file\_opened\_) throwError(\textcolor{stringliteral}{"{}cannot close file, file has not been opened"{}});}
+\DoxyCodeLine{00065     \textcolor{keywordflow}{if} (file\_closed\_) throwError(\textcolor{stringliteral}{"{}cannot close file, file has already been closed"{}});}
+\DoxyCodeLine{00066     \textcolor{keywordflow}{if} (av\_interleaved\_write\_frame(fmt\_ctx\_.get(), \textcolor{keyword}{nullptr})) throwError(\textcolor{stringliteral}{"{}failed to flush internal packet queue"{}});}
+\DoxyCodeLine{00067     \textcolor{keywordflow}{if} (av\_write\_trailer(fmt\_ctx\_.get()) < 0) throwError(\textcolor{stringliteral}{"{}failed to write file trailer"{}});}
+\DoxyCodeLine{00068     \textcolor{keywordflow}{if} (fmt\_ctx\_-\/>pb) \{}
+\DoxyCodeLine{00069         \textcolor{keywordflow}{if} (avio\_closep(\&(fmt\_ctx\_-\/>pb)) < 0) throwError(\textcolor{stringliteral}{"{}failed to close file"{}});}
+\DoxyCodeLine{00070     \}}
+\DoxyCodeLine{00071     file\_closed\_ = \textcolor{keyword}{true};}
+\DoxyCodeLine{00072 \}}
+
+\end{DoxyCode}
+\mbox{\Hypertarget{classMuxer_ae3952023b57203281a2e58705e0804c6}\label{classMuxer_ae3952023b57203281a2e58705e0804c6}} 
+\index{Muxer@{Muxer}!getGlobalHeaderFlags@{getGlobalHeaderFlags}}
+\index{getGlobalHeaderFlags@{getGlobalHeaderFlags}!Muxer@{Muxer}}
+\doxysubsubsection{\texorpdfstring{getGlobalHeaderFlags()}{getGlobalHeaderFlags()}}
+{\footnotesize\ttfamily int Muxer\+::get\+Global\+Header\+Flags (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+Get the global header flags of the output format \begin{DoxyReturn}{Returns}
+the global header flags 
+\end{DoxyReturn}
+
+
+Definition at line \mbox{\hyperlink{muxer_8cpp_source_l00096}{96}} of file \mbox{\hyperlink{muxer_8cpp_source}{muxer.\+cpp}}.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00096                                 \{}
+\DoxyCodeLine{00097     std::unique\_lock ul\{m\_\};}
+\DoxyCodeLine{00098     \textcolor{keywordflow}{return} fmt\_ctx\_-\/>oformat-\/>flags;}
+\DoxyCodeLine{00099 \}}
+
+\end{DoxyCode}
+\mbox{\Hypertarget{classMuxer_abc4baad299ce984680e87c0ef2246d77}\label{classMuxer_abc4baad299ce984680e87c0ef2246d77}} 
+\index{Muxer@{Muxer}!openFile@{openFile}}
+\index{openFile@{openFile}!Muxer@{Muxer}}
+\doxysubsubsection{\texorpdfstring{openFile()}{openFile()}}
+{\footnotesize\ttfamily void Muxer\+::open\+File (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+Open the file and write the header. WARNING\+: After calling this function, it won\textquotesingle{}t be possible to add streams to the muxer 
+
+Definition at line \mbox{\hyperlink{muxer_8cpp_source_l00048}{48}} of file \mbox{\hyperlink{muxer_8cpp_source}{muxer.\+cpp}}.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00048                      \{}
+\DoxyCodeLine{00049     std::unique\_lock ul\{m\_\};}
+\DoxyCodeLine{00050     \textcolor{keywordflow}{if} (file\_opened\_) throwError(\textcolor{stringliteral}{"{}cannot open file, file has already been opened"{}});}
+\DoxyCodeLine{00051     \textcolor{keywordflow}{if} (file\_closed\_) throwError(\textcolor{stringliteral}{"{}cannot re-\/open file, file has already been closed"{}});}
+\DoxyCodeLine{00052     \textcolor{comment}{/* create empty video file */}}
+\DoxyCodeLine{00053     \textcolor{keywordflow}{if} (!(fmt\_ctx\_-\/>flags \& AVFMT\_NOFILE)) \{}
+\DoxyCodeLine{00054         \textcolor{keywordflow}{if} (avio\_open(\&fmt\_ctx\_-\/>pb, filename\_.c\_str(), AVIO\_FLAG\_WRITE) < 0) \{}
+\DoxyCodeLine{00055             throwError(\textcolor{stringliteral}{"{}failed to create the output file"{}});}
+\DoxyCodeLine{00056         \}}
+\DoxyCodeLine{00057     \}}
+\DoxyCodeLine{00058     file\_opened\_ = \textcolor{keyword}{true};}
+\DoxyCodeLine{00059     \textcolor{keywordflow}{if} (avformat\_write\_header(fmt\_ctx\_.get(), \textcolor{keyword}{nullptr}) < 0) throwError(\textcolor{stringliteral}{"{}Failed to write file header"{}});}
+\DoxyCodeLine{00060 \}}
+
+\end{DoxyCode}
+\mbox{\Hypertarget{classMuxer_a0ea26e33f92375ae6a6244226c5e4648}\label{classMuxer_a0ea26e33f92375ae6a6244226c5e4648}} 
+\index{Muxer@{Muxer}!printInfo@{printInfo}}
+\index{printInfo@{printInfo}!Muxer@{Muxer}}
+\doxysubsubsection{\texorpdfstring{printInfo()}{printInfo()}}
+{\footnotesize\ttfamily void Muxer\+::print\+Info (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+Print informations about the streams 
+
+Definition at line \mbox{\hyperlink{muxer_8cpp_source_l00091}{91}} of file \mbox{\hyperlink{muxer_8cpp_source}{muxer.\+cpp}}.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00091                       \{}
+\DoxyCodeLine{00092     std::unique\_lock ul\{m\_\};}
+\DoxyCodeLine{00093     av\_dump\_format(fmt\_ctx\_.get(), 0, filename\_.c\_str(), 1);}
+\DoxyCodeLine{00094 \}}
+
+\end{DoxyCode}
+\mbox{\Hypertarget{classMuxer_a0cf18ee009cfebeab6d024ab157c9c85}\label{classMuxer_a0cf18ee009cfebeab6d024ab157c9c85}} 
+\index{Muxer@{Muxer}!writePacket@{writePacket}}
+\index{writePacket@{writePacket}!Muxer@{Muxer}}
+\doxysubsubsection{\texorpdfstring{writePacket()}{writePacket()}}
+{\footnotesize\ttfamily void Muxer\+::write\+Packet (\begin{DoxyParamCaption}\item[{av\+::\+Packet\+UPtr}]{packet,  }\item[{av\+::\+Media\+Type}]{packet\+\_\+type }\end{DoxyParamCaption})}
+
+Write a packet to the output file. This function is thread-\/safe 
+\begin{DoxyParams}{Parameters}
+{\em packet} & the packet to write. If nullptr, the output queue will be flushed \\
+\hline
+{\em packet\+\_\+type} & the type of the packet (audio or video). If the packet is nullptr, this parameter is irrelevant \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line \mbox{\hyperlink{muxer_8cpp_source_l00074}{74}} of file \mbox{\hyperlink{muxer_8cpp_source}{muxer.\+cpp}}.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00074                                                                     \{}
+\DoxyCodeLine{00075     std::unique\_lock ul\{m\_\};}
+\DoxyCodeLine{00076 }
+\DoxyCodeLine{00077     \textcolor{keywordflow}{if} (!file\_opened\_) throwError(\textcolor{stringliteral}{"{}cannot write packet, file has not been opened"{}});}
+\DoxyCodeLine{00078     \textcolor{keywordflow}{if} (file\_closed\_) throwError(\textcolor{stringliteral}{"{}cannot write packet, file has already been closed"{}});}
+\DoxyCodeLine{00079 }
+\DoxyCodeLine{00080     \textcolor{keywordflow}{if} (packet) \{}
+\DoxyCodeLine{00081         \textcolor{keywordflow}{if} (!av::validMediaType(packet\_type)) throwError(\textcolor{stringliteral}{"{}received packet of unknown type"{}});}
+\DoxyCodeLine{00082         \textcolor{keyword}{auto} stream = streams\_[packet\_type];}
+\DoxyCodeLine{00083         \textcolor{keywordflow}{if} (!stream) throwError(\textcolor{stringliteral}{"{}stream of specified type not present"{}});}
+\DoxyCodeLine{00084         av\_packet\_rescale\_ts(packet.get(), encoders\_time\_bases\_[packet\_type], stream-\/>time\_base);}
+\DoxyCodeLine{00085         packet-\/>stream\_index = stream-\/>index;}
+\DoxyCodeLine{00086     \}}
+\DoxyCodeLine{00087 }
+\DoxyCodeLine{00088     \textcolor{keywordflow}{if} (av\_interleaved\_write\_frame(fmt\_ctx\_.get(), packet.get())) throwError(\textcolor{stringliteral}{"{}failed to write packet"{}});}
+\DoxyCodeLine{00089 \}}
+
+\end{DoxyCode}
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+src/format/muxer.\+h\item 
+src/format/muxer.\+cpp\end{DoxyCompactItemize}

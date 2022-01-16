@@ -1,0 +1,44 @@
+\hypertarget{muxer_8h_source}{}\doxysection{muxer.\+h}
+\label{muxer_8h_source}\index{src/format/muxer.h@{src/format/muxer.h}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{muxer_8h_source_l00001}00001 \textcolor{preprocessor}{\#pragma once}}
+\DoxyCodeLine{\Hypertarget{muxer_8h_source_l00002}00002 }
+\DoxyCodeLine{\Hypertarget{muxer_8h_source_l00003}00003 \textcolor{preprocessor}{\#include <array>}}
+\DoxyCodeLine{\Hypertarget{muxer_8h_source_l00004}00004 \textcolor{preprocessor}{\#include <mutex>}}
+\DoxyCodeLine{\Hypertarget{muxer_8h_source_l00005}00005 \textcolor{preprocessor}{\#include <string>}}
+\DoxyCodeLine{\Hypertarget{muxer_8h_source_l00006}00006 }
+\DoxyCodeLine{\Hypertarget{muxer_8h_source_l00007}00007 \textcolor{preprocessor}{\#include "{}common/common.h"{}}}
+\DoxyCodeLine{\Hypertarget{muxer_8h_source_l00008}00008 }
+\DoxyCodeLine{\Hypertarget{muxer_8h_source_l00009}\mbox{\hyperlink{classMuxer}{00009}} \textcolor{keyword}{class }\mbox{\hyperlink{classMuxer}{Muxer}} \{}
+\DoxyCodeLine{\Hypertarget{muxer_8h_source_l00010}00010     av::FormatContextUPtr fmt\_ctx\_;}
+\DoxyCodeLine{\Hypertarget{muxer_8h_source_l00011}00011     std::string filename\_;}
+\DoxyCodeLine{\Hypertarget{muxer_8h_source_l00012}00012     std::array<const AVStream *, av::MediaType::NumTypes> streams\_ = \{\textcolor{keyword}{nullptr}, \textcolor{keyword}{nullptr}\};}
+\DoxyCodeLine{\Hypertarget{muxer_8h_source_l00013}00013     std::array<AVRational, av::MediaType::NumTypes> encoders\_time\_bases\_;}
+\DoxyCodeLine{\Hypertarget{muxer_8h_source_l00014}00014     \textcolor{keywordtype}{bool} file\_opened\_ = \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{muxer_8h_source_l00015}00015     \textcolor{keywordtype}{bool} file\_closed\_ = \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{muxer_8h_source_l00016}00016     std::mutex m\_;}
+\DoxyCodeLine{\Hypertarget{muxer_8h_source_l00017}00017 }
+\DoxyCodeLine{\Hypertarget{muxer_8h_source_l00018}00018 \textcolor{keyword}{public}:}
+\DoxyCodeLine{\Hypertarget{muxer_8h_source_l00023}00023     \textcolor{keyword}{explicit} \mbox{\hyperlink{classMuxer_aa8f6bb4ae0e395ace716a7b895967002}{Muxer}}(std::string filename);}
+\DoxyCodeLine{\Hypertarget{muxer_8h_source_l00024}00024 }
+\DoxyCodeLine{\Hypertarget{muxer_8h_source_l00025}00025     \mbox{\hyperlink{classMuxer_aa8f6bb4ae0e395ace716a7b895967002}{Muxer}}(\textcolor{keyword}{const} \mbox{\hyperlink{classMuxer}{Muxer}} \&) = \textcolor{keyword}{delete};}
+\DoxyCodeLine{\Hypertarget{muxer_8h_source_l00026}00026 }
+\DoxyCodeLine{\Hypertarget{muxer_8h_source_l00027}00027     \mbox{\hyperlink{classMuxer}{\string~Muxer}}();}
+\DoxyCodeLine{\Hypertarget{muxer_8h_source_l00028}00028 }
+\DoxyCodeLine{\Hypertarget{muxer_8h_source_l00029}00029     \mbox{\hyperlink{classMuxer}{Muxer}} \&operator=(\textcolor{keyword}{const} \mbox{\hyperlink{classMuxer}{Muxer}} \&) = \textcolor{keyword}{delete};}
+\DoxyCodeLine{\Hypertarget{muxer_8h_source_l00030}00030 }
+\DoxyCodeLine{\Hypertarget{muxer_8h_source_l00036}00036     \textcolor{keywordtype}{void} \mbox{\hyperlink{classMuxer_a6f0721584a75b82716c8d0e543ad4122}{addStream}}(\textcolor{keyword}{const} AVCodecContext *enc\_ctx);}
+\DoxyCodeLine{\Hypertarget{muxer_8h_source_l00037}00037 }
+\DoxyCodeLine{\Hypertarget{muxer_8h_source_l00042}00042     \textcolor{keywordtype}{void} \mbox{\hyperlink{classMuxer_abc4baad299ce984680e87c0ef2246d77}{openFile}}();}
+\DoxyCodeLine{\Hypertarget{muxer_8h_source_l00043}00043 }
+\DoxyCodeLine{\Hypertarget{muxer_8h_source_l00048}00048     \textcolor{keywordtype}{void} \mbox{\hyperlink{classMuxer_a11f0ea0fda943312eb42a7f6701dd08e}{closeFile}}();}
+\DoxyCodeLine{\Hypertarget{muxer_8h_source_l00049}00049 }
+\DoxyCodeLine{\Hypertarget{muxer_8h_source_l00056}00056     \textcolor{keywordtype}{void} \mbox{\hyperlink{classMuxer_a0cf18ee009cfebeab6d024ab157c9c85}{writePacket}}(av::PacketUPtr packet, av::MediaType packet\_type);}
+\DoxyCodeLine{\Hypertarget{muxer_8h_source_l00057}00057 }
+\DoxyCodeLine{\Hypertarget{muxer_8h_source_l00061}00061     \textcolor{keywordtype}{void} \mbox{\hyperlink{classMuxer_a0ea26e33f92375ae6a6244226c5e4648}{printInfo}}();}
+\DoxyCodeLine{\Hypertarget{muxer_8h_source_l00062}00062 }
+\DoxyCodeLine{\Hypertarget{muxer_8h_source_l00067}00067     [[nodiscard]] \textcolor{keywordtype}{int} \mbox{\hyperlink{classMuxer_ae3952023b57203281a2e58705e0804c6}{getGlobalHeaderFlags}}();}
+\DoxyCodeLine{\Hypertarget{muxer_8h_source_l00068}00068 \};}
+
+\end{DoxyCode}

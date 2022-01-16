@@ -1,0 +1,40 @@
+\hypertarget{decoder_8h_source}{}\doxysection{decoder.\+h}
+\label{decoder_8h_source}\index{src/process/decoder.h@{src/process/decoder.h}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{decoder_8h_source_l00001}00001 \textcolor{preprocessor}{\#pragma once}}
+\DoxyCodeLine{\Hypertarget{decoder_8h_source_l00002}00002 }
+\DoxyCodeLine{\Hypertarget{decoder_8h_source_l00003}00003 \textcolor{preprocessor}{\#include <memory>}}
+\DoxyCodeLine{\Hypertarget{decoder_8h_source_l00004}00004 }
+\DoxyCodeLine{\Hypertarget{decoder_8h_source_l00005}00005 \textcolor{preprocessor}{\#include "{}common/common.h"{}}}
+\DoxyCodeLine{\Hypertarget{decoder_8h_source_l00006}00006 }
+\DoxyCodeLine{\Hypertarget{decoder_8h_source_l00007}\mbox{\hyperlink{classDecoder}{00007}} \textcolor{keyword}{class }\mbox{\hyperlink{classDecoder}{Decoder}} \{}
+\DoxyCodeLine{\Hypertarget{decoder_8h_source_l00008}00008     AVCodec *codec\_ = \textcolor{keyword}{nullptr};}
+\DoxyCodeLine{\Hypertarget{decoder_8h_source_l00009}00009     av::CodecContextUPtr codec\_ctx\_;}
+\DoxyCodeLine{\Hypertarget{decoder_8h_source_l00010}00010     av::FrameUPtr frame\_;}
+\DoxyCodeLine{\Hypertarget{decoder_8h_source_l00011}00011 }
+\DoxyCodeLine{\Hypertarget{decoder_8h_source_l00012}00012     \textcolor{keyword}{friend} \textcolor{keywordtype}{void} swap(\mbox{\hyperlink{classDecoder}{Decoder}} \&lhs, \mbox{\hyperlink{classDecoder}{Decoder}} \&rhs);}
+\DoxyCodeLine{\Hypertarget{decoder_8h_source_l00013}00013 }
+\DoxyCodeLine{\Hypertarget{decoder_8h_source_l00014}00014 \textcolor{keyword}{public}:}
+\DoxyCodeLine{\Hypertarget{decoder_8h_source_l00015}00015     \mbox{\hyperlink{classDecoder}{Decoder}}() = \textcolor{keywordflow}{default};}
+\DoxyCodeLine{\Hypertarget{decoder_8h_source_l00016}00016 }
+\DoxyCodeLine{\Hypertarget{decoder_8h_source_l00021}00021     \textcolor{keyword}{explicit} \mbox{\hyperlink{classDecoder}{Decoder}}(\textcolor{keyword}{const} AVCodecParameters *params);}
+\DoxyCodeLine{\Hypertarget{decoder_8h_source_l00022}00022 }
+\DoxyCodeLine{\Hypertarget{decoder_8h_source_l00023}00023     \mbox{\hyperlink{classDecoder}{Decoder}}(\textcolor{keyword}{const} \mbox{\hyperlink{classDecoder}{Decoder}} \&) = \textcolor{keyword}{delete};}
+\DoxyCodeLine{\Hypertarget{decoder_8h_source_l00024}00024 }
+\DoxyCodeLine{\Hypertarget{decoder_8h_source_l00025}00025     \mbox{\hyperlink{classDecoder}{Decoder}}(\mbox{\hyperlink{classDecoder}{Decoder}} \&\&other);}
+\DoxyCodeLine{\Hypertarget{decoder_8h_source_l00026}00026 }
+\DoxyCodeLine{\Hypertarget{decoder_8h_source_l00027}00027     \mbox{\hyperlink{classDecoder}{\string~Decoder}}() = \textcolor{keywordflow}{default};}
+\DoxyCodeLine{\Hypertarget{decoder_8h_source_l00028}00028 }
+\DoxyCodeLine{\Hypertarget{decoder_8h_source_l00029}00029     \mbox{\hyperlink{classDecoder}{Decoder}} \&operator=(\mbox{\hyperlink{classDecoder}{Decoder}} other);}
+\DoxyCodeLine{\Hypertarget{decoder_8h_source_l00030}00030 }
+\DoxyCodeLine{\Hypertarget{decoder_8h_source_l00037}00037     \textcolor{keywordtype}{bool} \mbox{\hyperlink{classDecoder_ae029679b53626c60c68a4a21e876a8ed}{sendPacket}}(\textcolor{keyword}{const} AVPacket *packet);}
+\DoxyCodeLine{\Hypertarget{decoder_8h_source_l00038}00038 }
+\DoxyCodeLine{\Hypertarget{decoder_8h_source_l00044}00044     av::FrameUPtr \mbox{\hyperlink{classDecoder_a14d4f27737b208d96bdfcadf9f7068c4}{getFrame}}();}
+\DoxyCodeLine{\Hypertarget{decoder_8h_source_l00045}00045 }
+\DoxyCodeLine{\Hypertarget{decoder_8h_source_l00050}00050     [[nodiscard]] \textcolor{keyword}{const} AVCodecContext *\mbox{\hyperlink{classDecoder_a97f997415d60c5be1cc7c4f0d959d690}{getContext}}() \textcolor{keyword}{const};}
+\DoxyCodeLine{\Hypertarget{decoder_8h_source_l00051}00051 }
+\DoxyCodeLine{\Hypertarget{decoder_8h_source_l00056}00056     [[nodiscard]] std::string \mbox{\hyperlink{classDecoder_a80744bea78a907510147e400e9600c16}{getName}}() \textcolor{keyword}{const};}
+\DoxyCodeLine{\Hypertarget{decoder_8h_source_l00057}00057 \};}
+
+\end{DoxyCode}

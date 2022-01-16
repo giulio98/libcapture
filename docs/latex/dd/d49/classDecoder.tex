@@ -1,0 +1,234 @@
+\hypertarget{classDecoder}{}\doxysection{Decoder Class Reference}
+\label{classDecoder}\index{Decoder@{Decoder}}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classDecoder_afcf53f028a091b22c504656cb091da83}{Decoder}} (const AVCodec\+Parameters $\ast$params)
+\item 
+\mbox{\Hypertarget{classDecoder_ab3219e91712f38ed4e4cd1a81f033b83}\label{classDecoder_ab3219e91712f38ed4e4cd1a81f033b83}} 
+{\bfseries Decoder} (const \mbox{\hyperlink{classDecoder}{Decoder}} \&)=delete
+\item 
+\mbox{\hyperlink{classDecoder_a0a05e583af9f9e4c992e0074a5de027d}{Decoder}} (\mbox{\hyperlink{classDecoder}{Decoder}} \&\&other)
+\item 
+\mbox{\hyperlink{classDecoder}{Decoder}} \& \mbox{\hyperlink{classDecoder_ae82c2f06d5238b1f1edf65b265c42634}{operator=}} (\mbox{\hyperlink{classDecoder}{Decoder}} other)
+\item 
+bool \mbox{\hyperlink{classDecoder_ae029679b53626c60c68a4a21e876a8ed}{send\+Packet}} (const AVPacket $\ast$packet)
+\item 
+av\+::\+Frame\+UPtr \mbox{\hyperlink{classDecoder_a14d4f27737b208d96bdfcadf9f7068c4}{get\+Frame}} ()
+\item 
+const AVCodec\+Context $\ast$ \mbox{\hyperlink{classDecoder_a97f997415d60c5be1cc7c4f0d959d690}{get\+Context}} () const
+\item 
+std\+::string \mbox{\hyperlink{classDecoder_a80744bea78a907510147e400e9600c16}{get\+Name}} () const
+\end{DoxyCompactItemize}
+\doxysubsection*{Friends}
+\begin{DoxyCompactItemize}
+\item 
+void \mbox{\hyperlink{classDecoder_a3afcf16131999c2fdeddb7d1d483a69d}{swap}} (\mbox{\hyperlink{classDecoder}{Decoder}} \&lhs, \mbox{\hyperlink{classDecoder}{Decoder}} \&rhs)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+
+
+Definition at line \mbox{\hyperlink{decoder_8h_source_l00007}{7}} of file \mbox{\hyperlink{decoder_8h_source}{decoder.\+h}}.
+
+
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classDecoder_afcf53f028a091b22c504656cb091da83}\label{classDecoder_afcf53f028a091b22c504656cb091da83}} 
+\index{Decoder@{Decoder}!Decoder@{Decoder}}
+\index{Decoder@{Decoder}!Decoder@{Decoder}}
+\doxysubsubsection{\texorpdfstring{Decoder()}{Decoder()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily Decoder\+::\+Decoder (\begin{DoxyParamCaption}\item[{const AVCodec\+Parameters $\ast$}]{params }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [explicit]}}
+
+Create a new decoder 
+\begin{DoxyParams}{Parameters}
+{\em params} & the parameters of the stream to decode (likely taken from a demuxer) \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line \mbox{\hyperlink{decoder_8cpp_source_l00013}{13}} of file \mbox{\hyperlink{decoder_8cpp_source}{decoder.\+cpp}}.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00013                                                 \{}
+\DoxyCodeLine{00014     \textcolor{keywordflow}{if} (!params) throwError(\textcolor{stringliteral}{"{}received stream parameters ptr is null"{}});}
+\DoxyCodeLine{00015 }
+\DoxyCodeLine{00016     codec\_ = avcodec\_find\_decoder(params-\/>codec\_id);}
+\DoxyCodeLine{00017     \textcolor{keywordflow}{if} (!codec\_) throwError(\textcolor{stringliteral}{"{}cannot find codec"{}});}
+\DoxyCodeLine{00018 }
+\DoxyCodeLine{00019     codec\_ctx\_ = av::CodecContextUPtr(avcodec\_alloc\_context3(codec\_));}
+\DoxyCodeLine{00020     \textcolor{keywordflow}{if} (!codec\_ctx\_) throwError(\textcolor{stringliteral}{"{}failed to allocated memory for AVCodecContext"{}});}
+\DoxyCodeLine{00021 }
+\DoxyCodeLine{00022     \textcolor{keywordflow}{if} (avcodec\_parameters\_to\_context(codec\_ctx\_.get(), params) < 0)}
+\DoxyCodeLine{00023         throwError(\textcolor{stringliteral}{"{}failed to copy codec params to codec context"{}});}
+\DoxyCodeLine{00024 }
+\DoxyCodeLine{00025     \textcolor{keywordflow}{if} (avcodec\_open2(codec\_ctx\_.get(), codec\_, \textcolor{keyword}{nullptr}) < 0) throwError(\textcolor{stringliteral}{"{}unable to open the av codec"{}});}
+\DoxyCodeLine{00026 \}}
+
+\end{DoxyCode}
+\mbox{\Hypertarget{classDecoder_a0a05e583af9f9e4c992e0074a5de027d}\label{classDecoder_a0a05e583af9f9e4c992e0074a5de027d}} 
+\index{Decoder@{Decoder}!Decoder@{Decoder}}
+\index{Decoder@{Decoder}!Decoder@{Decoder}}
+\doxysubsubsection{\texorpdfstring{Decoder()}{Decoder()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily Decoder\+::\+Decoder (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classDecoder}{Decoder}} \&\&}]{other }\end{DoxyParamCaption})}
+
+
+
+Definition at line \mbox{\hyperlink{decoder_8cpp_source_l00028}{28}} of file \mbox{\hyperlink{decoder_8cpp_source}{decoder.\+cpp}}.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00028 : \mbox{\hyperlink{classDecoder}{Decoder}}() \{ swap(*\textcolor{keyword}{this}, other); \}}
+
+\end{DoxyCode}
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classDecoder_a97f997415d60c5be1cc7c4f0d959d690}\label{classDecoder_a97f997415d60c5be1cc7c4f0d959d690}} 
+\index{Decoder@{Decoder}!getContext@{getContext}}
+\index{getContext@{getContext}!Decoder@{Decoder}}
+\doxysubsubsection{\texorpdfstring{getContext()}{getContext()}}
+{\footnotesize\ttfamily const AVCodec\+Context $\ast$ Decoder\+::get\+Context (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const}
+
+Access the internal codec context \begin{DoxyReturn}{Returns}
+an observer pointer to access the codec context 
+\end{DoxyReturn}
+
+
+Definition at line \mbox{\hyperlink{decoder_8cpp_source_l00059}{59}} of file \mbox{\hyperlink{decoder_8cpp_source}{decoder.\+cpp}}.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00059 \{ \textcolor{keywordflow}{return} codec\_ctx\_.get(); \}}
+
+\end{DoxyCode}
+\mbox{\Hypertarget{classDecoder_a14d4f27737b208d96bdfcadf9f7068c4}\label{classDecoder_a14d4f27737b208d96bdfcadf9f7068c4}} 
+\index{Decoder@{Decoder}!getFrame@{getFrame}}
+\index{getFrame@{getFrame}!Decoder@{Decoder}}
+\doxysubsubsection{\texorpdfstring{getFrame()}{getFrame()}}
+{\footnotesize\ttfamily av\+::\+Frame\+UPtr Decoder\+::get\+Frame (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+Get a converted Frame from the decoder \begin{DoxyReturn}{Returns}
+a frame if it was possible to get it, nullptr if the decoder had nothing to write because it is empty or flushed 
+\end{DoxyReturn}
+
+
+Definition at line \mbox{\hyperlink{decoder_8cpp_source_l00044}{44}} of file \mbox{\hyperlink{decoder_8cpp_source}{decoder.\+cpp}}.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00044                               \{}
+\DoxyCodeLine{00045     \textcolor{keywordflow}{if} (!codec\_ctx\_) throwError(\textcolor{stringliteral}{"{}decoder was not initialized yet"{}});}
+\DoxyCodeLine{00046 }
+\DoxyCodeLine{00047     \textcolor{keywordflow}{if} (!frame\_) \{}
+\DoxyCodeLine{00048         frame\_ = av::FrameUPtr(av\_frame\_alloc());}
+\DoxyCodeLine{00049         \textcolor{keywordflow}{if} (!frame\_) throwError(\textcolor{stringliteral}{"{}failed to allocate frame"{}});}
+\DoxyCodeLine{00050     \}}
+\DoxyCodeLine{00051 }
+\DoxyCodeLine{00052     \textcolor{keywordtype}{int} ret = avcodec\_receive\_frame(codec\_ctx\_.get(), frame\_.get());}
+\DoxyCodeLine{00053     \textcolor{keywordflow}{if} (ret == AVERROR(EAGAIN) || ret == AVERROR\_EOF) \textcolor{keywordflow}{return} \textcolor{keyword}{nullptr};}
+\DoxyCodeLine{00054     \textcolor{keywordflow}{if} (ret < 0) throwError(\textcolor{stringliteral}{"{}failed to receive frame from decoder"{}});}
+\DoxyCodeLine{00055 }
+\DoxyCodeLine{00056     \textcolor{keywordflow}{return} std::move(frame\_);}
+\DoxyCodeLine{00057 \}}
+
+\end{DoxyCode}
+\mbox{\Hypertarget{classDecoder_a80744bea78a907510147e400e9600c16}\label{classDecoder_a80744bea78a907510147e400e9600c16}} 
+\index{Decoder@{Decoder}!getName@{getName}}
+\index{getName@{getName}!Decoder@{Decoder}}
+\doxysubsubsection{\texorpdfstring{getName()}{getName()}}
+{\footnotesize\ttfamily std\+::string Decoder\+::get\+Name (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const}
+
+Get the name of the decoder \begin{DoxyReturn}{Returns}
+the name of the decoder 
+\end{DoxyReturn}
+
+
+Definition at line \mbox{\hyperlink{decoder_8cpp_source_l00061}{61}} of file \mbox{\hyperlink{decoder_8cpp_source}{decoder.\+cpp}}.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00061                                  \{}
+\DoxyCodeLine{00062     \textcolor{keywordflow}{if} (codec\_) \textcolor{keywordflow}{return} codec\_-\/>long\_name;}
+\DoxyCodeLine{00063     \textcolor{keywordflow}{return} std::string\{\};}
+\DoxyCodeLine{00064 \}}
+
+\end{DoxyCode}
+\mbox{\Hypertarget{classDecoder_ae82c2f06d5238b1f1edf65b265c42634}\label{classDecoder_ae82c2f06d5238b1f1edf65b265c42634}} 
+\index{Decoder@{Decoder}!operator=@{operator=}}
+\index{operator=@{operator=}!Decoder@{Decoder}}
+\doxysubsubsection{\texorpdfstring{operator=()}{operator=()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{classDecoder}{Decoder}} \& Decoder\+::operator= (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classDecoder}{Decoder}}}]{other }\end{DoxyParamCaption})}
+
+
+
+Definition at line \mbox{\hyperlink{decoder_8cpp_source_l00030}{30}} of file \mbox{\hyperlink{decoder_8cpp_source}{decoder.\+cpp}}.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00030                                          \{}
+\DoxyCodeLine{00031     swap(*\textcolor{keyword}{this}, other);}
+\DoxyCodeLine{00032     \textcolor{keywordflow}{return} *\textcolor{keyword}{this};}
+\DoxyCodeLine{00033 \}}
+
+\end{DoxyCode}
+\mbox{\Hypertarget{classDecoder_ae029679b53626c60c68a4a21e876a8ed}\label{classDecoder_ae029679b53626c60c68a4a21e876a8ed}} 
+\index{Decoder@{Decoder}!sendPacket@{sendPacket}}
+\index{sendPacket@{sendPacket}!Decoder@{Decoder}}
+\doxysubsubsection{\texorpdfstring{sendPacket()}{sendPacket()}}
+{\footnotesize\ttfamily bool Decoder\+::send\+Packet (\begin{DoxyParamCaption}\item[{const AVPacket $\ast$}]{packet }\end{DoxyParamCaption})}
+
+Send a packet to the decoder 
+\begin{DoxyParams}{Parameters}
+{\em packet} & the packet to send to the decoder. It can be nullptr to flush the decoder (WARNING\+: sending more than one flush packet will throw an exception). \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+true if the packet has been correctly sent, false if the decoder could not receive it 
+\end{DoxyReturn}
+
+
+Definition at line \mbox{\hyperlink{decoder_8cpp_source_l00035}{35}} of file \mbox{\hyperlink{decoder_8cpp_source}{decoder.\+cpp}}.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00035                                                \{}
+\DoxyCodeLine{00036     \textcolor{keywordflow}{if} (!codec\_ctx\_) throwError(\textcolor{stringliteral}{"{}decoder was not initialized yet"{}});}
+\DoxyCodeLine{00037     \textcolor{keywordtype}{int} ret = avcodec\_send\_packet(codec\_ctx\_.get(), packet);}
+\DoxyCodeLine{00038     \textcolor{keywordflow}{if} (ret == AVERROR(EAGAIN)) \textcolor{keywordflow}{return} \textcolor{keyword}{false};}
+\DoxyCodeLine{00039     \textcolor{keywordflow}{if} (ret == AVERROR\_EOF) throwError(\textcolor{stringliteral}{"{}has already been flushed"{}});}
+\DoxyCodeLine{00040     \textcolor{keywordflow}{if} (ret < 0) throwError(\textcolor{stringliteral}{"{}failed to send packet to decoder"{}});}
+\DoxyCodeLine{00041     \textcolor{keywordflow}{return} \textcolor{keyword}{true};}
+\DoxyCodeLine{00042 \}}
+
+\end{DoxyCode}
+
+
+\doxysubsection{Friends And Related Function Documentation}
+\mbox{\Hypertarget{classDecoder_a3afcf16131999c2fdeddb7d1d483a69d}\label{classDecoder_a3afcf16131999c2fdeddb7d1d483a69d}} 
+\index{Decoder@{Decoder}!swap@{swap}}
+\index{swap@{swap}!Decoder@{Decoder}}
+\doxysubsubsection{\texorpdfstring{swap}{swap}}
+{\footnotesize\ttfamily void swap (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classDecoder}{Decoder}} \&}]{lhs,  }\item[{\mbox{\hyperlink{classDecoder}{Decoder}} \&}]{rhs }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [friend]}}
+
+
+
+Definition at line \mbox{\hyperlink{decoder_8cpp_source_l00007}{7}} of file \mbox{\hyperlink{decoder_8cpp_source}{decoder.\+cpp}}.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00007                                       \{}
+\DoxyCodeLine{00008     std::swap(lhs.codec\_, rhs.codec\_);}
+\DoxyCodeLine{00009     std::swap(lhs.codec\_ctx\_, rhs.codec\_ctx\_);}
+\DoxyCodeLine{00010     std::swap(lhs.frame\_, rhs.frame\_);}
+\DoxyCodeLine{00011 \}}
+
+\end{DoxyCode}
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+src/process/decoder.\+h\item 
+src/process/decoder.\+cpp\end{DoxyCompactItemize}

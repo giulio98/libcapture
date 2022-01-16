@@ -1,0 +1,52 @@
+\hypertarget{classLogCallbackSetter}{}\doxysection{Log\+Callback\+Setter Class Reference}
+\label{classLogCallbackSetter}\index{LogCallbackSetter@{LogCallbackSetter}}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classLogCallbackSetter_a543652cdb7967cf851cca69c865b43a9}{Log\+Callback\+Setter}} (void($\ast$callback)(void $\ast$, int, const char $\ast$, va\+\_\+list))
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+
+
+Definition at line \mbox{\hyperlink{log__callback__setter_8h_source_l00003}{3}} of file \mbox{\hyperlink{log__callback__setter_8h_source}{log\+\_\+callback\+\_\+setter.\+h}}.
+
+
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classLogCallbackSetter_a543652cdb7967cf851cca69c865b43a9}\label{classLogCallbackSetter_a543652cdb7967cf851cca69c865b43a9}} 
+\index{LogCallbackSetter@{LogCallbackSetter}!LogCallbackSetter@{LogCallbackSetter}}
+\index{LogCallbackSetter@{LogCallbackSetter}!LogCallbackSetter@{LogCallbackSetter}}
+\doxysubsubsection{\texorpdfstring{LogCallbackSetter()}{LogCallbackSetter()}}
+{\footnotesize\ttfamily Log\+Callback\+Setter\+::\+Log\+Callback\+Setter (\begin{DoxyParamCaption}\item[{void($\ast$)(void $\ast$, int, const char $\ast$, va\+\_\+list)}]{callback }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Definition at line \mbox{\hyperlink{log__callback__setter_8h_source_l00005}{5}} of file \mbox{\hyperlink{log__callback__setter_8h_source}{log\+\_\+callback\+\_\+setter.\+h}}.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00005 \{ av\_log\_set\_callback(callback); \}}
+
+\end{DoxyCode}
+\mbox{\Hypertarget{classLogCallbackSetter_aa4b61cbcfdf5a47b7ce27cf42181ea89}\label{classLogCallbackSetter_aa4b61cbcfdf5a47b7ce27cf42181ea89}} 
+\index{LogCallbackSetter@{LogCallbackSetter}!````~LogCallbackSetter@{$\sim$LogCallbackSetter}}
+\index{````~LogCallbackSetter@{$\sim$LogCallbackSetter}!LogCallbackSetter@{LogCallbackSetter}}
+\doxysubsubsection{\texorpdfstring{$\sim$LogCallbackSetter()}{~LogCallbackSetter()}}
+{\footnotesize\ttfamily Log\+Callback\+Setter\+::$\sim$\+Log\+Callback\+Setter (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Definition at line \mbox{\hyperlink{log__callback__setter_8h_source_l00007}{7}} of file \mbox{\hyperlink{log__callback__setter_8h_source}{log\+\_\+callback\+\_\+setter.\+h}}.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00007 \{ av\_log\_set\_callback(av\_log\_default\_callback); \}}
+
+\end{DoxyCode}
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+src/utils/log\+\_\+callback\+\_\+setter.\+h\end{DoxyCompactItemize}

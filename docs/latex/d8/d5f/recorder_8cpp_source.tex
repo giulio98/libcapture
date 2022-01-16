@@ -1,0 +1,366 @@
+\hypertarget{recorder_8cpp_source}{}\doxysection{recorder.\+cpp}
+\label{recorder_8cpp_source}\index{example/recorder.cpp@{example/recorder.cpp}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00001}00001 \textcolor{preprocessor}{\#ifdef LINUX}}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00002}00002 \textcolor{preprocessor}{\#include <X11/Xlib.h>}}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00003}00003 \textcolor{preprocessor}{\#include <X11/cursorfont.h>}}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00004}00004 \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00005}00005 }
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00006}00006 \textcolor{preprocessor}{\#include <screen-\/recorder/screen\_recorder.h>}}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00007}00007 \textcolor{preprocessor}{\#include <screen-\/recorder/video\_parameters.h>}}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00008}00008 }
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00009}00009 \textcolor{preprocessor}{\#include <filesystem>}}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00010}00010 \textcolor{preprocessor}{\#include <iostream>}}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00011}00011 \textcolor{preprocessor}{\#include <stdexcept>}}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00012}00012 \textcolor{preprocessor}{\#include <string>}}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00013}00013 \textcolor{preprocessor}{\#include <vector>}}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00014}00014 }
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00015}00015 \textcolor{preprocessor}{\#define DEFAULT\_DEVICES 0}}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00016}00016 }
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00017}00017 \mbox{\hyperlink{classVideoParameters}{VideoParameters}} parseVideoSize(\textcolor{keyword}{const} std::string \&str) \{}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00018}00018     \mbox{\hyperlink{classVideoParameters}{VideoParameters}} dims;}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00019}00019 }
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00020}00020     \textcolor{keyword}{auto} main\_delim\_pos = str.find(\textcolor{stringliteral}{"{}:"{}});}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00021}00021 }
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00022}00022     \{}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00023}00023         std::string video\_size = str.substr(0, main\_delim\_pos);}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00024}00024         \textcolor{keyword}{auto} delim\_pos = video\_size.find(\textcolor{stringliteral}{"{}x"{}});}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00025}00025         \textcolor{keywordflow}{if} (delim\_pos == std::string::npos) \textcolor{keywordflow}{throw} std::runtime\_error(\textcolor{stringliteral}{"{}Wrong video-\/size format"{}});}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00026}00026         \textcolor{keywordtype}{int} width = std::stoi(video\_size.substr(0, delim\_pos));}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00027}00027         \textcolor{keywordtype}{int} height = std::stoi(video\_size.substr(delim\_pos + 1));}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00028}00028         dims.setVideoSize(width, height);}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00029}00029     \}}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00030}00030 }
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00031}00031     \textcolor{keywordflow}{if} (main\_delim\_pos != std::string::npos) \{}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00032}00032         std::string offsets = str.substr(main\_delim\_pos + 1);}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00033}00033         \textcolor{keyword}{auto} delim\_pos = offsets.find(\textcolor{stringliteral}{"{},"{}});}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00034}00034         \textcolor{keywordflow}{if} (delim\_pos == std::string::npos) \textcolor{keywordflow}{throw} std::runtime\_error(\textcolor{stringliteral}{"{}Wrong offsets"{}});}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00035}00035         \textcolor{keywordtype}{int} offset\_x = std::stoi(offsets.substr(0, delim\_pos));}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00036}00036         \textcolor{keywordtype}{int} offset\_y = std::stoi(offsets.substr(delim\_pos + 1));}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00037}00037         dims.setVideoOffset(offset\_x, offset\_y);}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00038}00038     \}}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00039}00039 }
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00040}00040     \textcolor{keywordflow}{return} dims;}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00041}00041 \}}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00042}00042 }
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00043}00043 std::tuple<std::string, std::string, VideoParameters, std::string, bool> parseArgs(std::vector<std::string> args) \{}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00044}00044     \mbox{\hyperlink{classVideoParameters}{VideoParameters}} video\_params;}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00045}00045     \textcolor{keywordtype}{int} framerate = 30;}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00046}00046     std::string video\_device;}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00047}00047     std::string audio\_device;}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00048}00048     std::string output\_file;}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00049}00049 }
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00050}00050 \textcolor{preprocessor}{\#if DEFAULT\_DEVICES}}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00051}00051 \textcolor{preprocessor}{\#if defined(WINDOWS)}}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00052}00052     video\_device = \textcolor{stringliteral}{"{}screen-\/capture-\/recorder"{}};}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00053}00053     audio\_device = \textcolor{stringliteral}{"{}Gruppo microfoni (Realtek High Definition Audio(SST))"{}};}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00054}00054 \textcolor{preprocessor}{\#elif defined(LINUX)}}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00055}00055     \{}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00056}00056         std::stringstream ss;}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00057}00057         ss << getenv(\textcolor{stringliteral}{"{}DISPLAY"{}}) << \textcolor{stringliteral}{"{}.0"{}};}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00058}00058         video\_device = ss.str();}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00059}00059     \}}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00060}00060     audio\_device = \textcolor{stringliteral}{"{}hw:0,0"{}};}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00061}00061 \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00062}00062     video\_device = \textcolor{stringliteral}{"{}1"{}};}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00063}00063     audio\_device = \textcolor{stringliteral}{"{}0"{}};}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00064}00064 \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00065}00065 \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00066}00066 }
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00067}00067     \textcolor{keywordtype}{bool} video\_device\_set = \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00068}00068     \textcolor{keywordtype}{bool} audio\_device\_set = \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00069}00069     \textcolor{keywordtype}{bool} video\_size\_set = \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00070}00070     \textcolor{keywordtype}{bool} framerate\_set = \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00071}00071     \textcolor{keywordtype}{bool} output\_set = \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00072}00072     \textcolor{keywordtype}{bool} verbose = \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00073}00073     std::string wrong\_args\_msg(\textcolor{stringliteral}{"{}Wrong arguments"{}});}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00074}00074 }
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00075}00075     \textcolor{keywordflow}{for} (\textcolor{keyword}{auto} it = args.begin(); it != args.end(); it++) \{}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00076}00076         \textcolor{keywordflow}{if} (*it == \textcolor{stringliteral}{"{}-\/h"{}}) \{}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00077}00077             \textcolor{keywordflow}{throw} std::runtime\_error(\textcolor{stringliteral}{"{}"{}});}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00078}00078         \} \textcolor{keywordflow}{else} \textcolor{keywordflow}{if} (*it == \textcolor{stringliteral}{"{}-\/video\_device"{}}) \{}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00079}00079             \textcolor{keywordflow}{if} (video\_device\_set || ++it == args.end()) \textcolor{keywordflow}{throw} std::runtime\_error(wrong\_args\_msg);}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00080}00080             video\_device = *it;}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00081}00081             video\_device\_set = \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00082}00082         \} \textcolor{keywordflow}{else} \textcolor{keywordflow}{if} (*it == \textcolor{stringliteral}{"{}-\/audio\_device"{}}) \{}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00083}00083             \textcolor{keywordflow}{if} (audio\_device\_set || ++it == args.end()) \textcolor{keywordflow}{throw} std::runtime\_error(wrong\_args\_msg);}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00084}00084             audio\_device = *it;}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00085}00085             audio\_device\_set = \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00086}00086         \} \textcolor{keywordflow}{else} \textcolor{keywordflow}{if} (*it == \textcolor{stringliteral}{"{}-\/video\_size"{}}) \{}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00087}00087             \textcolor{keywordflow}{if} (video\_size\_set || ++it == args.end()) \textcolor{keywordflow}{throw} std::runtime\_error(wrong\_args\_msg);}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00088}00088             video\_params = parseVideoSize(*it);}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00089}00089             video\_size\_set = \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00090}00090         \} \textcolor{keywordflow}{else} \textcolor{keywordflow}{if} (*it == \textcolor{stringliteral}{"{}-\/framerate"{}}) \{}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00091}00091             \textcolor{keywordflow}{if} (framerate\_set || ++it == args.end()) \textcolor{keywordflow}{throw} std::runtime\_error(wrong\_args\_msg);}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00092}00092             framerate = std::stoi(*it);}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00093}00093             framerate\_set = \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00094}00094         \} \textcolor{keywordflow}{else} \textcolor{keywordflow}{if} (*it == \textcolor{stringliteral}{"{}-\/o"{}}) \{}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00095}00095             \textcolor{keywordflow}{if} (output\_set || ++it == args.end()) \textcolor{keywordflow}{throw} std::runtime\_error(wrong\_args\_msg);}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00096}00096             output\_file = *it;}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00097}00097             output\_set = \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00098}00098         \} \textcolor{keywordflow}{else} \textcolor{keywordflow}{if} (*it == \textcolor{stringliteral}{"{}-\/v"{}}) \{}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00099}00099             verbose = \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00100}00100         \} \textcolor{keywordflow}{else} \{}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00101}00101             \textcolor{keywordflow}{throw} std::runtime\_error(\textcolor{stringliteral}{"{}Unknown arg: "{}} + *it);}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00102}00102         \}}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00103}00103     \}}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00104}00104 }
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00105}00105     video\_params.setFramerate(framerate);}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00106}00106 }
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00107}00107     \textcolor{keywordflow}{if} (!output\_set) \{}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00108}00108         output\_file = \textcolor{stringliteral}{"{}output.mp4"{}};}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00109}00109         std::cout << \textcolor{stringliteral}{"{}No output file specified, saving to '"{}} << output\_file << \textcolor{stringliteral}{"{}'"{}} << std::endl;}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00110}00110     \}}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00111}00111 }
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00112}00112     \textcolor{keywordflow}{if} (verbose) \{}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00113}00113         std::cout << \textcolor{stringliteral}{"{}Parsed video device: "{}} << video\_device << std::endl;}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00114}00114         std::cout << \textcolor{stringliteral}{"{}Parsed audio device: "{}} << audio\_device;}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00115}00115 \textcolor{preprocessor}{\#if DEFAULT\_DEVICES}}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00116}00116         \textcolor{keywordflow}{if} (audio\_device == \textcolor{stringliteral}{"{}none"{}}) \{}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00117}00117             audio\_device = \textcolor{stringliteral}{"{}"{}};}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00118}00118             std::cout << \textcolor{stringliteral}{"{} (mute)"{}};}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00119}00119         \}}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00120}00120 \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00121}00121         std::cout << std::endl;}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00122}00122         \textcolor{keywordflow}{if} (framerate\_set) \{}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00123}00123             std::cout << \textcolor{stringliteral}{"{}Parsed framerate: "{}} << framerate << std::endl;}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00124}00124         \}}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00125}00125         \textcolor{keywordflow}{if} (video\_size\_set) \{}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00126}00126             \textcolor{keyword}{auto} [width, height] = video\_params.getVideoSize();}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00127}00127             \textcolor{keyword}{auto} [offset\_x, offset\_y] = video\_params.getVideoOffset();}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00128}00128             std::cout << \textcolor{stringliteral}{"{}Parsed video size: "{}} << width << \textcolor{stringliteral}{"{}x"{}} << height << std::endl;}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00129}00129             std::cout << \textcolor{stringliteral}{"{}Parsed video offset: "{}} << offset\_x << \textcolor{stringliteral}{"{},"{}} << offset\_y << std::endl;}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00130}00130         \}}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00131}00131         \textcolor{keywordflow}{if} (output\_set) \{}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00132}00132             std::cout << \textcolor{stringliteral}{"{}Parsed output file: "{}} << output\_file << std::endl;}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00133}00133         \}}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00134}00134     \}}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00135}00135 }
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00136}00136     \textcolor{keywordflow}{return} std::make\_tuple(video\_device, audio\_device, video\_params, output\_file, verbose);}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00137}00137 \}}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00138}00138 }
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00139}00139 \textcolor{keyword}{static} \textcolor{keywordtype}{void} printStatus(\textcolor{keywordtype}{bool} paused) \{}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00140}00140     std::cout << std::endl;}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00141}00141     \textcolor{keywordflow}{if} (paused) \{}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00142}00142         std::cout << \textcolor{stringliteral}{"{}Paused"{}};}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00143}00143     \} \textcolor{keywordflow}{else} \{}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00144}00144         std::cout << \textcolor{stringliteral}{"{}Recording..."{}};}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00145}00145     \}}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00146}00146     std::cout << std::endl;}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00147}00147 \}}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00148}00148 }
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00149}00149 \textcolor{keyword}{static} \textcolor{keywordtype}{void} printMenu(\textcolor{keywordtype}{bool} paused) \{}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00150}00150     \textcolor{keywordflow}{if} (paused) \{}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00151}00151         std::cout << \textcolor{stringliteral}{"{}[r]esume"{}};}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00152}00152     \} \textcolor{keywordflow}{else} \{}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00153}00153         std::cout << \textcolor{stringliteral}{"{}[p]ause"{}};}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00154}00154     \}}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00155}00155     std::cout << \textcolor{stringliteral}{"{}, [s]top: "{}} << std::flush;}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00156}00156 \}}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00157}00157 }
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00158}00158 \textcolor{keywordtype}{int} main(\textcolor{keywordtype}{int} argc, \textcolor{keywordtype}{char} **argv) \{}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00159}00159     \mbox{\hyperlink{classVideoParameters}{VideoParameters}} video\_params;}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00160}00160     std::string output\_file;}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00161}00161     std::string video\_device;}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00162}00162     std::string audio\_device;}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00163}00163     \textcolor{keywordtype}{bool} verbose = \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00164}00164 }
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00165}00165     \textcolor{keywordflow}{try} \{}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00166}00166         std::vector<std::string> args;}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00167}00167         \textcolor{keywordflow}{for} (\textcolor{keywordtype}{int} i = 1; i < argc; i++) \{}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00168}00168             args.emplace\_back(argv[i]);}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00169}00169         \}}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00170}00170         std::tie(video\_device, audio\_device, video\_params, output\_file, verbose) = parseArgs(args);}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00171}00171     \} \textcolor{keywordflow}{catch} (\textcolor{keyword}{const} std::exception \&e) \{}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00172}00172         std::string msg(e.what());}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00173}00173         \textcolor{keywordflow}{if} (msg != \textcolor{stringliteral}{"{}"{}}) std::cerr << \textcolor{stringliteral}{"{}ERROR: "{}} << msg << std::endl;}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00174}00174         std::cerr << \textcolor{stringliteral}{"{}Usage: "{}} << argv[0] << std::endl;}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00175}00175         std::cerr << \textcolor{stringliteral}{"{}\(\backslash\)t[-\/h]"{}} << std::endl;}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00176}00176         std::cerr << \textcolor{stringliteral}{"{}\(\backslash\)t[-\/video\_device <device\_name>]"{}} << std::endl;}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00177}00177         std::cerr << \textcolor{stringliteral}{"{}\(\backslash\)t[-\/audio\_device <device\_name>]"{}} << std::endl;}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00178}00178         std::cerr << \textcolor{stringliteral}{"{}\(\backslash\)t[-\/video\_size <width>x<height>:<offset\_x>,<offset\_y>]"{}} << std::endl;}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00179}00179         std::cerr << \textcolor{stringliteral}{"{}\(\backslash\)t[-\/framerate <framerate>]"{}} << std::endl;}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00180}00180         std::cerr << \textcolor{stringliteral}{"{}\(\backslash\)t[-\/o <output\_file>]"{}} << std::endl;}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00181}00181         std::cerr << \textcolor{stringliteral}{"{}\(\backslash\)t[-\/v]"{}} << std::endl;}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00182}00182         \textcolor{keywordflow}{return} 1;}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00183}00183     \}}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00184}00184 }
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00185}00185     \textcolor{keywordflow}{try} \{}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00186}00186         \mbox{\hyperlink{classScreenRecorder}{ScreenRecorder}} sc(verbose);}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00187}00187 }
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00188}00188         \textcolor{keywordflow}{if} (video\_device.empty()) \{}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00189}00189             std::cerr << \textcolor{stringliteral}{"{}ERROR: No video device specified"{}} << std::endl << std::endl;}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00190}00190             sc.listAvailableDevices();}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00191}00191             \textcolor{keywordflow}{return} 1;}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00192}00192         \}}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00193}00193 }
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00194}00194         \textcolor{keywordflow}{if} (std::filesystem::exists(output\_file)) \{}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00195}00195             std::cout << \textcolor{stringliteral}{"{}The output file '"{}} << output\_file << \textcolor{stringliteral}{"{}' already exists, overwrite it? [y/N] "{}};}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00196}00196             std::string answer;}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00197}00197             std::getline(std::cin, answer);}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00198}00198             \textcolor{keywordflow}{if} (answer != \textcolor{stringliteral}{"{}y"{}} \&\& answer != \textcolor{stringliteral}{"{}Y"{}}) \textcolor{keywordflow}{return} 0;}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00199}00199         \}}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00200}00200 }
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00201}00201         sc.start(video\_device, audio\_device, output\_file, video\_params);}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00202}00202 }
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00203}00203         \textcolor{keywordtype}{bool} paused = \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00204}00204         \textcolor{keywordtype}{bool} print\_status = \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00205}00205 }
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00206}00206         \textcolor{keywordflow}{while} (\textcolor{keyword}{true}) \{}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00207}00207             \textcolor{keywordflow}{if} (print\_status) printStatus(paused);}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00208}00208             print\_status = \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00209}00209             printMenu(paused);}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00210}00210             std::string input;}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00211}00211             std::getline(std::cin, input);}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00212}00212             \textcolor{keywordflow}{if} (input.length() == 1) \{}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00213}00213                 \textcolor{keywordtype}{char} command = std::tolower(input.front());}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00214}00214                 \textcolor{keywordflow}{if} (command == \textcolor{charliteral}{'p'} \&\& !paused) \{}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00215}00215                     sc.pause();}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00216}00216                     paused = \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00217}00217                     print\_status = \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00218}00218                 \} \textcolor{keywordflow}{else} \textcolor{keywordflow}{if} (command == \textcolor{charliteral}{'r'} \&\& paused) \{}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00219}00219                     sc.resume();}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00220}00220                     paused = \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00221}00221                     print\_status = \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00222}00222                 \} \textcolor{keywordflow}{else} \textcolor{keywordflow}{if} (command == \textcolor{charliteral}{'s'}) \{}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00223}00223                     std::cout << \textcolor{stringliteral}{"{}\(\backslash\)nStopping..."{}} << std::flush;}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00224}00224                     sc.stop();}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00225}00225                     std::cout << \textcolor{stringliteral}{"{} done"{}} << std::endl;}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00226}00226                     \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00227}00227                 \}}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00228}00228             \}}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00229}00229             \textcolor{keywordflow}{if} (!print\_status) std::cerr << \textcolor{stringliteral}{"{}Unknown command"{}} << std::endl;}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00230}00230         \}}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00231}00231 }
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00232}00232     \} \textcolor{keywordflow}{catch} (\textcolor{keyword}{const} std::exception \&e) \{}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00233}00233         std::cerr << e.what() << \textcolor{stringliteral}{"{}, terminating..."{}} << std::endl;}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00234}00234         \textcolor{keywordflow}{return} 1;}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00235}00235     \}}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00236}00236 }
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00237}00237     \textcolor{keywordflow}{return} 0;}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00238}00238 \}}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00239}00239 }
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00240}00240 \textcolor{preprocessor}{\#ifdef LINUX}}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00241}00241 std::tuple<int, int, int, int> select\_area() \{}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00242}00242     \textcolor{keywordtype}{int} video\_width, video\_height, video\_offset\_x, video\_offset\_y;}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00243}00243 }
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00244}00244     XEvent ev;}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00245}00245     Display *disp = \textcolor{keyword}{nullptr};}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00246}00246     Screen *scr = \textcolor{keyword}{nullptr};}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00247}00247     Window root = 0;}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00248}00248     Cursor cursor, cursor2;}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00249}00249     XGCValues gcval;}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00250}00250     GC gc;}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00251}00251     \textcolor{keywordtype}{int} rx = 0, ry = 0, rw = 0, rh = 0;}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00252}00252     \textcolor{keywordtype}{int} rect\_x = 0, rect\_y = 0, rect\_w = 0, rect\_h = 0;}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00253}00253     \textcolor{keywordtype}{int} btn\_pressed = 0, done = 0;}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00254}00254     \textcolor{keywordtype}{int} threshold = 10;}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00255}00255 }
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00256}00256     std::cout << \textcolor{stringliteral}{"{}Select the area to record (click to select all the display)"{}} << std::endl;}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00257}00257 }
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00258}00258     disp = XOpenDisplay(\textcolor{keyword}{nullptr});}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00259}00259     \textcolor{keywordflow}{if} (!disp) \textcolor{keywordflow}{throw} std::runtime\_error(\textcolor{stringliteral}{"{}Failed to open the display"{}});}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00260}00260 }
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00261}00261     scr = ScreenOfDisplay(disp, DefaultScreen(disp));}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00262}00262 }
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00263}00263     root = RootWindow(disp, XScreenNumberOfScreen(scr));}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00264}00264 }
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00265}00265     cursor = XCreateFontCursor(disp, XC\_left\_ptr);}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00266}00266     cursor2 = XCreateFontCursor(disp, XC\_lr\_angle);}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00267}00267 }
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00268}00268     gcval.foreground = XWhitePixel(disp, 0);}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00269}00269     gcval.function = GXxor;}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00270}00270     gcval.background = XBlackPixel(disp, 0);}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00271}00271     gcval.plane\_mask = gcval.background \string^ gcval.foreground;}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00272}00272     gcval.subwindow\_mode = IncludeInferiors;}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00273}00273 }
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00274}00274     gc = XCreateGC(disp, root, GCFunction | GCForeground | GCBackground | GCSubwindowMode, \&gcval);}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00275}00275 }
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00276}00276     \textcolor{comment}{/* this XGrab* stuff makes XPending true ? */}}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00277}00277     \textcolor{keywordflow}{if} ((XGrabPointer(disp, root, False, ButtonMotionMask | ButtonPressMask | ButtonReleaseMask, GrabModeAsync,}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00278}00278                       GrabModeAsync, root, cursor, CurrentTime) != GrabSuccess))}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00279}00279         printf(\textcolor{stringliteral}{"{}couldn't grab pointer:"{}});}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00280}00280 }
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00281}00281     \textcolor{keywordflow}{if} ((XGrabKeyboard(disp, root, False, GrabModeAsync, GrabModeAsync, CurrentTime) != GrabSuccess))}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00282}00282         printf(\textcolor{stringliteral}{"{}couldn't grab keyboard:"{}});}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00283}00283 }
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00284}00284     \textcolor{keywordflow}{while} (!done) \{}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00285}00285         \textcolor{keywordflow}{while} (!done \&\& XPending(disp)) \{}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00286}00286             XNextEvent(disp, \&ev);}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00287}00287             \textcolor{keywordflow}{switch} (ev.type) \{}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00288}00288                 \textcolor{keywordflow}{case} MotionNotify:}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00289}00289                     \textcolor{comment}{/* this case is purely for drawing rect on screen */}}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00290}00290                     \textcolor{keywordflow}{if} (btn\_pressed) \{}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00291}00291                         \textcolor{keywordflow}{if} (rect\_w) \{}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00292}00292                             \textcolor{comment}{/* re-\/draw the last rect to clear it */}}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00293}00293                             \textcolor{comment}{// XDrawRectangle(disp, root, gc, rect\_x, rect\_y, rect\_w, rect\_h);}}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00294}00294                         \} \textcolor{keywordflow}{else} \{}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00295}00295                             \textcolor{comment}{/* Change the cursor to show we're selecting a region */}}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00296}00296                             XChangeActivePointerGrab(disp, ButtonMotionMask | ButtonReleaseMask, cursor2, CurrentTime);}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00297}00297                         \}}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00298}00298                         rect\_x = rx;}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00299}00299                         rect\_y = ry;}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00300}00300                         rect\_w = ev.xmotion.x -\/ rect\_x;}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00301}00301                         rect\_h = ev.xmotion.y -\/ rect\_y;}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00302}00302 }
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00303}00303                         \textcolor{keywordflow}{if} (rect\_w < 0) \{}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00304}00304                             rect\_x += rect\_w;}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00305}00305                             rect\_w = 0 -\/ rect\_w;}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00306}00306                         \}}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00307}00307                         \textcolor{keywordflow}{if} (rect\_h < 0) \{}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00308}00308                             rect\_y += rect\_h;}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00309}00309                             rect\_h = 0 -\/ rect\_h;}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00310}00310                         \}}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00311}00311                         \textcolor{comment}{/* draw rectangle */}}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00312}00312                         \textcolor{comment}{// XDrawRectangle(disp, root, gc, rect\_x, rect\_y, rect\_w, rect\_h);}}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00313}00313                         XFlush(disp);}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00314}00314                     \}}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00315}00315                     \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00316}00316                 \textcolor{keywordflow}{case} ButtonPress:}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00317}00317                     btn\_pressed = 1;}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00318}00318                     rx = ev.xbutton.x;}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00319}00319                     ry = ev.xbutton.y;}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00320}00320                     \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00321}00321                 \textcolor{keywordflow}{case} ButtonRelease:}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00322}00322                     done = 1;}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00323}00323                     \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00324}00324             \}}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00325}00325         \}}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00326}00326     \}}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00327}00327     \textcolor{comment}{/* clear the drawn rectangle */}}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00328}00328     \textcolor{keywordflow}{if} (rect\_w) \{}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00329}00329         \textcolor{comment}{// XDrawRectangle(disp, root, gc, rect\_x, rect\_y, rect\_w, rect\_h);}}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00330}00330         XFlush(disp);}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00331}00331     \}}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00332}00332     rw = ev.xbutton.x -\/ rx;}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00333}00333     rh = ev.xbutton.y -\/ ry;}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00334}00334     \textcolor{comment}{/* cursor moves backwards */}}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00335}00335     \textcolor{keywordflow}{if} (rw < 0) \{}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00336}00336         rx += rw;}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00337}00337         rw = 0 -\/ rw;}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00338}00338     \}}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00339}00339     \textcolor{keywordflow}{if} (rh < 0) \{}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00340}00340         ry += rh;}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00341}00341         rh = 0 -\/ rh;}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00342}00342     \}}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00343}00343 }
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00344}00344     \textcolor{keywordflow}{if} (rw < threshold || rh < threshold) \{}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00345}00345         video\_width = scr-\/>width;}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00346}00346         video\_height = scr-\/>height;}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00347}00347         video\_offset\_x = 0;}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00348}00348         video\_offset\_y = 0;}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00349}00349     \} \textcolor{keywordflow}{else} \{}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00350}00350         video\_width = rw;}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00351}00351         video\_height = rh;}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00352}00352         video\_offset\_x = rx;}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00353}00353         video\_offset\_y = ry;}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00354}00354     \}}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00355}00355 }
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00356}00356     XCloseDisplay(disp);}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00357}00357 }
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00358}00358     \textcolor{keywordflow}{return} std::make\_tuple(video\_width, video\_height, video\_offset\_x, video\_offset\_y);}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00359}00359 \}}
+\DoxyCodeLine{\Hypertarget{recorder_8cpp_source_l00360}00360 \textcolor{preprocessor}{\#endif}}
+
+\end{DoxyCode}

@@ -1,0 +1,19 @@
+\hypertarget{log__level__setter_8h_source}{}\doxysection{log\+\_\+level\+\_\+setter.\+h}
+\label{log__level__setter_8h_source}\index{src/utils/log\_level\_setter.h@{src/utils/log\_level\_setter.h}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{log__level__setter_8h_source_l00001}00001 \textcolor{preprocessor}{\#include "{}common/common.h"{}}}
+\DoxyCodeLine{\Hypertarget{log__level__setter_8h_source_l00002}00002 }
+\DoxyCodeLine{\Hypertarget{log__level__setter_8h_source_l00003}\mbox{\hyperlink{classLogLevelSetter}{00003}} \textcolor{keyword}{class }\mbox{\hyperlink{classLogLevelSetter}{LogLevelSetter}} \{}
+\DoxyCodeLine{\Hypertarget{log__level__setter_8h_source_l00004}00004     \textcolor{keywordtype}{int} prev\_log\_level\_;}
+\DoxyCodeLine{\Hypertarget{log__level__setter_8h_source_l00005}00005 }
+\DoxyCodeLine{\Hypertarget{log__level__setter_8h_source_l00006}00006 \textcolor{keyword}{public}:}
+\DoxyCodeLine{\Hypertarget{log__level__setter_8h_source_l00007}00007     \mbox{\hyperlink{classLogLevelSetter}{LogLevelSetter}}(\textcolor{keywordtype}{int} log\_level) \{}
+\DoxyCodeLine{\Hypertarget{log__level__setter_8h_source_l00008}00008         prev\_log\_level\_ = av\_log\_get\_level();}
+\DoxyCodeLine{\Hypertarget{log__level__setter_8h_source_l00009}00009         av\_log\_set\_level(log\_level);}
+\DoxyCodeLine{\Hypertarget{log__level__setter_8h_source_l00010}00010     \}}
+\DoxyCodeLine{\Hypertarget{log__level__setter_8h_source_l00011}00011 }
+\DoxyCodeLine{\Hypertarget{log__level__setter_8h_source_l00012}00012     \mbox{\hyperlink{classLogLevelSetter}{\string~LogLevelSetter}}() \{ av\_log\_set\_level(prev\_log\_level\_); \}}
+\DoxyCodeLine{\Hypertarget{log__level__setter_8h_source_l00013}00013 \};}
+
+\end{DoxyCode}

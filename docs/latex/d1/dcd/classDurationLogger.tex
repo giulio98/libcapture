@@ -1,0 +1,58 @@
+\hypertarget{classDurationLogger}{}\doxysection{Duration\+Logger Class Reference}
+\label{classDurationLogger}\index{DurationLogger@{DurationLogger}}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classDurationLogger_a3c5c5b58b1a562b305e57980c7e54aff}{Duration\+Logger}} (std\+::string msg, bool new\+\_\+line=true)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+
+
+Definition at line \mbox{\hyperlink{duration__logger_8h_source_l00009}{9}} of file \mbox{\hyperlink{duration__logger_8h_source}{duration\+\_\+logger.\+h}}.
+
+
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classDurationLogger_a3c5c5b58b1a562b305e57980c7e54aff}\label{classDurationLogger_a3c5c5b58b1a562b305e57980c7e54aff}} 
+\index{DurationLogger@{DurationLogger}!DurationLogger@{DurationLogger}}
+\index{DurationLogger@{DurationLogger}!DurationLogger@{DurationLogger}}
+\doxysubsubsection{\texorpdfstring{DurationLogger()}{DurationLogger()}}
+{\footnotesize\ttfamily Duration\+Logger\+::\+Duration\+Logger (\begin{DoxyParamCaption}\item[{std\+::string}]{msg,  }\item[{bool}]{new\+\_\+line = {\ttfamily true} }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [explicit]}}
+
+
+
+Definition at line \mbox{\hyperlink{duration__logger_8h_source_l00015}{15}} of file \mbox{\hyperlink{duration__logger_8h_source}{duration\+\_\+logger.\+h}}.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00015                                                                  : msg\_(std::move(msg)), new\_line\_(new\_line) \{}
+\DoxyCodeLine{00016         start\_time\_ = av\_gettime();}
+\DoxyCodeLine{00017     \}}
+
+\end{DoxyCode}
+\mbox{\Hypertarget{classDurationLogger_a7a4c01e10c8a7b424482c3be5e33ac6a}\label{classDurationLogger_a7a4c01e10c8a7b424482c3be5e33ac6a}} 
+\index{DurationLogger@{DurationLogger}!````~DurationLogger@{$\sim$DurationLogger}}
+\index{````~DurationLogger@{$\sim$DurationLogger}!DurationLogger@{DurationLogger}}
+\doxysubsubsection{\texorpdfstring{$\sim$DurationLogger()}{~DurationLogger()}}
+{\footnotesize\ttfamily Duration\+Logger\+::$\sim$\+Duration\+Logger (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Definition at line \mbox{\hyperlink{duration__logger_8h_source_l00019}{19}} of file \mbox{\hyperlink{duration__logger_8h_source}{duration\+\_\+logger.\+h}}.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00019                       \{}
+\DoxyCodeLine{00020         int64\_t elapsed\_time = (av\_gettime() -\/ start\_time\_) / 1000;}
+\DoxyCodeLine{00021         std::cout << msg\_ << elapsed\_time << \textcolor{stringliteral}{"{} ms"{}};}
+\DoxyCodeLine{00022         \textcolor{keywordflow}{if} (new\_line\_) std::cout << std::endl;}
+\DoxyCodeLine{00023     \}}
+
+\end{DoxyCode}
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+src/utils/duration\+\_\+logger.\+h\end{DoxyCompactItemize}

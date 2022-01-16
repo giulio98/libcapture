@@ -1,0 +1,61 @@
+\hypertarget{video__parameters_8h_source}{}\doxysection{video\+\_\+parameters.\+h}
+\label{video__parameters_8h_source}\index{include/screen-\/recorder/video\_parameters.h@{include/screen-\/recorder/video\_parameters.h}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{video__parameters_8h_source_l00001}00001 \textcolor{preprocessor}{\#pragma once}}
+\DoxyCodeLine{\Hypertarget{video__parameters_8h_source_l00002}00002 }
+\DoxyCodeLine{\Hypertarget{video__parameters_8h_source_l00003}00003 \textcolor{preprocessor}{\#include <string>}}
+\DoxyCodeLine{\Hypertarget{video__parameters_8h_source_l00004}00004 }
+\DoxyCodeLine{\Hypertarget{video__parameters_8h_source_l00005}\mbox{\hyperlink{classVideoParameters}{00005}} \textcolor{keyword}{class }\mbox{\hyperlink{classVideoParameters}{VideoParameters}} \{}
+\DoxyCodeLine{\Hypertarget{video__parameters_8h_source_l00006}00006     \textcolor{keywordtype}{int} width\_ = 0;}
+\DoxyCodeLine{\Hypertarget{video__parameters_8h_source_l00007}00007     \textcolor{keywordtype}{int} height\_ = 0;}
+\DoxyCodeLine{\Hypertarget{video__parameters_8h_source_l00008}00008     \textcolor{keywordtype}{int} offset\_x\_ = 0;}
+\DoxyCodeLine{\Hypertarget{video__parameters_8h_source_l00009}00009     \textcolor{keywordtype}{int} offset\_y\_ = 0;}
+\DoxyCodeLine{\Hypertarget{video__parameters_8h_source_l00010}00010     \textcolor{keywordtype}{int} framerate\_ = 0;}
+\DoxyCodeLine{\Hypertarget{video__parameters_8h_source_l00011}00011 }
+\DoxyCodeLine{\Hypertarget{video__parameters_8h_source_l00012}00012     \textcolor{keywordtype}{void} checkGE(\textcolor{keyword}{const} std::string \&name, \textcolor{keyword}{const} \textcolor{keywordtype}{int} val, \textcolor{keyword}{const} \textcolor{keywordtype}{int} bound) \{}
+\DoxyCodeLine{\Hypertarget{video__parameters_8h_source_l00013}00013         \textcolor{keywordflow}{if} (val < bound) \textcolor{keywordflow}{throw} std::runtime\_error(name + \textcolor{stringliteral}{"{} must be >= "{}} + std::to\_string(bound));}
+\DoxyCodeLine{\Hypertarget{video__parameters_8h_source_l00014}00014     \}}
+\DoxyCodeLine{\Hypertarget{video__parameters_8h_source_l00015}00015 }
+\DoxyCodeLine{\Hypertarget{video__parameters_8h_source_l00016}00016     \textcolor{keywordtype}{void} checkEven(\textcolor{keyword}{const} std::string \&name, \textcolor{keyword}{const} \textcolor{keywordtype}{int} val) \{}
+\DoxyCodeLine{\Hypertarget{video__parameters_8h_source_l00017}00017         \textcolor{keywordflow}{if} (val \% 2) \textcolor{keywordflow}{throw} std::runtime\_error(name + \textcolor{stringliteral}{"{} must be divisible by 2"{}});}
+\DoxyCodeLine{\Hypertarget{video__parameters_8h_source_l00018}00018     \}}
+\DoxyCodeLine{\Hypertarget{video__parameters_8h_source_l00019}00019 }
+\DoxyCodeLine{\Hypertarget{video__parameters_8h_source_l00020}00020 \textcolor{keyword}{public}:}
+\DoxyCodeLine{\Hypertarget{video__parameters_8h_source_l00021}00021     \mbox{\hyperlink{classVideoParameters}{VideoParameters}}() = \textcolor{keywordflow}{default};}
+\DoxyCodeLine{\Hypertarget{video__parameters_8h_source_l00022}00022 }
+\DoxyCodeLine{\Hypertarget{video__parameters_8h_source_l00023}00023     \mbox{\hyperlink{classVideoParameters}{VideoParameters}}(\textcolor{keywordtype}{int} width, \textcolor{keywordtype}{int} height, \textcolor{keywordtype}{int} offset\_x, \textcolor{keywordtype}{int} offset\_y, \textcolor{keywordtype}{int} framerate) \{}
+\DoxyCodeLine{\Hypertarget{video__parameters_8h_source_l00024}00024         setVideoSize(width, height);}
+\DoxyCodeLine{\Hypertarget{video__parameters_8h_source_l00025}00025         setVideoOffset(offset\_x, offset\_y);}
+\DoxyCodeLine{\Hypertarget{video__parameters_8h_source_l00026}00026         setFramerate(framerate);}
+\DoxyCodeLine{\Hypertarget{video__parameters_8h_source_l00027}00027     \}}
+\DoxyCodeLine{\Hypertarget{video__parameters_8h_source_l00028}00028 }
+\DoxyCodeLine{\Hypertarget{video__parameters_8h_source_l00029}00029     \textcolor{keywordtype}{void} setVideoSize(\textcolor{keywordtype}{int} width, \textcolor{keywordtype}{int} height) \{}
+\DoxyCodeLine{\Hypertarget{video__parameters_8h_source_l00030}00030         checkGE(\textcolor{stringliteral}{"{}width"{}}, width, 0);}
+\DoxyCodeLine{\Hypertarget{video__parameters_8h_source_l00031}00031         checkGE(\textcolor{stringliteral}{"{}width"{}}, height, 0);}
+\DoxyCodeLine{\Hypertarget{video__parameters_8h_source_l00032}00032         checkEven(\textcolor{stringliteral}{"{}width"{}}, width);}
+\DoxyCodeLine{\Hypertarget{video__parameters_8h_source_l00033}00033         checkEven(\textcolor{stringliteral}{"{}height"{}}, height);}
+\DoxyCodeLine{\Hypertarget{video__parameters_8h_source_l00034}00034         width\_ = width;}
+\DoxyCodeLine{\Hypertarget{video__parameters_8h_source_l00035}00035         height\_ = height;}
+\DoxyCodeLine{\Hypertarget{video__parameters_8h_source_l00036}00036     \}}
+\DoxyCodeLine{\Hypertarget{video__parameters_8h_source_l00037}00037 }
+\DoxyCodeLine{\Hypertarget{video__parameters_8h_source_l00038}00038     \textcolor{keywordtype}{void} setVideoOffset(\textcolor{keywordtype}{int} offset\_x, \textcolor{keywordtype}{int} offset\_y) \{}
+\DoxyCodeLine{\Hypertarget{video__parameters_8h_source_l00039}00039         checkGE(\textcolor{stringliteral}{"{}offset x"{}}, offset\_x, 0);}
+\DoxyCodeLine{\Hypertarget{video__parameters_8h_source_l00040}00040         checkGE(\textcolor{stringliteral}{"{}offset y"{}}, offset\_y, 0);}
+\DoxyCodeLine{\Hypertarget{video__parameters_8h_source_l00041}00041         offset\_x\_ = offset\_x;}
+\DoxyCodeLine{\Hypertarget{video__parameters_8h_source_l00042}00042         offset\_y\_ = offset\_y;}
+\DoxyCodeLine{\Hypertarget{video__parameters_8h_source_l00043}00043     \}}
+\DoxyCodeLine{\Hypertarget{video__parameters_8h_source_l00044}00044 }
+\DoxyCodeLine{\Hypertarget{video__parameters_8h_source_l00045}00045     \textcolor{keywordtype}{void} setFramerate(\textcolor{keywordtype}{int} framerate) \{}
+\DoxyCodeLine{\Hypertarget{video__parameters_8h_source_l00046}00046         checkGE(\textcolor{stringliteral}{"{}framerate"{}}, framerate, 1);}
+\DoxyCodeLine{\Hypertarget{video__parameters_8h_source_l00047}00047         framerate\_ = framerate;}
+\DoxyCodeLine{\Hypertarget{video__parameters_8h_source_l00048}00048     \}}
+\DoxyCodeLine{\Hypertarget{video__parameters_8h_source_l00049}00049 }
+\DoxyCodeLine{\Hypertarget{video__parameters_8h_source_l00050}00050     [[nodiscard]] std::pair<int, int> getVideoSize()\textcolor{keyword}{ const }\{ \textcolor{keywordflow}{return} std::make\_pair(width\_, height\_); \}}
+\DoxyCodeLine{\Hypertarget{video__parameters_8h_source_l00051}00051 }
+\DoxyCodeLine{\Hypertarget{video__parameters_8h_source_l00052}00052     [[nodiscard]] std::pair<int, int> getVideoOffset()\textcolor{keyword}{ const }\{ \textcolor{keywordflow}{return} std::make\_pair(offset\_x\_, offset\_y\_); \}}
+\DoxyCodeLine{\Hypertarget{video__parameters_8h_source_l00053}00053 }
+\DoxyCodeLine{\Hypertarget{video__parameters_8h_source_l00054}00054     [[nodiscard]] \textcolor{keywordtype}{int} getFramerate()\textcolor{keyword}{ const }\{ \textcolor{keywordflow}{return} framerate\_; \}}
+\DoxyCodeLine{\Hypertarget{video__parameters_8h_source_l00055}00055 \};}
+
+\end{DoxyCode}

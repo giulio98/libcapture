@@ -1,0 +1,294 @@
+\hypertarget{classEncoder}{}\doxysection{Encoder Class Reference}
+\label{classEncoder}\index{Encoder@{Encoder}}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classEncoder_a1517231ea520edcfe81a75ca6f3923ff}{Encoder}} ()=default
+\item 
+\mbox{\hyperlink{classEncoder_a469ec925c331a574fe05c55972ee9675}{Encoder}} (AVCodec\+ID codec\+\_\+id, int sample\+\_\+rate, uint64\+\_\+t channel\+\_\+layout, int global\+\_\+header\+\_\+flags, const std\+::map$<$ std\+::string, std\+::string $>$ \&options)
+\item 
+\mbox{\hyperlink{classEncoder_a94b724152efb9215eae86025efc5c730}{Encoder}} (AVCodec\+ID codec\+\_\+id, int width, int height, AVPixel\+Format pix\+\_\+fmt, AVRational time\+\_\+base, int global\+\_\+header\+\_\+flags, const std\+::map$<$ std\+::string, std\+::string $>$ \&options)
+\item 
+\mbox{\Hypertarget{classEncoder_a688baf7b0b1247cfb8425117c6bed01b}\label{classEncoder_a688baf7b0b1247cfb8425117c6bed01b}} 
+{\bfseries Encoder} (const \mbox{\hyperlink{classEncoder}{Encoder}} \&)=delete
+\item 
+\mbox{\hyperlink{classEncoder_a551c435055bf42c0ce361438c7084aee}{Encoder}} (\mbox{\hyperlink{classEncoder}{Encoder}} \&\&other)
+\item 
+\mbox{\hyperlink{classEncoder}{Encoder}} \& \mbox{\hyperlink{classEncoder_a5023deb71e3a34712c18b22a44f1ddb1}{operator=}} (\mbox{\hyperlink{classEncoder}{Encoder}} other)
+\item 
+bool \mbox{\hyperlink{classEncoder_ad2ebcbb8d7563591b970f5b36e66d219}{send\+Frame}} (const AVFrame $\ast$frame)
+\item 
+av\+::\+Packet\+UPtr \mbox{\hyperlink{classEncoder_ae2928eeba00c04d53bd5bdcccd372d31}{get\+Packet}} ()
+\item 
+const AVCodec\+Context $\ast$ \mbox{\hyperlink{classEncoder_ab23d5e384fb8c29c2f9f0cf06bf41c33}{get\+Context}} () const
+\item 
+std\+::string \mbox{\hyperlink{classEncoder_af35f7ed35c1ecce6d863cae81526b78a}{get\+Name}} () const
+\end{DoxyCompactItemize}
+\doxysubsection*{Friends}
+\begin{DoxyCompactItemize}
+\item 
+void \mbox{\hyperlink{classEncoder_af49bf3f4b00e69e9e48c146ea4626b95}{swap}} (\mbox{\hyperlink{classEncoder}{Encoder}} \&lhs, \mbox{\hyperlink{classEncoder}{Encoder}} \&rhs)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+
+
+Definition at line \mbox{\hyperlink{encoder_8h_source_l00008}{8}} of file \mbox{\hyperlink{encoder_8h_source}{encoder.\+h}}.
+
+
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classEncoder_a1517231ea520edcfe81a75ca6f3923ff}\label{classEncoder_a1517231ea520edcfe81a75ca6f3923ff}} 
+\index{Encoder@{Encoder}!Encoder@{Encoder}}
+\index{Encoder@{Encoder}!Encoder@{Encoder}}
+\doxysubsubsection{\texorpdfstring{Encoder()}{Encoder()}\hspace{0.1cm}{\footnotesize\ttfamily [1/4]}}
+{\footnotesize\ttfamily Encoder\+::\+Encoder (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [default]}}
+
+Create a new empty encoder \mbox{\Hypertarget{classEncoder_a469ec925c331a574fe05c55972ee9675}\label{classEncoder_a469ec925c331a574fe05c55972ee9675}} 
+\index{Encoder@{Encoder}!Encoder@{Encoder}}
+\index{Encoder@{Encoder}!Encoder@{Encoder}}
+\doxysubsubsection{\texorpdfstring{Encoder()}{Encoder()}\hspace{0.1cm}{\footnotesize\ttfamily [2/4]}}
+{\footnotesize\ttfamily Encoder\+::\+Encoder (\begin{DoxyParamCaption}\item[{AVCodec\+ID}]{codec\+\_\+id,  }\item[{int}]{sample\+\_\+rate,  }\item[{uint64\+\_\+t}]{channel\+\_\+layout,  }\item[{int}]{global\+\_\+header\+\_\+flags,  }\item[{const std\+::map$<$ std\+::string, std\+::string $>$ \&}]{options }\end{DoxyParamCaption})}
+
+Create a new AUDIO encoder 
+\begin{DoxyParams}{Parameters}
+{\em codec\+\_\+id} & the ID of the codec to which encode the frames \\
+\hline
+{\em sample\+\_\+rate} & the sample rate of the audio to encode \\
+\hline
+{\em channnel\+\_\+layout} & the channel layout of the frames to encode (if unknown, it can be obtained by calling av\+\_\+get\+\_\+default\+\_\+channel\+\_\+layout(num\+\_\+channels)) \\
+\hline
+{\em global\+\_\+header\+\_\+flags} & the global header flags of the output format to which the encoded frames will be sent \\
+\hline
+{\em options} & a map filled with the key-\/value options to use for the encoder \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line \mbox{\hyperlink{encoder_8cpp_source_l00034}{34}} of file \mbox{\hyperlink{encoder_8cpp_source}{encoder.\+cpp}}.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00036     : \mbox{\hyperlink{classEncoder_a1517231ea520edcfe81a75ca6f3923ff}{Encoder}}(codec\_id) \{}
+\DoxyCodeLine{00037     \textcolor{keywordflow}{if} (codec\_-\/>type != AVMEDIA\_TYPE\_AUDIO)}
+\DoxyCodeLine{00038         throwError(\textcolor{stringliteral}{"{}failed to create audio encoder (received codec ID is not of type audio)"{}});}
+\DoxyCodeLine{00039 }
+\DoxyCodeLine{00040     codec\_ctx\_-\/>sample\_rate = sample\_rate;}
+\DoxyCodeLine{00041     codec\_ctx\_-\/>channel\_layout = channel\_layout;}
+\DoxyCodeLine{00042     codec\_ctx\_-\/>channels = av\_get\_channel\_layout\_nb\_channels(codec\_ctx\_-\/>channel\_layout);}
+\DoxyCodeLine{00043     \textcolor{keywordflow}{if} (codec\_-\/>sample\_fmts) codec\_ctx\_-\/>sample\_fmt = codec\_-\/>sample\_fmts[0];}
+\DoxyCodeLine{00044     \textcolor{comment}{/* for audio, the time base will be automatically set by init() */}}
+\DoxyCodeLine{00045     \textcolor{comment}{// codec\_ctx\_-\/>time\_base.num = 1;}}
+\DoxyCodeLine{00046     \textcolor{comment}{// codec\_ctx\_-\/>time\_base.den = codec\_ctx\_-\/>sample\_rate;}}
+\DoxyCodeLine{00047 }
+\DoxyCodeLine{00048     init(global\_header\_flags, options);}
+\DoxyCodeLine{00049 \}}
+
+\end{DoxyCode}
+\mbox{\Hypertarget{classEncoder_a94b724152efb9215eae86025efc5c730}\label{classEncoder_a94b724152efb9215eae86025efc5c730}} 
+\index{Encoder@{Encoder}!Encoder@{Encoder}}
+\index{Encoder@{Encoder}!Encoder@{Encoder}}
+\doxysubsubsection{\texorpdfstring{Encoder()}{Encoder()}\hspace{0.1cm}{\footnotesize\ttfamily [3/4]}}
+{\footnotesize\ttfamily Encoder\+::\+Encoder (\begin{DoxyParamCaption}\item[{AVCodec\+ID}]{codec\+\_\+id,  }\item[{int}]{width,  }\item[{int}]{height,  }\item[{AVPixel\+Format}]{pix\+\_\+fmt,  }\item[{AVRational}]{time\+\_\+base,  }\item[{int}]{global\+\_\+header\+\_\+flags,  }\item[{const std\+::map$<$ std\+::string, std\+::string $>$ \&}]{options }\end{DoxyParamCaption})}
+
+Create a new VIDEO encoder 
+\begin{DoxyParams}{Parameters}
+{\em codec\+\_\+id} & the ID of the codec to which encode the frames \\
+\hline
+{\em width} & the width of the video frames to encode \\
+\hline
+{\em height} & the height of the video frames to encode \\
+\hline
+{\em pix\+\_\+fmt} & the pixel format of the video frames to encode \\
+\hline
+{\em time\+\_\+base} & the time-\/base to use for the encoder (note that if this is different from the input one, the timestamps of the packets/frames will have to be manually converted) \\
+\hline
+{\em global\+\_\+header\+\_\+flags} & the global header flags of the output format to which the encoded frames will be sent \\
+\hline
+{\em options} & a map filled with the key-\/value options to use for the encoder \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line \mbox{\hyperlink{encoder_8cpp_source_l00051}{51}} of file \mbox{\hyperlink{encoder_8cpp_source}{encoder.\+cpp}}.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00053     : \mbox{\hyperlink{classEncoder_a1517231ea520edcfe81a75ca6f3923ff}{Encoder}}(codec\_id) \{}
+\DoxyCodeLine{00054     \textcolor{keywordflow}{if} (codec\_-\/>type != AVMEDIA\_TYPE\_VIDEO)}
+\DoxyCodeLine{00055         throwError(\textcolor{stringliteral}{"{}failed to create video encoder (received codec ID is not of type video)"{}});}
+\DoxyCodeLine{00056 }
+\DoxyCodeLine{00057     codec\_ctx\_-\/>width = width;}
+\DoxyCodeLine{00058     codec\_ctx\_-\/>height = height;}
+\DoxyCodeLine{00059     codec\_ctx\_-\/>pix\_fmt = pix\_fmt;}
+\DoxyCodeLine{00060     codec\_ctx\_-\/>time\_base = time\_base;}
+\DoxyCodeLine{00061 }
+\DoxyCodeLine{00062     init(global\_header\_flags, options);}
+\DoxyCodeLine{00063 \}}
+
+\end{DoxyCode}
+\mbox{\Hypertarget{classEncoder_a551c435055bf42c0ce361438c7084aee}\label{classEncoder_a551c435055bf42c0ce361438c7084aee}} 
+\index{Encoder@{Encoder}!Encoder@{Encoder}}
+\index{Encoder@{Encoder}!Encoder@{Encoder}}
+\doxysubsubsection{\texorpdfstring{Encoder()}{Encoder()}\hspace{0.1cm}{\footnotesize\ttfamily [4/4]}}
+{\footnotesize\ttfamily Encoder\+::\+Encoder (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classEncoder}{Encoder}} \&\&}]{other }\end{DoxyParamCaption})}
+
+
+
+Definition at line \mbox{\hyperlink{encoder_8cpp_source_l00065}{65}} of file \mbox{\hyperlink{encoder_8cpp_source}{encoder.\+cpp}}.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00065 : \mbox{\hyperlink{classEncoder_a1517231ea520edcfe81a75ca6f3923ff}{Encoder}}() \{ swap(*\textcolor{keyword}{this}, other); \}}
+
+\end{DoxyCode}
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classEncoder_ab23d5e384fb8c29c2f9f0cf06bf41c33}\label{classEncoder_ab23d5e384fb8c29c2f9f0cf06bf41c33}} 
+\index{Encoder@{Encoder}!getContext@{getContext}}
+\index{getContext@{getContext}!Encoder@{Encoder}}
+\doxysubsubsection{\texorpdfstring{getContext()}{getContext()}}
+{\footnotesize\ttfamily const AVCodec\+Context $\ast$ Encoder\+::get\+Context (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const}
+
+Access the internal codec context \begin{DoxyReturn}{Returns}
+an observer pointer to access the codec context 
+\end{DoxyReturn}
+
+
+Definition at line \mbox{\hyperlink{encoder_8cpp_source_l00115}{115}} of file \mbox{\hyperlink{encoder_8cpp_source}{encoder.\+cpp}}.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00115 \{ \textcolor{keywordflow}{return} codec\_ctx\_.get(); \}}
+
+\end{DoxyCode}
+\mbox{\Hypertarget{classEncoder_af35f7ed35c1ecce6d863cae81526b78a}\label{classEncoder_af35f7ed35c1ecce6d863cae81526b78a}} 
+\index{Encoder@{Encoder}!getName@{getName}}
+\index{getName@{getName}!Encoder@{Encoder}}
+\doxysubsubsection{\texorpdfstring{getName()}{getName()}}
+{\footnotesize\ttfamily std\+::string Encoder\+::get\+Name (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const}
+
+Get the encoder name \begin{DoxyReturn}{Returns}
+the encoder name 
+\end{DoxyReturn}
+
+
+Definition at line \mbox{\hyperlink{encoder_8cpp_source_l00117}{117}} of file \mbox{\hyperlink{encoder_8cpp_source}{encoder.\+cpp}}.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00117                                  \{}
+\DoxyCodeLine{00118     \textcolor{keywordflow}{if} (codec\_) \textcolor{keywordflow}{return} codec\_-\/>long\_name;}
+\DoxyCodeLine{00119     \textcolor{keywordflow}{return} std::string\{\};}
+\DoxyCodeLine{00120 \}}
+
+\end{DoxyCode}
+\mbox{\Hypertarget{classEncoder_ae2928eeba00c04d53bd5bdcccd372d31}\label{classEncoder_ae2928eeba00c04d53bd5bdcccd372d31}} 
+\index{Encoder@{Encoder}!getPacket@{getPacket}}
+\index{getPacket@{getPacket}!Encoder@{Encoder}}
+\doxysubsubsection{\texorpdfstring{getPacket()}{getPacket()}}
+{\footnotesize\ttfamily av\+::\+Packet\+UPtr Encoder\+::get\+Packet (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+Get a converted packet from the encoder \begin{DoxyReturn}{Returns}
+a packet if it was possible to get it, nullptr if the encoder had nothing to write because it is empty or flushed 
+\end{DoxyReturn}
+
+
+Definition at line \mbox{\hyperlink{encoder_8cpp_source_l00100}{100}} of file \mbox{\hyperlink{encoder_8cpp_source}{encoder.\+cpp}}.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00100                                 \{}
+\DoxyCodeLine{00101     \textcolor{keywordflow}{if} (!codec\_ctx\_) throwError(\textcolor{stringliteral}{"{}encoder was not initialized yet"{}});}
+\DoxyCodeLine{00102 }
+\DoxyCodeLine{00103     \textcolor{keywordflow}{if} (!packet\_) \{}
+\DoxyCodeLine{00104         packet\_ = av::PacketUPtr(av\_packet\_alloc());}
+\DoxyCodeLine{00105         \textcolor{keywordflow}{if} (!packet\_) throwError(\textcolor{stringliteral}{"{}failed to allocate packet"{}});}
+\DoxyCodeLine{00106     \}}
+\DoxyCodeLine{00107 }
+\DoxyCodeLine{00108     \textcolor{keywordtype}{int} ret = avcodec\_receive\_packet(codec\_ctx\_.get(), packet\_.get());}
+\DoxyCodeLine{00109     \textcolor{keywordflow}{if} (ret == AVERROR(EAGAIN) || ret == AVERROR\_EOF) \textcolor{keywordflow}{return} \textcolor{keyword}{nullptr};}
+\DoxyCodeLine{00110     \textcolor{keywordflow}{if} (ret < 0) throwError(\textcolor{stringliteral}{"{}failed to receive frame from decoder"{}});}
+\DoxyCodeLine{00111 }
+\DoxyCodeLine{00112     \textcolor{keywordflow}{return} std::move(packet\_);}
+\DoxyCodeLine{00113 \}}
+
+\end{DoxyCode}
+\mbox{\Hypertarget{classEncoder_a5023deb71e3a34712c18b22a44f1ddb1}\label{classEncoder_a5023deb71e3a34712c18b22a44f1ddb1}} 
+\index{Encoder@{Encoder}!operator=@{operator=}}
+\index{operator=@{operator=}!Encoder@{Encoder}}
+\doxysubsubsection{\texorpdfstring{operator=()}{operator=()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{classEncoder}{Encoder}} \& Encoder\+::operator= (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classEncoder}{Encoder}}}]{other }\end{DoxyParamCaption})}
+
+
+
+Definition at line \mbox{\hyperlink{encoder_8cpp_source_l00067}{67}} of file \mbox{\hyperlink{encoder_8cpp_source}{encoder.\+cpp}}.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00067                                          \{}
+\DoxyCodeLine{00068     swap(*\textcolor{keyword}{this}, other);}
+\DoxyCodeLine{00069     \textcolor{keywordflow}{return} *\textcolor{keyword}{this};}
+\DoxyCodeLine{00070 \}}
+
+\end{DoxyCode}
+\mbox{\Hypertarget{classEncoder_ad2ebcbb8d7563591b970f5b36e66d219}\label{classEncoder_ad2ebcbb8d7563591b970f5b36e66d219}} 
+\index{Encoder@{Encoder}!sendFrame@{sendFrame}}
+\index{sendFrame@{sendFrame}!Encoder@{Encoder}}
+\doxysubsubsection{\texorpdfstring{sendFrame()}{sendFrame()}}
+{\footnotesize\ttfamily bool Encoder\+::send\+Frame (\begin{DoxyParamCaption}\item[{const AVFrame $\ast$}]{frame }\end{DoxyParamCaption})}
+
+Send a frame to the encoder 
+\begin{DoxyParams}{Parameters}
+{\em frame} & the frame to send to the encoder. It can be nullptr to flush the encoder \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+true if the frame has been correctly sent, false if the encoder could not receive it 
+\end{DoxyReturn}
+
+
+Definition at line \mbox{\hyperlink{encoder_8cpp_source_l00091}{91}} of file \mbox{\hyperlink{encoder_8cpp_source}{encoder.\+cpp}}.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00091                                             \{}
+\DoxyCodeLine{00092     \textcolor{keywordflow}{if} (!codec\_ctx\_) throwError(\textcolor{stringliteral}{"{}encoder was not initialized yet"{}});}
+\DoxyCodeLine{00093     \textcolor{keywordtype}{int} ret = avcodec\_send\_frame(codec\_ctx\_.get(), frame);}
+\DoxyCodeLine{00094     \textcolor{keywordflow}{if} (ret == AVERROR(EAGAIN)) \textcolor{keywordflow}{return} \textcolor{keyword}{false};}
+\DoxyCodeLine{00095     \textcolor{keywordflow}{if} (ret == AVERROR\_EOF) throwError(\textcolor{stringliteral}{"{}has already been flushed"{}});}
+\DoxyCodeLine{00096     \textcolor{keywordflow}{if} (ret < 0) throwError(\textcolor{stringliteral}{"{}failed to send frame to encoder"{}});}
+\DoxyCodeLine{00097     \textcolor{keywordflow}{return} \textcolor{keyword}{true};}
+\DoxyCodeLine{00098 \}}
+
+\end{DoxyCode}
+
+
+\doxysubsection{Friends And Related Function Documentation}
+\mbox{\Hypertarget{classEncoder_af49bf3f4b00e69e9e48c146ea4626b95}\label{classEncoder_af49bf3f4b00e69e9e48c146ea4626b95}} 
+\index{Encoder@{Encoder}!swap@{swap}}
+\index{swap@{swap}!Encoder@{Encoder}}
+\doxysubsubsection{\texorpdfstring{swap}{swap}}
+{\footnotesize\ttfamily void swap (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classEncoder}{Encoder}} \&}]{lhs,  }\item[{\mbox{\hyperlink{classEncoder}{Encoder}} \&}]{rhs }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [friend]}}
+
+
+
+Definition at line \mbox{\hyperlink{encoder_8cpp_source_l00010}{10}} of file \mbox{\hyperlink{encoder_8cpp_source}{encoder.\+cpp}}.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00010                                       \{}
+\DoxyCodeLine{00011     std::swap(lhs.codec\_, rhs.codec\_);}
+\DoxyCodeLine{00012     std::swap(lhs.codec\_ctx\_, rhs.codec\_ctx\_);}
+\DoxyCodeLine{00013     std::swap(lhs.packet\_, rhs.packet\_);}
+\DoxyCodeLine{00014 \}}
+
+\end{DoxyCode}
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+src/process/encoder.\+h\item 
+src/process/encoder.\+cpp\end{DoxyCompactItemize}

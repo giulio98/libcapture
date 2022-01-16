@@ -1,0 +1,47 @@
+\hypertarget{structDeleterP}{}\doxysection{DeleterP\texorpdfstring{$<$}{<} deleter \texorpdfstring{$>$}{>} Struct Template Reference}
+\label{structDeleterP}\index{DeleterP$<$ deleter $>$@{DeleterP$<$ deleter $>$}}
+
+
+{\ttfamily \#include $<$deleter.\+h$>$}
+
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+{\footnotesize template$<$typename T $>$ }\\void \mbox{\hyperlink{structDeleterP_a3db8255a00207a4e32e65b1f94f5242d}{operator()}} (T $\ast$t) const
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+\subsubsection*{template$<$auto deleter$>$\newline
+struct Deleter\+P$<$ deleter $>$}
+Wrapper template for a deleter function that accept a pointer to the struct to free \char`\"{}auto\char`\"{} will accept any signature for the \char`\"{}deleter\char`\"{} function (e.\+g. void ($\ast$deleter)(Struct $\ast$)), creating a different struct for each one of them at compile-\/time 
+
+Definition at line \mbox{\hyperlink{deleter_8h_source_l00009}{9}} of file \mbox{\hyperlink{deleter_8h_source}{deleter.\+h}}.
+
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{structDeleterP_a3db8255a00207a4e32e65b1f94f5242d}\label{structDeleterP_a3db8255a00207a4e32e65b1f94f5242d}} 
+\index{DeleterP$<$ deleter $>$@{DeleterP$<$ deleter $>$}!operator()@{operator()}}
+\index{operator()@{operator()}!DeleterP$<$ deleter $>$@{DeleterP$<$ deleter $>$}}
+\doxysubsubsection{\texorpdfstring{operator()()}{operator()()}}
+{\footnotesize\ttfamily template$<$auto deleter$>$ \\
+template$<$typename T $>$ \\
+void \mbox{\hyperlink{structDeleterP}{DeleterP}}$<$ deleter $>$\+::operator() (\begin{DoxyParamCaption}\item[{T $\ast$}]{t }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Definition at line \mbox{\hyperlink{deleter_8h_source_l00011}{11}} of file \mbox{\hyperlink{deleter_8h_source}{deleter.\+h}}.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00011                                 \{}
+\DoxyCodeLine{00012         \textcolor{keywordflow}{if} (t) deleter(t);}
+\DoxyCodeLine{00013     \}}
+
+\end{DoxyCode}
+
+
+The documentation for this struct was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+src/common/deleter.\+h\end{DoxyCompactItemize}

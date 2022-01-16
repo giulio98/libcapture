@@ -1,0 +1,68 @@
+\hypertarget{screen__recorder_8h_source}{}\doxysection{screen\+\_\+recorder.\+h}
+\label{screen__recorder_8h_source}\index{include/screen-\/recorder/screen\_recorder.h@{include/screen-\/recorder/screen\_recorder.h}}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{screen__recorder_8h_source_l00001}00001 \textcolor{preprocessor}{\#pragma once}}
+\DoxyCodeLine{\Hypertarget{screen__recorder_8h_source_l00002}00002 }
+\DoxyCodeLine{\Hypertarget{screen__recorder_8h_source_l00003}00003 \textcolor{preprocessor}{\#include <array>}}
+\DoxyCodeLine{\Hypertarget{screen__recorder_8h_source_l00004}00004 \textcolor{preprocessor}{\#include <condition\_variable>}}
+\DoxyCodeLine{\Hypertarget{screen__recorder_8h_source_l00005}00005 \textcolor{preprocessor}{\#include <memory>}}
+\DoxyCodeLine{\Hypertarget{screen__recorder_8h_source_l00006}00006 \textcolor{preprocessor}{\#include <mutex>}}
+\DoxyCodeLine{\Hypertarget{screen__recorder_8h_source_l00007}00007 \textcolor{preprocessor}{\#include <string>}}
+\DoxyCodeLine{\Hypertarget{screen__recorder_8h_source_l00008}00008 \textcolor{preprocessor}{\#include <thread>}}
+\DoxyCodeLine{\Hypertarget{screen__recorder_8h_source_l00009}00009 }
+\DoxyCodeLine{\Hypertarget{screen__recorder_8h_source_l00010}00010 \textcolor{preprocessor}{\#include "{}video\_parameters.h"{}}}
+\DoxyCodeLine{\Hypertarget{screen__recorder_8h_source_l00011}00011 }
+\DoxyCodeLine{\Hypertarget{screen__recorder_8h_source_l00012}00012 \textcolor{keyword}{class }\mbox{\hyperlink{classDemuxer}{Demuxer}};}
+\DoxyCodeLine{\Hypertarget{screen__recorder_8h_source_l00013}00013 \textcolor{keyword}{class }\mbox{\hyperlink{classMuxer}{Muxer}};}
+\DoxyCodeLine{\Hypertarget{screen__recorder_8h_source_l00014}00014 \textcolor{keyword}{class }\mbox{\hyperlink{classPipeline}{Pipeline}};}
+\DoxyCodeLine{\Hypertarget{screen__recorder_8h_source_l00015}00015 }
+\DoxyCodeLine{\Hypertarget{screen__recorder_8h_source_l00016}\mbox{\hyperlink{classScreenRecorder}{00016}} \textcolor{keyword}{class }\mbox{\hyperlink{classScreenRecorder}{ScreenRecorder}} \{}
+\DoxyCodeLine{\Hypertarget{screen__recorder_8h_source_l00017}00017     \textcolor{comment}{/* Whether the recorder should be verbose or not */}}
+\DoxyCodeLine{\Hypertarget{screen__recorder_8h_source_l00018}00018     \textcolor{keywordtype}{bool} verbose\_;}
+\DoxyCodeLine{\Hypertarget{screen__recorder_8h_source_l00019}00019 }
+\DoxyCodeLine{\Hypertarget{screen__recorder_8h_source_l00020}00020     \textcolor{comment}{/* Synchronization variables */}}
+\DoxyCodeLine{\Hypertarget{screen__recorder_8h_source_l00021}00021 }
+\DoxyCodeLine{\Hypertarget{screen__recorder_8h_source_l00022}00022     \textcolor{keywordtype}{bool} stopped\_ = \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{screen__recorder_8h_source_l00023}00023     \textcolor{keywordtype}{bool} paused\_;}
+\DoxyCodeLine{\Hypertarget{screen__recorder_8h_source_l00024}00024     std::mutex m\_;}
+\DoxyCodeLine{\Hypertarget{screen__recorder_8h_source_l00025}00025     std::condition\_variable cv\_;}
+\DoxyCodeLine{\Hypertarget{screen__recorder_8h_source_l00026}00026     std::thread capturer\_;}
+\DoxyCodeLine{\Hypertarget{screen__recorder_8h_source_l00027}00027 \textcolor{preprocessor}{\#ifdef LINUX}}
+\DoxyCodeLine{\Hypertarget{screen__recorder_8h_source_l00028}00028     std::thread audio\_capturer\_;}
+\DoxyCodeLine{\Hypertarget{screen__recorder_8h_source_l00029}00029 \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{\Hypertarget{screen__recorder_8h_source_l00030}00030 }
+\DoxyCodeLine{\Hypertarget{screen__recorder_8h_source_l00031}00031     \textcolor{comment}{/* The pipeline used for audio/video processing */}}
+\DoxyCodeLine{\Hypertarget{screen__recorder_8h_source_l00032}00032     std::unique\_ptr<Pipeline> pipeline\_;}
+\DoxyCodeLine{\Hypertarget{screen__recorder_8h_source_l00033}00033 }
+\DoxyCodeLine{\Hypertarget{screen__recorder_8h_source_l00034}00034     \textcolor{comment}{/* The muxer managing the output file */}}
+\DoxyCodeLine{\Hypertarget{screen__recorder_8h_source_l00035}00035     std::shared\_ptr<Muxer> muxer\_;}
+\DoxyCodeLine{\Hypertarget{screen__recorder_8h_source_l00036}00036 }
+\DoxyCodeLine{\Hypertarget{screen__recorder_8h_source_l00041}00041     \textcolor{keywordtype}{void} capture(\mbox{\hyperlink{classDemuxer}{Demuxer}} demuxer);}
+\DoxyCodeLine{\Hypertarget{screen__recorder_8h_source_l00042}00042 }
+\DoxyCodeLine{\Hypertarget{screen__recorder_8h_source_l00046}00046     \textcolor{keywordtype}{void} stopCapturers();}
+\DoxyCodeLine{\Hypertarget{screen__recorder_8h_source_l00047}00047 }
+\DoxyCodeLine{\Hypertarget{screen__recorder_8h_source_l00048}00048 \textcolor{keyword}{public}:}
+\DoxyCodeLine{\Hypertarget{screen__recorder_8h_source_l00053}00053     \textcolor{keyword}{explicit} \mbox{\hyperlink{classScreenRecorder_a3fee5b65c2e97b01be6f182ce2d4ad74}{ScreenRecorder}}(\textcolor{keywordtype}{bool} verbose = \textcolor{keyword}{false});}
+\DoxyCodeLine{\Hypertarget{screen__recorder_8h_source_l00054}00054 }
+\DoxyCodeLine{\Hypertarget{screen__recorder_8h_source_l00055}00055     \mbox{\hyperlink{classScreenRecorder_a3fee5b65c2e97b01be6f182ce2d4ad74}{ScreenRecorder}}(\textcolor{keyword}{const} \mbox{\hyperlink{classScreenRecorder}{ScreenRecorder}} \&) = \textcolor{keyword}{delete};}
+\DoxyCodeLine{\Hypertarget{screen__recorder_8h_source_l00056}00056 }
+\DoxyCodeLine{\Hypertarget{screen__recorder_8h_source_l00057}00057     \mbox{\hyperlink{classScreenRecorder}{\string~ScreenRecorder}}();}
+\DoxyCodeLine{\Hypertarget{screen__recorder_8h_source_l00058}00058 }
+\DoxyCodeLine{\Hypertarget{screen__recorder_8h_source_l00059}00059     \mbox{\hyperlink{classScreenRecorder}{ScreenRecorder}} \&operator=(\textcolor{keyword}{const} \mbox{\hyperlink{classScreenRecorder}{ScreenRecorder}} \&) = \textcolor{keyword}{delete};}
+\DoxyCodeLine{\Hypertarget{screen__recorder_8h_source_l00060}00060 }
+\DoxyCodeLine{\Hypertarget{screen__recorder_8h_source_l00075}00075     \textcolor{keywordtype}{void} \mbox{\hyperlink{classScreenRecorder_a7025191be3141da7e7283c66ddf8d4b8}{start}}(\textcolor{keyword}{const} std::string \&video\_device, \textcolor{keyword}{const} std::string \&audio\_device, \textcolor{keyword}{const} std::string \&output\_file,}
+\DoxyCodeLine{\Hypertarget{screen__recorder_8h_source_l00076}00076                \mbox{\hyperlink{classVideoParameters}{VideoParameters}} video\_params);}
+\DoxyCodeLine{\Hypertarget{screen__recorder_8h_source_l00077}00077 }
+\DoxyCodeLine{\Hypertarget{screen__recorder_8h_source_l00083}00083     \textcolor{keywordtype}{void} \mbox{\hyperlink{classScreenRecorder_a893530f2a4a19c45fa36d8677b082ad5}{stop}}();}
+\DoxyCodeLine{\Hypertarget{screen__recorder_8h_source_l00084}00084 }
+\DoxyCodeLine{\Hypertarget{screen__recorder_8h_source_l00089}00089     \textcolor{keywordtype}{void} \mbox{\hyperlink{classScreenRecorder_a6052103d7920846b8464db351a2ba78e}{pause}}();}
+\DoxyCodeLine{\Hypertarget{screen__recorder_8h_source_l00090}00090 }
+\DoxyCodeLine{\Hypertarget{screen__recorder_8h_source_l00095}00095     \textcolor{keywordtype}{void} \mbox{\hyperlink{classScreenRecorder_a570c3793285871396d12dc5371b22000}{resume}}();}
+\DoxyCodeLine{\Hypertarget{screen__recorder_8h_source_l00096}00096 }
+\DoxyCodeLine{\Hypertarget{screen__recorder_8h_source_l00101}00101     \textcolor{keywordtype}{void} \mbox{\hyperlink{classScreenRecorder_aa83f20c854a76ccf0fdaad094723f6f5}{setVerbose}}(\textcolor{keywordtype}{bool} verbose);}
+\DoxyCodeLine{\Hypertarget{screen__recorder_8h_source_l00102}00102 }
+\DoxyCodeLine{\Hypertarget{screen__recorder_8h_source_l00106}00106     \textcolor{keywordtype}{void} \mbox{\hyperlink{classScreenRecorder_a82d7bf5c4ad0d5140bbee2fe2d03e370}{listAvailableDevices}}() \textcolor{keyword}{const};}
+\DoxyCodeLine{\Hypertarget{screen__recorder_8h_source_l00107}00107 \};}
+
+\end{DoxyCode}
