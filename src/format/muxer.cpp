@@ -3,12 +3,12 @@
 #include <iostream>
 #include <stdexcept>
 
-static void throwError(const std::string &msg) { throw std::runtime_error("Muxer: " + msg); }
+static void throwRuntimeError(const std::string &msg) { throw std::runtime_error("Muxer: " + msg); }
 
 Muxer::Muxer(std::string filename) : filename_(std::move(filename)) {
     AVFormatContext *fmt_ctx = nullptr;
     if (avformat_alloc_output_context2(&fmt_ctx, nullptr, nullptr, filename_.c_str()) < 0)
-        throwError("failed to allocate output format context");
+        throwRuntimeError("failed to allocate output format context");
     fmt_ctx_ = av::FormatContextUPtr(fmt_ctx);
 }
 
@@ -17,7 +17,7 @@ Muxer::~Muxer() {
 }
 
 void Muxer::addStream(const AVCodecContext *enc_ctx) {
-    if (!enc_ctx) throwError("received encoder context is NULL");
+    if (!enc_ctx) throwRuntimeError("received encoder context is NULL");
 
     av::MediaType type;
     if (enc_ctx->codec_type == AVMEDIA_TYPE_VIDEO) {
@@ -25,21 +25,20 @@ void Muxer::addStream(const AVCodecContext *enc_ctx) {
     } else if (enc_ctx->codec_type == AVMEDIA_TYPE_AUDIO) {
         type = av::MediaType::Audio;
     } else {
-        throwError("received encoder context is ok unknown media type");
+        throwRuntimeError("received encoder context is ok unknown media type");
     }
 
     std::unique_lock ul{m_};
 
-    if (file_opened_) throwError("cannot add a new stream, file has already been opened");
+    if (file_opened_) throwRuntimeError("cannot add a new stream, file has already been opened");
 
     auto stream = streams_[type];
-
-    if (stream) throwError("stream of specified type already present");
+    if (stream) throwRuntimeError("stream of specified type already present");
     stream = avformat_new_stream(fmt_ctx_.get(), nullptr);
-    if (!stream) throwError("failed to create a new stream");
+    if (!stream) throwRuntimeError("failed to create a new stream");
 
     if (avcodec_parameters_from_context(stream->codecpar, enc_ctx) < 0)
-        throwError("failed to write video stream parameters");
+        throwRuntimeError("failed to write video stream parameters");
 
     streams_[type] = stream;
     encoders_time_bases_[type] = enc_ctx->time_base;
@@ -47,26 +46,26 @@ void Muxer::addStream(const AVCodecContext *enc_ctx) {
 
 void Muxer::openFile() {
     std::unique_lock ul{m_};
-    if (file_opened_) throwError("cannot open file, file has already been opened");
-    if (file_closed_) throwError("cannot re-open file, file has already been closed");
+    if (file_opened_) throwRuntimeError("cannot open file, file has already been opened");
+    if (file_closed_) throwRuntimeError("cannot re-open file, file has already been closed");
     /* create empty video file */
     if (!(fmt_ctx_->flags & AVFMT_NOFILE)) {
         if (avio_open(&fmt_ctx_->pb, filename_.c_str(), AVIO_FLAG_WRITE) < 0) {
-            throwError("failed to create the output file");
+            throwRuntimeError("failed to create the output file");
         }
     }
     file_opened_ = true;
-    if (avformat_write_header(fmt_ctx_.get(), nullptr) < 0) throwError("Failed to write file header");
+    if (avformat_write_header(fmt_ctx_.get(), nullptr) < 0) throwRuntimeError("Failed to write file header");
 }
 
 void Muxer::closeFile() {
     std::unique_lock ul{m_};
-    if (!file_opened_) throwError("cannot close file, file has not been opened");
-    if (file_closed_) throwError("cannot close file, file has already been closed");
-    if (av_interleaved_write_frame(fmt_ctx_.get(), nullptr)) throwError("failed to flush internal packet queue");
-    if (av_write_trailer(fmt_ctx_.get()) < 0) throwError("failed to write file trailer");
+    if (!file_opened_) throwRuntimeError("cannot close file, file has not been opened");
+    if (file_closed_) throwRuntimeError("cannot close file, file has already been closed");
+    if (av_interleaved_write_frame(fmt_ctx_.get(), nullptr)) throwRuntimeError("failed to flush internal packet queue");
+    if (av_write_trailer(fmt_ctx_.get()) < 0) throwRuntimeError("failed to write file trailer");
     if (fmt_ctx_->pb) {
-        if (avio_closep(&(fmt_ctx_->pb)) < 0) throwError("failed to close file");
+        if (avio_closep(&(fmt_ctx_->pb)) < 0) throwRuntimeError("failed to close file");
     }
     file_closed_ = true;
 }
@@ -74,18 +73,18 @@ void Muxer::closeFile() {
 void Muxer::writePacket(av::PacketUPtr packet, av::MediaType packet_type) {
     std::unique_lock ul{m_};
 
-    if (!file_opened_) throwError("cannot write packet, file has not been opened");
-    if (file_closed_) throwError("cannot write packet, file has already been closed");
+    if (!file_opened_) throwRuntimeError("cannot write packet, file has not been opened");
+    if (file_closed_) throwRuntimeError("cannot write packet, file has already been closed");
 
     if (packet) {
-        if (!av::validMediaType(packet_type)) throwError("received packet of unknown type");
+        if (!av::validMediaType(packet_type)) throwRuntimeError("received packet of unknown type");
         auto stream = streams_[packet_type];
-        if (!stream) throwError("stream of specified type not present");
+        if (!stream) throwRuntimeError("stream of specified type not present");
         av_packet_rescale_ts(packet.get(), encoders_time_bases_[packet_type], stream->time_base);
         packet->stream_index = stream->index;
     }
 
-    if (av_interleaved_write_frame(fmt_ctx_.get(), packet.get())) throwError("failed to write packet");
+    if (av_interleaved_write_frame(fmt_ctx_.get(), packet.get())) throwRuntimeError("failed to write packet");
 }
 
 void Muxer::printInfo() {

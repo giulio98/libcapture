@@ -2,7 +2,7 @@
 
 #include <sstream>
 
-static void throwError(const std::string &msg) { throw std::runtime_error("Converter: " + msg); }
+static void throwRuntimeError(const std::string &msg) { throw std::runtime_error("Converter: " + msg); }
 
 void swap(Converter &lhs, Converter &rhs) {
     std::swap(lhs.filter_graph_, rhs.filter_graph_);
@@ -13,8 +13,8 @@ void swap(Converter &lhs, Converter &rhs) {
 
 static std::pair<std::string, std::string> getAudioFilterSpec(const AVCodecContext *dec_ctx,
                                                               const AVCodecContext *enc_ctx, AVRational in_time_base) {
-    if (!dec_ctx) throwError("dec_ctx is NULL");
-    if (!enc_ctx) throwError("enc_ctx is NULL");
+    if (!dec_ctx) throwRuntimeError("dec_ctx is NULL");
+    if (!enc_ctx) throwRuntimeError("enc_ctx is NULL");
 
     std::stringstream src_args_ss;
     src_args_ss << "time_base=" << in_time_base.num << "/" << in_time_base.den;
@@ -49,8 +49,8 @@ static std::pair<std::string, std::string> getAudioFilterSpec(const AVCodecConte
 static std::pair<std::string, std::string> getVideoFilterSpec(const AVCodecContext *dec_ctx,
                                                               const AVCodecContext *enc_ctx, AVRational in_time_base,
                                                               int offset_x, int offset_y) {
-    if (!dec_ctx) throwError("dec_ctx is NULL");
-    if (!enc_ctx) throwError("enc_ctx is NULL");
+    if (!dec_ctx) throwRuntimeError("dec_ctx is NULL");
+    if (!enc_ctx) throwRuntimeError("enc_ctx is NULL");
 
     std::stringstream src_args_ss;
     src_args_ss << "video_size=" << dec_ctx->width << "x" << dec_ctx->height;
@@ -71,8 +71,8 @@ static std::pair<std::string, std::string> getVideoFilterSpec(const AVCodecConte
 
 Converter::Converter(const AVCodecContext *dec_ctx, const AVCodecContext *enc_ctx, AVRational in_time_base,
                      int offset_x, int offset_y) {
-    if (!dec_ctx) throwError("dec_ctx is NULL");
-    if (!enc_ctx) throwError("enc_ctx is NULL");
+    if (!dec_ctx) throwRuntimeError("dec_ctx is NULL");
+    if (!enc_ctx) throwRuntimeError("enc_ctx is NULL");
 
     std::string src_filter_name;
     std::string sink_filter_name;
@@ -80,49 +80,49 @@ Converter::Converter(const AVCodecContext *dec_ctx, const AVCodecContext *enc_ct
     std::string filter_spec;
 
     if (dec_ctx->codec_type != enc_ctx->codec_type) {
-        throwError("type mismatch between received decoder and encoder");
+        throwRuntimeError("type mismatch between received decoder and encoder");
     } else if (dec_ctx->codec_type == AVMEDIA_TYPE_VIDEO) {
         src_filter_name = "buffer";
         sink_filter_name = "buffersink";
         std::tie(src_args, filter_spec) = getVideoFilterSpec(dec_ctx, enc_ctx, in_time_base, offset_x, offset_y);
     } else if (dec_ctx->codec_type == AVMEDIA_TYPE_AUDIO) {
-        if (offset_x || offset_y) throwError("video offset specified specified for audio converter constructor");
+        if (offset_x || offset_y) throwRuntimeError("video offset specified specified for audio converter constructor");
         src_filter_name = "abuffer";
         sink_filter_name = "abuffersink";
         std::tie(src_args, filter_spec) = getAudioFilterSpec(dec_ctx, enc_ctx, in_time_base);
     } else {
-        throwError("unknown media type received in constructor");
+        throwRuntimeError("unknown media type received in constructor");
     }
 
     filter_graph_ = av::FilterGraphUPtr(avfilter_graph_alloc());
-    if (!filter_graph_) throwError("failed to allocate filter graph");
+    if (!filter_graph_) throwRuntimeError("failed to allocate filter graph");
 
     { /* buffer src set-up*/
         const AVFilter *filter = avfilter_get_by_name(src_filter_name.c_str());
-        if (!filter) throwError("failed to find src filter definition");
+        if (!filter) throwRuntimeError("failed to find src filter definition");
         if (avfilter_graph_create_filter(&buffersrc_ctx_, filter, "in", src_args.c_str(), nullptr,
                                          filter_graph_.get()) < 0)
-            throwError("failed to create src filter");
+            throwRuntimeError("failed to create src filter");
     }
 
     { /* buffer sink set-up*/
         const AVFilter *filter = avfilter_get_by_name(sink_filter_name.c_str());
-        if (!filter) throwError("failed to find sink filter definition");
+        if (!filter) throwRuntimeError("failed to find sink filter definition");
         if (avfilter_graph_create_filter(&buffersink_ctx_, filter, "out", nullptr, nullptr, filter_graph_.get()) < 0)
-            throwError("failed to create src filter");
+            throwRuntimeError("failed to create src filter");
     }
 
     {
         /* Endpoints for the filter graph. */
         av::FilterInOutUPtr outputs(avfilter_inout_alloc());
-        if (!outputs) throwError("failed to allocate filter outputs");
+        if (!outputs) throwRuntimeError("failed to allocate filter outputs");
         outputs->name = av_strdup("in");
         outputs->filter_ctx = buffersrc_ctx_;
         outputs->pad_idx = 0;
         outputs->next = nullptr;
 
         av::FilterInOutUPtr inputs(avfilter_inout_alloc());
-        if (!inputs) throwError("failed to allocate filter inputs");
+        if (!inputs) throwRuntimeError("failed to allocate filter inputs");
         inputs->name = av_strdup("out");
         inputs->filter_ctx = buffersink_ctx_;
         inputs->pad_idx = 0;
@@ -134,10 +134,10 @@ Converter::Converter(const AVCodecContext *dec_ctx, const AVCodecContext *enc_ct
             avfilter_graph_parse_ptr(filter_graph_.get(), filter_spec.c_str(), &inputs_raw, &outputs_raw, nullptr);
         outputs = av::FilterInOutUPtr(outputs_raw);
         inputs = av::FilterInOutUPtr(inputs_raw);
-        if (ret < 0) throwError("failed to parse pointers");
+        if (ret < 0) throwRuntimeError("failed to parse pointers");
     }
 
-    if (avfilter_graph_config(filter_graph_.get(), nullptr) < 0) throwError("failed to configure the filter graph");
+    if (avfilter_graph_config(filter_graph_.get(), nullptr) < 0) throwRuntimeError("failed to configure the filter graph");
 }
 
 Converter::Converter(Converter &&other) : Converter() { swap(*this, other); }
@@ -148,22 +148,22 @@ Converter &Converter::operator=(Converter other) {
 }
 
 void Converter::sendFrame(av::FrameUPtr frame) {
-    if (!buffersrc_ctx_) throwError("buffersrc is not allocated");
-    if (!frame) throwError("sent frame is not allocated");
-    if (av_buffersrc_add_frame(buffersrc_ctx_, frame.get())) throwError("failed to write frame to filter");
+    if (!buffersrc_ctx_) throwRuntimeError("buffersrc is not allocated");
+    if (!frame) throwRuntimeError("sent frame is not allocated");
+    if (av_buffersrc_add_frame(buffersrc_ctx_, frame.get())) throwRuntimeError("failed to write frame to filter");
 }
 
 av::FrameUPtr Converter::getFrame() {
-    if (!buffersink_ctx_) throwError("buffersink is not allocated");
+    if (!buffersink_ctx_) throwRuntimeError("buffersink is not allocated");
 
     if (!frame_) {
         frame_ = av::FrameUPtr(av_frame_alloc());
-        if (!frame_) throwError("failed to allocate frame");
+        if (!frame_) throwRuntimeError("failed to allocate frame");
     }
 
     int ret = av_buffersink_get_frame(buffersink_ctx_, frame_.get());
     if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) return nullptr;
-    if (ret < 0) throwError("failed to receive frame from filter");
+    if (ret < 0) throwRuntimeError("failed to receive frame from filter");
 
     return std::move(frame_);
 };
