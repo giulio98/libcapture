@@ -38,7 +38,7 @@ if(WIN32)
     include(FetchContent)
     FetchContent_Declare(
             FFmpeg
-            URL https://www.gyan.dev/ffmpeg/builds/packages/ffmpeg-4.3.2-full_build-shared.7z
+            URL https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-full-shared.7z
     )
     FetchContent_GetProperties(FFmpeg)
     if(NOT ffmpeg_POPULATED)
