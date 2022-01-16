@@ -9,11 +9,11 @@ class VideoParameters {
     int offset_y_ = 0;
     int framerate_ = 0;
 
-    void checkGE(const std::string &name, const int val, const int bound) {
+    static void checkGE(const std::string &name, const int val, const int bound) {
         if (val < bound) throw std::runtime_error(name + " must be >= " + std::to_string(bound));
     }
 
-    void checkEven(const std::string &name, const int val) {
+    static void checkEven(const std::string &name, const int val) {
         if (val % 2) throw std::runtime_error(name + " must be divisible by 2");
     }
 

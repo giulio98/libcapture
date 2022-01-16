@@ -23,7 +23,7 @@ Demuxer::Demuxer(const std::string &fmt_name, std::string device_name, std::map<
     if (!fmt_) throwRuntimeError("cannot find input format");
 }
 
-Demuxer::Demuxer(Demuxer &&other) : Demuxer() { swap(*this, other); }
+Demuxer::Demuxer(Demuxer &&other) noexcept : Demuxer() { swap(*this, other); }
 
 Demuxer &Demuxer::operator=(Demuxer other) {
     swap(*this, other);

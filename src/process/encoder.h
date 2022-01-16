@@ -60,7 +60,7 @@ public:
 
     Encoder(const Encoder &) = delete;
 
-    Encoder(Encoder &&other);
+    Encoder(Encoder &&other) noexcept ;
 
     ~Encoder() = default;
 

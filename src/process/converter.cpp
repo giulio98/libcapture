@@ -13,8 +13,8 @@ void swap(Converter &lhs, Converter &rhs) {
 
 static std::pair<std::string, std::string> getAudioFilterSpec(const AVCodecContext *dec_ctx,
                                                               const AVCodecContext *enc_ctx, AVRational in_time_base) {
-    if (!dec_ctx) throwRuntimeError("dec_ctx is NULL");
-    if (!enc_ctx) throwRuntimeError("enc_ctx is NULL");
+    //if (!dec_ctx) throwRuntimeError("dec_ctx is NULL"); condition is always false
+    //if (!enc_ctx) throwRuntimeError("enc_ctx is NULL"); condition is always false
 
     std::stringstream src_args_ss;
     src_args_ss << "time_base=" << in_time_base.num << "/" << in_time_base.den;
@@ -49,8 +49,8 @@ static std::pair<std::string, std::string> getAudioFilterSpec(const AVCodecConte
 static std::pair<std::string, std::string> getVideoFilterSpec(const AVCodecContext *dec_ctx,
                                                               const AVCodecContext *enc_ctx, AVRational in_time_base,
                                                               int offset_x, int offset_y) {
-    if (!dec_ctx) throwRuntimeError("dec_ctx is NULL");
-    if (!enc_ctx) throwRuntimeError("enc_ctx is NULL");
+    //if (!dec_ctx) throwRuntimeError("dec_ctx is NULL"); condition is always false
+    //if (!enc_ctx) throwRuntimeError("enc_ctx is NULL"); condition is always false
 
     std::stringstream src_args_ss;
     src_args_ss << "video_size=" << dec_ctx->width << "x" << dec_ctx->height;
@@ -132,15 +132,15 @@ Converter::Converter(const AVCodecContext *dec_ctx, const AVCodecContext *enc_ct
         AVFilterInOut *inputs_raw = inputs.release();
         int ret =
             avfilter_graph_parse_ptr(filter_graph_.get(), filter_spec.c_str(), &inputs_raw, &outputs_raw, nullptr);
-        outputs = av::FilterInOutUPtr(outputs_raw);
-        inputs = av::FilterInOutUPtr(inputs_raw);
+        //outputs = av::FilterInOutUPtr(outputs_raw); never used
+        //inputs = av::FilterInOutUPtr(inputs_raw); never used
         if (ret < 0) throwRuntimeError("failed to parse pointers");
     }
 
     if (avfilter_graph_config(filter_graph_.get(), nullptr) < 0) throwRuntimeError("failed to configure the filter graph");
 }
 
-Converter::Converter(Converter &&other) : Converter() { swap(*this, other); }
+Converter::Converter(Converter &&other) noexcept : Converter() { swap(*this, other); }
 
 Converter &Converter::operator=(Converter other) {
     swap(*this, other);
@@ -166,4 +166,4 @@ av::FrameUPtr Converter::getFrame() {
     if (ret < 0) throwRuntimeError("failed to receive frame from filter");
 
     return std::move(frame_);
-};
+}

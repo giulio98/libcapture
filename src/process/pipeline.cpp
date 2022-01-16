@@ -2,7 +2,6 @@
 
 #include <iostream>
 #include <map>
-#include <sstream>
 
 #include "format/demuxer.h"
 #include "format/muxer.h"

@@ -29,7 +29,7 @@ public:
 
     Demuxer(const Demuxer &) = delete;
 
-    Demuxer(Demuxer &&other);
+    Demuxer(Demuxer &&other) noexcept ;
 
     ~Demuxer() = default;
 

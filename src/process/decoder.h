@@ -22,7 +22,7 @@ public:
 
     Decoder(const Decoder &) = delete;
 
-    Decoder(Decoder &&other);
+    Decoder(Decoder &&other) noexcept ;
 
     ~Decoder() = default;
 

@@ -1,5 +1,4 @@
 #include "encoder.h"
-
 #include <iostream>
 #include <stdexcept>
 
@@ -63,7 +62,7 @@ Encoder::Encoder(AVCodecID codec_id, int width, int height, AVPixelFormat pix_fm
     init(global_header_flags, options);
 }
 
-Encoder::Encoder(Encoder &&other) : Encoder() { swap(*this, other); }
+Encoder::Encoder(Encoder &&other) noexcept : Encoder() { swap(*this, other); }
 
 Encoder &Encoder::operator=(Encoder other) {
     swap(*this, other);

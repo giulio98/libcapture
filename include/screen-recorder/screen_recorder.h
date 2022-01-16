@@ -20,7 +20,7 @@ class ScreenRecorder {
     /* Synchronization variables */
 
     bool stopped_ = true;
-    bool paused_;
+    bool paused_{};
     std::mutex m_;
     std::condition_variable cv_;
     std::thread capturer_;

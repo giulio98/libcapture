@@ -1,6 +1,4 @@
 #include "muxer.h"
-
-#include <iostream>
 #include <stdexcept>
 
 static void throwRuntimeError(const std::string &msg) { throw std::runtime_error("Muxer: " + msg); }

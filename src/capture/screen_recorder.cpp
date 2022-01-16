@@ -25,7 +25,7 @@ static void makeAvVerbose(bool verbose) {
     }
 }
 
-static const std::string getInputFormatName(bool audio = false) {
+static std::string getInputFormatName(bool audio = false) {
 #if defined(LINUX)
     if (audio) {
         return "alsa";
@@ -39,7 +39,7 @@ static const std::string getInputFormatName(bool audio = false) {
 #endif
 }
 
-static const std::string generateInputDeviceName(const std::string &video_device, const std::string &audio_device,
+static std::string generateInputDeviceName(const std::string &video_device, const std::string &audio_device,
                                                  const VideoParameters &video_params) {
     std::stringstream device_name_ss;
 #if defined(WINDOWS)
@@ -94,7 +94,7 @@ static void setDisplayResolution(int framerate) {
 }
 #endif
 
-static const std::map<std::string, std::string> generateDemuxerOptions(const VideoParameters &video_params) {
+static std::map<std::string, std::string> generateDemuxerOptions(const VideoParameters &video_params) {
     std::map<std::string, std::string> demuxer_options;
 #ifdef WINDOWS
     setDisplayResolution(video_params.getFramerate());
