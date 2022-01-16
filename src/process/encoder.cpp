@@ -5,7 +5,7 @@
 
 #define VERBOSE 0
 
-static void throw_error(const std::string &msg) { throw std::runtime_error("Encoder: " + msg); }
+static void throwError(const std::string &msg) { throw std::runtime_error("Encoder: " + msg); }
 
 void swap(Encoder &lhs, Encoder &rhs) {
     std::swap(lhs.codec_, rhs.codec_);
@@ -24,18 +24,18 @@ Encoder::Encoder(AVCodecID codec_id) {
 
     if (!codec_) {
         codec_ = avcodec_find_encoder(codec_id);
-        if (!codec_) throw_error("cannot find codec");
+        if (!codec_) throwError("cannot find codec");
     }
 
     codec_ctx_ = av::CodecContextUPtr(avcodec_alloc_context3(codec_));
-    if (!codec_ctx_) throw_error("failed to allocated memory for AVCodecContext");
+    if (!codec_ctx_) throwError("failed to allocated memory for AVCodecContext");
 }
 
 Encoder::Encoder(AVCodecID codec_id, int sample_rate, uint64_t channel_layout, int global_header_flags,
                  const std::map<std::string, std::string> &options)
     : Encoder(codec_id) {
     if (codec_->type != AVMEDIA_TYPE_AUDIO)
-        throw_error("failed to create audio encoder (received codec ID is not of type audio)");
+        throwError("failed to create audio encoder (received codec ID is not of type audio)");
 
     codec_ctx_->sample_rate = sample_rate;
     codec_ctx_->channel_layout = channel_layout;
@@ -52,7 +52,7 @@ Encoder::Encoder(AVCodecID codec_id, int width, int height, AVPixelFormat pix_fm
                  int global_header_flags, const std::map<std::string, std::string> &options)
     : Encoder(codec_id) {
     if (codec_->type != AVMEDIA_TYPE_VIDEO)
-        throw_error("failed to create video encoder (received codec ID is not of type video)");
+        throwError("failed to create video encoder (received codec ID is not of type video)");
 
     codec_ctx_->width = width;
     codec_ctx_->height = height;
@@ -70,8 +70,8 @@ Encoder &Encoder::operator=(Encoder other) {
 }
 
 void Encoder::init(int global_header_flags, const std::map<std::string, std::string> &options) {
-    if (!codec_) throw_error("initialization failed, internal codec is null");
-    if (!codec_ctx_) throw_error("initialization failed, internal codec ctx is null");
+    if (!codec_) throwError("initialization failed, internal codec is null");
+    if (!codec_ctx_) throwError("initialization failed, internal codec ctx is null");
 
     if (global_header_flags & AVFMT_GLOBALHEADER) codec_ctx_->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
 
@@ -79,7 +79,7 @@ void Encoder::init(int global_header_flags, const std::map<std::string, std::str
     AVDictionary *dict_raw = dict.release();
     int ret = avcodec_open2(codec_ctx_.get(), codec_, dict_raw ? &dict_raw : nullptr);
     dict = av::DictionaryUPtr(dict_raw);
-    if (ret) throw_error("failed to initialize Codec Context");
+    if (ret) throwError("failed to initialize Codec Context");
 #if VERBOSE
     auto map = av::dict2map(dict.get());
     for (const auto &[key, val] : map) {
@@ -89,25 +89,25 @@ void Encoder::init(int global_header_flags, const std::map<std::string, std::str
 }
 
 bool Encoder::sendFrame(const AVFrame *frame) {
-    if (!codec_ctx_) throw_error("encoder was not initialized yet");
+    if (!codec_ctx_) throwError("encoder was not initialized yet");
     int ret = avcodec_send_frame(codec_ctx_.get(), frame);
     if (ret == AVERROR(EAGAIN)) return false;
-    if (ret == AVERROR_EOF) throw_error("has already been flushed");
-    if (ret < 0) throw_error("failed to send frame to encoder");
+    if (ret == AVERROR_EOF) throwError("has already been flushed");
+    if (ret < 0) throwError("failed to send frame to encoder");
     return true;
 }
 
 av::PacketUPtr Encoder::getPacket() {
-    if (!codec_ctx_) throw_error("encoder was not initialized yet");
+    if (!codec_ctx_) throwError("encoder was not initialized yet");
 
     if (!packet_) {
         packet_ = av::PacketUPtr(av_packet_alloc());
-        if (!packet_) throw_error("failed to allocate packet");
+        if (!packet_) throwError("failed to allocate packet");
     }
 
     int ret = avcodec_receive_packet(codec_ctx_.get(), packet_.get());
     if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) return nullptr;
-    if (ret < 0) throw_error("failed to receive frame from decoder");
+    if (ret < 0) throwError("failed to receive frame from decoder");
 
     return std::move(packet_);
 }
