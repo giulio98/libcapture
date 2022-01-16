@@ -27,7 +27,7 @@ screen-recorder is a multiplatform C++ library that allows to capture your scree
 | Audio device       	         |    microphone  |     microphone      |     microphone, system audio  | 
 ## Install FFmpeg
 Under **Windows**, you can install FFmpeg by clicking [here](https://www.gyan.dev/ffmpeg/builds/packages/ffmpeg-4.3.2-full_build-shared.7z).
-Make sure to add "C:\FFmpeg\FFmpeg\bin" on your Path variable.
+Make sure to add `C:\FFmpeg\FFmpeg\bin` on your Path variable.
 Additionally, to ensure proper operation of screen-capture you need to install [screen-capture-recorder-to-video-windows-free](https://github.com/rdp/screen-capture-recorder-to-video-windows-free/releases).
 
 Under **Linux**, you can install FFmpeg by opening your terminal and running the following command
@@ -57,7 +57,7 @@ FetchContent_MakeAvailable(screen-recorder)
 target_link_libraries(<your_executable> screen-recorder)
 ```
 ### Windows
-After installing ffmpeg, as described in [Install FFmpeg](#install-ffmpeg), your CMakeLists.txt should look like this
+After installing ffmpeg, as described in [Install FFmpeg](#install-ffmpeg), your `CMakeLists.txt` should look like this
 ```cmake
 cmake_minimum_required(VERSION 3.20)
 project(myproject)
@@ -76,12 +76,12 @@ FetchContent_MakeAvailable(screen-recorder)
 add_executable(myexe main.cpp)
 target_link_libraries(myexe screen-recorder)
 ```
-As an example "main.cpp" can be [recorder.cpp](example/recorder.cpp).
+As an example `main.cpp` can be [recorder.cpp](example/recorder.cpp).
 
 If your project doesn't compile, probably it's because you are not using a proper compiler, you can use either MSVC or minGW64
-you can find [here](https://www.msys2.org/) a guide to install minGW64, make sure to add  "C:\msys64\mingw64\bin"
+you can find [here](https://www.msys2.org/) a guide to install minGW64, make sure to add  `C:\msys64\mingw64\bin`
 in the path of your environment variable.
 
 At this step you will have under bin your executable.
 
-In order to run your executable you must add the ffmpeg dlls, that you can find under "C:\FFmpeg\FFmpeg\bin", in the same folder of your executable.
+In order to run your executable you must add the ffmpeg dlls, that you can find under `C:\FFmpeg\FFmpeg\bin`, in the same folder of your executable.
