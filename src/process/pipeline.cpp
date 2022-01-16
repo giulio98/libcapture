@@ -9,10 +9,6 @@
 
 static void throw_error(const std::string &msg) { throw std::runtime_error("Pipeline: " + msg); }
 
-static void checkMediaType(av::MediaType type) {
-    if (!av::validMediaType(type)) throw_error("invalid data type received");
-}
-
 Pipeline::Pipeline(std::shared_ptr<Muxer> muxer, bool async) : muxer_(std::move(muxer)), async_(async) {
     if (!muxer_) throw_error("received Muxer is null");
     if (async_) stopped_ = false;
@@ -23,7 +19,7 @@ Pipeline::~Pipeline() {
 }
 
 void Pipeline::startProcessor(av::MediaType type) {
-    checkMediaType(type);
+    if (!av::validMediaType(type)) throw_error("failed to start processor (invalid media type received)");
 
     if (processors_[type].joinable()) throw_error("processor for specified type was already started");
 
@@ -78,8 +74,8 @@ void Pipeline::initVideo(const Demuxer &demuxer, AVCodecID codec_id, const Video
     auto [offset_x, offset_y] = video_params.getVideoOffset();
     if (!width) width = dec_ctx->width;
     if (!height) height = dec_ctx->height;
-    if (offset_x + width > dec_ctx->width) throw std::runtime_error("Output video width exceeds input one");
-    if (offset_y + height > dec_ctx->height) throw std::runtime_error("Output video height exceeds input one");
+    if (offset_x + width > dec_ctx->width) throw_error("Output video width exceeds input one");
+    if (offset_y + height > dec_ctx->height) throw_error("Output video height exceeds input one");
 
     /* Init encoder */
     std::map<std::string, std::string> enc_options;
@@ -131,7 +127,7 @@ void Pipeline::initAudio(const Demuxer &demuxer, AVCodecID codec_id) {
 }
 
 void Pipeline::processPacket(const AVPacket *packet, av::MediaType type) {
-    checkMediaType(type);
+    if (!av::validMediaType(type)) throw_error("failed to process packet (media type is invalid)");
 
     Decoder &decoder = decoders_[type];
     Converter &converter = converters_[type];
@@ -155,7 +151,7 @@ void Pipeline::processPacket(const AVPacket *packet, av::MediaType type) {
 }
 
 void Pipeline::processConvertedFrame(const AVFrame *frame, av::MediaType type) {
-    checkMediaType(type);
+    if (!av::validMediaType(type)) throw_error("failed to process frame (media type is invalid)");
 
     Encoder &encoder = encoders_[type];
 
@@ -173,8 +169,8 @@ void Pipeline::processConvertedFrame(const AVFrame *frame, av::MediaType type) {
 
 void Pipeline::feed(av::PacketUPtr packet, av::MediaType packet_type) {
     if (!packet) throw_error("received packet is null");
-    checkMediaType(packet_type);
-    if (!managed_types_[packet_type]) throw std::runtime_error("No pipeline corresponding to received packet type");
+    if (!av::validMediaType(packet_type)) throw_error("failed to take packet (media type is invalid)");
+    if (!managed_types_[packet_type]) throw_error("No pipeline corresponding to received packet type");
 
     if (async_) {
         std::unique_lock ul{m_};
