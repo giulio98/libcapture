@@ -64,7 +64,8 @@ public:
      * and the recording will be in progress.
      * The video stream will be encoded as H.264, with pixel format YUV420, while the audio stream will
      * be encoded as AAC.
-     * WARNING: if there is already a recording in progress, calling this function will throw an exception
+     * WARNING: if there is already a recording in progress, calling this function will throw an exception.
+     * If the specified output file already exists, this function will simply overwrite it without performing any check
      * @param video_device      the name of the video device to use
      * @param audio_device      the name of the audio device to use (if empty, audio won't be recorded)
      * @param output_file       the name of the output file to use to save the recording
