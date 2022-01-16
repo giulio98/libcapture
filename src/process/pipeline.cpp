@@ -67,8 +67,8 @@ void Pipeline::initVideo(const Demuxer &demuxer, AVCodecID codec_id, const Video
                          AVPixelFormat pix_fmt) {
     const auto type = av::MediaType::Video;
 
-    if (managed_type_[type]) throw_error("video pipeline already inited");
-    managed_type_[type] = true;
+    if (managed_types_[type]) throw_error("video pipeline already inited");
+    managed_types_[type] = true;
 
     /* Init decoder */
     decoders_[type] = Decoder(demuxer.getStreamParams(type));
@@ -103,8 +103,8 @@ void Pipeline::initVideo(const Demuxer &demuxer, AVCodecID codec_id, const Video
 void Pipeline::initAudio(const Demuxer &demuxer, AVCodecID codec_id) {
     const auto type = av::MediaType::Audio;
 
-    if (managed_type_[type]) throw_error("audio pipeline already inited");
-    managed_type_[type] = true;
+    if (managed_types_[type]) throw_error("audio pipeline already inited");
+    managed_types_[type] = true;
 
     /* Init decoder */
     decoders_[type] = Decoder(demuxer.getStreamParams(type));
@@ -174,7 +174,7 @@ void Pipeline::processConvertedFrame(const AVFrame *frame, av::MediaType type) {
 void Pipeline::feed(av::PacketUPtr packet, av::MediaType packet_type) {
     if (!packet) throw_error("received packet is null");
     checkMediaType(packet_type);
-    if (!managed_type_[packet_type]) throw std::runtime_error("No pipeline corresponding to received packet type");
+    if (!managed_types_[packet_type]) throw std::runtime_error("No pipeline corresponding to received packet type");
 
     if (async_) {
         std::unique_lock ul{m_};
@@ -203,13 +203,13 @@ void Pipeline::flush() {
 
     /* flush the pipelines */
     for (auto type : av::validMediaTypes) {
-        if (managed_type_[type]) flushPipeline(type);
+        if (managed_types_[type]) flushPipeline(type);
     }
 }
 
 void Pipeline::printInfo() const {
     for (auto type : av::validMediaTypes) {
-        if (managed_type_[type]) {
+        if (managed_types_[type]) {
             std::cout << "Decoder " << type << ": " << decoders_[type].getName() << std::endl;
             std::cout << "Encoder " << type << ": " << encoders_[type].getName() << std::endl;
         }

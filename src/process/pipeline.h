@@ -15,7 +15,7 @@ class Demuxer;
 class Muxer;
 
 class Pipeline {
-    std::array<bool, av::MediaType::NumTypes> managed_type_ = {false, false};
+    std::array<bool, av::MediaType::NumTypes> managed_types_ = {false, false};
     std::shared_ptr<Muxer> muxer_;
     std::array<Decoder, av::MediaType::NumTypes> decoders_;
     std::array<Encoder, av::MediaType::NumTypes> encoders_;
