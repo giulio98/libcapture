@@ -261,18 +261,18 @@ void ScreenRecorder::capture(Demuxer *demuxer, Demuxer *audio_demuxer) {
     {
         ThreadGuard tg(audio_capturer);
 
-        try {
-            if (audio_demuxer) {
-                audio_capturer = std::thread([this, audio_demuxer, &e_ptr]() {
-                    try {
-                        readPackets(audio_demuxer);
-                    } catch (...) {
-                        stopCapture();
-                        e_ptr = std::current_exception();
-                    }
-                });
-            }
+        if (audio_demuxer) {
+            audio_capturer = std::thread([this, audio_demuxer, &e_ptr]() {
+                try {
+                    readPackets(audio_demuxer);
+                } catch (...) {
+                    stopCapture();
+                    e_ptr = std::current_exception();
+                }
+            });
+        }
 
+        try {
             readPackets(demuxer);
         } catch (...) {
             stopCapture();
