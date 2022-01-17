@@ -33,17 +33,17 @@ class ScreenRecorder {
     std::shared_ptr<Muxer> muxer_;
 
     /**
-     * Capture streams from the demuxer (and optionally audio_demuxer)
-     * @param demuxer       the main demuxer to read packets from (if null, an exception will be thrown)
-     * @param audio_demuxer the audio demuxer to read packets from (can be null, in which case it will just be ignored)
+     * Read packets from a demuxer and pass them to the processing pipeline
+     * @param demuxer the demuxer to read the packets from
      */
-    void capture(Demuxer *demuxer, Demuxer *audio_demuxer);
+    void capture(Demuxer &demuxer);
 
     /**
-     * Read packets from a demuxer and pass them to the processing pipeline
-     * @param demuxer the demuxer to read the packets from (if null, an exception will be thrown)
+     * Read packets from two separate audio/video demuxers and pass them to the processing pipeline
+     * @param video_demuxer the video demuxer to read packets from
+     * @param audio_demuxer the audio demuxer to read packets from
      */
-    void readPackets(Demuxer *demuxer);
+    void capture(Demuxer &video_demuxer, Demuxer &audio_demuxer);
 
     /**
      * Stop the capturer thread

@@ -136,8 +136,10 @@ ScreenRecorder::~ScreenRecorder() {
 
 void ScreenRecorder::stopCapture() {
     std::unique_lock ul{m_};
-    stopped_ = true;
-    cv_.notify_all();
+    if (!stopped_) {
+        stopped_ = true;
+        cv_.notify_all();
+    }
 }
 
 std::future<void> ScreenRecorder::start(const std::string &video_device, const std::string &audio_device,
@@ -153,8 +155,8 @@ std::future<void> ScreenRecorder::start(const std::string &video_device, const s
     AVCodecID video_codec_id = AV_CODEC_ID_H264;
     AVCodecID audio_codec_id = AV_CODEC_ID_AAC;
 
-    std::unique_ptr<Demuxer> demuxer;
-    std::unique_ptr<Demuxer> audio_demuxer;  // Linux only
+    Demuxer demuxer;
+    std::optional<Demuxer> audio_demuxer;  // Linux only
 
     /* init Muxer */
     muxer_ = std::make_shared<Muxer>(output_file);
@@ -162,8 +164,8 @@ std::future<void> ScreenRecorder::start(const std::string &video_device, const s
     { /* init Demuxer */
         const std::string device_name = generateInputDeviceName(video_device, audio_device, video_params);
         const std::map<std::string, std::string> demuxer_options = generateDemuxerOptions(video_params);
-        demuxer = std::make_unique<Demuxer>(getInputFormatName(), device_name, demuxer_options);
-        demuxer->openInput();
+        demuxer = Demuxer(getInputFormatName(), device_name, demuxer_options);
+        demuxer.openInput();
     }
 
     { /* init Pipeline */
@@ -178,19 +180,18 @@ std::future<void> ScreenRecorder::start(const std::string &video_device, const s
         pipeline_ = std::make_unique<Pipeline>(muxer_, async);
     }
 
-    pipeline_->initVideo(*demuxer, video_codec_id, video_pix_fmt, video_params);
+    pipeline_->initVideo(demuxer, video_codec_id, video_pix_fmt, video_params);
 
     /* init audio structures, if necessary */
     if (capture_audio) {
 #ifdef LINUX
         /* init audio demuxer and pipeline */
         const std::string audio_device_name = generateInputDeviceName("", audio_device, video_params);
-        audio_demuxer = std::make_unique<Demuxer>(getInputFormatName(true), audio_device_name,
-                                                  std::map<std::string, std::string>());
+        audio_demuxer = Demuxer(getInputFormatName(true), audio_device_name, std::map<std::string, std::string>());
         audio_demuxer->openInput();
         pipeline_->initAudio(*audio_demuxer, audio_codec_id);
 #else
-        pipeline_->initAudio(*demuxer, audio_codec_id);
+        pipeline_->initAudio(demuxer, audio_codec_id);
 #endif
     }
 
@@ -200,9 +201,9 @@ std::future<void> ScreenRecorder::start(const std::string &video_device, const s
     /* Print info about structures (if verbose) */
     if (verbose_) {
         std::cout << std::endl;
-        demuxer->printInfo();
+        demuxer.printInfo();
 #ifdef LINUX
-        if (capture_audio) audio_demuxer->printInfo(1);
+        if (capture_audio) audio_demuxer.value().printInfo(1);
 #endif
         muxer_->printInfo();
         pipeline_->printInfo();
@@ -216,15 +217,20 @@ std::future<void> ScreenRecorder::start(const std::string &video_device, const s
     auto f = p.get_future();
 
     capturer_ = std::thread(
-        [this](std::unique_ptr<Demuxer> demuxer, std::unique_ptr<Demuxer> audio_demuxer, std::promise<void> p) {
+        [this](Demuxer demuxer, std::optional<Demuxer> audio_demuxer, std::promise<void> p) {
             try {
-                capture(demuxer.get(), audio_demuxer.get());
+                if (audio_demuxer) {
+                    capture(demuxer, *audio_demuxer);
+                } else {
+                    capture(demuxer);
+                }
                 p.set_value();
             } catch (...) {
                 p.set_exception(std::current_exception());
             }
         },
         std::move(demuxer), std::move(audio_demuxer), std::move(p));
+    /* note that if audio_demuxer contained a value, it still contains a (now "empty") demuxer now */
 
     return f;
 }
@@ -252,28 +258,26 @@ void ScreenRecorder::resume() {
     cv_.notify_all();
 }
 
-void ScreenRecorder::capture(Demuxer *demuxer, Demuxer *audio_demuxer) {
-    if (!demuxer) throw std::logic_error("Cannot start capturers (the received demuxer ptr is null)");
-
+void ScreenRecorder::capture(Demuxer &video_demuxer, Demuxer &audio_demuxer) {
     std::thread audio_capturer;
     std::exception_ptr e_ptr;
 
     {
         ThreadGuard tg(audio_capturer);
 
-        if (audio_demuxer) {
-            audio_capturer = std::thread([this, audio_demuxer, &e_ptr]() {
+        audio_capturer = std::thread(
+            [this, &e_ptr](Demuxer &audio_demuxer) {
                 try {
-                    readPackets(audio_demuxer);
+                    capture(audio_demuxer);
                 } catch (...) {
                     stopCapture();
                     e_ptr = std::current_exception();
                 }
-            });
-        }
+            },
+            std::ref(audio_demuxer));
 
         try {
-            readPackets(demuxer);
+            capture(video_demuxer);
         } catch (...) {
             stopCapture();
             throw;
@@ -283,9 +287,7 @@ void ScreenRecorder::capture(Demuxer *demuxer, Demuxer *audio_demuxer) {
     if (e_ptr) std::rethrow_exception(e_ptr);
 }
 
-void ScreenRecorder::readPackets(Demuxer *demuxer) {
-    if (!demuxer) throw std::logic_error("Cannot read capturers (the received demuxer ptr is null)");
-
+void ScreenRecorder::capture(Demuxer &demuxer) {
     int64_t last_pts = 0;
     int64_t pts_offset = 0;
     bool adjust_pts_offset = false;
@@ -299,10 +301,10 @@ void ScreenRecorder::readPackets(Demuxer *demuxer) {
         bool after_pause;
         {
             std::unique_lock<std::mutex> ul{m_};
-#ifndef MACOS
-            if (paused_) demuxer->closeInput();
-#endif
             after_pause = paused_;
+#ifndef MACOS
+            if (paused_) demuxer.closeInput();
+#endif
             cv_.wait(ul, [this]() { return (!paused_ || stopped_); });
             if (stopped_) break;
         }
@@ -310,13 +312,13 @@ void ScreenRecorder::readPackets(Demuxer *demuxer) {
         if (after_pause) {
             adjust_pts_offset = true;
 #ifdef MACOS
-            demuxer->flush();
+            demuxer.flush();
 #else
-            demuxer->openInput();
+            demuxer.openInput();
 #endif
         }
 
-        auto [packet, packet_type] = demuxer->readPacket();
+        auto [packet, packet_type] = demuxer.readPacket();
         if (!packet) {
             std::this_thread::sleep_for(sleep_interval);
             continue;
