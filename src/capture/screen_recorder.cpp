@@ -44,7 +44,7 @@ static std::string getInputFormatName(bool audio = false) {
 }
 
 static std::string generateInputDeviceName(const std::string &video_device, const std::string &audio_device,
-                                                 const VideoParameters &video_params) {
+                                           const VideoParameters &video_params) {
     std::stringstream device_name_ss;
 #if defined(WINDOWS)
     if (!audio_device.empty()) device_name_ss << "audio=" << audio_device << ":";
@@ -135,12 +135,14 @@ ScreenRecorder::~ScreenRecorder() {
     if (capturer_.joinable()) capturer_.join();
 }
 
-void ScreenRecorder::stopCapture() {
-    std::unique_lock ul{m_};
-    if (!stopped_) {
+bool ScreenRecorder::stopCapture() {
+    {
+        std::unique_lock ul{m_};
+        if (stopped_) return false;
         stopped_ = true;
         cv_.notify_all();
     }
+    return true;
 }
 
 std::future<void> ScreenRecorder::start(const std::string &video_device, const std::string &audio_device,
@@ -211,33 +213,37 @@ std::future<void> ScreenRecorder::start(const std::string &video_device, const s
         std::cout << std::endl;
     }
 
-    stopped_ = false;
-    paused_ = false;
-
     std::promise<void> p;
     auto f = p.get_future();
 
-    capturer_ = std::thread(
-        [this](Demuxer demuxer, std::optional<Demuxer> audio_demuxer, std::promise<void> p) {
-            try {
-                if (audio_demuxer) {
-                    capture(demuxer, *audio_demuxer);
-                } else {
-                    capture(demuxer);
+    {
+        std::unique_lock ul{m_};
+
+        capturer_ = std::thread(
+            [this](Demuxer demuxer, std::optional<Demuxer> audio_demuxer, std::promise<void> p) {
+                try {
+                    if (audio_demuxer) {
+                        capture(demuxer, *audio_demuxer);
+                    } else {
+                        capture(demuxer);
+                    }
+                    p.set_value();
+                } catch (...) {
+                    p.set_exception(std::current_exception());
                 }
-                p.set_value();
-            } catch (...) {
-                p.set_exception(std::current_exception());
-            }
-        },
-        std::move(demuxer), std::move(audio_demuxer), std::move(p));
-    /* note that if audio_demuxer contained a value, it still contains a (now "empty") demuxer now */
+            },
+            std::move(demuxer), std::move(audio_demuxer), std::move(p));
+        /* note that if audio_demuxer contained a value, it still contains a (now "empty") demuxer now */
+
+        paused_ = false;
+        stopped_ = false;  // set stopped_ to false only when everything is properly set-up
+    }
 
     return f;
 }
 
 void ScreenRecorder::stop() {
-    stopCapture();
+    if (!stopCapture()) return;
     if (capturer_.joinable()) capturer_.join();
     pipeline_->flush();
     muxer_->closeFile();

@@ -47,8 +47,9 @@ class ScreenRecorder {
 
     /**
      * Stop the capturer thread
+     * @return true if the capture was succesfully stopped, false if it was already stopped and no action was performed
      */
-    void stopCapture();
+    bool stopCapture();
 
 public:
     /**
@@ -82,21 +83,19 @@ public:
                             const std::string &output_file, VideoParameters video_params);
 
     /**
-     * Stop the recording.
-     * When this function returns, the recorder internal state will have been complemetely cleaned up
+     * Stop the recording (if the recording is already stopped, nothing will be done).
+     * When this function returns, the recorder internal state is guaranteed to be complemetely cleaned up
      * (including all processing threads)
      */
     void stop();
 
     /**
-     * Pause the screen capture.
-     * If the recording is already paused/stopped, nothing will be done
+     * Pause the recording (if the recording is already paused/stopped, nothing will be done)
      */
     void pause();
 
     /**
-     * Resume the screen capture.
-     * If the recording is already proceeding/stopped, nothing will be done
+     * Resume the recording (if the recording is already proceeding/stopped, nothing will be done)
      */
     void resume();
 
