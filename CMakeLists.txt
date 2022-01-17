@@ -1,12 +1,12 @@
 cmake_minimum_required(VERSION 3.16)
 set(CMAKE_CXX_STANDARD 17)
 
-set(PROJECT_NAME screen-recorder)
+set(PROJECT_NAME libcapture)
 
 project(${PROJECT_NAME})
 
 set(SOURCES
-    src/capture/screen_recorder.cpp
+        src/capture/capture.cpp
     src/format/demuxer.cpp
     src/format/muxer.cpp
     src/process/decoder.cpp

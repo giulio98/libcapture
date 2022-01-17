@@ -3,8 +3,8 @@
 #include <X11/cursorfont.h>
 #endif
 
-#include <screen-recorder/screen_recorder.h>
-#include <screen-recorder/video_parameters.h>
+#include <libcapture/capture.h>
+#include <libcapture/video_parameters.h>
 
 #include <filesystem>
 #include <iostream>

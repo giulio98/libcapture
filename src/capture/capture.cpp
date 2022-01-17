@@ -1,4 +1,4 @@
-#include "screen_recorder.h"
+#include "capture.h"
 
 #ifdef WINDOWS
 #include <windows.h>

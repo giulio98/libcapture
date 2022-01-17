@@ -56,5 +56,5 @@ jobs:
         if: runner.os == 'Linux' || runner.os == 'macOS'
         uses: actions/upload-artifact@v2
         with:
-          name: "screen-recorder-${{runner.os}}"
+          name: "libcapture-${{runner.os}}"
           path: bin

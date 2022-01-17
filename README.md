@@ -1,15 +1,15 @@
-# screen-recorder C++ library
+# libcapture C++ library
 
 <p align="center">
 <img alt="c++" src="https://img.shields.io/badge/C++-17-blue.svg?style=flat&logo=c%2B%2B"/> 
- <img alt="CI build" src="https://github.com/giulio98/screen-recorder/actions/workflows/linux_build.yml/badge.svg"/> 
-<img alt="CI build" src="https://github.com/giulio98/screen-recorder/actions/workflows/macos_build.yml/badge.svg"/> 
-<img alt="CI build" src="https://github.com/giulio98/screen-recorder/actions/workflows/windows_build.yml/badge.svg"/> 
- <img alt="License"  src="https://img.shields.io/github/license/giulio98/screen-recorder"/> 
+ <img alt="CI build" src="https://github.com/giulio98/libcapture/actions/workflows/linux_build.yml/badge.svg"/> 
+<img alt="CI build" src="https://github.com/giulio98/libcapture/actions/workflows/macos_build.yml/badge.svg"/> 
+<img alt="CI build" src="https://github.com/giulio98/libcapture/actions/workflows/windows_build.yml/badge.svg"/> 
+ <img alt="License"  src="https://img.shields.io/github/license/giulio98/libcapture"/> 
 </p> 
 
 
-screen-recorder is a multiplatform C++ library that allows to capture your screen and optionally microphone audio, build with [FFmpeg](https://github.com/FFmpeg/FFmpeg).
+libcapture is a multiplatform C++ library that allows to capture your screen and optionally microphone audio, build with [FFmpeg](https://github.com/FFmpeg/FFmpeg).
 
 ## Dependences
 * cmake >= 2.8
@@ -39,25 +39,25 @@ Finally, under **MacOS**, you can install FFmpeg by opening your terminal and ru
 ```bash
 brew install cmake ffmpeg
 ```
-## Install screen-recorder
+## Install libcapture
 
-Using the cmake `FetchContent` directives you can directly setup screen-recorder as follows
+Using the cmake `FetchContent` directives you can directly setup libcapture as follows
 
 ```cmake
 include(FetchContent)
 
 FetchContent_Declare(
-        screen-recorder
-        GIT_REPOSITORY https://github.com/giulio98/screen-recorder.git
+        libcapture
+        GIT_REPOSITORY https://github.com/giulio98/libcapture.git
 )
-FetchContent_MakeAvailable(screen-recorder)
+FetchContent_MakeAvailable(libcapture)
 # create your executable 
 # and whatever you need for
 # your project ...
-target_link_libraries(<your_executable> screen-recorder)
+target_link_libraries(<your_executable> libcapture)
 ```
 ### Windows
-Let's see an example on how to install and use screen-recorder in Windows.
+Let's see an example on how to install and use libcapture in Windows.
 After installing ffmpeg, as described in [Install FFmpeg](#install-ffmpeg), your `CMakeLists.txt` should look like this
 ```cmake
 cmake_minimum_required(VERSION 3.20)
@@ -70,12 +70,12 @@ set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 include(FetchContent)
 
 FetchContent_Declare(
-        screen-recorder
-        GIT_REPOSITORY https://github.com/giulio98/screen-recorder.git
+        libcapture
+        GIT_REPOSITORY https://github.com/giulio98/libcapture.git
 )
-FetchContent_MakeAvailable(screen-recorder)
+FetchContent_MakeAvailable(libcapture)
 add_executable(myexe main.cpp)
-target_link_libraries(myexe screen-recorder)
+target_link_libraries(myexe libcapture)
 ```
 As an example `main.cpp` can be [recorder.cpp](example/recorder.cpp).
 
@@ -88,7 +88,7 @@ At this step you will have under bin your executable.
 In order to run your executable you must add the ffmpeg dlls, that you can find under `C:\FFmpeg\FFmpeg\bin`, in the same folder of your executable.
 
 ### Linux
-Let's see another example on how to install screen-recorder in Linux.
+Let's see another example on how to install libcapture in Linux.
 After installing ffmpeg, your `CMakeLists.txt` should look like this
 ```cmake
 cmake_minimum_required(VERSION 3.20)
@@ -101,12 +101,12 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -pthread")
 include(FetchContent)
 
 FetchContent_Declare(
-        screen-recorder
-        GIT_REPOSITORY https://github.com/giulio98/screen-recorder.git
+        libcapture
+        GIT_REPOSITORY https://github.com/giulio98/libcapture.git
 )
-FetchContent_MakeAvailable(screen-recorder)
+FetchContent_MakeAvailable(libcapture)
 add_executable(myexe main.cpp)
-target_link_libraries(myexe screen-recorder)
+target_link_libraries(myexe libcapture)
 ```
 As you can see it's the same for Windows except for the line
 ```cmake
