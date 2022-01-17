@@ -1,4 +1,5 @@
 #include "muxer.h"
+
 #include <stdexcept>
 
 static void throwRuntimeError(const std::string &msg) { throw std::runtime_error("Muxer: " + msg); }
@@ -11,7 +12,7 @@ Muxer::Muxer(std::string filename) : filename_(std::move(filename)) {
 }
 
 Muxer::~Muxer() {
-    if (fmt_ctx_ && fmt_ctx_->pb) avio_closep(&(fmt_ctx_->pb));
+    if (fmt_ctx_->pb) avio_closep(&(fmt_ctx_->pb));
 }
 
 void Muxer::addStream(const AVCodecContext *enc_ctx) {
@@ -45,7 +46,6 @@ void Muxer::addStream(const AVCodecContext *enc_ctx) {
 void Muxer::openFile() {
     std::unique_lock ul{m_};
     if (file_opened_) throwRuntimeError("cannot open file, file has already been opened");
-    if (file_closed_) throwRuntimeError("cannot re-open file, file has already been closed");
     /* create empty video file */
     if (!(fmt_ctx_->flags & AVFMT_NOFILE)) {
         if (avio_open(&fmt_ctx_->pb, filename_.c_str(), AVIO_FLAG_WRITE) < 0) {
