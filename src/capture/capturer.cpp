@@ -18,7 +18,7 @@
 #include "utils/log_level_setter.h"
 #include "utils/thread_guard.h"
 
-#define THROW_TEST_EXCEPTION 0
+#define THROW_TEST_EXCEPTION 0  // TO-DO: remove
 
 static void makeAvVerbose(bool verbose) {
     if (verbose) {

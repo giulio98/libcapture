@@ -3,7 +3,7 @@
 #include <iostream>
 #include <stdexcept>
 
-#define VERBOSE 0
+#define VERBOSE 0  // TO-DO: improve
 
 static void throwRuntimeError(const std::string &msg) { throw std::runtime_error("Demuxer: " + msg); }
 

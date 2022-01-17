@@ -3,7 +3,7 @@
 #include <iostream>
 #include <stdexcept>
 
-#define VERBOSE 0
+#define VERBOSE 0  // TO-DO: improve
 
 static void throwRuntimeError(const std::string &msg) { throw std::runtime_error("Encoder: " + msg); }
 static void throwLogicError(const std::string &msg) { throw std::logic_error("Encoder: " + msg); }
