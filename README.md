@@ -115,5 +115,5 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -pthread")
 As before, you can fill `main.cpp` with the code provided in [recorder.cpp](example/recorder.cpp).
 Then you can run your executable.
 
-#Usage
+# Usage
 
