@@ -295,6 +295,7 @@ void Capturer::capture(Demuxer &video_demuxer, Demuxer &audio_demuxer) {
 }
 
 void Capturer::capture(Demuxer &demuxer) {
+    bool after_pause;
     int64_t last_pts = 0;
     int64_t pts_offset = 0;
     bool adjust_pts_offset = false;
@@ -305,7 +306,6 @@ void Capturer::capture(Demuxer &demuxer) {
 #endif
 
     while (true) {
-        bool after_pause;
         {
             std::unique_lock<std::mutex> ul{m_};
             after_pause = paused_;
