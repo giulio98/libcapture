@@ -1,4 +1,4 @@
-#include "capture.h"
+#include "capturer.h"
 
 #ifdef WINDOWS
 #include <windows.h>
@@ -125,17 +125,17 @@ static std::map<std::string, std::string> generateDemuxerOptions(const VideoPara
     return demuxer_options;
 }
 
-ScreenRecorder::ScreenRecorder(bool verbose) : verbose_(verbose) {
+Capturer::Capturer(bool verbose) : verbose_(verbose) {
     makeAvVerbose(verbose_);
     avdevice_register_all();
 }
 
-ScreenRecorder::~ScreenRecorder() {
+Capturer::~Capturer() {
     stopCapture();
     if (capturer_.joinable()) capturer_.join();
 }
 
-bool ScreenRecorder::stopCapture() {
+bool Capturer::stopCapture() {
     {
         std::unique_lock ul{m_};
         if (stopped_) return false;
@@ -145,8 +145,8 @@ bool ScreenRecorder::stopCapture() {
     return true;
 }
 
-std::future<void> ScreenRecorder::start(const std::string &video_device, const std::string &audio_device,
-                                        const std::string &output_file, VideoParameters video_params) {
+std::future<void> Capturer::start(const std::string &video_device, const std::string &audio_device,
+                                  const std::string &output_file, VideoParameters video_params) {
     if (!stopped_) throw std::runtime_error("Recording already in progress");
 
     if (video_device.empty()) throw std::runtime_error("Video device not specified");
@@ -242,7 +242,7 @@ std::future<void> ScreenRecorder::start(const std::string &video_device, const s
     return f;
 }
 
-void ScreenRecorder::stop() {
+void Capturer::stop() {
     if (!stopCapture()) return;
     if (capturer_.joinable()) capturer_.join();
     pipeline_->flush();
@@ -251,21 +251,21 @@ void ScreenRecorder::stop() {
     muxer_.reset();
 }
 
-void ScreenRecorder::pause() {
+void Capturer::pause() {
     std::unique_lock<std::mutex> ul{m_};
     if (paused_ || stopped_) return;
     paused_ = true;
     cv_.notify_all();
 }
 
-void ScreenRecorder::resume() {
+void Capturer::resume() {
     std::unique_lock<std::mutex> ul{m_};
     if (!paused_ || stopped_) return;
     paused_ = false;
     cv_.notify_all();
 }
 
-void ScreenRecorder::capture(Demuxer &video_demuxer, Demuxer &audio_demuxer) {
+void Capturer::capture(Demuxer &video_demuxer, Demuxer &audio_demuxer) {
     std::thread audio_capturer;
     std::exception_ptr e_ptr;
 
@@ -294,7 +294,7 @@ void ScreenRecorder::capture(Demuxer &video_demuxer, Demuxer &audio_demuxer) {
     if (e_ptr) std::rethrow_exception(e_ptr);
 }
 
-void ScreenRecorder::capture(Demuxer &demuxer) {
+void Capturer::capture(Demuxer &demuxer) {
     int64_t last_pts = 0;
     int64_t pts_offset = 0;
     bool adjust_pts_offset = false;
@@ -347,12 +347,12 @@ void ScreenRecorder::capture(Demuxer &demuxer) {
     }
 }
 
-void ScreenRecorder::setVerbose(bool verbose) {
+void Capturer::setVerbose(bool verbose) {
     verbose_ = verbose;
     makeAvVerbose(verbose_);
 }
 
-void ScreenRecorder::listAvailableDevices() const {
+void Capturer::listAvailableDevices() const {
     std::string dummy_device_name;
     std::map<std::string, std::string> options;
     options.insert({"list_devices", "true"});

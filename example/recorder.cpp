@@ -3,7 +3,7 @@
 #include <X11/cursorfont.h>
 #endif
 
-#include <libcapture/capture.h>
+#include <libcapture/capturer.h>
 #include <libcapture/video_parameters.h>
 
 #include <filesystem>
@@ -183,7 +183,7 @@ int main(int argc, char **argv) {
     }
 
     try {
-        ScreenRecorder sc(verbose);
+        Capturer sc(verbose);
 
         if (video_device.empty()) {
             std::cerr << "ERROR: No video device specified" << std::endl << std::endl;

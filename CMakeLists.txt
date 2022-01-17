@@ -6,7 +6,7 @@ set(PROJECT_NAME libcapture)
 project(${PROJECT_NAME})
 
 set(SOURCES
-        src/capture/capture.cpp
+    src/capture/capturer.cpp
     src/format/demuxer.cpp
     src/format/muxer.cpp
     src/process/decoder.cpp

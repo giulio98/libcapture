@@ -14,7 +14,7 @@ class Demuxer;
 class Muxer;
 class Pipeline;
 
-class ScreenRecorder {
+class Capturer {
     /* Whether the recorder should be verbose or not */
     bool verbose_;
 
@@ -56,13 +56,13 @@ public:
      * Create a new Screen Recorder
      * @param verbose true to make the recorder verbose, false to use the default verbosity
      */
-    explicit ScreenRecorder(bool verbose = false);
+    explicit Capturer(bool verbose = false);
 
-    ScreenRecorder(const ScreenRecorder &) = delete;
+    Capturer(const Capturer &) = delete;
 
-    ~ScreenRecorder();
+    ~Capturer();
 
-    ScreenRecorder &operator=(const ScreenRecorder &) = delete;
+    Capturer &operator=(const Capturer &) = delete;
 
     /**
      * Start the video [and audio] recording.
