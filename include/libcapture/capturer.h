@@ -66,17 +66,17 @@ public:
 
     /**
      * Start the video [and audio] recording.
-     * When this function returns, the recorder internal state will be fully initialized
+     * When this function returns, the capturer internal state will be fully initialized
      * and the recording will be in progress.
      * The video stream will be encoded as H.264, with pixel format YUV420, while the audio stream will
      * be encoded as AAC.
      * WARNING: if there is already a recording in progress, calling this function will throw an exception.
      * If the specified output file already exists, this function will simply overwrite it without performing any check
-     * @param video_device      the name of the video device to use
+     * @param video_device      the name of the video device to use (must be non-empty)
      * @param audio_device      the name of the audio device to use (if empty, audio won't be recorded)
-     * @param output_file       the name of the output file to use to save the recording
-     * @param video_params      the video dimensions (NOTE: if width/height is set to 0, the whole display will be
-     * considered)
+     * @param output_file       the name of the output file to use to save the recording (must be non-empty)
+     * @param video_params      the video dimensions (NOTE: if the width/height is set to 0, the whole display dimension
+     * will be considered)
      * @return a future that can be used to check for exceptions occurring in the recording thread
      */
     std::future<void> start(const std::string &video_device, const std::string &audio_device,
