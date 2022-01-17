@@ -14,3 +14,4 @@ ffmpeg
 *.def
 *.exe
 CMakeSettings.json
+cmake-build-debug

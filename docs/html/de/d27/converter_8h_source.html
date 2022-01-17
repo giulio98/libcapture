@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.9.4"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>screen-recorder: src/process/converter.h Source File</title>
+<title>libcapture: src/process/converter.h Source File</title>
 <link href="../../tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="../../jquery.js"></script>
 <script type="text/javascript" src="../../dynsections.js"></script>
@@ -21,9 +21,9 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">screen-recorder<span id="projectnumber">&#160;0.1</span>
+   <div id="projectname">libcapture<span id="projectnumber">&#160;0.1</span>
    </div>
-   <div id="projectbrief">screen-recorder is a multiplatform C++ library that allows to capture your screen and optionally microphone audio, build with FFmpeg</div>
+   <div id="projectbrief">libcapture is a multiplatform c++ library that allows to capture the display and the microphone audio.</div>
   </td>
  </tr>
  </tbody>
@@ -70,17 +70,17 @@ $(function() {
   <div class="headertitle"><div class="title">converter.h</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="preprocessor">#pragma once</span></div>
+<a href="../../de/d27/converter_8h.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="preprocessor">#pragma once</span></div>
 <div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span> </div>
-<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="preprocessor">#include &quot;common/common.h&quot;</span></div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="preprocessor">#include &quot;<a class="code" href="../../dc/d54/common_8h.html">common/common.h</a>&quot;</span></div>
 <div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span> </div>
 <div class="line"><a id="l00005" name="l00005"></a><span class="lineno"><a class="line" href="../../d5/d17/classConverter.html">    5</a></span><span class="keyword">class </span><a class="code hl_class" href="../../d5/d17/classConverter.html">Converter</a> {</div>
-<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span>    av::FilterGraphUPtr filter_graph_;</div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span>    <a class="code hl_typedef" href="../../d8/d0d/namespaceav.html#aeda5767965662437c209ec63893a1fa6">av::FilterGraphUPtr</a> filter_graph_;</div>
 <div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span>    AVFilterContext *buffersrc_ctx_ = <span class="keyword">nullptr</span>;</div>
 <div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span>    AVFilterContext *buffersink_ctx_ = <span class="keyword">nullptr</span>;</div>
-<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span>    av::FrameUPtr frame_;</div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span>    <a class="code hl_typedef" href="../../d8/d0d/namespaceav.html#abcf8febb01b83a6bf7671fc1793f23f0">av::FrameUPtr</a> frame_;</div>
 <div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span> </div>
-<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span>    <span class="keyword">friend</span> <span class="keywordtype">void</span> swap(<a class="code hl_class" href="../../d5/d17/classConverter.html">Converter</a> &amp;lhs, <a class="code hl_class" href="../../d5/d17/classConverter.html">Converter</a> &amp;rhs);</div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span>    <span class="keyword">friend</span> <span class="keywordtype">void</span> <a class="code hl_friend" href="../../d5/d17/classConverter.html#a8baba4be80dc7f525946274eea7ad513">swap</a>(<a class="code hl_class" href="../../d5/d17/classConverter.html">Converter</a> &amp;lhs, <a class="code hl_class" href="../../d5/d17/classConverter.html">Converter</a> &amp;rhs);</div>
 <div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span> </div>
 <div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="keyword">public</span>:</div>
 <div class="line"><a id="l00017" name="l00017"></a><span class="lineno"><a class="line" href="../../d5/d17/classConverter.html#aaa67c7d2770c60fc2fa85fccb6f8a1fc">   17</a></span>    <a class="code hl_function" href="../../d5/d17/classConverter.html#aaa67c7d2770c60fc2fa85fccb6f8a1fc">Converter</a>() = <span class="keywordflow">default</span>;</div>
@@ -88,22 +88,29 @@ $(function() {
 <div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>    <a class="code hl_function" href="../../d5/d17/classConverter.html#aaa67c7d2770c60fc2fa85fccb6f8a1fc">Converter</a>(<span class="keyword">const</span> AVCodecContext *dec_ctx, <span class="keyword">const</span> AVCodecContext *enc_ctx, AVRational in_time_base, <span class="keywordtype">int</span> offset_x = 0,</div>
 <div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>              <span class="keywordtype">int</span> offset_y = 0);</div>
 <div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span> </div>
-<div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span>    <a class="code hl_function" href="../../d5/d17/classConverter.html#aaa67c7d2770c60fc2fa85fccb6f8a1fc">Converter</a>(<span class="keyword">const</span> <a class="code hl_class" href="../../d5/d17/classConverter.html">Converter</a> &amp;) = <span class="keyword">delete</span>;</div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno"><a class="line" href="../../d5/d17/classConverter.html#aa0ac7c1a1ee44b3ee2d6b51fa1e16308">   34</a></span>    <a class="code hl_function" href="../../d5/d17/classConverter.html#aa0ac7c1a1ee44b3ee2d6b51fa1e16308">Converter</a>(<span class="keyword">const</span> <a class="code hl_class" href="../../d5/d17/classConverter.html">Converter</a> &amp;) = <span class="keyword">delete</span>;</div>
 <div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span> </div>
-<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>    <a class="code hl_function" href="../../d5/d17/classConverter.html#aaa67c7d2770c60fc2fa85fccb6f8a1fc">Converter</a>(<a class="code hl_class" href="../../d5/d17/classConverter.html">Converter</a> &amp;&amp;other);</div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>    <a class="code hl_function" href="../../d5/d17/classConverter.html#aaa67c7d2770c60fc2fa85fccb6f8a1fc">Converter</a>(<a class="code hl_class" href="../../d5/d17/classConverter.html">Converter</a> &amp;&amp;other) <span class="keyword">noexcept</span>;</div>
 <div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span> </div>
-<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>    <a class="code hl_class" href="../../d5/d17/classConverter.html">~Converter</a>() = <span class="keywordflow">default</span>;</div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno"><a class="line" href="../../d5/d17/classConverter.html#a7f50175996e82142ac6cefa8469312dc">   38</a></span>    <a class="code hl_function" href="../../d5/d17/classConverter.html#a7f50175996e82142ac6cefa8469312dc">~Converter</a>() = <span class="keywordflow">default</span>;</div>
 <div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span> </div>
-<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>    <a class="code hl_class" href="../../d5/d17/classConverter.html">Converter</a> &amp;operator=(<a class="code hl_class" href="../../d5/d17/classConverter.html">Converter</a> other);</div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>    <a class="code hl_class" href="../../d5/d17/classConverter.html">Converter</a> &amp;<a class="code hl_function" href="../../d5/d17/classConverter.html#ad48ff4f80e3c16ac238f5cace194f0f7">operator=</a>(<a class="code hl_class" href="../../d5/d17/classConverter.html">Converter</a> other);</div>
 <div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span> </div>
-<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="../../d5/d17/classConverter.html#af0ecd7c664a249a7b7b8f9d600042964">sendFrame</a>(av::FrameUPtr frame);</div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="../../d5/d17/classConverter.html#af0ecd7c664a249a7b7b8f9d600042964">sendFrame</a>(<a class="code hl_typedef" href="../../d8/d0d/namespaceav.html#abcf8febb01b83a6bf7671fc1793f23f0">av::FrameUPtr</a> frame);</div>
 <div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span> </div>
-<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>    av::FrameUPtr <a class="code hl_function" href="../../d5/d17/classConverter.html#aea4bf5f51fc7fce7d1d5997406239cca">getFrame</a>();</div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>    <a class="code hl_typedef" href="../../d8/d0d/namespaceav.html#abcf8febb01b83a6bf7671fc1793f23f0">av::FrameUPtr</a> <a class="code hl_function" href="../../d5/d17/classConverter.html#aea4bf5f51fc7fce7d1d5997406239cca">getFrame</a>();</div>
 <div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>};</div>
 <div class="ttc" id="aclassConverter_html"><div class="ttname"><a href="../../d5/d17/classConverter.html">Converter</a></div><div class="ttdef"><b>Definition:</b> <a href="../../de/d27/converter_8h_source.html#l00005">converter.h:5</a></div></div>
+<div class="ttc" id="aclassConverter_html_a7f50175996e82142ac6cefa8469312dc"><div class="ttname"><a href="../../d5/d17/classConverter.html#a7f50175996e82142ac6cefa8469312dc">Converter::~Converter</a></div><div class="ttdeci">~Converter()=default</div></div>
+<div class="ttc" id="aclassConverter_html_a8baba4be80dc7f525946274eea7ad513"><div class="ttname"><a href="../../d5/d17/classConverter.html#a8baba4be80dc7f525946274eea7ad513">Converter::swap</a></div><div class="ttdeci">friend void swap(Converter &amp;lhs, Converter &amp;rhs)</div><div class="ttdef"><b>Definition:</b> <a href="../../db/dc8/converter_8cpp_source.html#l00007">converter.cpp:7</a></div></div>
+<div class="ttc" id="aclassConverter_html_aa0ac7c1a1ee44b3ee2d6b51fa1e16308"><div class="ttname"><a href="../../d5/d17/classConverter.html#aa0ac7c1a1ee44b3ee2d6b51fa1e16308">Converter::Converter</a></div><div class="ttdeci">Converter(const Converter &amp;)=delete</div></div>
 <div class="ttc" id="aclassConverter_html_aaa67c7d2770c60fc2fa85fccb6f8a1fc"><div class="ttname"><a href="../../d5/d17/classConverter.html#aaa67c7d2770c60fc2fa85fccb6f8a1fc">Converter::Converter</a></div><div class="ttdeci">Converter()=default</div></div>
-<div class="ttc" id="aclassConverter_html_aea4bf5f51fc7fce7d1d5997406239cca"><div class="ttname"><a href="../../d5/d17/classConverter.html#aea4bf5f51fc7fce7d1d5997406239cca">Converter::getFrame</a></div><div class="ttdeci">av::FrameUPtr getFrame()</div><div class="ttdef"><b>Definition:</b> <a href="../../db/dc8/converter_8cpp_source.html#l00156">converter.cpp:156</a></div></div>
-<div class="ttc" id="aclassConverter_html_af0ecd7c664a249a7b7b8f9d600042964"><div class="ttname"><a href="../../d5/d17/classConverter.html#af0ecd7c664a249a7b7b8f9d600042964">Converter::sendFrame</a></div><div class="ttdeci">void sendFrame(av::FrameUPtr frame)</div><div class="ttdef"><b>Definition:</b> <a href="../../db/dc8/converter_8cpp_source.html#l00150">converter.cpp:150</a></div></div>
+<div class="ttc" id="aclassConverter_html_ad48ff4f80e3c16ac238f5cace194f0f7"><div class="ttname"><a href="../../d5/d17/classConverter.html#ad48ff4f80e3c16ac238f5cace194f0f7">Converter::operator=</a></div><div class="ttdeci">Converter &amp; operator=(Converter other)</div><div class="ttdef"><b>Definition:</b> <a href="../../db/dc8/converter_8cpp_source.html#l00140">converter.cpp:140</a></div></div>
+<div class="ttc" id="aclassConverter_html_aea4bf5f51fc7fce7d1d5997406239cca"><div class="ttname"><a href="../../d5/d17/classConverter.html#aea4bf5f51fc7fce7d1d5997406239cca">Converter::getFrame</a></div><div class="ttdeci">av::FrameUPtr getFrame()</div><div class="ttdef"><b>Definition:</b> <a href="../../db/dc8/converter_8cpp_source.html#l00151">converter.cpp:151</a></div></div>
+<div class="ttc" id="aclassConverter_html_af0ecd7c664a249a7b7b8f9d600042964"><div class="ttname"><a href="../../d5/d17/classConverter.html#af0ecd7c664a249a7b7b8f9d600042964">Converter::sendFrame</a></div><div class="ttdeci">void sendFrame(av::FrameUPtr frame)</div><div class="ttdef"><b>Definition:</b> <a href="../../db/dc8/converter_8cpp_source.html#l00145">converter.cpp:145</a></div></div>
+<div class="ttc" id="acommon_8h_html"><div class="ttname"><a href="../../dc/d54/common_8h.html">common.h</a></div></div>
+<div class="ttc" id="anamespaceav_html_abcf8febb01b83a6bf7671fc1793f23f0"><div class="ttname"><a href="../../d8/d0d/namespaceav.html#abcf8febb01b83a6bf7671fc1793f23f0">av::FrameUPtr</a></div><div class="ttdeci">std::unique_ptr&lt; AVFrame, DeleterPP&lt; av_frame_free &gt; &gt; FrameUPtr</div><div class="ttdef"><b>Definition:</b> <a href="../../dc/d54/common_8h_source.html#l00045">common.h:45</a></div></div>
+<div class="ttc" id="anamespaceav_html_aeda5767965662437c209ec63893a1fa6"><div class="ttname"><a href="../../d8/d0d/namespaceav.html#aeda5767965662437c209ec63893a1fa6">av::FilterGraphUPtr</a></div><div class="ttdeci">std::unique_ptr&lt; AVFilterGraph, DeleterPP&lt; avfilter_graph_free &gt; &gt; FilterGraphUPtr</div><div class="ttdef"><b>Definition:</b> <a href="../../dc/d54/common_8h_source.html#l00049">common.h:49</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>

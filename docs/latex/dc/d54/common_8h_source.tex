@@ -1,6 +1,6 @@
 \hypertarget{common_8h_source}{}\doxysection{common.\+h}
 \label{common_8h_source}\index{src/common/common.h@{src/common/common.h}}
-
+\mbox{\hyperlink{common_8h}{Go to the documentation of this file.}}
 \begin{DoxyCode}{0}
 \DoxyCodeLine{\Hypertarget{common_8h_source_l00001}00001 \textcolor{preprocessor}{\#pragma once}}
 \DoxyCodeLine{\Hypertarget{common_8h_source_l00002}00002 }
@@ -21,26 +21,26 @@
 \DoxyCodeLine{\Hypertarget{common_8h_source_l00017}00017 \textcolor{preprocessor}{\#include <stdexcept>}}
 \DoxyCodeLine{\Hypertarget{common_8h_source_l00018}00018 \textcolor{preprocessor}{\#include <string>}}
 \DoxyCodeLine{\Hypertarget{common_8h_source_l00019}00019 }
-\DoxyCodeLine{\Hypertarget{common_8h_source_l00020}00020 \textcolor{preprocessor}{\#include "{}deleter.h"{}}}
+\DoxyCodeLine{\Hypertarget{common_8h_source_l00020}00020 \textcolor{preprocessor}{\#include "{}\mbox{\hyperlink{deleter_8h}{deleter.h}}"{}}}
 \DoxyCodeLine{\Hypertarget{common_8h_source_l00021}00021 }
-\DoxyCodeLine{\Hypertarget{common_8h_source_l00022}00022 \textcolor{keyword}{namespace }av \{}
+\DoxyCodeLine{\Hypertarget{common_8h_source_l00022}\mbox{\hyperlink{namespaceav}{00022}} \textcolor{keyword}{namespace }\mbox{\hyperlink{namespaceav}{av}} \{}
 \DoxyCodeLine{\Hypertarget{common_8h_source_l00023}00023 }
-\DoxyCodeLine{\Hypertarget{common_8h_source_l00030}00030 \textcolor{keyword}{enum} MediaType \{ None = -\/1, Video, Audio, NumTypes \};}
+\DoxyCodeLine{\Hypertarget{common_8h_source_l00030}\mbox{\hyperlink{namespaceav_ae2953b761e9eb4d9a8be80a224fd26bba99b90951926ac80c982650c5e579f93b}{00030}} \textcolor{keyword}{enum} \mbox{\hyperlink{namespaceav_ae2953b761e9eb4d9a8be80a224fd26bb}{MediaType}} \{ \mbox{\hyperlink{namespaceav_ae2953b761e9eb4d9a8be80a224fd26bbad4f2e84fb09232323dd1559e6e8fc5cb}{None}} = -\/1, \mbox{\hyperlink{namespaceav_ae2953b761e9eb4d9a8be80a224fd26bba6ec05a98ec3161d8877fadd84fdec43d}{Video}}, \mbox{\hyperlink{namespaceav_ae2953b761e9eb4d9a8be80a224fd26bba99b90951926ac80c982650c5e579f93b}{Audio}}, \mbox{\hyperlink{namespaceav_ae2953b761e9eb4d9a8be80a224fd26bba4ba3ba29e0bf744e3b78a3a07e063149}{NumTypes}} \};}
 \DoxyCodeLine{\Hypertarget{common_8h_source_l00031}00031 }
-\DoxyCodeLine{\Hypertarget{common_8h_source_l00035}00035 \textcolor{keyword}{constexpr} std::array<MediaType, MediaType::NumTypes> validMediaTypes = \{MediaType::Video, MediaType::Audio\};}
+\DoxyCodeLine{\Hypertarget{common_8h_source_l00035}\mbox{\hyperlink{namespaceav_a8c2d213cd1b3461b2ae369f83d00c1c5}{00035}} \textcolor{keyword}{constexpr} std::array<MediaType, MediaType::NumTypes> \mbox{\hyperlink{namespaceav_a8c2d213cd1b3461b2ae369f83d00c1c5}{validMediaTypes}} = \{\mbox{\hyperlink{namespaceav_ae2953b761e9eb4d9a8be80a224fd26bba6ec05a98ec3161d8877fadd84fdec43d}{MediaType::Video}}, \mbox{\hyperlink{namespaceav_ae2953b761e9eb4d9a8be80a224fd26bba99b90951926ac80c982650c5e579f93b}{MediaType::Audio}}\};}
 \DoxyCodeLine{\Hypertarget{common_8h_source_l00036}00036 }
-\DoxyCodeLine{\Hypertarget{common_8h_source_l00042}00042 \textcolor{keyword}{constexpr} \textcolor{keywordtype}{bool} validMediaType(MediaType type) \{ \textcolor{keywordflow}{return} (type > MediaType::None \&\& type < MediaType::NumTypes); \}}
+\DoxyCodeLine{\Hypertarget{common_8h_source_l00042}\mbox{\hyperlink{namespaceav_a231ef2ae2e10e69b5a79a64ac5453ed8}{00042}} \textcolor{keyword}{constexpr} \textcolor{keywordtype}{bool} \mbox{\hyperlink{namespaceav_a231ef2ae2e10e69b5a79a64ac5453ed8}{validMediaType}}(\mbox{\hyperlink{namespaceav_ae2953b761e9eb4d9a8be80a224fd26bb}{MediaType}} type) \{ \textcolor{keywordflow}{return} (type > \mbox{\hyperlink{namespaceav_ae2953b761e9eb4d9a8be80a224fd26bbad4f2e84fb09232323dd1559e6e8fc5cb}{MediaType::None}} \&\& type < \mbox{\hyperlink{namespaceav_ae2953b761e9eb4d9a8be80a224fd26bba4ba3ba29e0bf744e3b78a3a07e063149}{MediaType::NumTypes}}); \}}
 \DoxyCodeLine{\Hypertarget{common_8h_source_l00043}00043 }
-\DoxyCodeLine{\Hypertarget{common_8h_source_l00044}00044 \textcolor{keyword}{using} PacketUPtr = std::unique\_ptr<AVPacket, DeleterPP<av\_packet\_free>>;}
-\DoxyCodeLine{\Hypertarget{common_8h_source_l00045}00045 \textcolor{keyword}{using} FrameUPtr = std::unique\_ptr<AVFrame, DeleterPP<av\_frame\_free>>;}
-\DoxyCodeLine{\Hypertarget{common_8h_source_l00046}00046 \textcolor{keyword}{using} InFormatContextUPtr = std::unique\_ptr<AVFormatContext, DeleterPP<avformat\_close\_input>>;}
-\DoxyCodeLine{\Hypertarget{common_8h_source_l00047}00047 \textcolor{keyword}{using} FormatContextUPtr = std::unique\_ptr<AVFormatContext, DeleterP<avformat\_free\_context>>;}
-\DoxyCodeLine{\Hypertarget{common_8h_source_l00048}00048 \textcolor{keyword}{using} CodecContextUPtr = std::unique\_ptr<AVCodecContext, DeleterPP<avcodec\_free\_context>>;}
-\DoxyCodeLine{\Hypertarget{common_8h_source_l00049}00049 \textcolor{keyword}{using} FilterGraphUPtr = std::unique\_ptr<AVFilterGraph, DeleterPP<avfilter\_graph\_free>>;}
-\DoxyCodeLine{\Hypertarget{common_8h_source_l00050}00050 \textcolor{keyword}{using} FilterInOutUPtr = std::unique\_ptr<AVFilterInOut, DeleterPP<avfilter\_inout\_free>>;}
-\DoxyCodeLine{\Hypertarget{common_8h_source_l00051}00051 \textcolor{keyword}{using} DictionaryUPtr = std::unique\_ptr<AVDictionary, DeleterPP<av\_dict\_free>>;}
+\DoxyCodeLine{\Hypertarget{common_8h_source_l00044}\mbox{\hyperlink{namespaceav_a84641b7a446e1183f8722c998db8be0c}{00044}} \textcolor{keyword}{using} \mbox{\hyperlink{namespaceav_a84641b7a446e1183f8722c998db8be0c}{PacketUPtr}} = std::unique\_ptr<AVPacket, DeleterPP<av\_packet\_free>>;}
+\DoxyCodeLine{\Hypertarget{common_8h_source_l00045}\mbox{\hyperlink{namespaceav_abcf8febb01b83a6bf7671fc1793f23f0}{00045}} \textcolor{keyword}{using} \mbox{\hyperlink{namespaceav_abcf8febb01b83a6bf7671fc1793f23f0}{FrameUPtr}} = std::unique\_ptr<AVFrame, DeleterPP<av\_frame\_free>>;}
+\DoxyCodeLine{\Hypertarget{common_8h_source_l00046}\mbox{\hyperlink{namespaceav_a8bbddc2f529c1b2befec508337f0254b}{00046}} \textcolor{keyword}{using} \mbox{\hyperlink{namespaceav_a8bbddc2f529c1b2befec508337f0254b}{InFormatContextUPtr}} = std::unique\_ptr<AVFormatContext, DeleterPP<avformat\_close\_input>>;}
+\DoxyCodeLine{\Hypertarget{common_8h_source_l00047}\mbox{\hyperlink{namespaceav_ac85764c248c4228f6457d9ed75711c9c}{00047}} \textcolor{keyword}{using} \mbox{\hyperlink{namespaceav_ac85764c248c4228f6457d9ed75711c9c}{FormatContextUPtr}} = std::unique\_ptr<AVFormatContext, DeleterP<avformat\_free\_context>>;}
+\DoxyCodeLine{\Hypertarget{common_8h_source_l00048}\mbox{\hyperlink{namespaceav_a626540c7621a1e06ba5b9d2206006904}{00048}} \textcolor{keyword}{using} \mbox{\hyperlink{namespaceav_a626540c7621a1e06ba5b9d2206006904}{CodecContextUPtr}} = std::unique\_ptr<AVCodecContext, DeleterPP<avcodec\_free\_context>>;}
+\DoxyCodeLine{\Hypertarget{common_8h_source_l00049}\mbox{\hyperlink{namespaceav_aeda5767965662437c209ec63893a1fa6}{00049}} \textcolor{keyword}{using} \mbox{\hyperlink{namespaceav_aeda5767965662437c209ec63893a1fa6}{FilterGraphUPtr}} = std::unique\_ptr<AVFilterGraph, DeleterPP<avfilter\_graph\_free>>;}
+\DoxyCodeLine{\Hypertarget{common_8h_source_l00050}\mbox{\hyperlink{namespaceav_a2081378bc912e5d177d0eac7120a056a}{00050}} \textcolor{keyword}{using} \mbox{\hyperlink{namespaceav_a2081378bc912e5d177d0eac7120a056a}{FilterInOutUPtr}} = std::unique\_ptr<AVFilterInOut, DeleterPP<avfilter\_inout\_free>>;}
+\DoxyCodeLine{\Hypertarget{common_8h_source_l00051}\mbox{\hyperlink{namespaceav_ac63df59361f71f9e13346a67da3f46d3}{00051}} \textcolor{keyword}{using} \mbox{\hyperlink{namespaceav_ac63df59361f71f9e13346a67da3f46d3}{DictionaryUPtr}} = std::unique\_ptr<AVDictionary, DeleterPP<av\_dict\_free>>;}
 \DoxyCodeLine{\Hypertarget{common_8h_source_l00052}00052 }
-\DoxyCodeLine{\Hypertarget{common_8h_source_l00053}00053 \textcolor{keyword}{inline} DictionaryUPtr map2dict(\textcolor{keyword}{const} std::map<std::string, std::string> \&map) \{}
+\DoxyCodeLine{\Hypertarget{common_8h_source_l00053}\mbox{\hyperlink{namespaceav_adcd7031d3c0148269ef170c6e4b73003}{00053}} \textcolor{keyword}{inline} \mbox{\hyperlink{namespaceav_ac63df59361f71f9e13346a67da3f46d3}{DictionaryUPtr}} \mbox{\hyperlink{namespaceav_adcd7031d3c0148269ef170c6e4b73003}{map2dict}}(\textcolor{keyword}{const} std::map<std::string, std::string> \&map) \{}
 \DoxyCodeLine{\Hypertarget{common_8h_source_l00054}00054     AVDictionary *dict = \textcolor{keyword}{nullptr};}
 \DoxyCodeLine{\Hypertarget{common_8h_source_l00055}00055     \textcolor{keywordflow}{for} (\textcolor{keyword}{const} \textcolor{keyword}{auto} \&[key, val] : map) \{}
 \DoxyCodeLine{\Hypertarget{common_8h_source_l00056}00056         \textcolor{keywordflow}{if} (av\_dict\_set(\&dict, key.c\_str(), val.c\_str(), 0) < 0) \{}
@@ -48,10 +48,10 @@
 \DoxyCodeLine{\Hypertarget{common_8h_source_l00058}00058             \textcolor{keywordflow}{throw} std::runtime\_error(\textcolor{stringliteral}{"{}Cannot set "{}} + key + \textcolor{stringliteral}{"{}in dictionary"{}});}
 \DoxyCodeLine{\Hypertarget{common_8h_source_l00059}00059         \}}
 \DoxyCodeLine{\Hypertarget{common_8h_source_l00060}00060     \}}
-\DoxyCodeLine{\Hypertarget{common_8h_source_l00061}00061     \textcolor{keywordflow}{return} DictionaryUPtr(dict);}
+\DoxyCodeLine{\Hypertarget{common_8h_source_l00061}00061     \textcolor{keywordflow}{return} \mbox{\hyperlink{namespaceav_ac63df59361f71f9e13346a67da3f46d3}{DictionaryUPtr}}(dict);}
 \DoxyCodeLine{\Hypertarget{common_8h_source_l00062}00062 \}}
 \DoxyCodeLine{\Hypertarget{common_8h_source_l00063}00063 }
-\DoxyCodeLine{\Hypertarget{common_8h_source_l00064}00064 \textcolor{keyword}{inline} std::map<std::string, std::string> dict2map(\textcolor{keyword}{const} AVDictionary *dict) \{}
+\DoxyCodeLine{\Hypertarget{common_8h_source_l00064}\mbox{\hyperlink{namespaceav_a2289910715bb0ea43c6a0db11672ace0}{00064}} \textcolor{keyword}{inline} std::map<std::string, std::string> \mbox{\hyperlink{namespaceav_a2289910715bb0ea43c6a0db11672ace0}{dict2map}}(\textcolor{keyword}{const} AVDictionary *dict) \{}
 \DoxyCodeLine{\Hypertarget{common_8h_source_l00065}00065     std::map<std::string, std::string> map;}
 \DoxyCodeLine{\Hypertarget{common_8h_source_l00066}00066     \textcolor{keyword}{const} AVDictionaryEntry *entry = \textcolor{keyword}{nullptr};}
 \DoxyCodeLine{\Hypertarget{common_8h_source_l00067}00067     \textcolor{keywordflow}{do} \{}

@@ -1,17 +1,23 @@
 \hypertarget{classScopedThread}{}\doxysection{Scoped\+Thread Class Reference}
 \label{classScopedThread}\index{ScopedThread@{ScopedThread}}
+
+
+{\ttfamily \#include $<$scoped\+\_\+thread.\+h$>$}
+
 \doxysubsection*{Public Member Functions}
 \begin{DoxyCompactItemize}
 \item 
+\mbox{\hyperlink{classScopedThread_af6f1534aec5915402463d97dfa71e507}{Scoped\+Thread}} () noexcept=default
+\item 
 \mbox{\hyperlink{classScopedThread_a4c650875c1513e30a0960be018d2be9a}{Scoped\+Thread}} (std\+::thread \&\&t) noexcept
 \item 
-\mbox{\Hypertarget{classScopedThread_a901655f97874058bbe55a7bee79f06b4}\label{classScopedThread_a901655f97874058bbe55a7bee79f06b4}} 
-{\bfseries Scoped\+Thread} (const \mbox{\hyperlink{classScopedThread}{Scoped\+Thread}} \&)=delete
+\mbox{\hyperlink{classScopedThread_a901655f97874058bbe55a7bee79f06b4}{Scoped\+Thread}} (const \mbox{\hyperlink{classScopedThread}{Scoped\+Thread}} \&)=delete
 \item 
 \mbox{\hyperlink{classScopedThread_a6940615060e0770611ef8226d373f584}{Scoped\+Thread}} (\mbox{\hyperlink{classScopedThread}{Scoped\+Thread}} \&\&other) noexcept
 \item 
-\mbox{\Hypertarget{classScopedThread_a6abe2aefc5f5ae5ca1c089943d4364e7}\label{classScopedThread_a6abe2aefc5f5ae5ca1c089943d4364e7}} 
-\mbox{\hyperlink{classScopedThread}{Scoped\+Thread}} \& {\bfseries operator=} (const \mbox{\hyperlink{classScopedThread}{Scoped\+Thread}} \&)=delete
+\mbox{\hyperlink{classScopedThread_a129fd102912b296952e7e726bc35056d}{$\sim$\+Scoped\+Thread}} ()
+\item 
+\mbox{\hyperlink{classScopedThread}{Scoped\+Thread}} \& \mbox{\hyperlink{classScopedThread_a6abe2aefc5f5ae5ca1c089943d4364e7}{operator=}} (const \mbox{\hyperlink{classScopedThread}{Scoped\+Thread}} \&)=delete
 \item 
 \mbox{\hyperlink{classScopedThread}{Scoped\+Thread}} \& \mbox{\hyperlink{classScopedThread_aab4a6d20b68f984a18eafe3a3f7f30fd}{operator=}} (\mbox{\hyperlink{classScopedThread}{Scoped\+Thread}} \&\&other) noexcept
 \end{DoxyCompactItemize}
@@ -20,39 +26,51 @@
 \doxysubsection{Detailed Description}
 
 
-Definition at line \mbox{\hyperlink{scoped__thread_8h_source_l00003}{3}} of file \mbox{\hyperlink{scoped__thread_8h_source}{scoped\+\_\+thread.\+h}}.
+Definition at line \mbox{\hyperlink{scoped__thread_8h_source_l00005}{5}} of file \mbox{\hyperlink{scoped__thread_8h_source}{scoped\+\_\+thread.\+h}}.
 
 
 
 \doxysubsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classScopedThread_af6f1534aec5915402463d97dfa71e507}\label{classScopedThread_af6f1534aec5915402463d97dfa71e507}} 
+\index{ScopedThread@{ScopedThread}!ScopedThread@{ScopedThread}}
+\index{ScopedThread@{ScopedThread}!ScopedThread@{ScopedThread}}
+\doxysubsubsection{\texorpdfstring{ScopedThread()}{ScopedThread()}\hspace{0.1cm}{\footnotesize\ttfamily [1/4]}}
+{\footnotesize\ttfamily Scoped\+Thread\+::\+Scoped\+Thread (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [default]}, {\ttfamily [noexcept]}}
+
 \mbox{\Hypertarget{classScopedThread_a4c650875c1513e30a0960be018d2be9a}\label{classScopedThread_a4c650875c1513e30a0960be018d2be9a}} 
 \index{ScopedThread@{ScopedThread}!ScopedThread@{ScopedThread}}
 \index{ScopedThread@{ScopedThread}!ScopedThread@{ScopedThread}}
-\doxysubsubsection{\texorpdfstring{ScopedThread()}{ScopedThread()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+\doxysubsubsection{\texorpdfstring{ScopedThread()}{ScopedThread()}\hspace{0.1cm}{\footnotesize\ttfamily [2/4]}}
 {\footnotesize\ttfamily Scoped\+Thread\+::\+Scoped\+Thread (\begin{DoxyParamCaption}\item[{std\+::thread \&\&}]{t }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [noexcept]}}
 
 
 
-Definition at line \mbox{\hyperlink{scoped__thread_8h_source_l00009}{9}} of file \mbox{\hyperlink{scoped__thread_8h_source}{scoped\+\_\+thread.\+h}}.
+Definition at line \mbox{\hyperlink{scoped__thread_8h_source_l00011}{11}} of file \mbox{\hyperlink{scoped__thread_8h_source}{scoped\+\_\+thread.\+h}}.
 
 
 \begin{DoxyCode}{0}
-\DoxyCodeLine{00009 : t\_(std::move(t)) \{\}}
+\DoxyCodeLine{00011 : t\_(std::move(t)) \{\}}
 
 \end{DoxyCode}
+\mbox{\Hypertarget{classScopedThread_a901655f97874058bbe55a7bee79f06b4}\label{classScopedThread_a901655f97874058bbe55a7bee79f06b4}} 
+\index{ScopedThread@{ScopedThread}!ScopedThread@{ScopedThread}}
+\index{ScopedThread@{ScopedThread}!ScopedThread@{ScopedThread}}
+\doxysubsubsection{\texorpdfstring{ScopedThread()}{ScopedThread()}\hspace{0.1cm}{\footnotesize\ttfamily [3/4]}}
+{\footnotesize\ttfamily Scoped\+Thread\+::\+Scoped\+Thread (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{classScopedThread}{Scoped\+Thread}} \&}]{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [delete]}}
+
 \mbox{\Hypertarget{classScopedThread_a6940615060e0770611ef8226d373f584}\label{classScopedThread_a6940615060e0770611ef8226d373f584}} 
 \index{ScopedThread@{ScopedThread}!ScopedThread@{ScopedThread}}
 \index{ScopedThread@{ScopedThread}!ScopedThread@{ScopedThread}}
-\doxysubsubsection{\texorpdfstring{ScopedThread()}{ScopedThread()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+\doxysubsubsection{\texorpdfstring{ScopedThread()}{ScopedThread()}\hspace{0.1cm}{\footnotesize\ttfamily [4/4]}}
 {\footnotesize\ttfamily Scoped\+Thread\+::\+Scoped\+Thread (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classScopedThread}{Scoped\+Thread}} \&\&}]{other }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [noexcept]}}
 
 
 
-Definition at line \mbox{\hyperlink{scoped__thread_8h_source_l00013}{13}} of file \mbox{\hyperlink{scoped__thread_8h_source}{scoped\+\_\+thread.\+h}}.
+Definition at line \mbox{\hyperlink{scoped__thread_8h_source_l00015}{15}} of file \mbox{\hyperlink{scoped__thread_8h_source}{scoped\+\_\+thread.\+h}}.
 
 
 \begin{DoxyCode}{0}
-\DoxyCodeLine{00013 : t\_(std::move(other.t\_)) \{\}}
+\DoxyCodeLine{00015 : t\_(std::move(other.t\_)) \{\}}
 
 \end{DoxyCode}
 \mbox{\Hypertarget{classScopedThread_a129fd102912b296952e7e726bc35056d}\label{classScopedThread_a129fd102912b296952e7e726bc35056d}} 
@@ -63,38 +81,44 @@ Definition at line \mbox{\hyperlink{scoped__thread_8h_source_l00013}{13}} of fil
 
 
 
-Definition at line \mbox{\hyperlink{scoped__thread_8h_source_l00015}{15}} of file \mbox{\hyperlink{scoped__thread_8h_source}{scoped\+\_\+thread.\+h}}.
+Definition at line \mbox{\hyperlink{scoped__thread_8h_source_l00017}{17}} of file \mbox{\hyperlink{scoped__thread_8h_source}{scoped\+\_\+thread.\+h}}.
 
 
 \begin{DoxyCode}{0}
-\DoxyCodeLine{00015                     \{}
-\DoxyCodeLine{00016         \textcolor{keywordflow}{if} (t\_.joinable()) t\_.join();}
-\DoxyCodeLine{00017     \}}
+\DoxyCodeLine{00017                     \{}
+\DoxyCodeLine{00018         \textcolor{keywordflow}{if} (t\_.joinable()) t\_.join();}
+\DoxyCodeLine{00019     \}}
 
 \end{DoxyCode}
 
 
 \doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classScopedThread_a6abe2aefc5f5ae5ca1c089943d4364e7}\label{classScopedThread_a6abe2aefc5f5ae5ca1c089943d4364e7}} 
+\index{ScopedThread@{ScopedThread}!operator=@{operator=}}
+\index{operator=@{operator=}!ScopedThread@{ScopedThread}}
+\doxysubsubsection{\texorpdfstring{operator=()}{operator=()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily \mbox{\hyperlink{classScopedThread}{Scoped\+Thread}} \& Scoped\+Thread\+::operator= (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{classScopedThread}{Scoped\+Thread}} \&}]{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [delete]}}
+
 \mbox{\Hypertarget{classScopedThread_aab4a6d20b68f984a18eafe3a3f7f30fd}\label{classScopedThread_aab4a6d20b68f984a18eafe3a3f7f30fd}} 
 \index{ScopedThread@{ScopedThread}!operator=@{operator=}}
 \index{operator=@{operator=}!ScopedThread@{ScopedThread}}
-\doxysubsubsection{\texorpdfstring{operator=()}{operator=()}}
+\doxysubsubsection{\texorpdfstring{operator=()}{operator=()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
 {\footnotesize\ttfamily \mbox{\hyperlink{classScopedThread}{Scoped\+Thread}} \& Scoped\+Thread\+::operator= (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classScopedThread}{Scoped\+Thread}} \&\&}]{other }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [noexcept]}}
 
 
 
-Definition at line \mbox{\hyperlink{scoped__thread_8h_source_l00021}{21}} of file \mbox{\hyperlink{scoped__thread_8h_source}{scoped\+\_\+thread.\+h}}.
+Definition at line \mbox{\hyperlink{scoped__thread_8h_source_l00023}{23}} of file \mbox{\hyperlink{scoped__thread_8h_source}{scoped\+\_\+thread.\+h}}.
 
 
 \begin{DoxyCode}{0}
-\DoxyCodeLine{00021                                                            \{}
-\DoxyCodeLine{00022         t\_ = std::move(other.t\_);}
-\DoxyCodeLine{00023         \textcolor{keywordflow}{return} *\textcolor{keyword}{this};}
-\DoxyCodeLine{00024     \}}
+\DoxyCodeLine{00023                                                            \{}
+\DoxyCodeLine{00024         t\_ = std::move(other.t\_);}
+\DoxyCodeLine{00025         \textcolor{keywordflow}{return} *\textcolor{keyword}{this};}
+\DoxyCodeLine{00026     \}}
 
 \end{DoxyCode}
 
 
 The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
 \item 
-src/utils/scoped\+\_\+thread.\+h\end{DoxyCompactItemize}
+src/utils/\mbox{\hyperlink{scoped__thread_8h}{scoped\+\_\+thread.\+h}}\end{DoxyCompactItemize}

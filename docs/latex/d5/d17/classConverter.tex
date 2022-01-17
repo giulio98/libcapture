@@ -1,5 +1,9 @@
 \hypertarget{classConverter}{}\doxysection{Converter Class Reference}
 \label{classConverter}\index{Converter@{Converter}}
+
+
+{\ttfamily \#include $<$converter.\+h$>$}
+
 \doxysubsection*{Public Member Functions}
 \begin{DoxyCompactItemize}
 \item 
@@ -7,16 +11,17 @@
 \item 
 \mbox{\hyperlink{classConverter_ac36e741069fa7b608c1dcf398d8b242f}{Converter}} (const AVCodec\+Context $\ast$dec\+\_\+ctx, const AVCodec\+Context $\ast$enc\+\_\+ctx, AVRational in\+\_\+time\+\_\+base, int offset\+\_\+x=0, int offset\+\_\+y=0)
 \item 
-\mbox{\Hypertarget{classConverter_aa0ac7c1a1ee44b3ee2d6b51fa1e16308}\label{classConverter_aa0ac7c1a1ee44b3ee2d6b51fa1e16308}} 
-{\bfseries Converter} (const \mbox{\hyperlink{classConverter}{Converter}} \&)=delete
+\mbox{\hyperlink{classConverter_aa0ac7c1a1ee44b3ee2d6b51fa1e16308}{Converter}} (const \mbox{\hyperlink{classConverter}{Converter}} \&)=delete
 \item 
-\mbox{\hyperlink{classConverter_a66439d4a10d51806625333315e5de116}{Converter}} (\mbox{\hyperlink{classConverter}{Converter}} \&\&other)
+\mbox{\hyperlink{classConverter_ab89449987659b12ead316afba5301ff0}{Converter}} (\mbox{\hyperlink{classConverter}{Converter}} \&\&other) noexcept
+\item 
+\mbox{\hyperlink{classConverter_a7f50175996e82142ac6cefa8469312dc}{$\sim$\+Converter}} ()=default
 \item 
 \mbox{\hyperlink{classConverter}{Converter}} \& \mbox{\hyperlink{classConverter_ad48ff4f80e3c16ac238f5cace194f0f7}{operator=}} (\mbox{\hyperlink{classConverter}{Converter}} other)
 \item 
-void \mbox{\hyperlink{classConverter_af0ecd7c664a249a7b7b8f9d600042964}{send\+Frame}} (av\+::\+Frame\+UPtr frame)
+void \mbox{\hyperlink{classConverter_af0ecd7c664a249a7b7b8f9d600042964}{send\+Frame}} (\mbox{\hyperlink{namespaceav_abcf8febb01b83a6bf7671fc1793f23f0}{av\+::\+Frame\+UPtr}} frame)
 \item 
-av\+::\+Frame\+UPtr \mbox{\hyperlink{classConverter_aea4bf5f51fc7fce7d1d5997406239cca}{get\+Frame}} ()
+\mbox{\hyperlink{namespaceav_abcf8febb01b83a6bf7671fc1793f23f0}{av\+::\+Frame\+UPtr}} \mbox{\hyperlink{classConverter_aea4bf5f51fc7fce7d1d5997406239cca}{get\+Frame}} ()
 \end{DoxyCompactItemize}
 \doxysubsection*{Friends}
 \begin{DoxyCompactItemize}
@@ -36,13 +41,13 @@ Definition at line \mbox{\hyperlink{converter_8h_source_l00005}{5}} of file \mbo
 \mbox{\Hypertarget{classConverter_aaa67c7d2770c60fc2fa85fccb6f8a1fc}\label{classConverter_aaa67c7d2770c60fc2fa85fccb6f8a1fc}} 
 \index{Converter@{Converter}!Converter@{Converter}}
 \index{Converter@{Converter}!Converter@{Converter}}
-\doxysubsubsection{\texorpdfstring{Converter()}{Converter()}\hspace{0.1cm}{\footnotesize\ttfamily [1/3]}}
+\doxysubsubsection{\texorpdfstring{Converter()}{Converter()}\hspace{0.1cm}{\footnotesize\ttfamily [1/4]}}
 {\footnotesize\ttfamily Converter\+::\+Converter (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [default]}}
 
 Create a new empty converter \mbox{\Hypertarget{classConverter_ac36e741069fa7b608c1dcf398d8b242f}\label{classConverter_ac36e741069fa7b608c1dcf398d8b242f}} 
 \index{Converter@{Converter}!Converter@{Converter}}
 \index{Converter@{Converter}!Converter@{Converter}}
-\doxysubsubsection{\texorpdfstring{Converter()}{Converter()}\hspace{0.1cm}{\footnotesize\ttfamily [2/3]}}
+\doxysubsubsection{\texorpdfstring{Converter()}{Converter()}\hspace{0.1cm}{\footnotesize\ttfamily [2/4]}}
 {\footnotesize\ttfamily Converter\+::\+Converter (\begin{DoxyParamCaption}\item[{const AVCodec\+Context $\ast$}]{dec\+\_\+ctx,  }\item[{const AVCodec\+Context $\ast$}]{enc\+\_\+ctx,  }\item[{AVRational}]{in\+\_\+time\+\_\+base,  }\item[{int}]{offset\+\_\+x = {\ttfamily 0},  }\item[{int}]{offset\+\_\+y = {\ttfamily 0} }\end{DoxyParamCaption})}
 
 Create a new audio/video converter. For video, converting the pixel-\/format and cropping the frame to the output size. For audio, converting the sample-\/format, sample-\/rate and channel layout. WARNING\+: Even if the time-\/base of the encoder differs from the decoder\textquotesingle{}s one, the timestamps of the frames won\textquotesingle{}t be converted (an eventual conversion will have to be performed separately) 
@@ -60,96 +65,109 @@ Create a new audio/video converter. For video, converting the pixel-\/format and
 \end{DoxyParams}
 
 
-Definition at line \mbox{\hyperlink{converter_8cpp_source_l00072}{72}} of file \mbox{\hyperlink{converter_8cpp_source}{converter.\+cpp}}.
+Definition at line \mbox{\hyperlink{converter_8cpp_source_l00066}{66}} of file \mbox{\hyperlink{converter_8cpp_source}{converter.\+cpp}}.
 
 
 \begin{DoxyCode}{0}
-\DoxyCodeLine{00073                                                  \{}
-\DoxyCodeLine{00074     \textcolor{keywordflow}{if} (!dec\_ctx) throwError(\textcolor{stringliteral}{"{}dec\_ctx is NULL"{}});}
-\DoxyCodeLine{00075     \textcolor{keywordflow}{if} (!enc\_ctx) throwError(\textcolor{stringliteral}{"{}enc\_ctx is NULL"{}});}
-\DoxyCodeLine{00076 }
-\DoxyCodeLine{00077     std::string src\_filter\_name;}
-\DoxyCodeLine{00078     std::string sink\_filter\_name;}
-\DoxyCodeLine{00079     std::string src\_args;}
-\DoxyCodeLine{00080     std::string filter\_spec;}
-\DoxyCodeLine{00081 }
-\DoxyCodeLine{00082     \textcolor{keywordflow}{if} (dec\_ctx-\/>codec\_type != enc\_ctx-\/>codec\_type) \{}
-\DoxyCodeLine{00083         throwError(\textcolor{stringliteral}{"{}type mismatch between received decoder and encoder"{}});}
-\DoxyCodeLine{00084     \} \textcolor{keywordflow}{else} \textcolor{keywordflow}{if} (dec\_ctx-\/>codec\_type == AVMEDIA\_TYPE\_VIDEO) \{}
-\DoxyCodeLine{00085         src\_filter\_name = \textcolor{stringliteral}{"{}buffer"{}};}
-\DoxyCodeLine{00086         sink\_filter\_name = \textcolor{stringliteral}{"{}buffersink"{}};}
-\DoxyCodeLine{00087         std::tie(src\_args, filter\_spec) = getVideoFilterSpec(dec\_ctx, enc\_ctx, in\_time\_base, offset\_x, offset\_y);}
-\DoxyCodeLine{00088     \} \textcolor{keywordflow}{else} \textcolor{keywordflow}{if} (dec\_ctx-\/>codec\_type == AVMEDIA\_TYPE\_AUDIO) \{}
-\DoxyCodeLine{00089         \textcolor{keywordflow}{if} (offset\_x || offset\_y) throwError(\textcolor{stringliteral}{"{}video offset specified specified for audio converter constructor"{}});}
-\DoxyCodeLine{00090         src\_filter\_name = \textcolor{stringliteral}{"{}abuffer"{}};}
-\DoxyCodeLine{00091         sink\_filter\_name = \textcolor{stringliteral}{"{}abuffersink"{}};}
-\DoxyCodeLine{00092         std::tie(src\_args, filter\_spec) = getAudioFilterSpec(dec\_ctx, enc\_ctx, in\_time\_base);}
-\DoxyCodeLine{00093     \} \textcolor{keywordflow}{else} \{}
-\DoxyCodeLine{00094         throwError(\textcolor{stringliteral}{"{}unknown media type received in constructor"{}});}
-\DoxyCodeLine{00095     \}}
-\DoxyCodeLine{00096 }
-\DoxyCodeLine{00097     filter\_graph\_ = av::FilterGraphUPtr(avfilter\_graph\_alloc());}
-\DoxyCodeLine{00098     \textcolor{keywordflow}{if} (!filter\_graph\_) throwError(\textcolor{stringliteral}{"{}failed to allocate filter graph"{}});}
-\DoxyCodeLine{00099 }
-\DoxyCodeLine{00100     \{ \textcolor{comment}{/* buffer src set-\/up*/}}
-\DoxyCodeLine{00101         \textcolor{keyword}{const} AVFilter *filter = avfilter\_get\_by\_name(src\_filter\_name.c\_str());}
-\DoxyCodeLine{00102         \textcolor{keywordflow}{if} (!filter) throwError(\textcolor{stringliteral}{"{}failed to find src filter definition"{}});}
-\DoxyCodeLine{00103         \textcolor{keywordflow}{if} (avfilter\_graph\_create\_filter(\&buffersrc\_ctx\_, filter, \textcolor{stringliteral}{"{}in"{}}, src\_args.c\_str(), \textcolor{keyword}{nullptr},}
-\DoxyCodeLine{00104                                          filter\_graph\_.get()) < 0)}
-\DoxyCodeLine{00105             throwError(\textcolor{stringliteral}{"{}failed to create src filter"{}});}
-\DoxyCodeLine{00106     \}}
-\DoxyCodeLine{00107 }
-\DoxyCodeLine{00108     \{ \textcolor{comment}{/* buffer sink set-\/up*/}}
-\DoxyCodeLine{00109         \textcolor{keyword}{const} AVFilter *filter = avfilter\_get\_by\_name(sink\_filter\_name.c\_str());}
-\DoxyCodeLine{00110         \textcolor{keywordflow}{if} (!filter) throwError(\textcolor{stringliteral}{"{}failed to find sink filter definition"{}});}
-\DoxyCodeLine{00111         \textcolor{keywordflow}{if} (avfilter\_graph\_create\_filter(\&buffersink\_ctx\_, filter, \textcolor{stringliteral}{"{}out"{}}, \textcolor{keyword}{nullptr}, \textcolor{keyword}{nullptr}, filter\_graph\_.get()) < 0)}
-\DoxyCodeLine{00112             throwError(\textcolor{stringliteral}{"{}failed to create src filter"{}});}
-\DoxyCodeLine{00113     \}}
-\DoxyCodeLine{00114 }
-\DoxyCodeLine{00115     \{}
-\DoxyCodeLine{00116         \textcolor{comment}{/* Endpoints for the filter graph. */}}
-\DoxyCodeLine{00117         av::FilterInOutUPtr outputs(avfilter\_inout\_alloc());}
-\DoxyCodeLine{00118         \textcolor{keywordflow}{if} (!outputs) throwError(\textcolor{stringliteral}{"{}failed to allocate filter outputs"{}});}
-\DoxyCodeLine{00119         outputs-\/>name = av\_strdup(\textcolor{stringliteral}{"{}in"{}});}
-\DoxyCodeLine{00120         outputs-\/>filter\_ctx = buffersrc\_ctx\_;}
-\DoxyCodeLine{00121         outputs-\/>pad\_idx = 0;}
-\DoxyCodeLine{00122         outputs-\/>next = \textcolor{keyword}{nullptr};}
-\DoxyCodeLine{00123 }
-\DoxyCodeLine{00124         av::FilterInOutUPtr inputs(avfilter\_inout\_alloc());}
-\DoxyCodeLine{00125         \textcolor{keywordflow}{if} (!inputs) throwError(\textcolor{stringliteral}{"{}failed to allocate filter inputs"{}});}
-\DoxyCodeLine{00126         inputs-\/>name = av\_strdup(\textcolor{stringliteral}{"{}out"{}});}
-\DoxyCodeLine{00127         inputs-\/>filter\_ctx = buffersink\_ctx\_;}
-\DoxyCodeLine{00128         inputs-\/>pad\_idx = 0;}
-\DoxyCodeLine{00129         inputs-\/>next = \textcolor{keyword}{nullptr};}
-\DoxyCodeLine{00130 }
-\DoxyCodeLine{00131         AVFilterInOut *outputs\_raw = outputs.release();}
-\DoxyCodeLine{00132         AVFilterInOut *inputs\_raw = inputs.release();}
-\DoxyCodeLine{00133         \textcolor{keywordtype}{int} ret =}
-\DoxyCodeLine{00134             avfilter\_graph\_parse\_ptr(filter\_graph\_.get(), filter\_spec.c\_str(), \&inputs\_raw, \&outputs\_raw, \textcolor{keyword}{nullptr});}
-\DoxyCodeLine{00135         outputs = av::FilterInOutUPtr(outputs\_raw);}
-\DoxyCodeLine{00136         inputs = av::FilterInOutUPtr(inputs\_raw);}
-\DoxyCodeLine{00137         \textcolor{keywordflow}{if} (ret < 0) throwError(\textcolor{stringliteral}{"{}failed to parse pointers"{}});}
-\DoxyCodeLine{00138     \}}
-\DoxyCodeLine{00139 }
-\DoxyCodeLine{00140     \textcolor{keywordflow}{if} (avfilter\_graph\_config(filter\_graph\_.get(), \textcolor{keyword}{nullptr}) < 0) throwError(\textcolor{stringliteral}{"{}failed to configure the filter graph"{}});}
-\DoxyCodeLine{00141 \}}
+\DoxyCodeLine{00067                                                  \{}
+\DoxyCodeLine{00068     \textcolor{keywordflow}{if} (!dec\_ctx) throwRuntimeError(\textcolor{stringliteral}{"{}dec\_ctx is NULL"{}});}
+\DoxyCodeLine{00069     \textcolor{keywordflow}{if} (!enc\_ctx) throwRuntimeError(\textcolor{stringliteral}{"{}enc\_ctx is NULL"{}});}
+\DoxyCodeLine{00070 }
+\DoxyCodeLine{00071     std::string src\_filter\_name;}
+\DoxyCodeLine{00072     std::string sink\_filter\_name;}
+\DoxyCodeLine{00073     std::string src\_args;}
+\DoxyCodeLine{00074     std::string filter\_spec;}
+\DoxyCodeLine{00075 }
+\DoxyCodeLine{00076     \textcolor{keywordflow}{if} (dec\_ctx-\/>codec\_type != enc\_ctx-\/>codec\_type) \{}
+\DoxyCodeLine{00077         throwRuntimeError(\textcolor{stringliteral}{"{}type mismatch between received decoder and encoder"{}});}
+\DoxyCodeLine{00078     \} \textcolor{keywordflow}{else} \textcolor{keywordflow}{if} (dec\_ctx-\/>codec\_type == AVMEDIA\_TYPE\_VIDEO) \{}
+\DoxyCodeLine{00079         src\_filter\_name = \textcolor{stringliteral}{"{}buffer"{}};}
+\DoxyCodeLine{00080         sink\_filter\_name = \textcolor{stringliteral}{"{}buffersink"{}};}
+\DoxyCodeLine{00081         std::tie(src\_args, filter\_spec) = getVideoFilterSpec(dec\_ctx, enc\_ctx, in\_time\_base, offset\_x, offset\_y);}
+\DoxyCodeLine{00082     \} \textcolor{keywordflow}{else} \textcolor{keywordflow}{if} (dec\_ctx-\/>codec\_type == AVMEDIA\_TYPE\_AUDIO) \{}
+\DoxyCodeLine{00083         \textcolor{keywordflow}{if} (offset\_x || offset\_y) throwRuntimeError(\textcolor{stringliteral}{"{}video offset specified specified for audio converter constructor"{}});}
+\DoxyCodeLine{00084         src\_filter\_name = \textcolor{stringliteral}{"{}abuffer"{}};}
+\DoxyCodeLine{00085         sink\_filter\_name = \textcolor{stringliteral}{"{}abuffersink"{}};}
+\DoxyCodeLine{00086         std::tie(src\_args, filter\_spec) = getAudioFilterSpec(dec\_ctx, enc\_ctx, in\_time\_base);}
+\DoxyCodeLine{00087     \} \textcolor{keywordflow}{else} \{}
+\DoxyCodeLine{00088         throwRuntimeError(\textcolor{stringliteral}{"{}unknown media type received in constructor"{}});}
+\DoxyCodeLine{00089     \}}
+\DoxyCodeLine{00090 }
+\DoxyCodeLine{00091     filter\_graph\_ = \mbox{\hyperlink{namespaceav_aeda5767965662437c209ec63893a1fa6}{av::FilterGraphUPtr}}(avfilter\_graph\_alloc());}
+\DoxyCodeLine{00092     \textcolor{keywordflow}{if} (!filter\_graph\_) throwRuntimeError(\textcolor{stringliteral}{"{}failed to allocate filter graph"{}});}
+\DoxyCodeLine{00093 }
+\DoxyCodeLine{00094     \{ \textcolor{comment}{/* buffer src set-\/up*/}}
+\DoxyCodeLine{00095         \textcolor{keyword}{const} AVFilter *filter = avfilter\_get\_by\_name(src\_filter\_name.c\_str());}
+\DoxyCodeLine{00096         \textcolor{keywordflow}{if} (!filter) throwRuntimeError(\textcolor{stringliteral}{"{}failed to find src filter definition"{}});}
+\DoxyCodeLine{00097         \textcolor{keywordflow}{if} (avfilter\_graph\_create\_filter(\&buffersrc\_ctx\_, filter, \textcolor{stringliteral}{"{}in"{}}, src\_args.c\_str(), \textcolor{keyword}{nullptr},}
+\DoxyCodeLine{00098                                          filter\_graph\_.get()) < 0)}
+\DoxyCodeLine{00099             throwRuntimeError(\textcolor{stringliteral}{"{}failed to create src filter"{}});}
+\DoxyCodeLine{00100     \}}
+\DoxyCodeLine{00101 }
+\DoxyCodeLine{00102     \{ \textcolor{comment}{/* buffer sink set-\/up*/}}
+\DoxyCodeLine{00103         \textcolor{keyword}{const} AVFilter *filter = avfilter\_get\_by\_name(sink\_filter\_name.c\_str());}
+\DoxyCodeLine{00104         \textcolor{keywordflow}{if} (!filter) throwRuntimeError(\textcolor{stringliteral}{"{}failed to find sink filter definition"{}});}
+\DoxyCodeLine{00105         \textcolor{keywordflow}{if} (avfilter\_graph\_create\_filter(\&buffersink\_ctx\_, filter, \textcolor{stringliteral}{"{}out"{}}, \textcolor{keyword}{nullptr}, \textcolor{keyword}{nullptr}, filter\_graph\_.get()) < 0)}
+\DoxyCodeLine{00106             throwRuntimeError(\textcolor{stringliteral}{"{}failed to create src filter"{}});}
+\DoxyCodeLine{00107     \}}
+\DoxyCodeLine{00108 }
+\DoxyCodeLine{00109     \{}
+\DoxyCodeLine{00110         \textcolor{comment}{/* Endpoints for the filter graph. */}}
+\DoxyCodeLine{00111         \mbox{\hyperlink{namespaceav_a2081378bc912e5d177d0eac7120a056a}{av::FilterInOutUPtr}} outputs(avfilter\_inout\_alloc());}
+\DoxyCodeLine{00112         \textcolor{keywordflow}{if} (!outputs) throwRuntimeError(\textcolor{stringliteral}{"{}failed to allocate filter outputs"{}});}
+\DoxyCodeLine{00113         outputs-\/>name = av\_strdup(\textcolor{stringliteral}{"{}in"{}});}
+\DoxyCodeLine{00114         outputs-\/>filter\_ctx = buffersrc\_ctx\_;}
+\DoxyCodeLine{00115         outputs-\/>pad\_idx = 0;}
+\DoxyCodeLine{00116         outputs-\/>next = \textcolor{keyword}{nullptr};}
+\DoxyCodeLine{00117 }
+\DoxyCodeLine{00118         \mbox{\hyperlink{namespaceav_a2081378bc912e5d177d0eac7120a056a}{av::FilterInOutUPtr}} inputs(avfilter\_inout\_alloc());}
+\DoxyCodeLine{00119         \textcolor{keywordflow}{if} (!inputs) throwRuntimeError(\textcolor{stringliteral}{"{}failed to allocate filter inputs"{}});}
+\DoxyCodeLine{00120         inputs-\/>name = av\_strdup(\textcolor{stringliteral}{"{}out"{}});}
+\DoxyCodeLine{00121         inputs-\/>filter\_ctx = buffersink\_ctx\_;}
+\DoxyCodeLine{00122         inputs-\/>pad\_idx = 0;}
+\DoxyCodeLine{00123         inputs-\/>next = \textcolor{keyword}{nullptr};}
+\DoxyCodeLine{00124 }
+\DoxyCodeLine{00125         AVFilterInOut *outputs\_raw = outputs.release();}
+\DoxyCodeLine{00126         AVFilterInOut *inputs\_raw = inputs.release();}
+\DoxyCodeLine{00127         \textcolor{keywordtype}{int} ret =}
+\DoxyCodeLine{00128             avfilter\_graph\_parse\_ptr(filter\_graph\_.get(), filter\_spec.c\_str(), \&inputs\_raw, \&outputs\_raw, \textcolor{keyword}{nullptr});}
+\DoxyCodeLine{00129         \textcolor{comment}{// outputs = av::FilterInOutUPtr(outputs\_raw); never used}}
+\DoxyCodeLine{00130         \textcolor{comment}{// inputs = av::FilterInOutUPtr(inputs\_raw); never used}}
+\DoxyCodeLine{00131         \textcolor{keywordflow}{if} (ret < 0) throwRuntimeError(\textcolor{stringliteral}{"{}failed to parse pointers"{}});}
+\DoxyCodeLine{00132     \}}
+\DoxyCodeLine{00133 }
+\DoxyCodeLine{00134     \textcolor{keywordflow}{if} (avfilter\_graph\_config(filter\_graph\_.get(), \textcolor{keyword}{nullptr}) < 0)}
+\DoxyCodeLine{00135         throwRuntimeError(\textcolor{stringliteral}{"{}failed to configure the filter graph"{}});}
+\DoxyCodeLine{00136 \}}
 
 \end{DoxyCode}
-\mbox{\Hypertarget{classConverter_a66439d4a10d51806625333315e5de116}\label{classConverter_a66439d4a10d51806625333315e5de116}} 
+\mbox{\Hypertarget{classConverter_aa0ac7c1a1ee44b3ee2d6b51fa1e16308}\label{classConverter_aa0ac7c1a1ee44b3ee2d6b51fa1e16308}} 
 \index{Converter@{Converter}!Converter@{Converter}}
 \index{Converter@{Converter}!Converter@{Converter}}
-\doxysubsubsection{\texorpdfstring{Converter()}{Converter()}\hspace{0.1cm}{\footnotesize\ttfamily [3/3]}}
-{\footnotesize\ttfamily Converter\+::\+Converter (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classConverter}{Converter}} \&\&}]{other }\end{DoxyParamCaption})}
+\doxysubsubsection{\texorpdfstring{Converter()}{Converter()}\hspace{0.1cm}{\footnotesize\ttfamily [3/4]}}
+{\footnotesize\ttfamily Converter\+::\+Converter (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{classConverter}{Converter}} \&}]{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [delete]}}
+
+\mbox{\Hypertarget{classConverter_ab89449987659b12ead316afba5301ff0}\label{classConverter_ab89449987659b12ead316afba5301ff0}} 
+\index{Converter@{Converter}!Converter@{Converter}}
+\index{Converter@{Converter}!Converter@{Converter}}
+\doxysubsubsection{\texorpdfstring{Converter()}{Converter()}\hspace{0.1cm}{\footnotesize\ttfamily [4/4]}}
+{\footnotesize\ttfamily Converter\+::\+Converter (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classConverter}{Converter}} \&\&}]{other }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [noexcept]}}
 
 
 
-Definition at line \mbox{\hyperlink{converter_8cpp_source_l00143}{143}} of file \mbox{\hyperlink{converter_8cpp_source}{converter.\+cpp}}.
+Definition at line \mbox{\hyperlink{converter_8cpp_source_l00138}{138}} of file \mbox{\hyperlink{converter_8cpp_source}{converter.\+cpp}}.
 
 
 \begin{DoxyCode}{0}
-\DoxyCodeLine{00143 : \mbox{\hyperlink{classConverter_aaa67c7d2770c60fc2fa85fccb6f8a1fc}{Converter}}() \{ swap(*\textcolor{keyword}{this}, other); \}}
+\DoxyCodeLine{00138 : \mbox{\hyperlink{classConverter_aaa67c7d2770c60fc2fa85fccb6f8a1fc}{Converter}}() \{ \mbox{\hyperlink{classConverter_a8baba4be80dc7f525946274eea7ad513}{swap}}(*\textcolor{keyword}{this}, other); \}}
 
 \end{DoxyCode}
+\mbox{\Hypertarget{classConverter_a7f50175996e82142ac6cefa8469312dc}\label{classConverter_a7f50175996e82142ac6cefa8469312dc}} 
+\index{Converter@{Converter}!````~Converter@{$\sim$Converter}}
+\index{````~Converter@{$\sim$Converter}!Converter@{Converter}}
+\doxysubsubsection{\texorpdfstring{$\sim$Converter()}{~Converter()}}
+{\footnotesize\ttfamily Converter\+::$\sim$\+Converter (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [default]}}
+
 
 
 \doxysubsection{Member Function Documentation}
@@ -157,31 +175,31 @@ Definition at line \mbox{\hyperlink{converter_8cpp_source_l00143}{143}} of file 
 \index{Converter@{Converter}!getFrame@{getFrame}}
 \index{getFrame@{getFrame}!Converter@{Converter}}
 \doxysubsubsection{\texorpdfstring{getFrame()}{getFrame()}}
-{\footnotesize\ttfamily av\+::\+Frame\+UPtr Converter\+::get\+Frame (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+{\footnotesize\ttfamily \mbox{\hyperlink{namespaceav_abcf8febb01b83a6bf7671fc1793f23f0}{av\+::\+Frame\+UPtr}} Converter\+::get\+Frame (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
 
 Get a converted frame \begin{DoxyReturn}{Returns}
 a new converted frame if it was possible to build it, nullptr otherwise 
 \end{DoxyReturn}
 
 
-Definition at line \mbox{\hyperlink{converter_8cpp_source_l00156}{156}} of file \mbox{\hyperlink{converter_8cpp_source}{converter.\+cpp}}.
+Definition at line \mbox{\hyperlink{converter_8cpp_source_l00151}{151}} of file \mbox{\hyperlink{converter_8cpp_source}{converter.\+cpp}}.
 
 
 \begin{DoxyCode}{0}
-\DoxyCodeLine{00156                                 \{}
-\DoxyCodeLine{00157     \textcolor{keywordflow}{if} (!buffersink\_ctx\_) throwError(\textcolor{stringliteral}{"{}buffersink is not allocated"{}});}
+\DoxyCodeLine{00151                                 \{}
+\DoxyCodeLine{00152     \textcolor{keywordflow}{if} (!buffersink\_ctx\_) throwRuntimeError(\textcolor{stringliteral}{"{}buffersink is not allocated"{}});}
+\DoxyCodeLine{00153 }
+\DoxyCodeLine{00154     \textcolor{keywordflow}{if} (!frame\_) \{}
+\DoxyCodeLine{00155         frame\_ = \mbox{\hyperlink{namespaceav_abcf8febb01b83a6bf7671fc1793f23f0}{av::FrameUPtr}}(av\_frame\_alloc());}
+\DoxyCodeLine{00156         \textcolor{keywordflow}{if} (!frame\_) throwRuntimeError(\textcolor{stringliteral}{"{}failed to allocate frame"{}});}
+\DoxyCodeLine{00157     \}}
 \DoxyCodeLine{00158 }
-\DoxyCodeLine{00159     \textcolor{keywordflow}{if} (!frame\_) \{}
-\DoxyCodeLine{00160         frame\_ = av::FrameUPtr(av\_frame\_alloc());}
-\DoxyCodeLine{00161         \textcolor{keywordflow}{if} (!frame\_) throwError(\textcolor{stringliteral}{"{}failed to allocate frame"{}});}
-\DoxyCodeLine{00162     \}}
-\DoxyCodeLine{00163 }
-\DoxyCodeLine{00164     \textcolor{keywordtype}{int} ret = av\_buffersink\_get\_frame(buffersink\_ctx\_, frame\_.get());}
-\DoxyCodeLine{00165     \textcolor{keywordflow}{if} (ret == AVERROR(EAGAIN) || ret == AVERROR\_EOF) \textcolor{keywordflow}{return} \textcolor{keyword}{nullptr};}
-\DoxyCodeLine{00166     \textcolor{keywordflow}{if} (ret < 0) throwError(\textcolor{stringliteral}{"{}failed to receive frame from filter"{}});}
-\DoxyCodeLine{00167 }
-\DoxyCodeLine{00168     \textcolor{keywordflow}{return} std::move(frame\_);}
-\DoxyCodeLine{00169 \}}
+\DoxyCodeLine{00159     \textcolor{keywordtype}{int} ret = av\_buffersink\_get\_frame(buffersink\_ctx\_, frame\_.get());}
+\DoxyCodeLine{00160     \textcolor{keywordflow}{if} (ret == AVERROR(EAGAIN) || ret == AVERROR\_EOF) \textcolor{keywordflow}{return} \textcolor{keyword}{nullptr};}
+\DoxyCodeLine{00161     \textcolor{keywordflow}{if} (ret < 0) throwRuntimeError(\textcolor{stringliteral}{"{}failed to receive frame from filter"{}});}
+\DoxyCodeLine{00162 }
+\DoxyCodeLine{00163     \textcolor{keywordflow}{return} std::move(frame\_);}
+\DoxyCodeLine{00164 \}}
 
 \end{DoxyCode}
 \mbox{\Hypertarget{classConverter_ad48ff4f80e3c16ac238f5cace194f0f7}\label{classConverter_ad48ff4f80e3c16ac238f5cace194f0f7}} 
@@ -192,33 +210,33 @@ Definition at line \mbox{\hyperlink{converter_8cpp_source_l00156}{156}} of file 
 
 
 
-Definition at line \mbox{\hyperlink{converter_8cpp_source_l00145}{145}} of file \mbox{\hyperlink{converter_8cpp_source}{converter.\+cpp}}.
+Definition at line \mbox{\hyperlink{converter_8cpp_source_l00140}{140}} of file \mbox{\hyperlink{converter_8cpp_source}{converter.\+cpp}}.
 
 
 \begin{DoxyCode}{0}
-\DoxyCodeLine{00145                                                \{}
-\DoxyCodeLine{00146     swap(*\textcolor{keyword}{this}, other);}
-\DoxyCodeLine{00147     \textcolor{keywordflow}{return} *\textcolor{keyword}{this};}
-\DoxyCodeLine{00148 \}}
+\DoxyCodeLine{00140                                                \{}
+\DoxyCodeLine{00141     \mbox{\hyperlink{classConverter_a8baba4be80dc7f525946274eea7ad513}{swap}}(*\textcolor{keyword}{this}, other);}
+\DoxyCodeLine{00142     \textcolor{keywordflow}{return} *\textcolor{keyword}{this};}
+\DoxyCodeLine{00143 \}}
 
 \end{DoxyCode}
 \mbox{\Hypertarget{classConverter_af0ecd7c664a249a7b7b8f9d600042964}\label{classConverter_af0ecd7c664a249a7b7b8f9d600042964}} 
 \index{Converter@{Converter}!sendFrame@{sendFrame}}
 \index{sendFrame@{sendFrame}!Converter@{Converter}}
 \doxysubsubsection{\texorpdfstring{sendFrame()}{sendFrame()}}
-{\footnotesize\ttfamily void Converter\+::send\+Frame (\begin{DoxyParamCaption}\item[{av\+::\+Frame\+UPtr}]{frame }\end{DoxyParamCaption})}
+{\footnotesize\ttfamily void Converter\+::send\+Frame (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{namespaceav_abcf8febb01b83a6bf7671fc1793f23f0}{av\+::\+Frame\+UPtr}}}]{frame }\end{DoxyParamCaption})}
 
 Send a frame to convert 
 
-Definition at line \mbox{\hyperlink{converter_8cpp_source_l00150}{150}} of file \mbox{\hyperlink{converter_8cpp_source}{converter.\+cpp}}.
+Definition at line \mbox{\hyperlink{converter_8cpp_source_l00145}{145}} of file \mbox{\hyperlink{converter_8cpp_source}{converter.\+cpp}}.
 
 
 \begin{DoxyCode}{0}
-\DoxyCodeLine{00150                                            \{}
-\DoxyCodeLine{00151     \textcolor{keywordflow}{if} (!buffersrc\_ctx\_) throwError(\textcolor{stringliteral}{"{}buffersrc is not allocated"{}});}
-\DoxyCodeLine{00152     \textcolor{keywordflow}{if} (!frame) throwError(\textcolor{stringliteral}{"{}sent frame is not allocated"{}});}
-\DoxyCodeLine{00153     \textcolor{keywordflow}{if} (av\_buffersrc\_add\_frame(buffersrc\_ctx\_, frame.get())) throwError(\textcolor{stringliteral}{"{}failed to write frame to filter"{}});}
-\DoxyCodeLine{00154 \}}
+\DoxyCodeLine{00145                                            \{}
+\DoxyCodeLine{00146     \textcolor{keywordflow}{if} (!buffersrc\_ctx\_) throwRuntimeError(\textcolor{stringliteral}{"{}buffersrc is not allocated"{}});}
+\DoxyCodeLine{00147     \textcolor{keywordflow}{if} (!frame) throwRuntimeError(\textcolor{stringliteral}{"{}sent frame is not allocated"{}});}
+\DoxyCodeLine{00148     \textcolor{keywordflow}{if} (av\_buffersrc\_add\_frame(buffersrc\_ctx\_, frame.get())) throwRuntimeError(\textcolor{stringliteral}{"{}failed to write frame to filter"{}});}
+\DoxyCodeLine{00149 \}}
 
 \end{DoxyCode}
 
@@ -237,10 +255,10 @@ Definition at line \mbox{\hyperlink{converter_8cpp_source_l00007}{7}} of file \m
 
 \begin{DoxyCode}{0}
 \DoxyCodeLine{00007                                           \{}
-\DoxyCodeLine{00008     std::swap(lhs.filter\_graph\_, rhs.filter\_graph\_);}
-\DoxyCodeLine{00009     std::swap(lhs.buffersrc\_ctx\_, rhs.buffersrc\_ctx\_);}
-\DoxyCodeLine{00010     std::swap(lhs.buffersink\_ctx\_, rhs.buffersink\_ctx\_);}
-\DoxyCodeLine{00011     std::swap(lhs.frame\_, rhs.frame\_);}
+\DoxyCodeLine{00008     \mbox{\hyperlink{converter_8cpp_a8baba4be80dc7f525946274eea7ad513}{std::swap}}(lhs.filter\_graph\_, rhs.filter\_graph\_);}
+\DoxyCodeLine{00009     \mbox{\hyperlink{converter_8cpp_a8baba4be80dc7f525946274eea7ad513}{std::swap}}(lhs.buffersrc\_ctx\_, rhs.buffersrc\_ctx\_);}
+\DoxyCodeLine{00010     \mbox{\hyperlink{converter_8cpp_a8baba4be80dc7f525946274eea7ad513}{std::swap}}(lhs.buffersink\_ctx\_, rhs.buffersink\_ctx\_);}
+\DoxyCodeLine{00011     \mbox{\hyperlink{converter_8cpp_a8baba4be80dc7f525946274eea7ad513}{std::swap}}(lhs.frame\_, rhs.frame\_);}
 \DoxyCodeLine{00012 \}}
 
 \end{DoxyCode}
@@ -248,5 +266,5 @@ Definition at line \mbox{\hyperlink{converter_8cpp_source_l00007}{7}} of file \m
 
 The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
 \item 
-src/process/converter.\+h\item 
-src/process/converter.\+cpp\end{DoxyCompactItemize}
+src/process/\mbox{\hyperlink{converter_8h}{converter.\+h}}\item 
+src/process/\mbox{\hyperlink{converter_8cpp}{converter.\+cpp}}\end{DoxyCompactItemize}

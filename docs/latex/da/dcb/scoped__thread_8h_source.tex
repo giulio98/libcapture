@@ -1,31 +1,33 @@
 \hypertarget{scoped__thread_8h_source}{}\doxysection{scoped\+\_\+thread.\+h}
 \label{scoped__thread_8h_source}\index{src/utils/scoped\_thread.h@{src/utils/scoped\_thread.h}}
-
+\mbox{\hyperlink{scoped__thread_8h}{Go to the documentation of this file.}}
 \begin{DoxyCode}{0}
-\DoxyCodeLine{\Hypertarget{scoped__thread_8h_source_l00001}00001 \textcolor{preprocessor}{\#include <thread>}}
+\DoxyCodeLine{\Hypertarget{scoped__thread_8h_source_l00001}00001 \textcolor{preprocessor}{\#pragma once}}
 \DoxyCodeLine{\Hypertarget{scoped__thread_8h_source_l00002}00002 }
-\DoxyCodeLine{\Hypertarget{scoped__thread_8h_source_l00003}\mbox{\hyperlink{classScopedThread}{00003}} \textcolor{keyword}{class }\mbox{\hyperlink{classScopedThread}{ScopedThread}} \{}
-\DoxyCodeLine{\Hypertarget{scoped__thread_8h_source_l00004}00004     std::thread t\_;}
-\DoxyCodeLine{\Hypertarget{scoped__thread_8h_source_l00005}00005 }
-\DoxyCodeLine{\Hypertarget{scoped__thread_8h_source_l00006}00006 \textcolor{keyword}{public}:}
-\DoxyCodeLine{\Hypertarget{scoped__thread_8h_source_l00007}00007     \mbox{\hyperlink{classScopedThread}{ScopedThread}}() \textcolor{keyword}{noexcept} = \textcolor{keywordflow}{default};}
-\DoxyCodeLine{\Hypertarget{scoped__thread_8h_source_l00008}00008 }
-\DoxyCodeLine{\Hypertarget{scoped__thread_8h_source_l00009}00009     \mbox{\hyperlink{classScopedThread}{ScopedThread}}(std::thread \&\&t) noexcept : t\_(std::move(t)) \{\}}
+\DoxyCodeLine{\Hypertarget{scoped__thread_8h_source_l00003}00003 \textcolor{preprocessor}{\#include <thread>}}
+\DoxyCodeLine{\Hypertarget{scoped__thread_8h_source_l00004}00004 }
+\DoxyCodeLine{\Hypertarget{scoped__thread_8h_source_l00005}\mbox{\hyperlink{classScopedThread}{00005}} \textcolor{keyword}{class }\mbox{\hyperlink{classScopedThread}{ScopedThread}} \{}
+\DoxyCodeLine{\Hypertarget{scoped__thread_8h_source_l00006}00006     std::thread t\_;}
+\DoxyCodeLine{\Hypertarget{scoped__thread_8h_source_l00007}00007 }
+\DoxyCodeLine{\Hypertarget{scoped__thread_8h_source_l00008}00008 \textcolor{keyword}{public}:}
+\DoxyCodeLine{\Hypertarget{scoped__thread_8h_source_l00009}\mbox{\hyperlink{classScopedThread_af6f1534aec5915402463d97dfa71e507}{00009}}     \mbox{\hyperlink{classScopedThread_af6f1534aec5915402463d97dfa71e507}{ScopedThread}}() noexcept = default;}
 \DoxyCodeLine{\Hypertarget{scoped__thread_8h_source_l00010}00010 }
-\DoxyCodeLine{\Hypertarget{scoped__thread_8h_source_l00011}00011     \mbox{\hyperlink{classScopedThread}{ScopedThread}}(\textcolor{keyword}{const} \mbox{\hyperlink{classScopedThread}{ScopedThread}} \&) = \textcolor{keyword}{delete};}
+\DoxyCodeLine{\Hypertarget{scoped__thread_8h_source_l00011}\mbox{\hyperlink{classScopedThread_a4c650875c1513e30a0960be018d2be9a}{00011}}     \mbox{\hyperlink{classScopedThread}{ScopedThread}}(std::thread \&\&t) noexcept : t\_(std::move(t)) \{\}}
 \DoxyCodeLine{\Hypertarget{scoped__thread_8h_source_l00012}00012 }
-\DoxyCodeLine{\Hypertarget{scoped__thread_8h_source_l00013}00013     \mbox{\hyperlink{classScopedThread}{ScopedThread}}(\mbox{\hyperlink{classScopedThread}{ScopedThread}} \&\&other) noexcept : t\_(std::move(other.t\_)) \{\}}
+\DoxyCodeLine{\Hypertarget{scoped__thread_8h_source_l00013}\mbox{\hyperlink{classScopedThread_a901655f97874058bbe55a7bee79f06b4}{00013}}     \mbox{\hyperlink{classScopedThread_a901655f97874058bbe55a7bee79f06b4}{ScopedThread}}(\textcolor{keyword}{const} \mbox{\hyperlink{classScopedThread}{ScopedThread}} \&) = \textcolor{keyword}{delete};}
 \DoxyCodeLine{\Hypertarget{scoped__thread_8h_source_l00014}00014 }
-\DoxyCodeLine{\Hypertarget{scoped__thread_8h_source_l00015}00015     \mbox{\hyperlink{classScopedThread}{\string~ScopedThread}}() \{}
-\DoxyCodeLine{\Hypertarget{scoped__thread_8h_source_l00016}00016         \textcolor{keywordflow}{if} (t\_.joinable()) t\_.join();}
-\DoxyCodeLine{\Hypertarget{scoped__thread_8h_source_l00017}00017     \}}
-\DoxyCodeLine{\Hypertarget{scoped__thread_8h_source_l00018}00018 }
-\DoxyCodeLine{\Hypertarget{scoped__thread_8h_source_l00019}00019     \mbox{\hyperlink{classScopedThread}{ScopedThread}} \&operator=(\textcolor{keyword}{const} \mbox{\hyperlink{classScopedThread}{ScopedThread}} \&) = \textcolor{keyword}{delete};}
+\DoxyCodeLine{\Hypertarget{scoped__thread_8h_source_l00015}\mbox{\hyperlink{classScopedThread_a6940615060e0770611ef8226d373f584}{00015}}     \mbox{\hyperlink{classScopedThread_a6940615060e0770611ef8226d373f584}{ScopedThread}}(\mbox{\hyperlink{classScopedThread}{ScopedThread}} \&\&other) noexcept : t\_(std::move(other.t\_)) \{\}}
+\DoxyCodeLine{\Hypertarget{scoped__thread_8h_source_l00016}00016 }
+\DoxyCodeLine{\Hypertarget{scoped__thread_8h_source_l00017}\mbox{\hyperlink{classScopedThread_a129fd102912b296952e7e726bc35056d}{00017}}     \mbox{\hyperlink{classScopedThread_a129fd102912b296952e7e726bc35056d}{\string~ScopedThread}}() \{}
+\DoxyCodeLine{\Hypertarget{scoped__thread_8h_source_l00018}00018         \textcolor{keywordflow}{if} (t\_.joinable()) t\_.join();}
+\DoxyCodeLine{\Hypertarget{scoped__thread_8h_source_l00019}00019     \}}
 \DoxyCodeLine{\Hypertarget{scoped__thread_8h_source_l00020}00020 }
-\DoxyCodeLine{\Hypertarget{scoped__thread_8h_source_l00021}00021     \mbox{\hyperlink{classScopedThread}{ScopedThread}} \&operator=(\mbox{\hyperlink{classScopedThread}{ScopedThread}} \&\&other) \textcolor{keyword}{noexcept} \{}
-\DoxyCodeLine{\Hypertarget{scoped__thread_8h_source_l00022}00022         t\_ = std::move(other.t\_);}
-\DoxyCodeLine{\Hypertarget{scoped__thread_8h_source_l00023}00023         \textcolor{keywordflow}{return} *\textcolor{keyword}{this};}
-\DoxyCodeLine{\Hypertarget{scoped__thread_8h_source_l00024}00024     \}}
-\DoxyCodeLine{\Hypertarget{scoped__thread_8h_source_l00025}00025 \};}
+\DoxyCodeLine{\Hypertarget{scoped__thread_8h_source_l00021}\mbox{\hyperlink{classScopedThread_a6abe2aefc5f5ae5ca1c089943d4364e7}{00021}}     \mbox{\hyperlink{classScopedThread}{ScopedThread}} \&\mbox{\hyperlink{classScopedThread_a6abe2aefc5f5ae5ca1c089943d4364e7}{operator=}}(\textcolor{keyword}{const} \mbox{\hyperlink{classScopedThread}{ScopedThread}} \&) = \textcolor{keyword}{delete};}
+\DoxyCodeLine{\Hypertarget{scoped__thread_8h_source_l00022}00022 }
+\DoxyCodeLine{\Hypertarget{scoped__thread_8h_source_l00023}\mbox{\hyperlink{classScopedThread_aab4a6d20b68f984a18eafe3a3f7f30fd}{00023}}     \mbox{\hyperlink{classScopedThread}{ScopedThread}} \&\mbox{\hyperlink{classScopedThread_aab4a6d20b68f984a18eafe3a3f7f30fd}{operator=}}(\mbox{\hyperlink{classScopedThread}{ScopedThread}} \&\&other) \textcolor{keyword}{noexcept} \{}
+\DoxyCodeLine{\Hypertarget{scoped__thread_8h_source_l00024}00024         t\_ = std::move(other.t\_);}
+\DoxyCodeLine{\Hypertarget{scoped__thread_8h_source_l00025}00025         \textcolor{keywordflow}{return} *\textcolor{keyword}{this};}
+\DoxyCodeLine{\Hypertarget{scoped__thread_8h_source_l00026}00026     \}}
+\DoxyCodeLine{\Hypertarget{scoped__thread_8h_source_l00027}00027 \};}
 
 \end{DoxyCode}

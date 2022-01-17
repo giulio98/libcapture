@@ -1,127 +1,127 @@
 \hypertarget{demuxer_8cpp_source}{}\doxysection{demuxer.\+cpp}
 \label{demuxer_8cpp_source}\index{src/format/demuxer.cpp@{src/format/demuxer.cpp}}
-
+\mbox{\hyperlink{demuxer_8cpp}{Go to the documentation of this file.}}
 \begin{DoxyCode}{0}
-\DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00001}00001 \textcolor{preprocessor}{\#include "{}demuxer.h"{}}}
+\DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00001}00001 \textcolor{preprocessor}{\#include "{}\mbox{\hyperlink{demuxer_8h}{demuxer.h}}"{}}}
 \DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00002}00002 }
 \DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00003}00003 \textcolor{preprocessor}{\#include <iostream>}}
 \DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00004}00004 \textcolor{preprocessor}{\#include <stdexcept>}}
 \DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00005}00005 }
-\DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00006}00006 \textcolor{preprocessor}{\#define VERBOSE 0}}
+\DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00006}\mbox{\hyperlink{demuxer_8cpp_a42f8c497a1968074f38bf5055c650dca}{00006}} \textcolor{preprocessor}{\#define VERBOSE 0  }\textcolor{comment}{// TO-\/DO: improve}}
 \DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00007}00007 }
-\DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00008}00008 \textcolor{keyword}{static} \textcolor{keywordtype}{void} throwError(\textcolor{keyword}{const} std::string \&msg) \{ \textcolor{keywordflow}{throw} std::runtime\_error(\textcolor{stringliteral}{"{}Demuxer: "{}} + msg); \}}
+\DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00008}00008 \textcolor{keyword}{static} \textcolor{keywordtype}{void} throwRuntimeError(\textcolor{keyword}{const} std::string \&msg) \{ \textcolor{keywordflow}{throw} std::runtime\_error(\textcolor{stringliteral}{"{}Demuxer: "{}} + msg); \}}
 \DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00009}00009 }
-\DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00010}00010 \textcolor{keywordtype}{void} swap(\mbox{\hyperlink{classDemuxer}{Demuxer}} \&lhs, \mbox{\hyperlink{classDemuxer}{Demuxer}} \&rhs) \{}
-\DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00011}00011     std::swap(lhs.fmt\_ctx\_, rhs.fmt\_ctx\_);}
-\DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00012}00012     std::swap(lhs.fmt\_, rhs.fmt\_);}
-\DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00013}00013     std::swap(lhs.device\_name\_, rhs.device\_name\_);}
-\DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00014}00014     std::swap(lhs.options\_, rhs.options\_);}
-\DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00015}00015     std::swap(lhs.streams\_[av::MediaType::Audio], rhs.streams\_[av::MediaType::Audio]);}
-\DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00016}00016     std::swap(lhs.streams\_[av::MediaType::Video], rhs.streams\_[av::MediaType::Video]);}
-\DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00017}00017     std::swap(lhs.packet\_, rhs.packet\_);}
+\DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00010}\mbox{\hyperlink{classDemuxer_a82a17238c6f18f81e88eda961b10436f}{00010}} \textcolor{keywordtype}{void} \mbox{\hyperlink{demuxer_8cpp_a82a17238c6f18f81e88eda961b10436f}{swap}}(\mbox{\hyperlink{classDemuxer}{Demuxer}} \&lhs, \mbox{\hyperlink{classDemuxer}{Demuxer}} \&rhs) \{}
+\DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00011}00011     \mbox{\hyperlink{demuxer_8cpp_a82a17238c6f18f81e88eda961b10436f}{std::swap}}(lhs.fmt\_ctx\_, rhs.fmt\_ctx\_);}
+\DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00012}00012     \mbox{\hyperlink{demuxer_8cpp_a82a17238c6f18f81e88eda961b10436f}{std::swap}}(lhs.fmt\_, rhs.fmt\_);}
+\DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00013}00013     \mbox{\hyperlink{demuxer_8cpp_a82a17238c6f18f81e88eda961b10436f}{std::swap}}(lhs.device\_name\_, rhs.device\_name\_);}
+\DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00014}00014     \mbox{\hyperlink{demuxer_8cpp_a82a17238c6f18f81e88eda961b10436f}{std::swap}}(lhs.options\_, rhs.options\_);}
+\DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00015}00015     \mbox{\hyperlink{demuxer_8cpp_a82a17238c6f18f81e88eda961b10436f}{std::swap}}(lhs.streams\_[\mbox{\hyperlink{namespaceav_ae2953b761e9eb4d9a8be80a224fd26bba99b90951926ac80c982650c5e579f93b}{av::MediaType::Audio}}], rhs.streams\_[\mbox{\hyperlink{namespaceav_ae2953b761e9eb4d9a8be80a224fd26bba99b90951926ac80c982650c5e579f93b}{av::MediaType::Audio}}]);}
+\DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00016}00016     \mbox{\hyperlink{demuxer_8cpp_a82a17238c6f18f81e88eda961b10436f}{std::swap}}(lhs.streams\_[\mbox{\hyperlink{namespaceav_ae2953b761e9eb4d9a8be80a224fd26bba6ec05a98ec3161d8877fadd84fdec43d}{av::MediaType::Video}}], rhs.streams\_[\mbox{\hyperlink{namespaceav_ae2953b761e9eb4d9a8be80a224fd26bba6ec05a98ec3161d8877fadd84fdec43d}{av::MediaType::Video}}]);}
+\DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00017}00017     \mbox{\hyperlink{demuxer_8cpp_a82a17238c6f18f81e88eda961b10436f}{std::swap}}(lhs.packet\_, rhs.packet\_);}
 \DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00018}00018 \}}
 \DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00019}00019 }
-\DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00020}\mbox{\hyperlink{classDemuxer_abc638bf9a3d659daa1a60e80a9332c64}{00020}} Demuxer::Demuxer(\textcolor{keyword}{const} std::string \&fmt\_name, std::string device\_name, std::map<std::string, std::string> options)}
+\DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00020}\mbox{\hyperlink{classDemuxer_abc638bf9a3d659daa1a60e80a9332c64}{00020}} \mbox{\hyperlink{classDemuxer_a5286d00ffc4ed4f29fe740df1a4c97ec}{Demuxer::Demuxer}}(\textcolor{keyword}{const} std::string \&fmt\_name, std::string device\_name, std::map<std::string, std::string> options)}
 \DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00021}00021     : device\_name\_(std::move(device\_name)), options\_(std::move(options)) \{}
 \DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00022}00022     fmt\_ = av\_find\_input\_format(fmt\_name.c\_str());}
-\DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00023}00023     \textcolor{keywordflow}{if} (!fmt\_) throwError(\textcolor{stringliteral}{"{}cannot find input format"{}});}
+\DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00023}00023     \textcolor{keywordflow}{if} (!fmt\_) throwRuntimeError(\textcolor{stringliteral}{"{}cannot find input format"{}});}
 \DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00024}00024 \}}
 \DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00025}00025 }
-\DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00026}00026 Demuxer::Demuxer(\mbox{\hyperlink{classDemuxer}{Demuxer}} \&\&other) : \mbox{\hyperlink{classDemuxer}{Demuxer}}() \{ swap(*\textcolor{keyword}{this}, other); \}}
+\DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00026}\mbox{\hyperlink{classDemuxer_a1d6343d4d7ec765e5312f25d13240605}{00026}} \mbox{\hyperlink{classDemuxer_a5286d00ffc4ed4f29fe740df1a4c97ec}{Demuxer::Demuxer}}(\mbox{\hyperlink{classDemuxer}{Demuxer}} \&\&other) noexcept : \mbox{\hyperlink{classDemuxer}{Demuxer}}() \{ \mbox{\hyperlink{demuxer_8cpp_a82a17238c6f18f81e88eda961b10436f}{swap}}(*\textcolor{keyword}{this}, other); \}}
 \DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00027}00027 }
-\DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00028}00028 \mbox{\hyperlink{classDemuxer}{Demuxer}} \&Demuxer::operator=(\mbox{\hyperlink{classDemuxer}{Demuxer}} other) \{}
-\DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00029}00029     swap(*\textcolor{keyword}{this}, other);}
+\DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00028}\mbox{\hyperlink{classDemuxer_a1882826b9c85071bdae8d7cc7e404f26}{00028}} \mbox{\hyperlink{classDemuxer}{Demuxer}} \&\mbox{\hyperlink{classDemuxer_a1882826b9c85071bdae8d7cc7e404f26}{Demuxer::operator=}}(\mbox{\hyperlink{classDemuxer}{Demuxer}} other) \{}
+\DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00029}00029     \mbox{\hyperlink{classDemuxer_a82a17238c6f18f81e88eda961b10436f}{swap}}(*\textcolor{keyword}{this}, other);}
 \DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00030}00030     \textcolor{keywordflow}{return} *\textcolor{keyword}{this};}
 \DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00031}00031 \}}
 \DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00032}00032 }
 \DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00033}\mbox{\hyperlink{classDemuxer_adb7d8df640f876555025a6ca7d7b2cdb}{00033}} \textcolor{keywordtype}{void} \mbox{\hyperlink{classDemuxer_adb7d8df640f876555025a6ca7d7b2cdb}{Demuxer::openInput}}() \{}
-\DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00034}00034     \textcolor{keywordflow}{if} (fmt\_ctx\_) throwError(\textcolor{stringliteral}{"{}failed to open input device (input is already open)"{}});}
-\DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00035}00035     \textcolor{keywordflow}{if} (!fmt\_) throwError(\textcolor{stringliteral}{"{}failed to open input device (missing input format)"{}});}
+\DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00034}00034     \textcolor{keywordflow}{if} (fmt\_ctx\_) throwRuntimeError(\textcolor{stringliteral}{"{}failed to open input device (input is already open)"{}});}
+\DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00035}00035     \textcolor{keywordflow}{if} (!fmt\_) throwRuntimeError(\textcolor{stringliteral}{"{}failed to open input device (missing input format)"{}});}
 \DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00036}00036 }
 \DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00037}00037     \{}
 \DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00038}00038         AVFormatContext *fmt\_ctx = \textcolor{keyword}{nullptr};}
-\DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00039}00039         av::DictionaryUPtr dict = av::map2dict(options\_);}
+\DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00039}00039         \mbox{\hyperlink{namespaceav_ac63df59361f71f9e13346a67da3f46d3}{av::DictionaryUPtr}} dict = \mbox{\hyperlink{namespaceav_adcd7031d3c0148269ef170c6e4b73003}{av::map2dict}}(options\_);}
 \DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00040}00040         AVDictionary *dict\_raw = dict.release();}
 \DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00041}00041         \textcolor{keywordtype}{int} ret = avformat\_open\_input(\&fmt\_ctx, device\_name\_.c\_str(), fmt\_, dict\_raw ? \&dict\_raw : \textcolor{keyword}{nullptr});}
-\DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00042}00042         dict = av::DictionaryUPtr(dict\_raw);}
-\DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00043}00043         fmt\_ctx\_ = av::InFormatContextUPtr(fmt\_ctx);}
-\DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00044}00044         \textcolor{keywordflow}{if} (ret) throwError(\textcolor{stringliteral}{"{}cannot open input format"{}});}
+\DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00042}00042         dict = \mbox{\hyperlink{namespaceav_ac63df59361f71f9e13346a67da3f46d3}{av::DictionaryUPtr}}(dict\_raw);}
+\DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00043}00043         fmt\_ctx\_ = \mbox{\hyperlink{namespaceav_a8bbddc2f529c1b2befec508337f0254b}{av::InFormatContextUPtr}}(fmt\_ctx);}
+\DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00044}00044         \textcolor{keywordflow}{if} (ret) throwRuntimeError(\textcolor{stringliteral}{"{}cannot open input format"{}});}
 \DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00045}00045 \textcolor{preprocessor}{\#if VERBOSE}}
-\DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00046}00046         \textcolor{keyword}{auto} map = av::dict2map(dict.get());}
+\DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00046}00046         \textcolor{keyword}{auto} map = \mbox{\hyperlink{namespaceav_a2289910715bb0ea43c6a0db11672ace0}{av::dict2map}}(dict.get());}
 \DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00047}00047         \textcolor{keywordflow}{for} (\textcolor{keyword}{const} \textcolor{keyword}{auto} \&[key, val] : map) \{}
 \DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00048}00048             std::cerr << \textcolor{stringliteral}{"{}Encoder: couldn't find any '"{}} << key << \textcolor{stringliteral}{"{}' option"{}} << std::endl;}
 \DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00049}00049         \}}
 \DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00050}00050 \textcolor{preprocessor}{\#endif}}
 \DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00051}00051     \}}
 \DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00052}00052 }
-\DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00053}00053     \textcolor{keywordflow}{if} (avformat\_find\_stream\_info(fmt\_ctx\_.get(), \textcolor{keyword}{nullptr}) < 0) throwError(\textcolor{stringliteral}{"{}Failed to find stream info"{}});}
+\DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00053}00053     \textcolor{keywordflow}{if} (avformat\_find\_stream\_info(fmt\_ctx\_.get(), \textcolor{keyword}{nullptr}) < 0) throwRuntimeError(\textcolor{stringliteral}{"{}Failed to find stream info"{}});}
 \DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00054}00054 }
 \DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00055}00055     \textcolor{keywordflow}{for} (\textcolor{keywordtype}{int} i = 0; i < fmt\_ctx\_-\/>nb\_streams; i++) \{}
 \DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00056}00056         \textcolor{keyword}{const} AVStream *stream = fmt\_ctx\_-\/>streams[i];}
 \DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00057}00057         \textcolor{keywordflow}{if} (stream-\/>codecpar-\/>codec\_type == AVMEDIA\_TYPE\_VIDEO) \{}
-\DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00058}00058             streams\_[av::MediaType::Video] = stream;}
+\DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00058}00058             streams\_[\mbox{\hyperlink{namespaceav_ae2953b761e9eb4d9a8be80a224fd26bba6ec05a98ec3161d8877fadd84fdec43d}{av::MediaType::Video}}] = stream;}
 \DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00059}00059         \} \textcolor{keywordflow}{else} \textcolor{keywordflow}{if} (stream-\/>codecpar-\/>codec\_type == AVMEDIA\_TYPE\_AUDIO) \{}
-\DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00060}00060             streams\_[av::MediaType::Audio] = stream;}
+\DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00060}00060             streams\_[\mbox{\hyperlink{namespaceav_ae2953b761e9eb4d9a8be80a224fd26bba99b90951926ac80c982650c5e579f93b}{av::MediaType::Audio}}] = stream;}
 \DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00061}00061         \}}
 \DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00062}00062     \}}
 \DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00063}00063 \}}
 \DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00064}00064 }
 \DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00065}\mbox{\hyperlink{classDemuxer_a1e344d76a4d8f3770d5673c04a9792cb}{00065}} \textcolor{keywordtype}{void} \mbox{\hyperlink{classDemuxer_a1e344d76a4d8f3770d5673c04a9792cb}{Demuxer::closeInput}}() \{}
-\DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00066}00066     \textcolor{keywordflow}{if} (!fmt\_ctx\_) throwError(\textcolor{stringliteral}{"{}failed to close input (input is not open)"{}});}
+\DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00066}00066     \textcolor{keywordflow}{if} (!fmt\_ctx\_) throwRuntimeError(\textcolor{stringliteral}{"{}failed to close input (input is not open)"{}});}
 \DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00067}00067     fmt\_ctx\_.reset();}
-\DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00068}00068     streams\_[av::MediaType::Video] = \textcolor{keyword}{nullptr};}
-\DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00069}00069     streams\_[av::MediaType::Audio] = \textcolor{keyword}{nullptr};}
+\DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00068}00068     streams\_[\mbox{\hyperlink{namespaceav_ae2953b761e9eb4d9a8be80a224fd26bba6ec05a98ec3161d8877fadd84fdec43d}{av::MediaType::Video}}] = \textcolor{keyword}{nullptr};}
+\DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00069}00069     streams\_[\mbox{\hyperlink{namespaceav_ae2953b761e9eb4d9a8be80a224fd26bba99b90951926ac80c982650c5e579f93b}{av::MediaType::Audio}}] = \textcolor{keyword}{nullptr};}
 \DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00070}00070 \}}
 \DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00071}00071 }
 \DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00072}\mbox{\hyperlink{classDemuxer_ac5c00fad73efc9fd745fd6c484e1555b}{00072}} \textcolor{keywordtype}{void} \mbox{\hyperlink{classDemuxer_ac5c00fad73efc9fd745fd6c484e1555b}{Demuxer::flush}}() \{}
-\DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00073}00073     \textcolor{keywordflow}{if} (!fmt\_ctx\_) throwError(\textcolor{stringliteral}{"{}failed to flush (input is not open)"{}});}
+\DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00073}00073     \textcolor{keywordflow}{if} (!fmt\_ctx\_) throwRuntimeError(\textcolor{stringliteral}{"{}failed to flush (input is not open)"{}});}
 \DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00074}00074     \textcolor{keywordflow}{if} (fmt\_ctx\_-\/>pb) avio\_flush(fmt\_ctx\_-\/>pb);}
-\DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00075}00075     \textcolor{keywordflow}{if} (avformat\_flush(fmt\_ctx\_.get()) < 0) throwError(\textcolor{stringliteral}{"{}failed to flush internal data"{}});}
+\DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00075}00075     \textcolor{keywordflow}{if} (avformat\_flush(fmt\_ctx\_.get()) < 0) throwRuntimeError(\textcolor{stringliteral}{"{}failed to flush internal data"{}});}
 \DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00076}00076 \}}
 \DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00077}00077 }
 \DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00078}\mbox{\hyperlink{classDemuxer_aced5dab1a996da140fc55cda3b8c6822}{00078}} \textcolor{keywordtype}{bool} \mbox{\hyperlink{classDemuxer_aced5dab1a996da140fc55cda3b8c6822}{Demuxer::isInputOpen}}()\textcolor{keyword}{ const }\{ \textcolor{keywordflow}{return} (fmt\_ctx\_ != \textcolor{keyword}{nullptr}); \}}
 \DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00079}00079 }
-\DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00080}\mbox{\hyperlink{classDemuxer_a21dcade74fec8cb4a30e312c79dd1274}{00080}} \textcolor{keyword}{const} AVCodecParameters *\mbox{\hyperlink{classDemuxer_a21dcade74fec8cb4a30e312c79dd1274}{Demuxer::getStreamParams}}(av::MediaType stream\_type)\textcolor{keyword}{ const }\{}
-\DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00081}00081     \textcolor{keywordflow}{if} (!fmt\_ctx\_) throwError(\textcolor{stringliteral}{"{}failed to acess stream (input is not open)"{}});}
-\DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00082}00082     \textcolor{keywordflow}{if} (!av::validMediaType(stream\_type)) throwError(\textcolor{stringliteral}{"{}invalid stream\_type received"{}});}
-\DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00083}00083     \textcolor{keywordflow}{if} (!streams\_[stream\_type]) throwError(\textcolor{stringliteral}{"{}specified stream not present"{}});}
+\DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00080}\mbox{\hyperlink{classDemuxer_a21dcade74fec8cb4a30e312c79dd1274}{00080}} \textcolor{keyword}{const} AVCodecParameters *\mbox{\hyperlink{classDemuxer_a21dcade74fec8cb4a30e312c79dd1274}{Demuxer::getStreamParams}}(\mbox{\hyperlink{namespaceav_ae2953b761e9eb4d9a8be80a224fd26bb}{av::MediaType}} stream\_type)\textcolor{keyword}{ const }\{}
+\DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00081}00081     \textcolor{keywordflow}{if} (!fmt\_ctx\_) throwRuntimeError(\textcolor{stringliteral}{"{}failed to acess stream (input is not open)"{}});}
+\DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00082}00082     \textcolor{keywordflow}{if} (!\mbox{\hyperlink{namespaceav_a231ef2ae2e10e69b5a79a64ac5453ed8}{av::validMediaType}}(stream\_type)) throwRuntimeError(\textcolor{stringliteral}{"{}invalid stream\_type received"{}});}
+\DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00083}00083     \textcolor{keywordflow}{if} (!streams\_[stream\_type]) throwRuntimeError(\textcolor{stringliteral}{"{}specified stream not present"{}});}
 \DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00084}00084     \textcolor{keywordflow}{return} streams\_[stream\_type]-\/>codecpar;}
 \DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00085}00085 \}}
 \DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00086}00086 }
-\DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00087}\mbox{\hyperlink{classDemuxer_a5465f2d641af3ddfb253ff2cbd87ba37}{00087}} AVRational \mbox{\hyperlink{classDemuxer_a5465f2d641af3ddfb253ff2cbd87ba37}{Demuxer::getStreamTimeBase}}(av::MediaType stream\_type)\textcolor{keyword}{ const }\{}
-\DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00088}00088     \textcolor{keywordflow}{if} (!fmt\_ctx\_) throwError(\textcolor{stringliteral}{"{}failed to acess stream (input is not open)"{}});}
-\DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00089}00089     \textcolor{keywordflow}{if} (!av::validMediaType(stream\_type)) throwError(\textcolor{stringliteral}{"{}invalid stream\_type received"{}});}
-\DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00090}00090     \textcolor{keywordflow}{if} (!streams\_[stream\_type]) throwError(\textcolor{stringliteral}{"{}specified stream not present"{}});}
+\DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00087}\mbox{\hyperlink{classDemuxer_a5465f2d641af3ddfb253ff2cbd87ba37}{00087}} AVRational \mbox{\hyperlink{classDemuxer_a5465f2d641af3ddfb253ff2cbd87ba37}{Demuxer::getStreamTimeBase}}(\mbox{\hyperlink{namespaceav_ae2953b761e9eb4d9a8be80a224fd26bb}{av::MediaType}} stream\_type)\textcolor{keyword}{ const }\{}
+\DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00088}00088     \textcolor{keywordflow}{if} (!fmt\_ctx\_) throwRuntimeError(\textcolor{stringliteral}{"{}failed to acess stream (input is not open)"{}});}
+\DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00089}00089     \textcolor{keywordflow}{if} (!\mbox{\hyperlink{namespaceav_a231ef2ae2e10e69b5a79a64ac5453ed8}{av::validMediaType}}(stream\_type)) throwRuntimeError(\textcolor{stringliteral}{"{}invalid stream\_type received"{}});}
+\DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00090}00090     \textcolor{keywordflow}{if} (!streams\_[stream\_type]) throwRuntimeError(\textcolor{stringliteral}{"{}specified stream not present"{}});}
 \DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00091}00091     \textcolor{keywordflow}{return} streams\_[stream\_type]-\/>time\_base;}
 \DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00092}00092 \}}
 \DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00093}00093 }
 \DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00094}\mbox{\hyperlink{classDemuxer_aef8feef99ec38bd3cc579e3339a18aec}{00094}} std::pair<av::PacketUPtr, av::MediaType> \mbox{\hyperlink{classDemuxer_aef8feef99ec38bd3cc579e3339a18aec}{Demuxer::readPacket}}() \{}
-\DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00095}00095     \textcolor{keywordflow}{if} (!fmt\_ctx\_) throwError(\textcolor{stringliteral}{"{}failed to read packet (input is not open)"{}});}
+\DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00095}00095     \textcolor{keywordflow}{if} (!fmt\_ctx\_) throwRuntimeError(\textcolor{stringliteral}{"{}failed to read packet (input is not open)"{}});}
 \DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00096}00096 }
 \DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00097}00097     \textcolor{keywordflow}{if} (!packet\_) \{}
-\DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00098}00098         packet\_ = av::PacketUPtr(av\_packet\_alloc());}
-\DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00099}00099         \textcolor{keywordflow}{if} (!packet\_) throwError(\textcolor{stringliteral}{"{}failed to allocate packet"{}});}
+\DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00098}00098         packet\_ = \mbox{\hyperlink{namespaceav_a84641b7a446e1183f8722c998db8be0c}{av::PacketUPtr}}(av\_packet\_alloc());}
+\DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00099}00099         \textcolor{keywordflow}{if} (!packet\_) throwRuntimeError(\textcolor{stringliteral}{"{}failed to allocate packet"{}});}
 \DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00100}00100     \}}
 \DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00101}00101 }
-\DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00102}00102     \textcolor{keyword}{auto} packet\_type = av::MediaType::None;}
+\DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00102}00102     \textcolor{keyword}{auto} packet\_type = \mbox{\hyperlink{namespaceav_ae2953b761e9eb4d9a8be80a224fd26bbad4f2e84fb09232323dd1559e6e8fc5cb}{av::MediaType::None}};}
 \DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00103}00103 }
 \DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00104}00104     \textcolor{keywordtype}{int} ret = av\_read\_frame(fmt\_ctx\_.get(), packet\_.get());}
 \DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00105}00105     \textcolor{keywordflow}{if} (ret == AVERROR(EAGAIN)) \textcolor{keywordflow}{return} std::make\_pair(\textcolor{keyword}{nullptr}, packet\_type);}
-\DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00106}00106     \textcolor{keywordflow}{if} (ret < 0) throwError(\textcolor{stringliteral}{"{}failed to read a packet"{}});}
+\DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00106}00106     \textcolor{keywordflow}{if} (ret < 0) throwRuntimeError(\textcolor{stringliteral}{"{}failed to read a packet"{}});}
 \DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00107}00107 }
-\DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00108}00108     \textcolor{keywordflow}{for} (\textcolor{keyword}{auto} type : av::validMediaTypes) \{}
+\DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00108}00108     \textcolor{keywordflow}{for} (\textcolor{keyword}{auto} type : \mbox{\hyperlink{namespaceav_a8c2d213cd1b3461b2ae369f83d00c1c5}{av::validMediaTypes}}) \{}
 \DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00109}00109         \textcolor{keywordflow}{if} (streams\_[type] \&\& packet\_-\/>stream\_index == streams\_[type]-\/>index) \{}
 \DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00110}00110             packet\_type = type;}
 \DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00111}00111             \textcolor{keywordflow}{break};}
 \DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00112}00112         \}}
 \DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00113}00113     \}}
-\DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00114}00114     \textcolor{keywordflow}{if} (packet\_type == av::MediaType::None) throwError(\textcolor{stringliteral}{"{}unknown packet stream index"{}});}
+\DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00114}00114     \textcolor{keywordflow}{if} (packet\_type == \mbox{\hyperlink{namespaceav_ae2953b761e9eb4d9a8be80a224fd26bbad4f2e84fb09232323dd1559e6e8fc5cb}{av::MediaType::None}}) throwRuntimeError(\textcolor{stringliteral}{"{}unknown packet stream index"{}});}
 \DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00115}00115 }
 \DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00116}00116     \textcolor{keywordflow}{return} std::make\_pair(std::move(packet\_), packet\_type);}
 \DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00117}00117 \}}
 \DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00118}00118 }
 \DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00119}\mbox{\hyperlink{classDemuxer_a85f970c6ef269fd10729fea1995a130d}{00119}} \textcolor{keywordtype}{void} \mbox{\hyperlink{classDemuxer_a85f970c6ef269fd10729fea1995a130d}{Demuxer::printInfo}}(\textcolor{keywordtype}{int} index)\textcolor{keyword}{ const }\{}
-\DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00120}00120     \textcolor{keywordflow}{if} (!fmt\_ctx\_) throwError(\textcolor{stringliteral}{"{}failed to print info (input is not open)"{}});}
+\DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00120}00120     \textcolor{keywordflow}{if} (!fmt\_ctx\_) throwRuntimeError(\textcolor{stringliteral}{"{}failed to print info (input is not open)"{}});}
 \DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00121}00121     av\_dump\_format(fmt\_ctx\_.get(), index, device\_name\_.c\_str(), 0);}
 \DoxyCodeLine{\Hypertarget{demuxer_8cpp_source_l00122}00122 \}}
 

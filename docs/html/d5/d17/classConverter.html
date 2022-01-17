@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.9.4"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>screen-recorder: Converter Class Reference</title>
+<title>libcapture: Converter Class Reference</title>
 <link href="../../tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="../../jquery.js"></script>
 <script type="text/javascript" src="../../dynsections.js"></script>
@@ -21,9 +21,9 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">screen-recorder<span id="projectnumber">&#160;0.1</span>
+   <div id="projectname">libcapture<span id="projectnumber">&#160;0.1</span>
    </div>
-   <div id="projectbrief">screen-recorder is a multiplatform C++ library that allows to capture your screen and optionally microphone audio, build with FFmpeg</div>
+   <div id="projectbrief">libcapture is a multiplatform c++ library that allows to capture the display and the microphone audio.</div>
   </td>
  </tr>
  </tbody>
@@ -70,6 +70,8 @@ $(function() {
   <div class="headertitle"><div class="title">Converter Class Reference</div></div>
 </div><!--header-->
 <div class="contents">
+
+<p><code>#include &lt;<a class="el" href="../../de/d27/converter_8h_source.html">converter.h</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
@@ -77,16 +79,17 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:aaa67c7d2770c60fc2fa85fccb6f8a1fc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac36e741069fa7b608c1dcf398d8b242f"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/d17/classConverter.html#ac36e741069fa7b608c1dcf398d8b242f">Converter</a> (const AVCodecContext *dec_ctx, const AVCodecContext *enc_ctx, AVRational in_time_base, int offset_x=0, int offset_y=0)</td></tr>
 <tr class="separator:ac36e741069fa7b608c1dcf398d8b242f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa0ac7c1a1ee44b3ee2d6b51fa1e16308"><td class="memItemLeft" align="right" valign="top"><a id="aa0ac7c1a1ee44b3ee2d6b51fa1e16308" name="aa0ac7c1a1ee44b3ee2d6b51fa1e16308"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>Converter</b> (const <a class="el" href="../../d5/d17/classConverter.html">Converter</a> &amp;)=delete</td></tr>
+<tr class="memitem:aa0ac7c1a1ee44b3ee2d6b51fa1e16308"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/d17/classConverter.html#aa0ac7c1a1ee44b3ee2d6b51fa1e16308">Converter</a> (const <a class="el" href="../../d5/d17/classConverter.html">Converter</a> &amp;)=delete</td></tr>
 <tr class="separator:aa0ac7c1a1ee44b3ee2d6b51fa1e16308"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a66439d4a10d51806625333315e5de116"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/d17/classConverter.html#a66439d4a10d51806625333315e5de116">Converter</a> (<a class="el" href="../../d5/d17/classConverter.html">Converter</a> &amp;&amp;other)</td></tr>
-<tr class="separator:a66439d4a10d51806625333315e5de116"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab89449987659b12ead316afba5301ff0"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/d17/classConverter.html#ab89449987659b12ead316afba5301ff0">Converter</a> (<a class="el" href="../../d5/d17/classConverter.html">Converter</a> &amp;&amp;other) noexcept</td></tr>
+<tr class="separator:ab89449987659b12ead316afba5301ff0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7f50175996e82142ac6cefa8469312dc"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/d17/classConverter.html#a7f50175996e82142ac6cefa8469312dc">~Converter</a> ()=default</td></tr>
+<tr class="separator:a7f50175996e82142ac6cefa8469312dc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad48ff4f80e3c16ac238f5cace194f0f7"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d5/d17/classConverter.html">Converter</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/d17/classConverter.html#ad48ff4f80e3c16ac238f5cace194f0f7">operator=</a> (<a class="el" href="../../d5/d17/classConverter.html">Converter</a> other)</td></tr>
 <tr class="separator:ad48ff4f80e3c16ac238f5cace194f0f7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af0ecd7c664a249a7b7b8f9d600042964"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/d17/classConverter.html#af0ecd7c664a249a7b7b8f9d600042964">sendFrame</a> (av::FrameUPtr frame)</td></tr>
+<tr class="memitem:af0ecd7c664a249a7b7b8f9d600042964"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/d17/classConverter.html#af0ecd7c664a249a7b7b8f9d600042964">sendFrame</a> (<a class="el" href="../../d8/d0d/namespaceav.html#abcf8febb01b83a6bf7671fc1793f23f0">av::FrameUPtr</a> frame)</td></tr>
 <tr class="separator:af0ecd7c664a249a7b7b8f9d600042964"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aea4bf5f51fc7fce7d1d5997406239cca"><td class="memItemLeft" align="right" valign="top">av::FrameUPtr&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/d17/classConverter.html#aea4bf5f51fc7fce7d1d5997406239cca">getFrame</a> ()</td></tr>
+<tr class="memitem:aea4bf5f51fc7fce7d1d5997406239cca"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d8/d0d/namespaceav.html#abcf8febb01b83a6bf7671fc1793f23f0">av::FrameUPtr</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/d17/classConverter.html#aea4bf5f51fc7fce7d1d5997406239cca">getFrame</a> ()</td></tr>
 <tr class="separator:aea4bf5f51fc7fce7d1d5997406239cca"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="friends" name="friends"></a>
@@ -99,7 +102,7 @@ Friends</h2></td></tr>
 <p class="definition">Definition at line <a class="el" href="../../de/d27/converter_8h_source.html#l00005">5</a> of file <a class="el" href="../../de/d27/converter_8h_source.html">converter.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="aaa67c7d2770c60fc2fa85fccb6f8a1fc" name="aaa67c7d2770c60fc2fa85fccb6f8a1fc"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aaa67c7d2770c60fc2fa85fccb6f8a1fc">&#9670;&nbsp;</a></span>Converter() <span class="overload">[1/3]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#aaa67c7d2770c60fc2fa85fccb6f8a1fc">&#9670;&nbsp;</a></span>Converter() <span class="overload">[1/4]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -125,7 +128,7 @@ Friends</h2></td></tr>
 </div>
 </div>
 <a id="ac36e741069fa7b608c1dcf398d8b242f" name="ac36e741069fa7b608c1dcf398d8b242f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac36e741069fa7b608c1dcf398d8b242f">&#9670;&nbsp;</a></span>Converter() <span class="overload">[2/3]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#ac36e741069fa7b608c1dcf398d8b242f">&#9670;&nbsp;</a></span>Converter() <span class="overload">[2/4]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -178,84 +181,116 @@ Friends</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="../../db/dc8/converter_8cpp_source.html#l00072">72</a> of file <a class="el" href="../../db/dc8/converter_8cpp_source.html">converter.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   73</span>                                                 {</div>
-<div class="line"><span class="lineno">   74</span>    <span class="keywordflow">if</span> (!dec_ctx) throwError(<span class="stringliteral">&quot;dec_ctx is NULL&quot;</span>);</div>
-<div class="line"><span class="lineno">   75</span>    <span class="keywordflow">if</span> (!enc_ctx) throwError(<span class="stringliteral">&quot;enc_ctx is NULL&quot;</span>);</div>
-<div class="line"><span class="lineno">   76</span> </div>
-<div class="line"><span class="lineno">   77</span>    std::string src_filter_name;</div>
-<div class="line"><span class="lineno">   78</span>    std::string sink_filter_name;</div>
-<div class="line"><span class="lineno">   79</span>    std::string src_args;</div>
-<div class="line"><span class="lineno">   80</span>    std::string filter_spec;</div>
-<div class="line"><span class="lineno">   81</span> </div>
-<div class="line"><span class="lineno">   82</span>    <span class="keywordflow">if</span> (dec_ctx-&gt;codec_type != enc_ctx-&gt;codec_type) {</div>
-<div class="line"><span class="lineno">   83</span>        throwError(<span class="stringliteral">&quot;type mismatch between received decoder and encoder&quot;</span>);</div>
-<div class="line"><span class="lineno">   84</span>    } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (dec_ctx-&gt;codec_type == AVMEDIA_TYPE_VIDEO) {</div>
-<div class="line"><span class="lineno">   85</span>        src_filter_name = <span class="stringliteral">&quot;buffer&quot;</span>;</div>
-<div class="line"><span class="lineno">   86</span>        sink_filter_name = <span class="stringliteral">&quot;buffersink&quot;</span>;</div>
-<div class="line"><span class="lineno">   87</span>        std::tie(src_args, filter_spec) = getVideoFilterSpec(dec_ctx, enc_ctx, in_time_base, offset_x, offset_y);</div>
-<div class="line"><span class="lineno">   88</span>    } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (dec_ctx-&gt;codec_type == AVMEDIA_TYPE_AUDIO) {</div>
-<div class="line"><span class="lineno">   89</span>        <span class="keywordflow">if</span> (offset_x || offset_y) throwError(<span class="stringliteral">&quot;video offset specified specified for audio converter constructor&quot;</span>);</div>
-<div class="line"><span class="lineno">   90</span>        src_filter_name = <span class="stringliteral">&quot;abuffer&quot;</span>;</div>
-<div class="line"><span class="lineno">   91</span>        sink_filter_name = <span class="stringliteral">&quot;abuffersink&quot;</span>;</div>
-<div class="line"><span class="lineno">   92</span>        std::tie(src_args, filter_spec) = getAudioFilterSpec(dec_ctx, enc_ctx, in_time_base);</div>
-<div class="line"><span class="lineno">   93</span>    } <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno">   94</span>        throwError(<span class="stringliteral">&quot;unknown media type received in constructor&quot;</span>);</div>
-<div class="line"><span class="lineno">   95</span>    }</div>
-<div class="line"><span class="lineno">   96</span> </div>
-<div class="line"><span class="lineno">   97</span>    filter_graph_ = av::FilterGraphUPtr(avfilter_graph_alloc());</div>
-<div class="line"><span class="lineno">   98</span>    <span class="keywordflow">if</span> (!filter_graph_) throwError(<span class="stringliteral">&quot;failed to allocate filter graph&quot;</span>);</div>
-<div class="line"><span class="lineno">   99</span> </div>
-<div class="line"><span class="lineno">  100</span>    { <span class="comment">/* buffer src set-up*/</span></div>
-<div class="line"><span class="lineno">  101</span>        <span class="keyword">const</span> AVFilter *filter = avfilter_get_by_name(src_filter_name.c_str());</div>
-<div class="line"><span class="lineno">  102</span>        <span class="keywordflow">if</span> (!filter) throwError(<span class="stringliteral">&quot;failed to find src filter definition&quot;</span>);</div>
-<div class="line"><span class="lineno">  103</span>        <span class="keywordflow">if</span> (avfilter_graph_create_filter(&amp;buffersrc_ctx_, filter, <span class="stringliteral">&quot;in&quot;</span>, src_args.c_str(), <span class="keyword">nullptr</span>,</div>
-<div class="line"><span class="lineno">  104</span>                                         filter_graph_.get()) &lt; 0)</div>
-<div class="line"><span class="lineno">  105</span>            throwError(<span class="stringliteral">&quot;failed to create src filter&quot;</span>);</div>
-<div class="line"><span class="lineno">  106</span>    }</div>
-<div class="line"><span class="lineno">  107</span> </div>
-<div class="line"><span class="lineno">  108</span>    { <span class="comment">/* buffer sink set-up*/</span></div>
-<div class="line"><span class="lineno">  109</span>        <span class="keyword">const</span> AVFilter *filter = avfilter_get_by_name(sink_filter_name.c_str());</div>
-<div class="line"><span class="lineno">  110</span>        <span class="keywordflow">if</span> (!filter) throwError(<span class="stringliteral">&quot;failed to find sink filter definition&quot;</span>);</div>
-<div class="line"><span class="lineno">  111</span>        <span class="keywordflow">if</span> (avfilter_graph_create_filter(&amp;buffersink_ctx_, filter, <span class="stringliteral">&quot;out&quot;</span>, <span class="keyword">nullptr</span>, <span class="keyword">nullptr</span>, filter_graph_.get()) &lt; 0)</div>
-<div class="line"><span class="lineno">  112</span>            throwError(<span class="stringliteral">&quot;failed to create src filter&quot;</span>);</div>
-<div class="line"><span class="lineno">  113</span>    }</div>
-<div class="line"><span class="lineno">  114</span> </div>
-<div class="line"><span class="lineno">  115</span>    {</div>
-<div class="line"><span class="lineno">  116</span>        <span class="comment">/* Endpoints for the filter graph. */</span></div>
-<div class="line"><span class="lineno">  117</span>        av::FilterInOutUPtr outputs(avfilter_inout_alloc());</div>
-<div class="line"><span class="lineno">  118</span>        <span class="keywordflow">if</span> (!outputs) throwError(<span class="stringliteral">&quot;failed to allocate filter outputs&quot;</span>);</div>
-<div class="line"><span class="lineno">  119</span>        outputs-&gt;name = av_strdup(<span class="stringliteral">&quot;in&quot;</span>);</div>
-<div class="line"><span class="lineno">  120</span>        outputs-&gt;filter_ctx = buffersrc_ctx_;</div>
-<div class="line"><span class="lineno">  121</span>        outputs-&gt;pad_idx = 0;</div>
-<div class="line"><span class="lineno">  122</span>        outputs-&gt;next = <span class="keyword">nullptr</span>;</div>
-<div class="line"><span class="lineno">  123</span> </div>
-<div class="line"><span class="lineno">  124</span>        av::FilterInOutUPtr inputs(avfilter_inout_alloc());</div>
-<div class="line"><span class="lineno">  125</span>        <span class="keywordflow">if</span> (!inputs) throwError(<span class="stringliteral">&quot;failed to allocate filter inputs&quot;</span>);</div>
-<div class="line"><span class="lineno">  126</span>        inputs-&gt;name = av_strdup(<span class="stringliteral">&quot;out&quot;</span>);</div>
-<div class="line"><span class="lineno">  127</span>        inputs-&gt;filter_ctx = buffersink_ctx_;</div>
-<div class="line"><span class="lineno">  128</span>        inputs-&gt;pad_idx = 0;</div>
-<div class="line"><span class="lineno">  129</span>        inputs-&gt;next = <span class="keyword">nullptr</span>;</div>
-<div class="line"><span class="lineno">  130</span> </div>
-<div class="line"><span class="lineno">  131</span>        AVFilterInOut *outputs_raw = outputs.release();</div>
-<div class="line"><span class="lineno">  132</span>        AVFilterInOut *inputs_raw = inputs.release();</div>
-<div class="line"><span class="lineno">  133</span>        <span class="keywordtype">int</span> ret =</div>
-<div class="line"><span class="lineno">  134</span>            avfilter_graph_parse_ptr(filter_graph_.get(), filter_spec.c_str(), &amp;inputs_raw, &amp;outputs_raw, <span class="keyword">nullptr</span>);</div>
-<div class="line"><span class="lineno">  135</span>        outputs = av::FilterInOutUPtr(outputs_raw);</div>
-<div class="line"><span class="lineno">  136</span>        inputs = av::FilterInOutUPtr(inputs_raw);</div>
-<div class="line"><span class="lineno">  137</span>        <span class="keywordflow">if</span> (ret &lt; 0) throwError(<span class="stringliteral">&quot;failed to parse pointers&quot;</span>);</div>
-<div class="line"><span class="lineno">  138</span>    }</div>
-<div class="line"><span class="lineno">  139</span> </div>
-<div class="line"><span class="lineno">  140</span>    <span class="keywordflow">if</span> (avfilter_graph_config(filter_graph_.get(), <span class="keyword">nullptr</span>) &lt; 0) throwError(<span class="stringliteral">&quot;failed to configure the filter graph&quot;</span>);</div>
-<div class="line"><span class="lineno">  141</span>}</div>
+<p class="definition">Definition at line <a class="el" href="../../db/dc8/converter_8cpp_source.html#l00066">66</a> of file <a class="el" href="../../db/dc8/converter_8cpp_source.html">converter.cpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   67</span>                                                 {</div>
+<div class="line"><span class="lineno">   68</span>    <span class="keywordflow">if</span> (!dec_ctx) throwRuntimeError(<span class="stringliteral">&quot;dec_ctx is NULL&quot;</span>);</div>
+<div class="line"><span class="lineno">   69</span>    <span class="keywordflow">if</span> (!enc_ctx) throwRuntimeError(<span class="stringliteral">&quot;enc_ctx is NULL&quot;</span>);</div>
+<div class="line"><span class="lineno">   70</span> </div>
+<div class="line"><span class="lineno">   71</span>    std::string src_filter_name;</div>
+<div class="line"><span class="lineno">   72</span>    std::string sink_filter_name;</div>
+<div class="line"><span class="lineno">   73</span>    std::string src_args;</div>
+<div class="line"><span class="lineno">   74</span>    std::string filter_spec;</div>
+<div class="line"><span class="lineno">   75</span> </div>
+<div class="line"><span class="lineno">   76</span>    <span class="keywordflow">if</span> (dec_ctx-&gt;codec_type != enc_ctx-&gt;codec_type) {</div>
+<div class="line"><span class="lineno">   77</span>        throwRuntimeError(<span class="stringliteral">&quot;type mismatch between received decoder and encoder&quot;</span>);</div>
+<div class="line"><span class="lineno">   78</span>    } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (dec_ctx-&gt;codec_type == AVMEDIA_TYPE_VIDEO) {</div>
+<div class="line"><span class="lineno">   79</span>        src_filter_name = <span class="stringliteral">&quot;buffer&quot;</span>;</div>
+<div class="line"><span class="lineno">   80</span>        sink_filter_name = <span class="stringliteral">&quot;buffersink&quot;</span>;</div>
+<div class="line"><span class="lineno">   81</span>        std::tie(src_args, filter_spec) = getVideoFilterSpec(dec_ctx, enc_ctx, in_time_base, offset_x, offset_y);</div>
+<div class="line"><span class="lineno">   82</span>    } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (dec_ctx-&gt;codec_type == AVMEDIA_TYPE_AUDIO) {</div>
+<div class="line"><span class="lineno">   83</span>        <span class="keywordflow">if</span> (offset_x || offset_y) throwRuntimeError(<span class="stringliteral">&quot;video offset specified specified for audio converter constructor&quot;</span>);</div>
+<div class="line"><span class="lineno">   84</span>        src_filter_name = <span class="stringliteral">&quot;abuffer&quot;</span>;</div>
+<div class="line"><span class="lineno">   85</span>        sink_filter_name = <span class="stringliteral">&quot;abuffersink&quot;</span>;</div>
+<div class="line"><span class="lineno">   86</span>        std::tie(src_args, filter_spec) = getAudioFilterSpec(dec_ctx, enc_ctx, in_time_base);</div>
+<div class="line"><span class="lineno">   87</span>    } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">   88</span>        throwRuntimeError(<span class="stringliteral">&quot;unknown media type received in constructor&quot;</span>);</div>
+<div class="line"><span class="lineno">   89</span>    }</div>
+<div class="line"><span class="lineno">   90</span> </div>
+<div class="line"><span class="lineno">   91</span>    filter_graph_ = <a class="code hl_typedef" href="../../d8/d0d/namespaceav.html#aeda5767965662437c209ec63893a1fa6">av::FilterGraphUPtr</a>(avfilter_graph_alloc());</div>
+<div class="line"><span class="lineno">   92</span>    <span class="keywordflow">if</span> (!filter_graph_) throwRuntimeError(<span class="stringliteral">&quot;failed to allocate filter graph&quot;</span>);</div>
+<div class="line"><span class="lineno">   93</span> </div>
+<div class="line"><span class="lineno">   94</span>    { <span class="comment">/* buffer src set-up*/</span></div>
+<div class="line"><span class="lineno">   95</span>        <span class="keyword">const</span> AVFilter *filter = avfilter_get_by_name(src_filter_name.c_str());</div>
+<div class="line"><span class="lineno">   96</span>        <span class="keywordflow">if</span> (!filter) throwRuntimeError(<span class="stringliteral">&quot;failed to find src filter definition&quot;</span>);</div>
+<div class="line"><span class="lineno">   97</span>        <span class="keywordflow">if</span> (avfilter_graph_create_filter(&amp;buffersrc_ctx_, filter, <span class="stringliteral">&quot;in&quot;</span>, src_args.c_str(), <span class="keyword">nullptr</span>,</div>
+<div class="line"><span class="lineno">   98</span>                                         filter_graph_.get()) &lt; 0)</div>
+<div class="line"><span class="lineno">   99</span>            throwRuntimeError(<span class="stringliteral">&quot;failed to create src filter&quot;</span>);</div>
+<div class="line"><span class="lineno">  100</span>    }</div>
+<div class="line"><span class="lineno">  101</span> </div>
+<div class="line"><span class="lineno">  102</span>    { <span class="comment">/* buffer sink set-up*/</span></div>
+<div class="line"><span class="lineno">  103</span>        <span class="keyword">const</span> AVFilter *filter = avfilter_get_by_name(sink_filter_name.c_str());</div>
+<div class="line"><span class="lineno">  104</span>        <span class="keywordflow">if</span> (!filter) throwRuntimeError(<span class="stringliteral">&quot;failed to find sink filter definition&quot;</span>);</div>
+<div class="line"><span class="lineno">  105</span>        <span class="keywordflow">if</span> (avfilter_graph_create_filter(&amp;buffersink_ctx_, filter, <span class="stringliteral">&quot;out&quot;</span>, <span class="keyword">nullptr</span>, <span class="keyword">nullptr</span>, filter_graph_.get()) &lt; 0)</div>
+<div class="line"><span class="lineno">  106</span>            throwRuntimeError(<span class="stringliteral">&quot;failed to create src filter&quot;</span>);</div>
+<div class="line"><span class="lineno">  107</span>    }</div>
+<div class="line"><span class="lineno">  108</span> </div>
+<div class="line"><span class="lineno">  109</span>    {</div>
+<div class="line"><span class="lineno">  110</span>        <span class="comment">/* Endpoints for the filter graph. */</span></div>
+<div class="line"><span class="lineno">  111</span>        <a class="code hl_typedef" href="../../d8/d0d/namespaceav.html#a2081378bc912e5d177d0eac7120a056a">av::FilterInOutUPtr</a> outputs(avfilter_inout_alloc());</div>
+<div class="line"><span class="lineno">  112</span>        <span class="keywordflow">if</span> (!outputs) throwRuntimeError(<span class="stringliteral">&quot;failed to allocate filter outputs&quot;</span>);</div>
+<div class="line"><span class="lineno">  113</span>        outputs-&gt;name = av_strdup(<span class="stringliteral">&quot;in&quot;</span>);</div>
+<div class="line"><span class="lineno">  114</span>        outputs-&gt;filter_ctx = buffersrc_ctx_;</div>
+<div class="line"><span class="lineno">  115</span>        outputs-&gt;pad_idx = 0;</div>
+<div class="line"><span class="lineno">  116</span>        outputs-&gt;next = <span class="keyword">nullptr</span>;</div>
+<div class="line"><span class="lineno">  117</span> </div>
+<div class="line"><span class="lineno">  118</span>        <a class="code hl_typedef" href="../../d8/d0d/namespaceav.html#a2081378bc912e5d177d0eac7120a056a">av::FilterInOutUPtr</a> inputs(avfilter_inout_alloc());</div>
+<div class="line"><span class="lineno">  119</span>        <span class="keywordflow">if</span> (!inputs) throwRuntimeError(<span class="stringliteral">&quot;failed to allocate filter inputs&quot;</span>);</div>
+<div class="line"><span class="lineno">  120</span>        inputs-&gt;name = av_strdup(<span class="stringliteral">&quot;out&quot;</span>);</div>
+<div class="line"><span class="lineno">  121</span>        inputs-&gt;filter_ctx = buffersink_ctx_;</div>
+<div class="line"><span class="lineno">  122</span>        inputs-&gt;pad_idx = 0;</div>
+<div class="line"><span class="lineno">  123</span>        inputs-&gt;next = <span class="keyword">nullptr</span>;</div>
+<div class="line"><span class="lineno">  124</span> </div>
+<div class="line"><span class="lineno">  125</span>        AVFilterInOut *outputs_raw = outputs.release();</div>
+<div class="line"><span class="lineno">  126</span>        AVFilterInOut *inputs_raw = inputs.release();</div>
+<div class="line"><span class="lineno">  127</span>        <span class="keywordtype">int</span> ret =</div>
+<div class="line"><span class="lineno">  128</span>            avfilter_graph_parse_ptr(filter_graph_.get(), filter_spec.c_str(), &amp;inputs_raw, &amp;outputs_raw, <span class="keyword">nullptr</span>);</div>
+<div class="line"><span class="lineno">  129</span>        <span class="comment">// outputs = av::FilterInOutUPtr(outputs_raw); never used</span></div>
+<div class="line"><span class="lineno">  130</span>        <span class="comment">// inputs = av::FilterInOutUPtr(inputs_raw); never used</span></div>
+<div class="line"><span class="lineno">  131</span>        <span class="keywordflow">if</span> (ret &lt; 0) throwRuntimeError(<span class="stringliteral">&quot;failed to parse pointers&quot;</span>);</div>
+<div class="line"><span class="lineno">  132</span>    }</div>
+<div class="line"><span class="lineno">  133</span> </div>
+<div class="line"><span class="lineno">  134</span>    <span class="keywordflow">if</span> (avfilter_graph_config(filter_graph_.get(), <span class="keyword">nullptr</span>) &lt; 0)</div>
+<div class="line"><span class="lineno">  135</span>        throwRuntimeError(<span class="stringliteral">&quot;failed to configure the filter graph&quot;</span>);</div>
+<div class="line"><span class="lineno">  136</span>}</div>
+<div class="ttc" id="anamespaceav_html_a2081378bc912e5d177d0eac7120a056a"><div class="ttname"><a href="../../d8/d0d/namespaceav.html#a2081378bc912e5d177d0eac7120a056a">av::FilterInOutUPtr</a></div><div class="ttdeci">std::unique_ptr&lt; AVFilterInOut, DeleterPP&lt; avfilter_inout_free &gt; &gt; FilterInOutUPtr</div><div class="ttdef"><b>Definition:</b> <a href="../../dc/d54/common_8h_source.html#l00050">common.h:50</a></div></div>
+<div class="ttc" id="anamespaceav_html_aeda5767965662437c209ec63893a1fa6"><div class="ttname"><a href="../../d8/d0d/namespaceav.html#aeda5767965662437c209ec63893a1fa6">av::FilterGraphUPtr</a></div><div class="ttdeci">std::unique_ptr&lt; AVFilterGraph, DeleterPP&lt; avfilter_graph_free &gt; &gt; FilterGraphUPtr</div><div class="ttdef"><b>Definition:</b> <a href="../../dc/d54/common_8h_source.html#l00049">common.h:49</a></div></div>
 </div><!-- fragment -->
 </div>
 </div>
-<a id="a66439d4a10d51806625333315e5de116" name="a66439d4a10d51806625333315e5de116"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a66439d4a10d51806625333315e5de116">&#9670;&nbsp;</a></span>Converter() <span class="overload">[3/3]</span></h2>
+<a id="aa0ac7c1a1ee44b3ee2d6b51fa1e16308" name="aa0ac7c1a1ee44b3ee2d6b51fa1e16308"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa0ac7c1a1ee44b3ee2d6b51fa1e16308">&#9670;&nbsp;</a></span>Converter() <span class="overload">[3/4]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">Converter::Converter </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="../../d5/d17/classConverter.html">Converter</a> &amp;&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">delete</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ab89449987659b12ead316afba5301ff0" name="ab89449987659b12ead316afba5301ff0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab89449987659b12ead316afba5301ff0">&#9670;&nbsp;</a></span>Converter() <span class="overload">[4/4]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">Converter::Converter </td>
@@ -265,12 +300,43 @@ Friends</h2></td></tr>
           <td></td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../db/dc8/converter_8cpp_source.html#l00143">143</a> of file <a class="el" href="../../db/dc8/converter_8cpp_source.html">converter.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  143</span>: <a class="code hl_function" href="../../d5/d17/classConverter.html#aaa67c7d2770c60fc2fa85fccb6f8a1fc">Converter</a>() { swap(*<span class="keyword">this</span>, other); }</div>
+<p class="definition">Definition at line <a class="el" href="../../db/dc8/converter_8cpp_source.html#l00138">138</a> of file <a class="el" href="../../db/dc8/converter_8cpp_source.html">converter.cpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  138</span>: <a class="code hl_function" href="../../d5/d17/classConverter.html#aaa67c7d2770c60fc2fa85fccb6f8a1fc">Converter</a>() { <a class="code hl_friend" href="../../d5/d17/classConverter.html#a8baba4be80dc7f525946274eea7ad513">swap</a>(*<span class="keyword">this</span>, other); }</div>
+<div class="ttc" id="aclassConverter_html_a8baba4be80dc7f525946274eea7ad513"><div class="ttname"><a href="../../d5/d17/classConverter.html#a8baba4be80dc7f525946274eea7ad513">Converter::swap</a></div><div class="ttdeci">friend void swap(Converter &amp;lhs, Converter &amp;rhs)</div><div class="ttdef"><b>Definition:</b> <a href="../../db/dc8/converter_8cpp_source.html#l00007">converter.cpp:7</a></div></div>
 <div class="ttc" id="aclassConverter_html_aaa67c7d2770c60fc2fa85fccb6f8a1fc"><div class="ttname"><a href="../../d5/d17/classConverter.html#aaa67c7d2770c60fc2fa85fccb6f8a1fc">Converter::Converter</a></div><div class="ttdeci">Converter()=default</div></div>
 </div><!-- fragment -->
+</div>
+</div>
+<a id="a7f50175996e82142ac6cefa8469312dc" name="a7f50175996e82142ac6cefa8469312dc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7f50175996e82142ac6cefa8469312dc">&#9670;&nbsp;</a></span>~Converter()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">Converter::~Converter </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">default</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
@@ -281,7 +347,7 @@ Friends</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">av::FrameUPtr Converter::getFrame </td>
+          <td class="memname"><a class="el" href="../../d8/d0d/namespaceav.html#abcf8febb01b83a6bf7671fc1793f23f0">av::FrameUPtr</a> Converter::getFrame </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -290,21 +356,22 @@ Friends</h2></td></tr>
 </div><div class="memdoc">
 <p >Get a converted frame </p><dl class="section return"><dt>Returns</dt><dd>a new converted frame if it was possible to build it, nullptr otherwise </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="../../db/dc8/converter_8cpp_source.html#l00156">156</a> of file <a class="el" href="../../db/dc8/converter_8cpp_source.html">converter.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  156</span>                                {</div>
-<div class="line"><span class="lineno">  157</span>    <span class="keywordflow">if</span> (!buffersink_ctx_) throwError(<span class="stringliteral">&quot;buffersink is not allocated&quot;</span>);</div>
+<p class="definition">Definition at line <a class="el" href="../../db/dc8/converter_8cpp_source.html#l00151">151</a> of file <a class="el" href="../../db/dc8/converter_8cpp_source.html">converter.cpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  151</span>                                {</div>
+<div class="line"><span class="lineno">  152</span>    <span class="keywordflow">if</span> (!buffersink_ctx_) throwRuntimeError(<span class="stringliteral">&quot;buffersink is not allocated&quot;</span>);</div>
+<div class="line"><span class="lineno">  153</span> </div>
+<div class="line"><span class="lineno">  154</span>    <span class="keywordflow">if</span> (!frame_) {</div>
+<div class="line"><span class="lineno">  155</span>        frame_ = <a class="code hl_typedef" href="../../d8/d0d/namespaceav.html#abcf8febb01b83a6bf7671fc1793f23f0">av::FrameUPtr</a>(av_frame_alloc());</div>
+<div class="line"><span class="lineno">  156</span>        <span class="keywordflow">if</span> (!frame_) throwRuntimeError(<span class="stringliteral">&quot;failed to allocate frame&quot;</span>);</div>
+<div class="line"><span class="lineno">  157</span>    }</div>
 <div class="line"><span class="lineno">  158</span> </div>
-<div class="line"><span class="lineno">  159</span>    <span class="keywordflow">if</span> (!frame_) {</div>
-<div class="line"><span class="lineno">  160</span>        frame_ = av::FrameUPtr(av_frame_alloc());</div>
-<div class="line"><span class="lineno">  161</span>        <span class="keywordflow">if</span> (!frame_) throwError(<span class="stringliteral">&quot;failed to allocate frame&quot;</span>);</div>
-<div class="line"><span class="lineno">  162</span>    }</div>
-<div class="line"><span class="lineno">  163</span> </div>
-<div class="line"><span class="lineno">  164</span>    <span class="keywordtype">int</span> ret = av_buffersink_get_frame(buffersink_ctx_, frame_.get());</div>
-<div class="line"><span class="lineno">  165</span>    <span class="keywordflow">if</span> (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) <span class="keywordflow">return</span> <span class="keyword">nullptr</span>;</div>
-<div class="line"><span class="lineno">  166</span>    <span class="keywordflow">if</span> (ret &lt; 0) throwError(<span class="stringliteral">&quot;failed to receive frame from filter&quot;</span>);</div>
-<div class="line"><span class="lineno">  167</span> </div>
-<div class="line"><span class="lineno">  168</span>    <span class="keywordflow">return</span> std::move(frame_);</div>
-<div class="line"><span class="lineno">  169</span>}</div>
+<div class="line"><span class="lineno">  159</span>    <span class="keywordtype">int</span> ret = av_buffersink_get_frame(buffersink_ctx_, frame_.get());</div>
+<div class="line"><span class="lineno">  160</span>    <span class="keywordflow">if</span> (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) <span class="keywordflow">return</span> <span class="keyword">nullptr</span>;</div>
+<div class="line"><span class="lineno">  161</span>    <span class="keywordflow">if</span> (ret &lt; 0) throwRuntimeError(<span class="stringliteral">&quot;failed to receive frame from filter&quot;</span>);</div>
+<div class="line"><span class="lineno">  162</span> </div>
+<div class="line"><span class="lineno">  163</span>    <span class="keywordflow">return</span> std::move(frame_);</div>
+<div class="line"><span class="lineno">  164</span>}</div>
+<div class="ttc" id="anamespaceav_html_abcf8febb01b83a6bf7671fc1793f23f0"><div class="ttname"><a href="../../d8/d0d/namespaceav.html#abcf8febb01b83a6bf7671fc1793f23f0">av::FrameUPtr</a></div><div class="ttdeci">std::unique_ptr&lt; AVFrame, DeleterPP&lt; av_frame_free &gt; &gt; FrameUPtr</div><div class="ttdef"><b>Definition:</b> <a href="../../dc/d54/common_8h_source.html#l00045">common.h:45</a></div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -324,11 +391,11 @@ Friends</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../db/dc8/converter_8cpp_source.html#l00145">145</a> of file <a class="el" href="../../db/dc8/converter_8cpp_source.html">converter.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  145</span>                                               {</div>
-<div class="line"><span class="lineno">  146</span>    swap(*<span class="keyword">this</span>, other);</div>
-<div class="line"><span class="lineno">  147</span>    <span class="keywordflow">return</span> *<span class="keyword">this</span>;</div>
-<div class="line"><span class="lineno">  148</span>}</div>
+<p class="definition">Definition at line <a class="el" href="../../db/dc8/converter_8cpp_source.html#l00140">140</a> of file <a class="el" href="../../db/dc8/converter_8cpp_source.html">converter.cpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  140</span>                                               {</div>
+<div class="line"><span class="lineno">  141</span>    <a class="code hl_friend" href="../../d5/d17/classConverter.html#a8baba4be80dc7f525946274eea7ad513">swap</a>(*<span class="keyword">this</span>, other);</div>
+<div class="line"><span class="lineno">  142</span>    <span class="keywordflow">return</span> *<span class="keyword">this</span>;</div>
+<div class="line"><span class="lineno">  143</span>}</div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -341,7 +408,7 @@ Friends</h2></td></tr>
         <tr>
           <td class="memname">void Converter::sendFrame </td>
           <td>(</td>
-          <td class="paramtype">av::FrameUPtr&#160;</td>
+          <td class="paramtype"><a class="el" href="../../d8/d0d/namespaceav.html#abcf8febb01b83a6bf7671fc1793f23f0">av::FrameUPtr</a>&#160;</td>
           <td class="paramname"><em>frame</em></td><td>)</td>
           <td></td>
         </tr>
@@ -349,12 +416,12 @@ Friends</h2></td></tr>
 </div><div class="memdoc">
 <p >Send a frame to convert </p>
 
-<p class="definition">Definition at line <a class="el" href="../../db/dc8/converter_8cpp_source.html#l00150">150</a> of file <a class="el" href="../../db/dc8/converter_8cpp_source.html">converter.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  150</span>                                           {</div>
-<div class="line"><span class="lineno">  151</span>    <span class="keywordflow">if</span> (!buffersrc_ctx_) throwError(<span class="stringliteral">&quot;buffersrc is not allocated&quot;</span>);</div>
-<div class="line"><span class="lineno">  152</span>    <span class="keywordflow">if</span> (!frame) throwError(<span class="stringliteral">&quot;sent frame is not allocated&quot;</span>);</div>
-<div class="line"><span class="lineno">  153</span>    <span class="keywordflow">if</span> (av_buffersrc_add_frame(buffersrc_ctx_, frame.get())) throwError(<span class="stringliteral">&quot;failed to write frame to filter&quot;</span>);</div>
-<div class="line"><span class="lineno">  154</span>}</div>
+<p class="definition">Definition at line <a class="el" href="../../db/dc8/converter_8cpp_source.html#l00145">145</a> of file <a class="el" href="../../db/dc8/converter_8cpp_source.html">converter.cpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  145</span>                                           {</div>
+<div class="line"><span class="lineno">  146</span>    <span class="keywordflow">if</span> (!buffersrc_ctx_) throwRuntimeError(<span class="stringliteral">&quot;buffersrc is not allocated&quot;</span>);</div>
+<div class="line"><span class="lineno">  147</span>    <span class="keywordflow">if</span> (!frame) throwRuntimeError(<span class="stringliteral">&quot;sent frame is not allocated&quot;</span>);</div>
+<div class="line"><span class="lineno">  148</span>    <span class="keywordflow">if</span> (av_buffersrc_add_frame(buffersrc_ctx_, frame.get())) throwRuntimeError(<span class="stringliteral">&quot;failed to write frame to filter&quot;</span>);</div>
+<div class="line"><span class="lineno">  149</span>}</div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -395,11 +462,12 @@ Friends</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="../../db/dc8/converter_8cpp_source.html#l00007">7</a> of file <a class="el" href="../../db/dc8/converter_8cpp_source.html">converter.cpp</a>.</p>
 <div class="fragment"><div class="line"><span class="lineno">    7</span>                                          {</div>
-<div class="line"><span class="lineno">    8</span>    std::swap(lhs.filter_graph_, rhs.filter_graph_);</div>
-<div class="line"><span class="lineno">    9</span>    std::swap(lhs.buffersrc_ctx_, rhs.buffersrc_ctx_);</div>
-<div class="line"><span class="lineno">   10</span>    std::swap(lhs.buffersink_ctx_, rhs.buffersink_ctx_);</div>
-<div class="line"><span class="lineno">   11</span>    std::swap(lhs.frame_, rhs.frame_);</div>
+<div class="line"><span class="lineno">    8</span>    <a class="code hl_function" href="../../db/dc8/converter_8cpp.html#a8baba4be80dc7f525946274eea7ad513">std::swap</a>(lhs.filter_graph_, rhs.filter_graph_);</div>
+<div class="line"><span class="lineno">    9</span>    <a class="code hl_function" href="../../db/dc8/converter_8cpp.html#a8baba4be80dc7f525946274eea7ad513">std::swap</a>(lhs.buffersrc_ctx_, rhs.buffersrc_ctx_);</div>
+<div class="line"><span class="lineno">   10</span>    <a class="code hl_function" href="../../db/dc8/converter_8cpp.html#a8baba4be80dc7f525946274eea7ad513">std::swap</a>(lhs.buffersink_ctx_, rhs.buffersink_ctx_);</div>
+<div class="line"><span class="lineno">   11</span>    <a class="code hl_function" href="../../db/dc8/converter_8cpp.html#a8baba4be80dc7f525946274eea7ad513">std::swap</a>(lhs.frame_, rhs.frame_);</div>
 <div class="line"><span class="lineno">   12</span>}</div>
+<div class="ttc" id="aconverter_8cpp_html_a8baba4be80dc7f525946274eea7ad513"><div class="ttname"><a href="../../db/dc8/converter_8cpp.html#a8baba4be80dc7f525946274eea7ad513">swap</a></div><div class="ttdeci">void swap(Converter &amp;lhs, Converter &amp;rhs)</div><div class="ttdef"><b>Definition:</b> <a href="../../db/dc8/converter_8cpp_source.html#l00007">converter.cpp:7</a></div></div>
 </div><!-- fragment -->
 </div>
 </div>

@@ -1,219 +1,218 @@
 \hypertarget{pipeline_8cpp_source}{}\doxysection{pipeline.\+cpp}
 \label{pipeline_8cpp_source}\index{src/process/pipeline.cpp@{src/process/pipeline.cpp}}
-
+\mbox{\hyperlink{pipeline_8cpp}{Go to the documentation of this file.}}
 \begin{DoxyCode}{0}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00001}00001 \textcolor{preprocessor}{\#include "{}pipeline.h"{}}}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00001}00001 \textcolor{preprocessor}{\#include "{}\mbox{\hyperlink{pipeline_8h}{pipeline.h}}"{}}}
 \DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00002}00002 }
 \DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00003}00003 \textcolor{preprocessor}{\#include <iostream>}}
 \DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00004}00004 \textcolor{preprocessor}{\#include <map>}}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00005}00005 \textcolor{preprocessor}{\#include <sstream>}}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00006}00006 }
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00007}00007 \textcolor{preprocessor}{\#include "{}format/demuxer.h"{}}}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00008}00008 \textcolor{preprocessor}{\#include "{}format/muxer.h"{}}}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00009}00009 }
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00010}00010 \textcolor{keyword}{static} \textcolor{keywordtype}{void} throwError(\textcolor{keyword}{const} std::string \&msg) \{ \textcolor{keywordflow}{throw} std::runtime\_error(\textcolor{stringliteral}{"{}Pipeline: "{}} + msg); \}}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00005}00005 }
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00006}00006 \textcolor{preprocessor}{\#include "{}\mbox{\hyperlink{demuxer_8h}{format/demuxer.h}}"{}}}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00007}00007 \textcolor{preprocessor}{\#include "{}\mbox{\hyperlink{muxer_8h}{format/muxer.h}}"{}}}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00008}00008 }
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00009}00009 \textcolor{keyword}{static} \textcolor{keywordtype}{void} throwRuntimeError(\textcolor{keyword}{const} std::string \&msg) \{ \textcolor{keywordflow}{throw} std::runtime\_error(\textcolor{stringliteral}{"{}Pipeline: "{}} + msg); \}}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00010}00010 \textcolor{keyword}{static} \textcolor{keywordtype}{void} throwLogicError(\textcolor{keyword}{const} std::string \&msg) \{ \textcolor{keywordflow}{throw} std::logic\_error(\textcolor{stringliteral}{"{}Pipeline: "{}} + msg); \}}
 \DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00011}00011 }
 \DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00012}\mbox{\hyperlink{classPipeline_a882528d2d5712d429f33329dbf97b0dd}{00012}} \mbox{\hyperlink{classPipeline_a882528d2d5712d429f33329dbf97b0dd}{Pipeline::Pipeline}}(std::shared\_ptr<Muxer> muxer, \textcolor{keywordtype}{bool} async) : muxer\_(std::move(muxer)), async\_(async) \{}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00013}00013     \textcolor{keywordflow}{if} (!muxer\_) throwError(\textcolor{stringliteral}{"{}received Muxer is null"{}});}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00013}00013     \textcolor{keywordflow}{if} (!muxer\_) throwRuntimeError(\textcolor{stringliteral}{"{}received Muxer is null"{}});}
 \DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00014}00014     \textcolor{keywordflow}{if} (async\_) stopped\_ = \textcolor{keyword}{false};}
 \DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00015}00015 \}}
 \DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00016}00016 }
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00017}00017 Pipeline::\string~Pipeline() \{}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00017}\mbox{\hyperlink{classPipeline_a527044d53a20f851d0579fbf313a2dec}{00017}} \mbox{\hyperlink{classPipeline_a527044d53a20f851d0579fbf313a2dec}{Pipeline::\string~Pipeline}}() \{}
 \DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00018}00018     \textcolor{keywordflow}{if} (async\_) stopProcessors();}
 \DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00019}00019 \}}
 \DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00020}00020 }
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00021}00021 \textcolor{keywordtype}{void} Pipeline::startProcessor(av::MediaType type) \{}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00022}00022     \textcolor{keywordflow}{if} (!av::validMediaType(type)) throwError(\textcolor{stringliteral}{"{}failed to start processor (invalid media type received)"{}});}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00023}00023 }
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00024}00024     \textcolor{keywordflow}{if} (processors\_[type].joinable()) throwError(\textcolor{stringliteral}{"{}processor for specified type was already started"{}});}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00025}00025 }
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00026}00026     processors\_[type] = std::thread([\textcolor{keyword}{this}, type]() \{}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00027}00027         \textcolor{keywordflow}{try} \{}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00028}00028             \textcolor{keywordflow}{while} (\textcolor{keyword}{true}) \{}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00029}00029                 av::PacketUPtr packet;}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00030}00030                 \{}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00031}00031                     std::unique\_lock ul\{m\_\};}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00032}00032                     packets\_cv\_[type].wait(ul, [\textcolor{keyword}{this}, type]() \{ \textcolor{keywordflow}{return} (packets\_[type] || stopped\_); \});}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00033}00033                     \textcolor{keywordflow}{if} (!packets\_[type] \&\& stopped\_) \textcolor{keywordflow}{break};}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00034}00034                     packet = std::move(packets\_[type]);}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00035}00035                 \}}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00036}00036                 processPacket(packet.get(), type);}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00037}00037             \}}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00038}00038         \} \textcolor{keywordflow}{catch} (...) \{}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00039}00039             std::unique\_lock ul\{m\_\};}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00040}00040             e\_ptrs\_[type] = std::current\_exception();}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00041}00041         \}}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00042}00042     \});}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00043}00043 \}}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00044}00044 }
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00045}00045 \textcolor{keywordtype}{void} Pipeline::stopProcessors() \{}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00046}00046     \{}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00047}00047         std::unique\_lock<std::mutex> ul\{m\_\};}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00048}00048         stopped\_ = \textcolor{keyword}{true};}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00049}00049         \textcolor{keywordflow}{for} (\textcolor{keyword}{auto} \&cv : packets\_cv\_) cv.notify\_all();}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00050}00050     \}}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00051}00051     \textcolor{keywordflow}{for} (\textcolor{keyword}{auto} \&p : processors\_) \{}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00052}00052         \textcolor{keywordflow}{if} (p.joinable()) p.join();}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00053}00053     \}}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00054}00054 \}}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00055}00055 }
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00056}00056 \textcolor{keywordtype}{void} Pipeline::checkExceptions() \{}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00057}00057     \textcolor{keywordflow}{for} (\textcolor{keyword}{auto} \&e\_ptr : e\_ptrs\_) \{}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00058}00058         \textcolor{keywordflow}{if} (e\_ptr) std::rethrow\_exception(e\_ptr);}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00059}00059     \}}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00060}00060 \}}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00061}00061 }
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00062}\mbox{\hyperlink{classPipeline_abdb81129dd9b6fc8b6db16ecba3c0a98}{00062}} \textcolor{keywordtype}{void} \mbox{\hyperlink{classPipeline_abdb81129dd9b6fc8b6db16ecba3c0a98}{Pipeline::initVideo}}(\textcolor{keyword}{const} \mbox{\hyperlink{classDemuxer}{Demuxer}} \&demuxer, AVCodecID codec\_id, AVPixelFormat pix\_fmt,}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00063}00063                          \textcolor{keyword}{const} \mbox{\hyperlink{classVideoParameters}{VideoParameters}} \&video\_params) \{}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00064}00064     \textcolor{keyword}{const} \textcolor{keyword}{auto} type = av::MediaType::Video;}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00065}00065 }
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00066}00066     \textcolor{keywordflow}{if} (managed\_types\_[type]) throwError(\textcolor{stringliteral}{"{}video pipeline already inited"{}});}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00067}00067     managed\_types\_[type] = \textcolor{keyword}{true};}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00068}00068 }
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00069}00069     \textcolor{comment}{/* Init decoder */}}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00070}00070     decoders\_[type] = \mbox{\hyperlink{classDecoder}{Decoder}}(demuxer.\mbox{\hyperlink{classDemuxer_a21dcade74fec8cb4a30e312c79dd1274}{getStreamParams}}(type));}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00071}00071 }
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00072}00072     \textcolor{keyword}{auto} dec\_ctx = decoders\_[type].getContext();}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00073}00073     \textcolor{keyword}{auto} [width, height] = video\_params.getVideoSize();}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00074}00074     \textcolor{keyword}{auto} [offset\_x, offset\_y] = video\_params.getVideoOffset();}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00075}00075     \textcolor{keywordflow}{if} (!width) width = dec\_ctx-\/>width;}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00076}00076     \textcolor{keywordflow}{if} (!height) height = dec\_ctx-\/>height;}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00077}00077     \textcolor{keywordflow}{if} (offset\_x + width > dec\_ctx-\/>width) throwError(\textcolor{stringliteral}{"{}Output video width exceeds input one"{}});}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00078}00078     \textcolor{keywordflow}{if} (offset\_y + height > dec\_ctx-\/>height) throwError(\textcolor{stringliteral}{"{}Output video height exceeds input one"{}});}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00079}00079 }
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00080}00080     \textcolor{comment}{/* Init encoder */}}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00081}00081     std::map<std::string, std::string> enc\_options;}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00082}00082     \textcolor{comment}{/*}}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00083}00083 \textcolor{comment}{     * Possible presets from fastest (and worst quality) to slowest (and best quality):}}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00084}00084 \textcolor{comment}{     * ultrafast -\/> superfast -\/> veryfast -\/> faster -\/> fast -\/> medium}}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00085}00085 \textcolor{comment}{     */}}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00086}00086     enc\_options.insert(\{\textcolor{stringliteral}{"{}preset"{}}, \textcolor{stringliteral}{"{}ultrafast"{}}\});}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00087}00087     encoders\_[type] = \mbox{\hyperlink{classEncoder}{Encoder}}(codec\_id, width, height, pix\_fmt, demuxer.\mbox{\hyperlink{classDemuxer_a5465f2d641af3ddfb253ff2cbd87ba37}{getStreamTimeBase}}(type),}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00088}00088                               muxer\_-\/>getGlobalHeaderFlags(), enc\_options);}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00089}00089 }
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00090}00090     \textcolor{comment}{/* Init converter */}}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00091}00091     converters\_[type] = \mbox{\hyperlink{classConverter}{Converter}}(decoders\_[type].getContext(), encoders\_[type].getContext(),}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00092}00092                                   demuxer.\mbox{\hyperlink{classDemuxer_a5465f2d641af3ddfb253ff2cbd87ba37}{getStreamTimeBase}}(type), offset\_x, offset\_y);}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00093}00093 }
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00094}00094     muxer\_-\/>addStream(encoders\_[type].getContext());}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00095}00095 }
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00096}00096     \textcolor{keywordflow}{if} (async\_) startProcessor(type);}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00097}00097 \}}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00098}00098 }
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00099}\mbox{\hyperlink{classPipeline_a91369041b8817898d3d3752e497564f2}{00099}} \textcolor{keywordtype}{void} \mbox{\hyperlink{classPipeline_a91369041b8817898d3d3752e497564f2}{Pipeline::initAudio}}(\textcolor{keyword}{const} \mbox{\hyperlink{classDemuxer}{Demuxer}} \&demuxer, AVCodecID codec\_id) \{}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00100}00100     \textcolor{keyword}{const} \textcolor{keyword}{auto} type = av::MediaType::Audio;}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00101}00101 }
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00102}00102     \textcolor{keywordflow}{if} (managed\_types\_[type]) throwError(\textcolor{stringliteral}{"{}audio pipeline already inited"{}});}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00103}00103     managed\_types\_[type] = \textcolor{keyword}{true};}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00104}00104 }
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00105}00105     \textcolor{comment}{/* Init decoder */}}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00106}00106     decoders\_[type] = \mbox{\hyperlink{classDecoder}{Decoder}}(demuxer.\mbox{\hyperlink{classDemuxer_a21dcade74fec8cb4a30e312c79dd1274}{getStreamParams}}(type));}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00107}00107 }
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00108}00108     \textcolor{keyword}{auto} dec\_ctx = decoders\_[type].getContext();}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00109}00109     uint64\_t channel\_layout;}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00110}00110     \textcolor{keywordflow}{if} (dec\_ctx-\/>channel\_layout) \{}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00111}00111         channel\_layout = dec\_ctx-\/>channel\_layout;}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00112}00112     \} \textcolor{keywordflow}{else} \{}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00113}00113         channel\_layout = av\_get\_default\_channel\_layout(dec\_ctx-\/>channels);}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00114}00114     \}}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00115}00115 }
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00116}00116     \textcolor{comment}{/* Init encoder */}}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00117}00117     encoders\_[type] = \mbox{\hyperlink{classEncoder}{Encoder}}(codec\_id, dec\_ctx-\/>sample\_rate, channel\_layout, muxer\_-\/>getGlobalHeaderFlags(),}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00118}00118                               std::map<std::string, std::string>());}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00119}00119 }
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00120}00120     \textcolor{comment}{/* Init converter */}}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00121}00121     converters\_[type] =}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00122}00122         \mbox{\hyperlink{classConverter}{Converter}}(decoders\_[type].getContext(), encoders\_[type].getContext(), demuxer.\mbox{\hyperlink{classDemuxer_a5465f2d641af3ddfb253ff2cbd87ba37}{getStreamTimeBase}}(type));}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00123}00123 }
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00124}00124     muxer\_-\/>addStream(encoders\_[type].getContext());}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00125}00125 }
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00126}00126     \textcolor{keywordflow}{if} (async\_) startProcessor(type);}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00127}00127 \}}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00128}00128 }
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00129}00129 \textcolor{keywordtype}{void} Pipeline::processPacket(\textcolor{keyword}{const} AVPacket *packet, av::MediaType type) \{}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00130}00130     \textcolor{keywordflow}{if} (!av::validMediaType(type)) throwError(\textcolor{stringliteral}{"{}failed to process packet (media type is invalid)"{}});}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00131}00131 }
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00132}00132     \mbox{\hyperlink{classDecoder}{Decoder}} \&decoder = decoders\_[type];}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00133}00133     \mbox{\hyperlink{classConverter}{Converter}} \&converter = converters\_[type];}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00134}00134 }
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00135}00135     \textcolor{keywordtype}{bool} decoder\_received = \textcolor{keyword}{false};}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00136}00136     \textcolor{keywordflow}{while} (!decoder\_received) \{}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00137}00137         decoder\_received = decoder.\mbox{\hyperlink{classDecoder_ae029679b53626c60c68a4a21e876a8ed}{sendPacket}}(packet);}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00138}00138 }
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00139}00139         \textcolor{keywordflow}{while} (\textcolor{keyword}{true}) \{}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00140}00140             \textcolor{keyword}{auto} frame = decoder.\mbox{\hyperlink{classDecoder_a14d4f27737b208d96bdfcadf9f7068c4}{getFrame}}();}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00141}00141             \textcolor{keywordflow}{if} (!frame) \textcolor{keywordflow}{break};}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00142}00142             converter.\mbox{\hyperlink{classConverter_af0ecd7c664a249a7b7b8f9d600042964}{sendFrame}}(std::move(frame));}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00143}00143 }
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00144}00144             \textcolor{keywordflow}{while} (\textcolor{keyword}{true}) \{}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00145}00145                 \textcolor{keyword}{auto} converted\_frame = converter.\mbox{\hyperlink{classConverter_aea4bf5f51fc7fce7d1d5997406239cca}{getFrame}}();}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00146}00146                 \textcolor{keywordflow}{if} (!converted\_frame) \textcolor{keywordflow}{break};}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00147}00147                 processConvertedFrame(converted\_frame.get(), type);}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00148}00148             \}}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00149}00149         \}}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00150}00150     \}}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00151}00151 \}}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00152}00152 }
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00153}00153 \textcolor{keywordtype}{void} Pipeline::processConvertedFrame(\textcolor{keyword}{const} AVFrame *frame, av::MediaType type) \{}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00154}00154     \textcolor{keywordflow}{if} (!av::validMediaType(type)) throwError(\textcolor{stringliteral}{"{}failed to process frame (media type is invalid)"{}});}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00155}00155 }
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00156}00156     \mbox{\hyperlink{classEncoder}{Encoder}} \&encoder = encoders\_[type];}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00157}00157 }
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00158}00158     \textcolor{keywordtype}{bool} encoder\_received = \textcolor{keyword}{false};}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00159}00159     \textcolor{keywordflow}{while} (!encoder\_received) \{}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00160}00160         encoder\_received = encoder.\mbox{\hyperlink{classEncoder_ad2ebcbb8d7563591b970f5b36e66d219}{sendFrame}}(frame);}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00161}00161 }
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00162}00162         \textcolor{keywordflow}{while} (\textcolor{keyword}{true}) \{}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00163}00163             \textcolor{keyword}{auto} packet = encoder.\mbox{\hyperlink{classEncoder_ae2928eeba00c04d53bd5bdcccd372d31}{getPacket}}();}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00164}00164             \textcolor{keywordflow}{if} (!packet) \textcolor{keywordflow}{break};}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00165}00165             muxer\_-\/>writePacket(std::move(packet), type);}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00166}00166         \}}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00167}00167     \}}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00168}00168 \}}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00169}00169 }
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00170}\mbox{\hyperlink{classPipeline_ab28f046f571aad557913004be339748d}{00170}} \textcolor{keywordtype}{void} \mbox{\hyperlink{classPipeline_ab28f046f571aad557913004be339748d}{Pipeline::feed}}(av::PacketUPtr packet, av::MediaType packet\_type) \{}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00171}00171     \textcolor{keywordflow}{if} (!packet) throwError(\textcolor{stringliteral}{"{}received packet is null"{}});}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00172}00172     \textcolor{keywordflow}{if} (!av::validMediaType(packet\_type)) throwError(\textcolor{stringliteral}{"{}failed to take packet (media type is invalid)"{}});}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00173}00173     \textcolor{keywordflow}{if} (!managed\_types\_[packet\_type]) throwError(\textcolor{stringliteral}{"{}No pipeline corresponding to received packet type"{}});}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00174}00174 }
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00175}00175     \textcolor{keywordflow}{if} (async\_) \{}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00176}00176         std::unique\_lock ul\{m\_\};}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00177}00177         \textcolor{keywordflow}{if} (stopped\_) throwError(\textcolor{stringliteral}{"{}already stopped"{}});}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00178}00178         checkExceptions();}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00179}00179         \textcolor{keywordflow}{if} (!packets\_[packet\_type]) \{  \textcolor{comment}{// if previous packet has been fully processed}}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00180}00180             packets\_[packet\_type] = std::move(packet);}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00181}00181             packets\_cv\_[packet\_type].notify\_all();}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00182}00182         \}}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00183}00183     \} \textcolor{keywordflow}{else} \{}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00184}00184         processPacket(packet.get(), packet\_type);}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00185}00185     \}}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00186}00186 \}}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00187}00187 }
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00188}00188 \textcolor{keywordtype}{void} Pipeline::flushPipeline(av::MediaType type) \{}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00189}00189     processPacket(\textcolor{keyword}{nullptr}, type);}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00190}00190     processConvertedFrame(\textcolor{keyword}{nullptr}, type);}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00191}00191 \}}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00192}00192 }
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00193}\mbox{\hyperlink{classPipeline_ad0d10bdda090c0f7d8e0ce79653f9f23}{00193}} \textcolor{keywordtype}{void} \mbox{\hyperlink{classPipeline_ad0d10bdda090c0f7d8e0ce79653f9f23}{Pipeline::flush}}() \{}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00194}00194     \textcolor{keywordflow}{if} (async\_) \{}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00195}00195         \textcolor{comment}{/* stop all threads working on the pipelines */}}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00196}00196         stopProcessors();}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00197}00197         checkExceptions();}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00198}00198     \}}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00199}00199 }
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00200}00200     \textcolor{comment}{/* flush the pipelines */}}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00201}00201     \textcolor{keywordflow}{for} (\textcolor{keyword}{auto} type : av::validMediaTypes) \{}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00202}00202         \textcolor{keywordflow}{if} (managed\_types\_[type]) flushPipeline(type);}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00203}00203     \}}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00204}00204 \}}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00205}00205 }
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00206}\mbox{\hyperlink{classPipeline_a219c911a44e34564f4a0fbe28e049412}{00206}} \textcolor{keywordtype}{void} \mbox{\hyperlink{classPipeline_a219c911a44e34564f4a0fbe28e049412}{Pipeline::printInfo}}()\textcolor{keyword}{ const }\{}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00207}00207     \textcolor{keywordflow}{for} (\textcolor{keyword}{auto} type : av::validMediaTypes) \{}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00208}00208         \textcolor{keywordflow}{if} (managed\_types\_[type]) \{}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00209}00209             std::cout << \textcolor{stringliteral}{"{}Decoder "{}} << type << \textcolor{stringliteral}{"{}: "{}} << decoders\_[type].getName() << std::endl;}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00210}00210             std::cout << \textcolor{stringliteral}{"{}Encoder "{}} << type << \textcolor{stringliteral}{"{}: "{}} << encoders\_[type].getName() << std::endl;}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00211}00211         \}}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00212}00212     \}}
-\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00213}00213 \}}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00021}00021 \textcolor{keywordtype}{void} Pipeline::startProcessor(\mbox{\hyperlink{namespaceav_ae2953b761e9eb4d9a8be80a224fd26bb}{av::MediaType}} type) \{}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00022}00022     \textcolor{keywordflow}{if} (!\mbox{\hyperlink{namespaceav_a231ef2ae2e10e69b5a79a64ac5453ed8}{av::validMediaType}}(type)) throwLogicError(\textcolor{stringliteral}{"{}failed to start processor (invalid media type received)"{}});}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00023}00023     \textcolor{keywordflow}{if} (processors\_[type].joinable()) throwLogicError(\textcolor{stringliteral}{"{}processor for specified type was already started"{}});}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00024}00024 }
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00025}00025     processors\_[type] = std::thread([\textcolor{keyword}{this}, type]() \{}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00026}00026         \textcolor{keywordflow}{try} \{}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00027}00027             \textcolor{keywordflow}{while} (\textcolor{keyword}{true}) \{}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00028}00028                 \mbox{\hyperlink{namespaceav_a84641b7a446e1183f8722c998db8be0c}{av::PacketUPtr}} packet;}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00029}00029                 \{}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00030}00030                     std::unique\_lock ul\{m\_\};}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00031}00031                     packets\_cv\_[type].wait(ul, [\textcolor{keyword}{this}, type]() \{ \textcolor{keywordflow}{return} (packets\_[type] || stopped\_); \});}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00032}00032                     \textcolor{keywordflow}{if} (!packets\_[type] \&\& stopped\_) \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00033}00033                     packet = std::move(packets\_[type]);}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00034}00034                 \}}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00035}00035                 processPacket(packet.get(), type);}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00036}00036             \}}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00037}00037         \} \textcolor{keywordflow}{catch} (...) \{}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00038}00038             std::unique\_lock ul\{m\_\};}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00039}00039             e\_ptrs\_[type] = std::current\_exception();}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00040}00040         \}}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00041}00041     \});}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00042}00042 \}}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00043}00043 }
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00044}00044 \textcolor{keywordtype}{void} Pipeline::stopProcessors() \{}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00045}00045     \{}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00046}00046         std::unique\_lock<std::mutex> ul\{m\_\};}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00047}00047         stopped\_ = \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00048}00048         \textcolor{keywordflow}{for} (\textcolor{keyword}{auto} \&cv : packets\_cv\_) cv.notify\_all();}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00049}00049     \}}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00050}00050     \textcolor{keywordflow}{for} (\textcolor{keyword}{auto} \&p : processors\_) \{}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00051}00051         \textcolor{keywordflow}{if} (p.joinable()) p.join();}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00052}00052     \}}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00053}00053 \}}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00054}00054 }
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00055}00055 \textcolor{keywordtype}{void} Pipeline::checkExceptions() \{}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00056}00056     \textcolor{keywordflow}{for} (\textcolor{keyword}{auto} \&e\_ptr : e\_ptrs\_) \{}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00057}00057         \textcolor{keywordflow}{if} (e\_ptr) std::rethrow\_exception(e\_ptr);}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00058}00058     \}}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00059}00059 \}}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00060}00060 }
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00061}\mbox{\hyperlink{classPipeline_abdb81129dd9b6fc8b6db16ecba3c0a98}{00061}} \textcolor{keywordtype}{void} \mbox{\hyperlink{classPipeline_abdb81129dd9b6fc8b6db16ecba3c0a98}{Pipeline::initVideo}}(\textcolor{keyword}{const} \mbox{\hyperlink{classDemuxer}{Demuxer}} \&demuxer, AVCodecID codec\_id, AVPixelFormat pix\_fmt,}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00062}00062                          \textcolor{keyword}{const} \mbox{\hyperlink{classVideoParameters}{VideoParameters}} \&video\_params) \{}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00063}00063     \textcolor{keyword}{const} \textcolor{keyword}{auto} type = \mbox{\hyperlink{namespaceav_ae2953b761e9eb4d9a8be80a224fd26bba6ec05a98ec3161d8877fadd84fdec43d}{av::MediaType::Video}};}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00064}00064 }
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00065}00065     \textcolor{keywordflow}{if} (managed\_types\_[type]) throwRuntimeError(\textcolor{stringliteral}{"{}video pipeline already initialized"{}});}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00066}00066     managed\_types\_[type] = \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00067}00067 }
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00068}00068     \textcolor{comment}{/* Init decoder */}}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00069}00069     decoders\_[type] = \mbox{\hyperlink{classDecoder}{Decoder}}(demuxer.\mbox{\hyperlink{classDemuxer_a21dcade74fec8cb4a30e312c79dd1274}{getStreamParams}}(type));}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00070}00070 }
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00071}00071     \textcolor{keyword}{auto} dec\_ctx = decoders\_[type].getContext();}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00072}00072     \textcolor{keyword}{auto} [width, height] = video\_params.\mbox{\hyperlink{classVideoParameters_afaf0987244f9961fd6cbb5468ac16c18}{getVideoSize}}();}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00073}00073     \textcolor{keyword}{auto} [offset\_x, offset\_y] = video\_params.\mbox{\hyperlink{classVideoParameters_a4338d07a117bcbea757824253fd55ee0}{getVideoOffset}}();}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00074}00074     \textcolor{keywordflow}{if} (!width) width = dec\_ctx-\/>width;}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00075}00075     \textcolor{keywordflow}{if} (!height) height = dec\_ctx-\/>height;}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00076}00076     \textcolor{keywordflow}{if} (offset\_x + width > dec\_ctx-\/>width) throwRuntimeError(\textcolor{stringliteral}{"{}Output video width exceeds input one"{}});}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00077}00077     \textcolor{keywordflow}{if} (offset\_y + height > dec\_ctx-\/>height) throwRuntimeError(\textcolor{stringliteral}{"{}Output video height exceeds input one"{}});}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00078}00078 }
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00079}00079     \textcolor{comment}{/* Init encoder */}}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00080}00080     std::map<std::string, std::string> enc\_options;}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00081}00081     \textcolor{comment}{/*}}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00082}00082 \textcolor{comment}{     * Possible presets from fastest (and worst quality) to slowest (and best quality):}}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00083}00083 \textcolor{comment}{     * ultrafast -\/> superfast -\/> veryfast -\/> faster -\/> fast -\/> medium}}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00084}00084 \textcolor{comment}{     */}}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00085}00085     enc\_options.insert(\{\textcolor{stringliteral}{"{}preset"{}}, \textcolor{stringliteral}{"{}ultrafast"{}}\});}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00086}00086     encoders\_[type] = \mbox{\hyperlink{classEncoder}{Encoder}}(codec\_id, width, height, pix\_fmt, demuxer.\mbox{\hyperlink{classDemuxer_a5465f2d641af3ddfb253ff2cbd87ba37}{getStreamTimeBase}}(type),}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00087}00087                               muxer\_-\/>getGlobalHeaderFlags(), enc\_options);}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00088}00088 }
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00089}00089     \textcolor{comment}{/* Init converter */}}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00090}00090     converters\_[type] = \mbox{\hyperlink{classConverter}{Converter}}(decoders\_[type].getContext(), encoders\_[type].getContext(),}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00091}00091                                   demuxer.\mbox{\hyperlink{classDemuxer_a5465f2d641af3ddfb253ff2cbd87ba37}{getStreamTimeBase}}(type), offset\_x, offset\_y);}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00092}00092 }
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00093}00093     muxer\_-\/>addStream(encoders\_[type].getContext());}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00094}00094 }
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00095}00095     \textcolor{keywordflow}{if} (async\_) startProcessor(type);}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00096}00096 \}}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00097}00097 }
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00098}\mbox{\hyperlink{classPipeline_a91369041b8817898d3d3752e497564f2}{00098}} \textcolor{keywordtype}{void} \mbox{\hyperlink{classPipeline_a91369041b8817898d3d3752e497564f2}{Pipeline::initAudio}}(\textcolor{keyword}{const} \mbox{\hyperlink{classDemuxer}{Demuxer}} \&demuxer, AVCodecID codec\_id) \{}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00099}00099     \textcolor{keyword}{const} \textcolor{keyword}{auto} type = \mbox{\hyperlink{namespaceav_ae2953b761e9eb4d9a8be80a224fd26bba99b90951926ac80c982650c5e579f93b}{av::MediaType::Audio}};}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00100}00100 }
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00101}00101     \textcolor{keywordflow}{if} (managed\_types\_[type]) throwRuntimeError(\textcolor{stringliteral}{"{}audio pipeline already initialized"{}});}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00102}00102     managed\_types\_[type] = \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00103}00103 }
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00104}00104     \textcolor{comment}{/* Init decoder */}}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00105}00105     decoders\_[type] = \mbox{\hyperlink{classDecoder}{Decoder}}(demuxer.\mbox{\hyperlink{classDemuxer_a21dcade74fec8cb4a30e312c79dd1274}{getStreamParams}}(type));}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00106}00106 }
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00107}00107     \textcolor{keyword}{auto} dec\_ctx = decoders\_[type].getContext();}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00108}00108     uint64\_t channel\_layout;}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00109}00109     \textcolor{keywordflow}{if} (dec\_ctx-\/>channel\_layout) \{}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00110}00110         channel\_layout = dec\_ctx-\/>channel\_layout;}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00111}00111     \} \textcolor{keywordflow}{else} \{}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00112}00112         channel\_layout = av\_get\_default\_channel\_layout(dec\_ctx-\/>channels);}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00113}00113     \}}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00114}00114 }
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00115}00115     \textcolor{comment}{/* Init encoder */}}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00116}00116     encoders\_[type] = \mbox{\hyperlink{classEncoder}{Encoder}}(codec\_id, dec\_ctx-\/>sample\_rate, channel\_layout, muxer\_-\/>getGlobalHeaderFlags(),}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00117}00117                               std::map<std::string, std::string>());}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00118}00118 }
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00119}00119     \textcolor{comment}{/* Init converter */}}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00120}00120     converters\_[type] =}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00121}00121         \mbox{\hyperlink{classConverter}{Converter}}(decoders\_[type].getContext(), encoders\_[type].getContext(), demuxer.\mbox{\hyperlink{classDemuxer_a5465f2d641af3ddfb253ff2cbd87ba37}{getStreamTimeBase}}(type));}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00122}00122 }
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00123}00123     muxer\_-\/>addStream(encoders\_[type].getContext());}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00124}00124 }
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00125}00125     \textcolor{keywordflow}{if} (async\_) startProcessor(type);}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00126}00126 \}}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00127}00127 }
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00128}00128 \textcolor{keywordtype}{void} Pipeline::processPacket(\textcolor{keyword}{const} AVPacket *packet, \mbox{\hyperlink{namespaceav_ae2953b761e9eb4d9a8be80a224fd26bb}{av::MediaType}} type) \{}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00129}00129     \textcolor{keywordflow}{if} (!\mbox{\hyperlink{namespaceav_a231ef2ae2e10e69b5a79a64ac5453ed8}{av::validMediaType}}(type)) throwLogicError(\textcolor{stringliteral}{"{}failed to process packet (media type is invalid)"{}});}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00130}00130 }
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00131}00131     \mbox{\hyperlink{classDecoder}{Decoder}} \&decoder = decoders\_[type];}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00132}00132     \mbox{\hyperlink{classConverter}{Converter}} \&converter = converters\_[type];}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00133}00133 }
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00134}00134     \textcolor{keywordtype}{bool} decoder\_received = \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00135}00135     \textcolor{keywordflow}{while} (!decoder\_received) \{}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00136}00136         decoder\_received = decoder.\mbox{\hyperlink{classDecoder_ae029679b53626c60c68a4a21e876a8ed}{sendPacket}}(packet);}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00137}00137 }
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00138}00138         \textcolor{keywordflow}{while} (\textcolor{keyword}{true}) \{}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00139}00139             \textcolor{keyword}{auto} frame = decoder.\mbox{\hyperlink{classDecoder_a14d4f27737b208d96bdfcadf9f7068c4}{getFrame}}();}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00140}00140             \textcolor{keywordflow}{if} (!frame) \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00141}00141             converter.\mbox{\hyperlink{classConverter_af0ecd7c664a249a7b7b8f9d600042964}{sendFrame}}(std::move(frame));}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00142}00142 }
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00143}00143             \textcolor{keywordflow}{while} (\textcolor{keyword}{true}) \{}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00144}00144                 \textcolor{keyword}{auto} converted\_frame = converter.\mbox{\hyperlink{classConverter_aea4bf5f51fc7fce7d1d5997406239cca}{getFrame}}();}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00145}00145                 \textcolor{keywordflow}{if} (!converted\_frame) \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00146}00146                 processConvertedFrame(converted\_frame.get(), type);}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00147}00147             \}}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00148}00148         \}}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00149}00149     \}}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00150}00150 \}}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00151}00151 }
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00152}00152 \textcolor{keywordtype}{void} Pipeline::processConvertedFrame(\textcolor{keyword}{const} AVFrame *frame, \mbox{\hyperlink{namespaceav_ae2953b761e9eb4d9a8be80a224fd26bb}{av::MediaType}} type) \{}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00153}00153     \textcolor{keywordflow}{if} (!\mbox{\hyperlink{namespaceav_a231ef2ae2e10e69b5a79a64ac5453ed8}{av::validMediaType}}(type)) throwLogicError(\textcolor{stringliteral}{"{}failed to process frame (media type is invalid)"{}});}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00154}00154 }
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00155}00155     \mbox{\hyperlink{classEncoder}{Encoder}} \&encoder = encoders\_[type];}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00156}00156 }
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00157}00157     \textcolor{keywordtype}{bool} encoder\_received = \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00158}00158     \textcolor{keywordflow}{while} (!encoder\_received) \{}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00159}00159         encoder\_received = encoder.\mbox{\hyperlink{classEncoder_ad2ebcbb8d7563591b970f5b36e66d219}{sendFrame}}(frame);}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00160}00160 }
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00161}00161         \textcolor{keywordflow}{while} (\textcolor{keyword}{true}) \{}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00162}00162             \textcolor{keyword}{auto} packet = encoder.\mbox{\hyperlink{classEncoder_ae2928eeba00c04d53bd5bdcccd372d31}{getPacket}}();}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00163}00163             \textcolor{keywordflow}{if} (!packet) \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00164}00164             muxer\_-\/>writePacket(std::move(packet), type);}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00165}00165         \}}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00166}00166     \}}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00167}00167 \}}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00168}00168 }
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00169}\mbox{\hyperlink{classPipeline_ab28f046f571aad557913004be339748d}{00169}} \textcolor{keywordtype}{void} \mbox{\hyperlink{classPipeline_ab28f046f571aad557913004be339748d}{Pipeline::feed}}(\mbox{\hyperlink{namespaceav_a84641b7a446e1183f8722c998db8be0c}{av::PacketUPtr}} packet, \mbox{\hyperlink{namespaceav_ae2953b761e9eb4d9a8be80a224fd26bb}{av::MediaType}} packet\_type) \{}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00170}00170     \textcolor{keywordflow}{if} (!packet) throwRuntimeError(\textcolor{stringliteral}{"{}received packet is null"{}});}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00171}00171     \textcolor{keywordflow}{if} (!\mbox{\hyperlink{namespaceav_a231ef2ae2e10e69b5a79a64ac5453ed8}{av::validMediaType}}(packet\_type)) throwRuntimeError(\textcolor{stringliteral}{"{}failed to take packet (media type is invalid)"{}});}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00172}00172     \textcolor{keywordflow}{if} (!managed\_types\_[packet\_type]) throwRuntimeError(\textcolor{stringliteral}{"{}No pipeline corresponding to received packet type"{}});}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00173}00173 }
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00174}00174     \textcolor{keywordflow}{if} (async\_) \{}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00175}00175         std::unique\_lock ul\{m\_\};}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00176}00176         \textcolor{keywordflow}{if} (stopped\_) throwRuntimeError(\textcolor{stringliteral}{"{}already stopped"{}});}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00177}00177         checkExceptions();}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00178}00178         \textcolor{keywordflow}{if} (!packets\_[packet\_type]) \{  \textcolor{comment}{// if previous packet has been fully processed}}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00179}00179             packets\_[packet\_type] = std::move(packet);}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00180}00180             packets\_cv\_[packet\_type].notify\_all();}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00181}00181         \}}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00182}00182     \} \textcolor{keywordflow}{else} \{}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00183}00183         processPacket(packet.get(), packet\_type);}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00184}00184     \}}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00185}00185 \}}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00186}00186 }
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00187}00187 \textcolor{keywordtype}{void} Pipeline::flushPipeline(\mbox{\hyperlink{namespaceav_ae2953b761e9eb4d9a8be80a224fd26bb}{av::MediaType}} type) \{}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00188}00188     processPacket(\textcolor{keyword}{nullptr}, type);}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00189}00189     processConvertedFrame(\textcolor{keyword}{nullptr}, type);}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00190}00190 \}}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00191}00191 }
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00192}\mbox{\hyperlink{classPipeline_ad0d10bdda090c0f7d8e0ce79653f9f23}{00192}} \textcolor{keywordtype}{void} \mbox{\hyperlink{classPipeline_ad0d10bdda090c0f7d8e0ce79653f9f23}{Pipeline::flush}}() \{}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00193}00193     \textcolor{keywordflow}{if} (async\_) \{}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00194}00194         \textcolor{comment}{/* stop all threads working on the pipelines */}}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00195}00195         stopProcessors();}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00196}00196         checkExceptions();}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00197}00197     \}}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00198}00198 }
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00199}00199     \textcolor{comment}{/* flush the pipelines */}}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00200}00200     \textcolor{keywordflow}{for} (\textcolor{keyword}{auto} type : \mbox{\hyperlink{namespaceav_a8c2d213cd1b3461b2ae369f83d00c1c5}{av::validMediaTypes}}) \{}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00201}00201         \textcolor{keywordflow}{if} (managed\_types\_[type]) flushPipeline(type);}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00202}00202     \}}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00203}00203 \}}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00204}00204 }
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00205}\mbox{\hyperlink{classPipeline_a219c911a44e34564f4a0fbe28e049412}{00205}} \textcolor{keywordtype}{void} \mbox{\hyperlink{classPipeline_a219c911a44e34564f4a0fbe28e049412}{Pipeline::printInfo}}()\textcolor{keyword}{ const }\{}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00206}00206     \textcolor{keywordflow}{for} (\textcolor{keyword}{auto} type : \mbox{\hyperlink{namespaceav_a8c2d213cd1b3461b2ae369f83d00c1c5}{av::validMediaTypes}}) \{}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00207}00207         \textcolor{keywordflow}{if} (managed\_types\_[type]) \{}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00208}00208             std::cout << \textcolor{stringliteral}{"{}Decoder "{}} << type << \textcolor{stringliteral}{"{}: "{}} << decoders\_[type].getName() << std::endl;}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00209}00209             std::cout << \textcolor{stringliteral}{"{}Encoder "{}} << type << \textcolor{stringliteral}{"{}: "{}} << encoders\_[type].getName() << std::endl;}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00210}00210         \}}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00211}00211     \}}
+\DoxyCodeLine{\Hypertarget{pipeline_8cpp_source_l00212}00212 \}}
 
 \end{DoxyCode}

@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.9.4"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>screen-recorder: src/common/deleter.h Source File</title>
+<title>libcapture: src/common/deleter.h Source File</title>
 <link href="../../tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="../../jquery.js"></script>
 <script type="text/javascript" src="../../dynsections.js"></script>
@@ -21,9 +21,9 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">screen-recorder<span id="projectnumber">&#160;0.1</span>
+   <div id="projectname">libcapture<span id="projectnumber">&#160;0.1</span>
    </div>
-   <div id="projectbrief">screen-recorder is a multiplatform C++ library that allows to capture your screen and optionally microphone audio, build with FFmpeg</div>
+   <div id="projectbrief">libcapture is a multiplatform c++ library that allows to capture the display and the microphone audio.</div>
   </td>
  </tr>
  </tbody>
@@ -70,12 +70,12 @@ $(function() {
   <div class="headertitle"><div class="title">deleter.h</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="preprocessor">#pragma once</span></div>
+<a href="../../dd/def/deleter_8h.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="preprocessor">#pragma once</span></div>
 <div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span> </div>
 <div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="keyword">template</span> &lt;auto deleter&gt;</div>
 <div class="line"><a id="l00009" name="l00009"></a><span class="lineno"><a class="line" href="../../d4/d47/structDeleterP.html">    9</a></span><span class="keyword">struct </span><a class="code hl_struct" href="../../d4/d47/structDeleterP.html">DeleterP</a> {</div>
 <div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span>    <span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
-<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span>    <span class="keywordtype">void</span> operator()(T* t)<span class="keyword"> const </span>{</div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno"><a class="line" href="../../d4/d47/structDeleterP.html#a3db8255a00207a4e32e65b1f94f5242d">   11</a></span>    <span class="keywordtype">void</span> <a class="code hl_function" href="../../d4/d47/structDeleterP.html#a3db8255a00207a4e32e65b1f94f5242d">operator()</a>(T* t)<span class="keyword"> const </span>{</div>
 <div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span>        <span class="keywordflow">if</span> (t) deleter(t);</div>
 <div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span>    }</div>
 <div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span>};</div>
@@ -83,13 +83,15 @@ $(function() {
 <div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="keyword">template</span> &lt;auto deleter&gt;</div>
 <div class="line"><a id="l00022" name="l00022"></a><span class="lineno"><a class="line" href="../../d9/d90/structDeleterPP.html">   22</a></span><span class="keyword">struct </span><a class="code hl_struct" href="../../d9/d90/structDeleterPP.html">DeleterPP</a> {</div>
 <div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span>    <span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span>    <span class="keywordtype">void</span> operator()(T* t)<span class="keyword"> const </span>{</div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno"><a class="line" href="../../d9/d90/structDeleterPP.html#aaf43e8f4c97fb5c6870e184dfeee64ce">   24</a></span>    <span class="keywordtype">void</span> <a class="code hl_function" href="../../d9/d90/structDeleterPP.html#aaf43e8f4c97fb5c6870e184dfeee64ce">operator()</a>(T* t)<span class="keyword"> const </span>{</div>
 <div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span>        <span class="keywordflow">if</span> (t) deleter(&amp;t);</div>
 <div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>    }</div>
 <div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span>};</div>
 <div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span> </div>
 <div class="ttc" id="astructDeleterPP_html"><div class="ttname"><a href="../../d9/d90/structDeleterPP.html">DeleterPP</a></div><div class="ttdef"><b>Definition:</b> <a href="../../dd/def/deleter_8h_source.html#l00022">deleter.h:22</a></div></div>
+<div class="ttc" id="astructDeleterPP_html_aaf43e8f4c97fb5c6870e184dfeee64ce"><div class="ttname"><a href="../../d9/d90/structDeleterPP.html#aaf43e8f4c97fb5c6870e184dfeee64ce">DeleterPP::operator()</a></div><div class="ttdeci">void operator()(T *t) const</div><div class="ttdef"><b>Definition:</b> <a href="../../dd/def/deleter_8h_source.html#l00024">deleter.h:24</a></div></div>
 <div class="ttc" id="astructDeleterP_html"><div class="ttname"><a href="../../d4/d47/structDeleterP.html">DeleterP</a></div><div class="ttdef"><b>Definition:</b> <a href="../../dd/def/deleter_8h_source.html#l00009">deleter.h:9</a></div></div>
+<div class="ttc" id="astructDeleterP_html_a3db8255a00207a4e32e65b1f94f5242d"><div class="ttname"><a href="../../d4/d47/structDeleterP.html#a3db8255a00207a4e32e65b1f94f5242d">DeleterP::operator()</a></div><div class="ttdeci">void operator()(T *t) const</div><div class="ttdef"><b>Definition:</b> <a href="../../dd/def/deleter_8h_source.html#l00011">deleter.h:11</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>

@@ -1,0 +1,293 @@
+\hypertarget{recorder_8cpp}{}\doxysection{example/recorder.cpp File Reference}
+\label{recorder_8cpp}\index{example/recorder.cpp@{example/recorder.cpp}}
+{\ttfamily \#include $<$libcapture/capturer.\+h$>$}\newline
+{\ttfamily \#include $<$libcapture/video\+\_\+parameters.\+h$>$}\newline
+{\ttfamily \#include $<$filesystem$>$}\newline
+{\ttfamily \#include $<$iostream$>$}\newline
+{\ttfamily \#include $<$stdexcept$>$}\newline
+{\ttfamily \#include $<$string$>$}\newline
+{\ttfamily \#include $<$vector$>$}\newline
+\doxysubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define \mbox{\hyperlink{recorder_8cpp_a12569a389d8e9997d7bb50fbca8324cc}{DEFAULT\+\_\+\+DEVICES}}~0
+\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classVideoParameters}{Video\+Parameters}} \mbox{\hyperlink{recorder_8cpp_a7f4da7290495fa1362e33030d49afbf1}{parse\+Video\+Size}} (const std\+::string \&str)
+\item 
+std\+::tuple$<$ std\+::string, std\+::string, \mbox{\hyperlink{classVideoParameters}{Video\+Parameters}}, std\+::string, bool $>$ \mbox{\hyperlink{recorder_8cpp_af74b02eb4b3c3c32a7af81591b7f3d71}{parse\+Args}} (std\+::vector$<$ std\+::string $>$ args)
+\item 
+int \mbox{\hyperlink{recorder_8cpp_a3c04138a5bfe5d72780bb7e82a18e627}{main}} (int argc, char $\ast$$\ast$argv)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Macro Definition Documentation}
+\mbox{\Hypertarget{recorder_8cpp_a12569a389d8e9997d7bb50fbca8324cc}\label{recorder_8cpp_a12569a389d8e9997d7bb50fbca8324cc}} 
+\index{recorder.cpp@{recorder.cpp}!DEFAULT\_DEVICES@{DEFAULT\_DEVICES}}
+\index{DEFAULT\_DEVICES@{DEFAULT\_DEVICES}!recorder.cpp@{recorder.cpp}}
+\doxysubsubsection{\texorpdfstring{DEFAULT\_DEVICES}{DEFAULT\_DEVICES}}
+{\footnotesize\ttfamily \#define DEFAULT\+\_\+\+DEVICES~0}
+
+
+
+Definition at line \mbox{\hyperlink{recorder_8cpp_source_l00015}{15}} of file \mbox{\hyperlink{recorder_8cpp_source}{recorder.\+cpp}}.
+
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{recorder_8cpp_a3c04138a5bfe5d72780bb7e82a18e627}\label{recorder_8cpp_a3c04138a5bfe5d72780bb7e82a18e627}} 
+\index{recorder.cpp@{recorder.cpp}!main@{main}}
+\index{main@{main}!recorder.cpp@{recorder.cpp}}
+\doxysubsubsection{\texorpdfstring{main()}{main()}}
+{\footnotesize\ttfamily int main (\begin{DoxyParamCaption}\item[{int}]{argc,  }\item[{char $\ast$$\ast$}]{argv }\end{DoxyParamCaption})}
+
+
+
+Definition at line \mbox{\hyperlink{recorder_8cpp_source_l00158}{158}} of file \mbox{\hyperlink{recorder_8cpp_source}{recorder.\+cpp}}.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00158                                 \{}
+\DoxyCodeLine{00159     \mbox{\hyperlink{classVideoParameters}{VideoParameters}} video\_params;}
+\DoxyCodeLine{00160     std::string output\_file;}
+\DoxyCodeLine{00161     std::string video\_device;}
+\DoxyCodeLine{00162     std::string audio\_device;}
+\DoxyCodeLine{00163     \textcolor{keywordtype}{bool} verbose = \textcolor{keyword}{false};}
+\DoxyCodeLine{00164 }
+\DoxyCodeLine{00165     \textcolor{keywordflow}{try} \{}
+\DoxyCodeLine{00166         std::vector<std::string> args;}
+\DoxyCodeLine{00167         \textcolor{keywordflow}{for} (\textcolor{keywordtype}{int} i = 1; i < argc; i++) \{}
+\DoxyCodeLine{00168             args.emplace\_back(argv[i]);}
+\DoxyCodeLine{00169         \}}
+\DoxyCodeLine{00170         std::tie(video\_device, audio\_device, video\_params, output\_file, verbose) = \mbox{\hyperlink{recorder_8cpp_af74b02eb4b3c3c32a7af81591b7f3d71}{parseArgs}}(args);}
+\DoxyCodeLine{00171     \} \textcolor{keywordflow}{catch} (\textcolor{keyword}{const} std::exception \&e) \{}
+\DoxyCodeLine{00172         std::string msg(e.what());}
+\DoxyCodeLine{00173         \textcolor{keywordflow}{if} (msg != \textcolor{stringliteral}{"{}"{}}) std::cerr << \textcolor{stringliteral}{"{}ERROR: "{}} << msg << std::endl;}
+\DoxyCodeLine{00174         std::cerr << \textcolor{stringliteral}{"{}Usage: "{}} << argv[0] << std::endl;}
+\DoxyCodeLine{00175         std::cerr << \textcolor{stringliteral}{"{}\(\backslash\)t[-\/h]"{}} << std::endl;}
+\DoxyCodeLine{00176         std::cerr << \textcolor{stringliteral}{"{}\(\backslash\)t[-\/video\_device <device\_name>]"{}} << std::endl;}
+\DoxyCodeLine{00177         std::cerr << \textcolor{stringliteral}{"{}\(\backslash\)t[-\/audio\_device <device\_name>]"{}} << std::endl;}
+\DoxyCodeLine{00178         std::cerr << \textcolor{stringliteral}{"{}\(\backslash\)t[-\/video\_size <width>x<height>:<offset\_x>,<offset\_y>]"{}} << std::endl;}
+\DoxyCodeLine{00179         std::cerr << \textcolor{stringliteral}{"{}\(\backslash\)t[-\/framerate <framerate>]"{}} << std::endl;}
+\DoxyCodeLine{00180         std::cerr << \textcolor{stringliteral}{"{}\(\backslash\)t[-\/o <output\_file>]"{}} << std::endl;}
+\DoxyCodeLine{00181         std::cerr << \textcolor{stringliteral}{"{}\(\backslash\)t[-\/v]"{}} << std::endl;}
+\DoxyCodeLine{00182         \textcolor{keywordflow}{return} 1;}
+\DoxyCodeLine{00183     \}}
+\DoxyCodeLine{00184 }
+\DoxyCodeLine{00185     \textcolor{keywordflow}{try} \{}
+\DoxyCodeLine{00186         \mbox{\hyperlink{classCapturer}{Capturer}} capturer(verbose);}
+\DoxyCodeLine{00187 }
+\DoxyCodeLine{00188         \textcolor{keywordflow}{if} (video\_device.empty()) \{}
+\DoxyCodeLine{00189             std::cerr << \textcolor{stringliteral}{"{}ERROR: No video device specified"{}} << std::endl << std::endl;}
+\DoxyCodeLine{00190             capturer.listAvailableDevices();}
+\DoxyCodeLine{00191             \textcolor{keywordflow}{return} 1;}
+\DoxyCodeLine{00192         \}}
+\DoxyCodeLine{00193 }
+\DoxyCodeLine{00194         \textcolor{keywordflow}{if} (std::filesystem::exists(output\_file)) \{}
+\DoxyCodeLine{00195             std::cout << \textcolor{stringliteral}{"{}The output file '"{}} << output\_file << \textcolor{stringliteral}{"{}' already exists, overwrite it? [y/N] "{}};}
+\DoxyCodeLine{00196             std::string answer;}
+\DoxyCodeLine{00197             std::getline(std::cin, answer);}
+\DoxyCodeLine{00198             \textcolor{keywordflow}{if} (answer != \textcolor{stringliteral}{"{}y"{}} \&\& answer != \textcolor{stringliteral}{"{}Y"{}}) \textcolor{keywordflow}{return} 0;}
+\DoxyCodeLine{00199         \}}
+\DoxyCodeLine{00200 }
+\DoxyCodeLine{00201         \textcolor{keyword}{auto} f = capturer.start(video\_device, audio\_device, output\_file, video\_params);}
+\DoxyCodeLine{00202 }
+\DoxyCodeLine{00203         \textcolor{keyword}{auto} listener = std::thread([\&capturer]() \{}
+\DoxyCodeLine{00204             \textcolor{keywordtype}{bool} paused = \textcolor{keyword}{false};}
+\DoxyCodeLine{00205             \textcolor{keywordtype}{bool} print\_status = \textcolor{keyword}{true};}
+\DoxyCodeLine{00206 }
+\DoxyCodeLine{00207             \textcolor{keywordflow}{while} (\textcolor{keyword}{true}) \{}
+\DoxyCodeLine{00208                 \textcolor{keywordflow}{if} (print\_status) printStatus(paused);}
+\DoxyCodeLine{00209                 print\_status = \textcolor{keyword}{false};}
+\DoxyCodeLine{00210                 printMenu(paused);}
+\DoxyCodeLine{00211                 std::string input;}
+\DoxyCodeLine{00212                 std::getline(std::cin, input);}
+\DoxyCodeLine{00213                 \textcolor{keywordflow}{if} (input.length() == 1) \{}
+\DoxyCodeLine{00214                     \textcolor{keywordtype}{char} command = std::tolower(input.front());}
+\DoxyCodeLine{00215                     \textcolor{keywordflow}{if} (command == \textcolor{charliteral}{'p'} \&\& !paused) \{}
+\DoxyCodeLine{00216                         capturer.pause();}
+\DoxyCodeLine{00217                         paused = \textcolor{keyword}{true};}
+\DoxyCodeLine{00218                         print\_status = \textcolor{keyword}{true};}
+\DoxyCodeLine{00219                     \} \textcolor{keywordflow}{else} \textcolor{keywordflow}{if} (command == \textcolor{charliteral}{'r'} \&\& paused) \{}
+\DoxyCodeLine{00220                         capturer.resume();}
+\DoxyCodeLine{00221                         paused = \textcolor{keyword}{false};}
+\DoxyCodeLine{00222                         print\_status = \textcolor{keyword}{true};}
+\DoxyCodeLine{00223                     \} \textcolor{keywordflow}{else} \textcolor{keywordflow}{if} (command == \textcolor{charliteral}{'s'}) \{}
+\DoxyCodeLine{00224                         std::cout << \textcolor{stringliteral}{"{}\(\backslash\)nStopping..."{}} << std::flush;}
+\DoxyCodeLine{00225                         capturer.stop();}
+\DoxyCodeLine{00226                         std::cout << \textcolor{stringliteral}{"{} done"{}} << std::endl;}
+\DoxyCodeLine{00227                         \textcolor{keywordflow}{break};}
+\DoxyCodeLine{00228                     \}}
+\DoxyCodeLine{00229                 \}}
+\DoxyCodeLine{00230                 \textcolor{keywordflow}{if} (!print\_status) std::cerr << \textcolor{stringliteral}{"{}Unknown command"{}} << std::endl;}
+\DoxyCodeLine{00231             \}}
+\DoxyCodeLine{00232         \});}
+\DoxyCodeLine{00233 }
+\DoxyCodeLine{00234         \textcolor{keywordflow}{try} \{}
+\DoxyCodeLine{00235             f.get();}
+\DoxyCodeLine{00236         \} \textcolor{keywordflow}{catch} (...) \{}
+\DoxyCodeLine{00237             listener.detach();}
+\DoxyCodeLine{00238             \textcolor{keywordflow}{throw};}
+\DoxyCodeLine{00239         \}}
+\DoxyCodeLine{00240 }
+\DoxyCodeLine{00241         \textcolor{keywordflow}{if} (listener.joinable()) listener.join();}
+\DoxyCodeLine{00242 }
+\DoxyCodeLine{00243     \} \textcolor{keywordflow}{catch} (\textcolor{keyword}{const} std::exception \&e) \{}
+\DoxyCodeLine{00244         std::cerr << e.what() << \textcolor{stringliteral}{"{}, terminating..."{}} << std::endl;}
+\DoxyCodeLine{00245         \textcolor{keywordflow}{return} 1;}
+\DoxyCodeLine{00246     \}}
+\DoxyCodeLine{00247 }
+\DoxyCodeLine{00248     \textcolor{keywordflow}{return} 0;}
+\DoxyCodeLine{00249 \}}
+
+\end{DoxyCode}
+\mbox{\Hypertarget{recorder_8cpp_af74b02eb4b3c3c32a7af81591b7f3d71}\label{recorder_8cpp_af74b02eb4b3c3c32a7af81591b7f3d71}} 
+\index{recorder.cpp@{recorder.cpp}!parseArgs@{parseArgs}}
+\index{parseArgs@{parseArgs}!recorder.cpp@{recorder.cpp}}
+\doxysubsubsection{\texorpdfstring{parseArgs()}{parseArgs()}}
+{\footnotesize\ttfamily std\+::tuple$<$ std\+::string, std\+::string, \mbox{\hyperlink{classVideoParameters}{Video\+Parameters}}, std\+::string, bool $>$ parse\+Args (\begin{DoxyParamCaption}\item[{std\+::vector$<$ std\+::string $>$}]{args }\end{DoxyParamCaption})}
+
+
+
+Definition at line \mbox{\hyperlink{recorder_8cpp_source_l00043}{43}} of file \mbox{\hyperlink{recorder_8cpp_source}{recorder.\+cpp}}.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00043                                                                                                       \{}
+\DoxyCodeLine{00044     \mbox{\hyperlink{classVideoParameters}{VideoParameters}} video\_params;}
+\DoxyCodeLine{00045     \textcolor{keywordtype}{int} framerate = 30;}
+\DoxyCodeLine{00046     std::string video\_device;}
+\DoxyCodeLine{00047     std::string audio\_device;}
+\DoxyCodeLine{00048     std::string output\_file;}
+\DoxyCodeLine{00049 }
+\DoxyCodeLine{00050 \textcolor{preprocessor}{\#if DEFAULT\_DEVICES}}
+\DoxyCodeLine{00051 \textcolor{preprocessor}{\#if defined(WINDOWS)}}
+\DoxyCodeLine{00052     video\_device = \textcolor{stringliteral}{"{}screen-\/capture-\/recorder"{}};}
+\DoxyCodeLine{00053     audio\_device = \textcolor{stringliteral}{"{}Gruppo microfoni (Realtek High Definition Audio(SST))"{}};}
+\DoxyCodeLine{00054 \textcolor{preprocessor}{\#elif defined(LINUX)}}
+\DoxyCodeLine{00055     \{}
+\DoxyCodeLine{00056         std::stringstream ss;}
+\DoxyCodeLine{00057         ss << getenv(\textcolor{stringliteral}{"{}DISPLAY"{}}) << \textcolor{stringliteral}{"{}.0"{}};}
+\DoxyCodeLine{00058         video\_device = ss.str();}
+\DoxyCodeLine{00059     \}}
+\DoxyCodeLine{00060     audio\_device = \textcolor{stringliteral}{"{}hw:0,0"{}};}
+\DoxyCodeLine{00061 \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00062     video\_device = \textcolor{stringliteral}{"{}1"{}};}
+\DoxyCodeLine{00063     audio\_device = \textcolor{stringliteral}{"{}0"{}};}
+\DoxyCodeLine{00064 \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00065 \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00066 }
+\DoxyCodeLine{00067     \textcolor{keywordtype}{bool} video\_device\_set = \textcolor{keyword}{false};}
+\DoxyCodeLine{00068     \textcolor{keywordtype}{bool} audio\_device\_set = \textcolor{keyword}{false};}
+\DoxyCodeLine{00069     \textcolor{keywordtype}{bool} video\_size\_set = \textcolor{keyword}{false};}
+\DoxyCodeLine{00070     \textcolor{keywordtype}{bool} framerate\_set = \textcolor{keyword}{false};}
+\DoxyCodeLine{00071     \textcolor{keywordtype}{bool} output\_set = \textcolor{keyword}{false};}
+\DoxyCodeLine{00072     \textcolor{keywordtype}{bool} verbose = \textcolor{keyword}{false};}
+\DoxyCodeLine{00073     std::string wrong\_args\_msg(\textcolor{stringliteral}{"{}Wrong arguments"{}});}
+\DoxyCodeLine{00074 }
+\DoxyCodeLine{00075     \textcolor{keywordflow}{for} (\textcolor{keyword}{auto} it = args.begin(); it != args.end(); it++) \{}
+\DoxyCodeLine{00076         \textcolor{keywordflow}{if} (*it == \textcolor{stringliteral}{"{}-\/h"{}}) \{}
+\DoxyCodeLine{00077             \textcolor{keywordflow}{throw} std::runtime\_error(\textcolor{stringliteral}{"{}"{}});}
+\DoxyCodeLine{00078         \} \textcolor{keywordflow}{else} \textcolor{keywordflow}{if} (*it == \textcolor{stringliteral}{"{}-\/video\_device"{}}) \{}
+\DoxyCodeLine{00079             \textcolor{keywordflow}{if} (video\_device\_set || ++it == args.end()) \textcolor{keywordflow}{throw} std::runtime\_error(wrong\_args\_msg);}
+\DoxyCodeLine{00080             video\_device = *it;}
+\DoxyCodeLine{00081             video\_device\_set = \textcolor{keyword}{true};}
+\DoxyCodeLine{00082         \} \textcolor{keywordflow}{else} \textcolor{keywordflow}{if} (*it == \textcolor{stringliteral}{"{}-\/audio\_device"{}}) \{}
+\DoxyCodeLine{00083             \textcolor{keywordflow}{if} (audio\_device\_set || ++it == args.end()) \textcolor{keywordflow}{throw} std::runtime\_error(wrong\_args\_msg);}
+\DoxyCodeLine{00084             audio\_device = *it;}
+\DoxyCodeLine{00085             audio\_device\_set = \textcolor{keyword}{true};}
+\DoxyCodeLine{00086         \} \textcolor{keywordflow}{else} \textcolor{keywordflow}{if} (*it == \textcolor{stringliteral}{"{}-\/video\_size"{}}) \{}
+\DoxyCodeLine{00087             \textcolor{keywordflow}{if} (video\_size\_set || ++it == args.end()) \textcolor{keywordflow}{throw} std::runtime\_error(wrong\_args\_msg);}
+\DoxyCodeLine{00088             video\_params = \mbox{\hyperlink{recorder_8cpp_a7f4da7290495fa1362e33030d49afbf1}{parseVideoSize}}(*it);}
+\DoxyCodeLine{00089             video\_size\_set = \textcolor{keyword}{true};}
+\DoxyCodeLine{00090         \} \textcolor{keywordflow}{else} \textcolor{keywordflow}{if} (*it == \textcolor{stringliteral}{"{}-\/framerate"{}}) \{}
+\DoxyCodeLine{00091             \textcolor{keywordflow}{if} (framerate\_set || ++it == args.end()) \textcolor{keywordflow}{throw} std::runtime\_error(wrong\_args\_msg);}
+\DoxyCodeLine{00092             framerate = std::stoi(*it);}
+\DoxyCodeLine{00093             framerate\_set = \textcolor{keyword}{true};}
+\DoxyCodeLine{00094         \} \textcolor{keywordflow}{else} \textcolor{keywordflow}{if} (*it == \textcolor{stringliteral}{"{}-\/o"{}}) \{}
+\DoxyCodeLine{00095             \textcolor{keywordflow}{if} (output\_set || ++it == args.end()) \textcolor{keywordflow}{throw} std::runtime\_error(wrong\_args\_msg);}
+\DoxyCodeLine{00096             output\_file = *it;}
+\DoxyCodeLine{00097             output\_set = \textcolor{keyword}{true};}
+\DoxyCodeLine{00098         \} \textcolor{keywordflow}{else} \textcolor{keywordflow}{if} (*it == \textcolor{stringliteral}{"{}-\/v"{}}) \{}
+\DoxyCodeLine{00099             verbose = \textcolor{keyword}{true};}
+\DoxyCodeLine{00100         \} \textcolor{keywordflow}{else} \{}
+\DoxyCodeLine{00101             \textcolor{keywordflow}{throw} std::runtime\_error(\textcolor{stringliteral}{"{}Unknown arg: "{}} + *it);}
+\DoxyCodeLine{00102         \}}
+\DoxyCodeLine{00103     \}}
+\DoxyCodeLine{00104 }
+\DoxyCodeLine{00105     video\_params.\mbox{\hyperlink{classVideoParameters_abb38fa11fbf493488c78efee2c10f9f8}{setFramerate}}(framerate);}
+\DoxyCodeLine{00106 }
+\DoxyCodeLine{00107     \textcolor{keywordflow}{if} (!output\_set) \{}
+\DoxyCodeLine{00108         output\_file = \textcolor{stringliteral}{"{}output.mp4"{}};}
+\DoxyCodeLine{00109         std::cout << \textcolor{stringliteral}{"{}No output file specified, saving to '"{}} << output\_file << \textcolor{stringliteral}{"{}'"{}} << std::endl;}
+\DoxyCodeLine{00110     \}}
+\DoxyCodeLine{00111 }
+\DoxyCodeLine{00112     \textcolor{keywordflow}{if} (verbose) \{}
+\DoxyCodeLine{00113         std::cout << \textcolor{stringliteral}{"{}Parsed video device: "{}} << video\_device << std::endl;}
+\DoxyCodeLine{00114         std::cout << \textcolor{stringliteral}{"{}Parsed audio device: "{}} << audio\_device;}
+\DoxyCodeLine{00115 \textcolor{preprocessor}{\#if DEFAULT\_DEVICES}}
+\DoxyCodeLine{00116         \textcolor{keywordflow}{if} (audio\_device == \textcolor{stringliteral}{"{}none"{}}) \{}
+\DoxyCodeLine{00117             audio\_device = \textcolor{stringliteral}{"{}"{}};}
+\DoxyCodeLine{00118             std::cout << \textcolor{stringliteral}{"{} (mute)"{}};}
+\DoxyCodeLine{00119         \}}
+\DoxyCodeLine{00120 \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00121         std::cout << std::endl;}
+\DoxyCodeLine{00122         \textcolor{keywordflow}{if} (framerate\_set) \{}
+\DoxyCodeLine{00123             std::cout << \textcolor{stringliteral}{"{}Parsed framerate: "{}} << framerate << std::endl;}
+\DoxyCodeLine{00124         \}}
+\DoxyCodeLine{00125         \textcolor{keywordflow}{if} (video\_size\_set) \{}
+\DoxyCodeLine{00126             \textcolor{keyword}{auto} [width, height] = video\_params.\mbox{\hyperlink{classVideoParameters_afaf0987244f9961fd6cbb5468ac16c18}{getVideoSize}}();}
+\DoxyCodeLine{00127             \textcolor{keyword}{auto} [offset\_x, offset\_y] = video\_params.\mbox{\hyperlink{classVideoParameters_a4338d07a117bcbea757824253fd55ee0}{getVideoOffset}}();}
+\DoxyCodeLine{00128             std::cout << \textcolor{stringliteral}{"{}Parsed video size: "{}} << width << \textcolor{stringliteral}{"{}x"{}} << height << std::endl;}
+\DoxyCodeLine{00129             std::cout << \textcolor{stringliteral}{"{}Parsed video offset: "{}} << offset\_x << \textcolor{stringliteral}{"{},"{}} << offset\_y << std::endl;}
+\DoxyCodeLine{00130         \}}
+\DoxyCodeLine{00131         \textcolor{keywordflow}{if} (output\_set) \{}
+\DoxyCodeLine{00132             std::cout << \textcolor{stringliteral}{"{}Parsed output file: "{}} << output\_file << std::endl;}
+\DoxyCodeLine{00133         \}}
+\DoxyCodeLine{00134     \}}
+\DoxyCodeLine{00135 }
+\DoxyCodeLine{00136     \textcolor{keywordflow}{return} std::make\_tuple(video\_device, audio\_device, video\_params, output\_file, verbose);}
+\DoxyCodeLine{00137 \}}
+
+\end{DoxyCode}
+\mbox{\Hypertarget{recorder_8cpp_a7f4da7290495fa1362e33030d49afbf1}\label{recorder_8cpp_a7f4da7290495fa1362e33030d49afbf1}} 
+\index{recorder.cpp@{recorder.cpp}!parseVideoSize@{parseVideoSize}}
+\index{parseVideoSize@{parseVideoSize}!recorder.cpp@{recorder.cpp}}
+\doxysubsubsection{\texorpdfstring{parseVideoSize()}{parseVideoSize()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{classVideoParameters}{Video\+Parameters}} parse\+Video\+Size (\begin{DoxyParamCaption}\item[{const std\+::string \&}]{str }\end{DoxyParamCaption})}
+
+
+
+Definition at line \mbox{\hyperlink{recorder_8cpp_source_l00017}{17}} of file \mbox{\hyperlink{recorder_8cpp_source}{recorder.\+cpp}}.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00017                                                      \{}
+\DoxyCodeLine{00018     \mbox{\hyperlink{classVideoParameters}{VideoParameters}} dims;}
+\DoxyCodeLine{00019 }
+\DoxyCodeLine{00020     \textcolor{keyword}{auto} main\_delim\_pos = str.find(\textcolor{stringliteral}{"{}:"{}});}
+\DoxyCodeLine{00021 }
+\DoxyCodeLine{00022     \{}
+\DoxyCodeLine{00023         std::string video\_size = str.substr(0, main\_delim\_pos);}
+\DoxyCodeLine{00024         \textcolor{keyword}{auto} delim\_pos = video\_size.find(\textcolor{stringliteral}{"{}x"{}});}
+\DoxyCodeLine{00025         \textcolor{keywordflow}{if} (delim\_pos == std::string::npos) \textcolor{keywordflow}{throw} std::runtime\_error(\textcolor{stringliteral}{"{}Wrong video-\/size format"{}});}
+\DoxyCodeLine{00026         \textcolor{keywordtype}{int} width = std::stoi(video\_size.substr(0, delim\_pos));}
+\DoxyCodeLine{00027         \textcolor{keywordtype}{int} height = std::stoi(video\_size.substr(delim\_pos + 1));}
+\DoxyCodeLine{00028         dims.\mbox{\hyperlink{classVideoParameters_ab89fab0001e049e77f8876ff7832dd15}{setVideoSize}}(width, height);}
+\DoxyCodeLine{00029     \}}
+\DoxyCodeLine{00030 }
+\DoxyCodeLine{00031     \textcolor{keywordflow}{if} (main\_delim\_pos != std::string::npos) \{}
+\DoxyCodeLine{00032         std::string offsets = str.substr(main\_delim\_pos + 1);}
+\DoxyCodeLine{00033         \textcolor{keyword}{auto} delim\_pos = offsets.find(\textcolor{stringliteral}{"{},"{}});}
+\DoxyCodeLine{00034         \textcolor{keywordflow}{if} (delim\_pos == std::string::npos) \textcolor{keywordflow}{throw} std::runtime\_error(\textcolor{stringliteral}{"{}Wrong offsets"{}});}
+\DoxyCodeLine{00035         \textcolor{keywordtype}{int} offset\_x = std::stoi(offsets.substr(0, delim\_pos));}
+\DoxyCodeLine{00036         \textcolor{keywordtype}{int} offset\_y = std::stoi(offsets.substr(delim\_pos + 1));}
+\DoxyCodeLine{00037         dims.\mbox{\hyperlink{classVideoParameters_ae5d9d23da28e0cdcdf22d7802d928620}{setVideoOffset}}(offset\_x, offset\_y);}
+\DoxyCodeLine{00038     \}}
+\DoxyCodeLine{00039 }
+\DoxyCodeLine{00040     \textcolor{keywordflow}{return} dims;}
+\DoxyCodeLine{00041 \}}
+
+\end{DoxyCode}

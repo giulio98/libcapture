@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.9.4"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>screen-recorder: LogLevelSetter Class Reference</title>
+<title>libcapture: LogLevelSetter Class Reference</title>
 <link href="../../tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="../../jquery.js"></script>
 <script type="text/javascript" src="../../dynsections.js"></script>
@@ -21,9 +21,9 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">screen-recorder<span id="projectnumber">&#160;0.1</span>
+   <div id="projectname">libcapture<span id="projectnumber">&#160;0.1</span>
    </div>
-   <div id="projectbrief">screen-recorder is a multiplatform C++ library that allows to capture your screen and optionally microphone audio, build with FFmpeg</div>
+   <div id="projectbrief">libcapture is a multiplatform c++ library that allows to capture the display and the microphone audio.</div>
   </td>
  </tr>
  </tbody>
@@ -69,15 +69,19 @@ $(function() {
   <div class="headertitle"><div class="title">LogLevelSetter Class Reference</div></div>
 </div><!--header-->
 <div class="contents">
+
+<p><code>#include &lt;<a class="el" href="../../da/dfc/log__level__setter_8h_source.html">log_level_setter.h</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:af652768695bd05143aa9dc6f42fd9a9b"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/d60/classLogLevelSetter.html#af652768695bd05143aa9dc6f42fd9a9b">LogLevelSetter</a> (int log_level)</td></tr>
 <tr class="separator:af652768695bd05143aa9dc6f42fd9a9b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afda88139d4fa36bdc52118f13f6d3326"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/d60/classLogLevelSetter.html#afda88139d4fa36bdc52118f13f6d3326">~LogLevelSetter</a> ()</td></tr>
+<tr class="separator:afda88139d4fa36bdc52118f13f6d3326"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock">
-<p class="definition">Definition at line <a class="el" href="../../da/dfc/log__level__setter_8h_source.html#l00003">3</a> of file <a class="el" href="../../da/dfc/log__level__setter_8h_source.html">log_level_setter.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../da/dfc/log__level__setter_8h_source.html#l00005">5</a> of file <a class="el" href="../../da/dfc/log__level__setter_8h_source.html">log_level_setter.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="af652768695bd05143aa9dc6f42fd9a9b" name="af652768695bd05143aa9dc6f42fd9a9b"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#af652768695bd05143aa9dc6f42fd9a9b">&#9670;&nbsp;</a></span>LogLevelSetter()</h2>
@@ -98,16 +102,16 @@ Public Member Functions</h2></td></tr>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">explicit</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../da/dfc/log__level__setter_8h_source.html#l00007">7</a> of file <a class="el" href="../../da/dfc/log__level__setter_8h_source.html">log_level_setter.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">    7</span>                                  {</div>
-<div class="line"><span class="lineno">    8</span>        prev_log_level_ = av_log_get_level();</div>
-<div class="line"><span class="lineno">    9</span>        av_log_set_level(log_level);</div>
-<div class="line"><span class="lineno">   10</span>    }</div>
+<p class="definition">Definition at line <a class="el" href="../../da/dfc/log__level__setter_8h_source.html#l00009">9</a> of file <a class="el" href="../../da/dfc/log__level__setter_8h_source.html">log_level_setter.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">    9</span>                                           {</div>
+<div class="line"><span class="lineno">   10</span>        prev_log_level_ = av_log_get_level();</div>
+<div class="line"><span class="lineno">   11</span>        av_log_set_level(log_level);</div>
+<div class="line"><span class="lineno">   12</span>    }</div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -134,8 +138,8 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../da/dfc/log__level__setter_8h_source.html#l00012">12</a> of file <a class="el" href="../../da/dfc/log__level__setter_8h_source.html">log_level_setter.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   12</span>{ av_log_set_level(prev_log_level_); }</div>
+<p class="definition">Definition at line <a class="el" href="../../da/dfc/log__level__setter_8h_source.html#l00014">14</a> of file <a class="el" href="../../da/dfc/log__level__setter_8h_source.html">log_level_setter.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   14</span>{ av_log_set_level(prev_log_level_); }</div>
 </div><!-- fragment -->
 </div>
 </div>

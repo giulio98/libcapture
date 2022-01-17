@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.9.4"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>screen-recorder: Class Members - Functions</title>
+<title>libcapture: Class Members - Functions</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -21,9 +21,9 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">screen-recorder<span id="projectnumber">&#160;0.1</span>
+   <div id="projectname">libcapture<span id="projectnumber">&#160;0.1</span>
    </div>
-   <div id="projectbrief">screen-recorder is a multiplatform C++ library that allows to capture your screen and optionally microphone audio, build with FFmpeg</div>
+   <div id="projectbrief">libcapture is a multiplatform c++ library that allows to capture the display and the microphone audio.</div>
   </td>
  </tr>
  </tbody>
@@ -71,6 +71,7 @@ $(function() {
 
 
 <h3><a id="index_c" name="index_c"></a>- c -</h3><ul>
+<li>Capturer()&#160;:&#160;<a class="el" href="d7/d20/classCapturer.html#a3426c95b3e3b23fa8e0afcad763c0839">Capturer</a></li>
 <li>closeFile()&#160;:&#160;<a class="el" href="d6/d3f/classMuxer.html#a11f0ea0fda943312eb42a7f6701dd08e">Muxer</a></li>
 <li>closeInput()&#160;:&#160;<a class="el" href="d7/d21/classDemuxer.html#a1e344d76a4d8f3770d5673c04a9792cb">Demuxer</a></li>
 <li>Converter()&#160;:&#160;<a class="el" href="d5/d17/classConverter.html#aaa67c7d2770c60fc2fa85fccb6f8a1fc">Converter</a></li>
@@ -78,8 +79,9 @@ $(function() {
 
 
 <h3><a id="index_d" name="index_d"></a>- d -</h3><ul>
-<li>Decoder()&#160;:&#160;<a class="el" href="dd/d49/classDecoder.html#afcf53f028a091b22c504656cb091da83">Decoder</a></li>
-<li>Demuxer()&#160;:&#160;<a class="el" href="d7/d21/classDemuxer.html#abc638bf9a3d659daa1a60e80a9332c64">Demuxer</a></li>
+<li>Decoder()&#160;:&#160;<a class="el" href="dd/d49/classDecoder.html#acb1932b930cb29f58696065d19e5477f">Decoder</a></li>
+<li>Demuxer()&#160;:&#160;<a class="el" href="d7/d21/classDemuxer.html#a5286d00ffc4ed4f29fe740df1a4c97ec">Demuxer</a></li>
+<li>DurationLogger()&#160;:&#160;<a class="el" href="d1/dcd/classDurationLogger.html#a3c5c5b58b1a562b305e57980c7e54aff">DurationLogger</a></li>
 </ul>
 
 
@@ -97,11 +99,14 @@ $(function() {
 <h3><a id="index_g" name="index_g"></a>- g -</h3><ul>
 <li>getContext()&#160;:&#160;<a class="el" href="dd/d49/classDecoder.html#a97f997415d60c5be1cc7c4f0d959d690">Decoder</a>, <a class="el" href="d0/d3b/classEncoder.html#ab23d5e384fb8c29c2f9f0cf06bf41c33">Encoder</a></li>
 <li>getFrame()&#160;:&#160;<a class="el" href="d5/d17/classConverter.html#aea4bf5f51fc7fce7d1d5997406239cca">Converter</a>, <a class="el" href="dd/d49/classDecoder.html#a14d4f27737b208d96bdfcadf9f7068c4">Decoder</a></li>
+<li>getFramerate()&#160;:&#160;<a class="el" href="da/d57/classVideoParameters.html#ad698f89ad5b99356ab4988e8ca50df6e">VideoParameters</a></li>
 <li>getGlobalHeaderFlags()&#160;:&#160;<a class="el" href="d6/d3f/classMuxer.html#ae3952023b57203281a2e58705e0804c6">Muxer</a></li>
 <li>getName()&#160;:&#160;<a class="el" href="dd/d49/classDecoder.html#a80744bea78a907510147e400e9600c16">Decoder</a>, <a class="el" href="d0/d3b/classEncoder.html#af35f7ed35c1ecce6d863cae81526b78a">Encoder</a></li>
 <li>getPacket()&#160;:&#160;<a class="el" href="d0/d3b/classEncoder.html#ae2928eeba00c04d53bd5bdcccd372d31">Encoder</a></li>
 <li>getStreamParams()&#160;:&#160;<a class="el" href="d7/d21/classDemuxer.html#a21dcade74fec8cb4a30e312c79dd1274">Demuxer</a></li>
 <li>getStreamTimeBase()&#160;:&#160;<a class="el" href="d7/d21/classDemuxer.html#a5465f2d641af3ddfb253ff2cbd87ba37">Demuxer</a></li>
+<li>getVideoOffset()&#160;:&#160;<a class="el" href="da/d57/classVideoParameters.html#a4338d07a117bcbea757824253fd55ee0">VideoParameters</a></li>
+<li>getVideoSize()&#160;:&#160;<a class="el" href="da/d57/classVideoParameters.html#afaf0987244f9961fd6cbb5468ac16c18">VideoParameters</a></li>
 </ul>
 
 
@@ -113,7 +118,9 @@ $(function() {
 
 
 <h3><a id="index_l" name="index_l"></a>- l -</h3><ul>
-<li>listAvailableDevices()&#160;:&#160;<a class="el" href="d2/d44/classScreenRecorder.html#a82d7bf5c4ad0d5140bbee2fe2d03e370">ScreenRecorder</a></li>
+<li>listAvailableDevices()&#160;:&#160;<a class="el" href="d7/d20/classCapturer.html#a450ca730b6f94989accb0e615951437a">Capturer</a></li>
+<li>LogCallbackSetter()&#160;:&#160;<a class="el" href="df/d31/classLogCallbackSetter.html#a543652cdb7967cf851cca69c865b43a9">LogCallbackSetter</a></li>
+<li>LogLevelSetter()&#160;:&#160;<a class="el" href="d5/d60/classLogLevelSetter.html#af652768695bd05143aa9dc6f42fd9a9b">LogLevelSetter</a></li>
 </ul>
 
 
@@ -125,11 +132,13 @@ $(function() {
 <h3><a id="index_o" name="index_o"></a>- o -</h3><ul>
 <li>openFile()&#160;:&#160;<a class="el" href="d6/d3f/classMuxer.html#abc4baad299ce984680e87c0ef2246d77">Muxer</a></li>
 <li>openInput()&#160;:&#160;<a class="el" href="d7/d21/classDemuxer.html#adb7d8df640f876555025a6ca7d7b2cdb">Demuxer</a></li>
+<li>operator()()&#160;:&#160;<a class="el" href="d4/d47/structDeleterP.html#a3db8255a00207a4e32e65b1f94f5242d">DeleterP&lt; deleter &gt;</a>, <a class="el" href="d9/d90/structDeleterPP.html#aaf43e8f4c97fb5c6870e184dfeee64ce">DeleterPP&lt; deleter &gt;</a></li>
+<li>operator=()&#160;:&#160;<a class="el" href="d7/d20/classCapturer.html#a5940ee9072f93e9fa6e3c80b6f42bde1">Capturer</a>, <a class="el" href="d5/d17/classConverter.html#ad48ff4f80e3c16ac238f5cace194f0f7">Converter</a>, <a class="el" href="dd/d49/classDecoder.html#ae82c2f06d5238b1f1edf65b265c42634">Decoder</a>, <a class="el" href="d7/d21/classDemuxer.html#a1882826b9c85071bdae8d7cc7e404f26">Demuxer</a>, <a class="el" href="d0/d3b/classEncoder.html#a5023deb71e3a34712c18b22a44f1ddb1">Encoder</a>, <a class="el" href="d6/d3f/classMuxer.html#aed46547705a6aa521605ec8cd40657f3">Muxer</a>, <a class="el" href="d7/d6a/classPipeline.html#a5bd72869a5c4d5a9a02a67892be2e1b3">Pipeline</a>, <a class="el" href="d6/dc9/classScopedThread.html#a6abe2aefc5f5ae5ca1c089943d4364e7">ScopedThread</a>, <a class="el" href="de/d5c/classThreadGuard.html#ac12dc8aa3305cdb9b4e071ab54999663">ThreadGuard</a></li>
 </ul>
 
 
 <h3><a id="index_p" name="index_p"></a>- p -</h3><ul>
-<li>pause()&#160;:&#160;<a class="el" href="d2/d44/classScreenRecorder.html#a6052103d7920846b8464db351a2ba78e">ScreenRecorder</a></li>
+<li>pause()&#160;:&#160;<a class="el" href="d7/d20/classCapturer.html#ae01ca2c78faa1e7c4fdf5b1c36562ff0">Capturer</a></li>
 <li>Pipeline()&#160;:&#160;<a class="el" href="d7/d6a/classPipeline.html#a882528d2d5712d429f33329dbf97b0dd">Pipeline</a></li>
 <li>printInfo()&#160;:&#160;<a class="el" href="d7/d21/classDemuxer.html#a85f970c6ef269fd10729fea1995a130d">Demuxer</a>, <a class="el" href="d6/d3f/classMuxer.html#a0ea26e33f92375ae6a6244226c5e4648">Muxer</a>, <a class="el" href="d7/d6a/classPipeline.html#a219c911a44e34564f4a0fbe28e049412">Pipeline</a></li>
 </ul>
@@ -137,22 +146,51 @@ $(function() {
 
 <h3><a id="index_r" name="index_r"></a>- r -</h3><ul>
 <li>readPacket()&#160;:&#160;<a class="el" href="d7/d21/classDemuxer.html#aef8feef99ec38bd3cc579e3339a18aec">Demuxer</a></li>
-<li>resume()&#160;:&#160;<a class="el" href="d2/d44/classScreenRecorder.html#a570c3793285871396d12dc5371b22000">ScreenRecorder</a></li>
+<li>resume()&#160;:&#160;<a class="el" href="d7/d20/classCapturer.html#addc2bab7c74562e447ce8a8f1fe16013">Capturer</a></li>
 </ul>
 
 
 <h3><a id="index_s" name="index_s"></a>- s -</h3><ul>
-<li>ScreenRecorder()&#160;:&#160;<a class="el" href="d2/d44/classScreenRecorder.html#a3fee5b65c2e97b01be6f182ce2d4ad74">ScreenRecorder</a></li>
+<li>ScopedThread()&#160;:&#160;<a class="el" href="d6/dc9/classScopedThread.html#af6f1534aec5915402463d97dfa71e507">ScopedThread</a></li>
 <li>sendFrame()&#160;:&#160;<a class="el" href="d5/d17/classConverter.html#af0ecd7c664a249a7b7b8f9d600042964">Converter</a>, <a class="el" href="d0/d3b/classEncoder.html#ad2ebcbb8d7563591b970f5b36e66d219">Encoder</a></li>
 <li>sendPacket()&#160;:&#160;<a class="el" href="dd/d49/classDecoder.html#ae029679b53626c60c68a4a21e876a8ed">Decoder</a></li>
-<li>setVerbose()&#160;:&#160;<a class="el" href="d2/d44/classScreenRecorder.html#aa83f20c854a76ccf0fdaad094723f6f5">ScreenRecorder</a></li>
-<li>start()&#160;:&#160;<a class="el" href="d2/d44/classScreenRecorder.html#a7025191be3141da7e7283c66ddf8d4b8">ScreenRecorder</a></li>
-<li>stop()&#160;:&#160;<a class="el" href="d2/d44/classScreenRecorder.html#a893530f2a4a19c45fa36d8677b082ad5">ScreenRecorder</a></li>
+<li>setFramerate()&#160;:&#160;<a class="el" href="da/d57/classVideoParameters.html#abb38fa11fbf493488c78efee2c10f9f8">VideoParameters</a></li>
+<li>setVerbose()&#160;:&#160;<a class="el" href="d7/d20/classCapturer.html#a1fcc9b714f0ca9273ab8af371b0d1b8a">Capturer</a></li>
+<li>setVideoOffset()&#160;:&#160;<a class="el" href="da/d57/classVideoParameters.html#ae5d9d23da28e0cdcdf22d7802d928620">VideoParameters</a></li>
+<li>setVideoSize()&#160;:&#160;<a class="el" href="da/d57/classVideoParameters.html#ab89fab0001e049e77f8876ff7832dd15">VideoParameters</a></li>
+<li>start()&#160;:&#160;<a class="el" href="d7/d20/classCapturer.html#a603d8210404b68dd782a7d2f89bae552">Capturer</a></li>
+<li>stop()&#160;:&#160;<a class="el" href="d7/d20/classCapturer.html#a3690f81aa60bc388f73f8e92c05d9d08">Capturer</a></li>
+</ul>
+
+
+<h3><a id="index_t" name="index_t"></a>- t -</h3><ul>
+<li>ThreadGuard()&#160;:&#160;<a class="el" href="de/d5c/classThreadGuard.html#a972b7bfb6d28e91b747730ce3dca81fa">ThreadGuard</a></li>
+</ul>
+
+
+<h3><a id="index_v" name="index_v"></a>- v -</h3><ul>
+<li>VideoParameters()&#160;:&#160;<a class="el" href="da/d57/classVideoParameters.html#a6fe18526bb39ee380515ff34fbf2f4b7">VideoParameters</a></li>
 </ul>
 
 
 <h3><a id="index_w" name="index_w"></a>- w -</h3><ul>
 <li>writePacket()&#160;:&#160;<a class="el" href="d6/d3f/classMuxer.html#a0cf18ee009cfebeab6d024ab157c9c85">Muxer</a></li>
+</ul>
+
+
+<h3><a id="index__7E" name="index__7E"></a>- ~ -</h3><ul>
+<li>~Capturer()&#160;:&#160;<a class="el" href="d7/d20/classCapturer.html#ad425e168d79bcf6ea3c1b85fc7f472bb">Capturer</a></li>
+<li>~Converter()&#160;:&#160;<a class="el" href="d5/d17/classConverter.html#a7f50175996e82142ac6cefa8469312dc">Converter</a></li>
+<li>~Decoder()&#160;:&#160;<a class="el" href="dd/d49/classDecoder.html#aa8569c2bfe52745017f0260ee0a3c424">Decoder</a></li>
+<li>~Demuxer()&#160;:&#160;<a class="el" href="d7/d21/classDemuxer.html#a5f3f5dec460e70829984a7891723a753">Demuxer</a></li>
+<li>~DurationLogger()&#160;:&#160;<a class="el" href="d1/dcd/classDurationLogger.html#a7a4c01e10c8a7b424482c3be5e33ac6a">DurationLogger</a></li>
+<li>~Encoder()&#160;:&#160;<a class="el" href="d0/d3b/classEncoder.html#a005a93060a725d8dbba1957dbbb6abec">Encoder</a></li>
+<li>~LogCallbackSetter()&#160;:&#160;<a class="el" href="df/d31/classLogCallbackSetter.html#aa4b61cbcfdf5a47b7ce27cf42181ea89">LogCallbackSetter</a></li>
+<li>~LogLevelSetter()&#160;:&#160;<a class="el" href="d5/d60/classLogLevelSetter.html#afda88139d4fa36bdc52118f13f6d3326">LogLevelSetter</a></li>
+<li>~Muxer()&#160;:&#160;<a class="el" href="d6/d3f/classMuxer.html#a5a1accea8db837c7504383790e456e95">Muxer</a></li>
+<li>~Pipeline()&#160;:&#160;<a class="el" href="d7/d6a/classPipeline.html#a527044d53a20f851d0579fbf313a2dec">Pipeline</a></li>
+<li>~ScopedThread()&#160;:&#160;<a class="el" href="d6/dc9/classScopedThread.html#a129fd102912b296952e7e726bc35056d">ScopedThread</a></li>
+<li>~ThreadGuard()&#160;:&#160;<a class="el" href="de/d5c/classThreadGuard.html#a3aaab3088727bd38b6b1f4f733c5af11">ThreadGuard</a></li>
 </ul>
 </div><!-- contents -->
 <!-- start footer part -->

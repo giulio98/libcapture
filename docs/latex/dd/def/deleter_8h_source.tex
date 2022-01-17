@@ -1,13 +1,13 @@
 \hypertarget{deleter_8h_source}{}\doxysection{deleter.\+h}
 \label{deleter_8h_source}\index{src/common/deleter.h@{src/common/deleter.h}}
-
+\mbox{\hyperlink{deleter_8h}{Go to the documentation of this file.}}
 \begin{DoxyCode}{0}
 \DoxyCodeLine{\Hypertarget{deleter_8h_source_l00001}00001 \textcolor{preprocessor}{\#pragma once}}
 \DoxyCodeLine{\Hypertarget{deleter_8h_source_l00002}00002 }
 \DoxyCodeLine{\Hypertarget{deleter_8h_source_l00008}00008 \textcolor{keyword}{template} <auto deleter>}
 \DoxyCodeLine{\Hypertarget{deleter_8h_source_l00009}\mbox{\hyperlink{structDeleterP}{00009}} \textcolor{keyword}{struct }\mbox{\hyperlink{structDeleterP}{DeleterP}} \{}
 \DoxyCodeLine{\Hypertarget{deleter_8h_source_l00010}00010     \textcolor{keyword}{template} <\textcolor{keyword}{typename} T>}
-\DoxyCodeLine{\Hypertarget{deleter_8h_source_l00011}00011     \textcolor{keywordtype}{void} operator()(T* t)\textcolor{keyword}{ const }\{}
+\DoxyCodeLine{\Hypertarget{deleter_8h_source_l00011}\mbox{\hyperlink{structDeleterP_a3db8255a00207a4e32e65b1f94f5242d}{00011}}     \textcolor{keywordtype}{void} \mbox{\hyperlink{structDeleterP_a3db8255a00207a4e32e65b1f94f5242d}{operator()}}(T* t)\textcolor{keyword}{ const }\{}
 \DoxyCodeLine{\Hypertarget{deleter_8h_source_l00012}00012         \textcolor{keywordflow}{if} (t) deleter(t);}
 \DoxyCodeLine{\Hypertarget{deleter_8h_source_l00013}00013     \}}
 \DoxyCodeLine{\Hypertarget{deleter_8h_source_l00014}00014 \};}
@@ -15,7 +15,7 @@
 \DoxyCodeLine{\Hypertarget{deleter_8h_source_l00021}00021 \textcolor{keyword}{template} <auto deleter>}
 \DoxyCodeLine{\Hypertarget{deleter_8h_source_l00022}\mbox{\hyperlink{structDeleterPP}{00022}} \textcolor{keyword}{struct }\mbox{\hyperlink{structDeleterPP}{DeleterPP}} \{}
 \DoxyCodeLine{\Hypertarget{deleter_8h_source_l00023}00023     \textcolor{keyword}{template} <\textcolor{keyword}{typename} T>}
-\DoxyCodeLine{\Hypertarget{deleter_8h_source_l00024}00024     \textcolor{keywordtype}{void} operator()(T* t)\textcolor{keyword}{ const }\{}
+\DoxyCodeLine{\Hypertarget{deleter_8h_source_l00024}\mbox{\hyperlink{structDeleterPP_aaf43e8f4c97fb5c6870e184dfeee64ce}{00024}}     \textcolor{keywordtype}{void} \mbox{\hyperlink{structDeleterPP_aaf43e8f4c97fb5c6870e184dfeee64ce}{operator()}}(T* t)\textcolor{keyword}{ const }\{}
 \DoxyCodeLine{\Hypertarget{deleter_8h_source_l00025}00025         \textcolor{keywordflow}{if} (t) deleter(\&t);}
 \DoxyCodeLine{\Hypertarget{deleter_8h_source_l00026}00026     \}}
 \DoxyCodeLine{\Hypertarget{deleter_8h_source_l00027}00027 \};}

@@ -1,0 +1,249 @@
+\hypertarget{namespaceav}{}\doxysection{av Namespace Reference}
+\label{namespaceav}\index{av@{av}}
+\doxysubsection*{Typedefs}
+\begin{DoxyCompactItemize}
+\item 
+using \mbox{\hyperlink{namespaceav_a84641b7a446e1183f8722c998db8be0c}{Packet\+UPtr}} = std\+::unique\+\_\+ptr$<$ AVPacket, \mbox{\hyperlink{structDeleterPP}{Deleter\+PP}}$<$ av\+\_\+packet\+\_\+free $>$ $>$
+\item 
+using \mbox{\hyperlink{namespaceav_abcf8febb01b83a6bf7671fc1793f23f0}{Frame\+UPtr}} = std\+::unique\+\_\+ptr$<$ AVFrame, \mbox{\hyperlink{structDeleterPP}{Deleter\+PP}}$<$ av\+\_\+frame\+\_\+free $>$ $>$
+\item 
+using \mbox{\hyperlink{namespaceav_a8bbddc2f529c1b2befec508337f0254b}{In\+Format\+Context\+UPtr}} = std\+::unique\+\_\+ptr$<$ AVFormat\+Context, \mbox{\hyperlink{structDeleterPP}{Deleter\+PP}}$<$ avformat\+\_\+close\+\_\+input $>$ $>$
+\item 
+using \mbox{\hyperlink{namespaceav_ac85764c248c4228f6457d9ed75711c9c}{Format\+Context\+UPtr}} = std\+::unique\+\_\+ptr$<$ AVFormat\+Context, \mbox{\hyperlink{structDeleterP}{DeleterP}}$<$ avformat\+\_\+free\+\_\+context $>$ $>$
+\item 
+using \mbox{\hyperlink{namespaceav_a626540c7621a1e06ba5b9d2206006904}{Codec\+Context\+UPtr}} = std\+::unique\+\_\+ptr$<$ AVCodec\+Context, \mbox{\hyperlink{structDeleterPP}{Deleter\+PP}}$<$ avcodec\+\_\+free\+\_\+context $>$ $>$
+\item 
+using \mbox{\hyperlink{namespaceav_aeda5767965662437c209ec63893a1fa6}{Filter\+Graph\+UPtr}} = std\+::unique\+\_\+ptr$<$ AVFilter\+Graph, \mbox{\hyperlink{structDeleterPP}{Deleter\+PP}}$<$ avfilter\+\_\+graph\+\_\+free $>$ $>$
+\item 
+using \mbox{\hyperlink{namespaceav_a2081378bc912e5d177d0eac7120a056a}{Filter\+In\+Out\+UPtr}} = std\+::unique\+\_\+ptr$<$ AVFilter\+In\+Out, \mbox{\hyperlink{structDeleterPP}{Deleter\+PP}}$<$ avfilter\+\_\+inout\+\_\+free $>$ $>$
+\item 
+using \mbox{\hyperlink{namespaceav_ac63df59361f71f9e13346a67da3f46d3}{Dictionary\+UPtr}} = std\+::unique\+\_\+ptr$<$ AVDictionary, \mbox{\hyperlink{structDeleterPP}{Deleter\+PP}}$<$ av\+\_\+dict\+\_\+free $>$ $>$
+\end{DoxyCompactItemize}
+\doxysubsection*{Enumerations}
+\begin{DoxyCompactItemize}
+\item 
+enum \mbox{\hyperlink{namespaceav_ae2953b761e9eb4d9a8be80a224fd26bb}{Media\+Type}} \{ \mbox{\hyperlink{namespaceav_ae2953b761e9eb4d9a8be80a224fd26bbad4f2e84fb09232323dd1559e6e8fc5cb}{None}} = -\/1
+, \mbox{\hyperlink{namespaceav_ae2953b761e9eb4d9a8be80a224fd26bba6ec05a98ec3161d8877fadd84fdec43d}{Video}}
+, \mbox{\hyperlink{namespaceav_ae2953b761e9eb4d9a8be80a224fd26bba99b90951926ac80c982650c5e579f93b}{Audio}}
+, \mbox{\hyperlink{namespaceav_ae2953b761e9eb4d9a8be80a224fd26bba4ba3ba29e0bf744e3b78a3a07e063149}{Num\+Types}}
+ \}
+\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+constexpr bool \mbox{\hyperlink{namespaceav_a231ef2ae2e10e69b5a79a64ac5453ed8}{valid\+Media\+Type}} (\mbox{\hyperlink{namespaceav_ae2953b761e9eb4d9a8be80a224fd26bb}{Media\+Type}} type)
+\item 
+\mbox{\hyperlink{namespaceav_ac63df59361f71f9e13346a67da3f46d3}{Dictionary\+UPtr}} \mbox{\hyperlink{namespaceav_adcd7031d3c0148269ef170c6e4b73003}{map2dict}} (const std\+::map$<$ std\+::string, std\+::string $>$ \&map)
+\item 
+std\+::map$<$ std\+::string, std\+::string $>$ \mbox{\hyperlink{namespaceav_a2289910715bb0ea43c6a0db11672ace0}{dict2map}} (const AVDictionary $\ast$dict)
+\end{DoxyCompactItemize}
+\doxysubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+constexpr std\+::array$<$ \mbox{\hyperlink{namespaceav_ae2953b761e9eb4d9a8be80a224fd26bb}{Media\+Type}}, Media\+Type\+::\+Num\+Types $>$ \mbox{\hyperlink{namespaceav_a8c2d213cd1b3461b2ae369f83d00c1c5}{valid\+Media\+Types}} = \{Media\+Type\+::\+Video, Media\+Type\+::\+Audio\}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Typedef Documentation}
+\mbox{\Hypertarget{namespaceav_a626540c7621a1e06ba5b9d2206006904}\label{namespaceav_a626540c7621a1e06ba5b9d2206006904}} 
+\index{av@{av}!CodecContextUPtr@{CodecContextUPtr}}
+\index{CodecContextUPtr@{CodecContextUPtr}!av@{av}}
+\doxysubsubsection{\texorpdfstring{CodecContextUPtr}{CodecContextUPtr}}
+{\footnotesize\ttfamily using \mbox{\hyperlink{namespaceav_a626540c7621a1e06ba5b9d2206006904}{av\+::\+Codec\+Context\+UPtr}} = typedef std\+::unique\+\_\+ptr$<$AVCodec\+Context, \mbox{\hyperlink{structDeleterPP}{Deleter\+PP}}$<$avcodec\+\_\+free\+\_\+context$>$ $>$}
+
+
+
+Definition at line \mbox{\hyperlink{common_8h_source_l00048}{48}} of file \mbox{\hyperlink{common_8h_source}{common.\+h}}.
+
+\mbox{\Hypertarget{namespaceav_ac63df59361f71f9e13346a67da3f46d3}\label{namespaceav_ac63df59361f71f9e13346a67da3f46d3}} 
+\index{av@{av}!DictionaryUPtr@{DictionaryUPtr}}
+\index{DictionaryUPtr@{DictionaryUPtr}!av@{av}}
+\doxysubsubsection{\texorpdfstring{DictionaryUPtr}{DictionaryUPtr}}
+{\footnotesize\ttfamily using \mbox{\hyperlink{namespaceav_ac63df59361f71f9e13346a67da3f46d3}{av\+::\+Dictionary\+UPtr}} = typedef std\+::unique\+\_\+ptr$<$AVDictionary, \mbox{\hyperlink{structDeleterPP}{Deleter\+PP}}$<$av\+\_\+dict\+\_\+free$>$ $>$}
+
+
+
+Definition at line \mbox{\hyperlink{common_8h_source_l00051}{51}} of file \mbox{\hyperlink{common_8h_source}{common.\+h}}.
+
+\mbox{\Hypertarget{namespaceav_aeda5767965662437c209ec63893a1fa6}\label{namespaceav_aeda5767965662437c209ec63893a1fa6}} 
+\index{av@{av}!FilterGraphUPtr@{FilterGraphUPtr}}
+\index{FilterGraphUPtr@{FilterGraphUPtr}!av@{av}}
+\doxysubsubsection{\texorpdfstring{FilterGraphUPtr}{FilterGraphUPtr}}
+{\footnotesize\ttfamily using \mbox{\hyperlink{namespaceav_aeda5767965662437c209ec63893a1fa6}{av\+::\+Filter\+Graph\+UPtr}} = typedef std\+::unique\+\_\+ptr$<$AVFilter\+Graph, \mbox{\hyperlink{structDeleterPP}{Deleter\+PP}}$<$avfilter\+\_\+graph\+\_\+free$>$ $>$}
+
+
+
+Definition at line \mbox{\hyperlink{common_8h_source_l00049}{49}} of file \mbox{\hyperlink{common_8h_source}{common.\+h}}.
+
+\mbox{\Hypertarget{namespaceav_a2081378bc912e5d177d0eac7120a056a}\label{namespaceav_a2081378bc912e5d177d0eac7120a056a}} 
+\index{av@{av}!FilterInOutUPtr@{FilterInOutUPtr}}
+\index{FilterInOutUPtr@{FilterInOutUPtr}!av@{av}}
+\doxysubsubsection{\texorpdfstring{FilterInOutUPtr}{FilterInOutUPtr}}
+{\footnotesize\ttfamily using \mbox{\hyperlink{namespaceav_a2081378bc912e5d177d0eac7120a056a}{av\+::\+Filter\+In\+Out\+UPtr}} = typedef std\+::unique\+\_\+ptr$<$AVFilter\+In\+Out, \mbox{\hyperlink{structDeleterPP}{Deleter\+PP}}$<$avfilter\+\_\+inout\+\_\+free$>$ $>$}
+
+
+
+Definition at line \mbox{\hyperlink{common_8h_source_l00050}{50}} of file \mbox{\hyperlink{common_8h_source}{common.\+h}}.
+
+\mbox{\Hypertarget{namespaceav_ac85764c248c4228f6457d9ed75711c9c}\label{namespaceav_ac85764c248c4228f6457d9ed75711c9c}} 
+\index{av@{av}!FormatContextUPtr@{FormatContextUPtr}}
+\index{FormatContextUPtr@{FormatContextUPtr}!av@{av}}
+\doxysubsubsection{\texorpdfstring{FormatContextUPtr}{FormatContextUPtr}}
+{\footnotesize\ttfamily using \mbox{\hyperlink{namespaceav_ac85764c248c4228f6457d9ed75711c9c}{av\+::\+Format\+Context\+UPtr}} = typedef std\+::unique\+\_\+ptr$<$AVFormat\+Context, \mbox{\hyperlink{structDeleterP}{DeleterP}}$<$avformat\+\_\+free\+\_\+context$>$ $>$}
+
+
+
+Definition at line \mbox{\hyperlink{common_8h_source_l00047}{47}} of file \mbox{\hyperlink{common_8h_source}{common.\+h}}.
+
+\mbox{\Hypertarget{namespaceav_abcf8febb01b83a6bf7671fc1793f23f0}\label{namespaceav_abcf8febb01b83a6bf7671fc1793f23f0}} 
+\index{av@{av}!FrameUPtr@{FrameUPtr}}
+\index{FrameUPtr@{FrameUPtr}!av@{av}}
+\doxysubsubsection{\texorpdfstring{FrameUPtr}{FrameUPtr}}
+{\footnotesize\ttfamily using \mbox{\hyperlink{namespaceav_abcf8febb01b83a6bf7671fc1793f23f0}{av\+::\+Frame\+UPtr}} = typedef std\+::unique\+\_\+ptr$<$AVFrame, \mbox{\hyperlink{structDeleterPP}{Deleter\+PP}}$<$av\+\_\+frame\+\_\+free$>$ $>$}
+
+
+
+Definition at line \mbox{\hyperlink{common_8h_source_l00045}{45}} of file \mbox{\hyperlink{common_8h_source}{common.\+h}}.
+
+\mbox{\Hypertarget{namespaceav_a8bbddc2f529c1b2befec508337f0254b}\label{namespaceav_a8bbddc2f529c1b2befec508337f0254b}} 
+\index{av@{av}!InFormatContextUPtr@{InFormatContextUPtr}}
+\index{InFormatContextUPtr@{InFormatContextUPtr}!av@{av}}
+\doxysubsubsection{\texorpdfstring{InFormatContextUPtr}{InFormatContextUPtr}}
+{\footnotesize\ttfamily using \mbox{\hyperlink{namespaceav_a8bbddc2f529c1b2befec508337f0254b}{av\+::\+In\+Format\+Context\+UPtr}} = typedef std\+::unique\+\_\+ptr$<$AVFormat\+Context, \mbox{\hyperlink{structDeleterPP}{Deleter\+PP}}$<$avformat\+\_\+close\+\_\+input$>$ $>$}
+
+
+
+Definition at line \mbox{\hyperlink{common_8h_source_l00046}{46}} of file \mbox{\hyperlink{common_8h_source}{common.\+h}}.
+
+\mbox{\Hypertarget{namespaceav_a84641b7a446e1183f8722c998db8be0c}\label{namespaceav_a84641b7a446e1183f8722c998db8be0c}} 
+\index{av@{av}!PacketUPtr@{PacketUPtr}}
+\index{PacketUPtr@{PacketUPtr}!av@{av}}
+\doxysubsubsection{\texorpdfstring{PacketUPtr}{PacketUPtr}}
+{\footnotesize\ttfamily using \mbox{\hyperlink{namespaceav_a84641b7a446e1183f8722c998db8be0c}{av\+::\+Packet\+UPtr}} = typedef std\+::unique\+\_\+ptr$<$AVPacket, \mbox{\hyperlink{structDeleterPP}{Deleter\+PP}}$<$av\+\_\+packet\+\_\+free$>$ $>$}
+
+
+
+Definition at line \mbox{\hyperlink{common_8h_source_l00044}{44}} of file \mbox{\hyperlink{common_8h_source}{common.\+h}}.
+
+
+
+\doxysubsection{Enumeration Type Documentation}
+\mbox{\Hypertarget{namespaceav_ae2953b761e9eb4d9a8be80a224fd26bb}\label{namespaceav_ae2953b761e9eb4d9a8be80a224fd26bb}} 
+\index{av@{av}!MediaType@{MediaType}}
+\index{MediaType@{MediaType}!av@{av}}
+\doxysubsubsection{\texorpdfstring{MediaType}{MediaType}}
+{\footnotesize\ttfamily enum \mbox{\hyperlink{namespaceav_ae2953b761e9eb4d9a8be80a224fd26bb}{av\+::\+Media\+Type}}}
+
+Data types (Audio or Video). WARNING\+: Num\+Types is NOT a valid data type and it\textquotesingle{}s only used to properly size data structures in order to use Video and Audio as indices (DO NOT change the order) \begin{DoxyEnumFields}{Enumerator}
+\raisebox{\heightof{T}}[0pt][0pt]{\index{None@{None}!av@{av}}\index{av@{av}!None@{None}}}\mbox{\Hypertarget{namespaceav_ae2953b761e9eb4d9a8be80a224fd26bbad4f2e84fb09232323dd1559e6e8fc5cb}\label{namespaceav_ae2953b761e9eb4d9a8be80a224fd26bbad4f2e84fb09232323dd1559e6e8fc5cb}} 
+None&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{Video@{Video}!av@{av}}\index{av@{av}!Video@{Video}}}\mbox{\Hypertarget{namespaceav_ae2953b761e9eb4d9a8be80a224fd26bba6ec05a98ec3161d8877fadd84fdec43d}\label{namespaceav_ae2953b761e9eb4d9a8be80a224fd26bba6ec05a98ec3161d8877fadd84fdec43d}} 
+Video&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{Audio@{Audio}!av@{av}}\index{av@{av}!Audio@{Audio}}}\mbox{\Hypertarget{namespaceav_ae2953b761e9eb4d9a8be80a224fd26bba99b90951926ac80c982650c5e579f93b}\label{namespaceav_ae2953b761e9eb4d9a8be80a224fd26bba99b90951926ac80c982650c5e579f93b}} 
+Audio&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{NumTypes@{NumTypes}!av@{av}}\index{av@{av}!NumTypes@{NumTypes}}}\mbox{\Hypertarget{namespaceav_ae2953b761e9eb4d9a8be80a224fd26bba4ba3ba29e0bf744e3b78a3a07e063149}\label{namespaceav_ae2953b761e9eb4d9a8be80a224fd26bba4ba3ba29e0bf744e3b78a3a07e063149}} 
+Num\+Types&\\
+\hline
+
+\end{DoxyEnumFields}
+
+
+Definition at line \mbox{\hyperlink{common_8h_source_l00030}{30}} of file \mbox{\hyperlink{common_8h_source}{common.\+h}}.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00030 \{ \mbox{\hyperlink{namespaceav_ae2953b761e9eb4d9a8be80a224fd26bbad4f2e84fb09232323dd1559e6e8fc5cb}{None}} = -\/1, \mbox{\hyperlink{namespaceav_ae2953b761e9eb4d9a8be80a224fd26bba6ec05a98ec3161d8877fadd84fdec43d}{Video}}, \mbox{\hyperlink{namespaceav_ae2953b761e9eb4d9a8be80a224fd26bba99b90951926ac80c982650c5e579f93b}{Audio}}, \mbox{\hyperlink{namespaceav_ae2953b761e9eb4d9a8be80a224fd26bba4ba3ba29e0bf744e3b78a3a07e063149}{NumTypes}} \};}
+
+\end{DoxyCode}
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{namespaceav_a2289910715bb0ea43c6a0db11672ace0}\label{namespaceav_a2289910715bb0ea43c6a0db11672ace0}} 
+\index{av@{av}!dict2map@{dict2map}}
+\index{dict2map@{dict2map}!av@{av}}
+\doxysubsubsection{\texorpdfstring{dict2map()}{dict2map()}}
+{\footnotesize\ttfamily std\+::map$<$ std\+::string, std\+::string $>$ av\+::dict2map (\begin{DoxyParamCaption}\item[{const AVDictionary $\ast$}]{dict }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Definition at line \mbox{\hyperlink{common_8h_source_l00064}{64}} of file \mbox{\hyperlink{common_8h_source}{common.\+h}}.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00064                                                                        \{}
+\DoxyCodeLine{00065     std::map<std::string, std::string> map;}
+\DoxyCodeLine{00066     \textcolor{keyword}{const} AVDictionaryEntry *entry = \textcolor{keyword}{nullptr};}
+\DoxyCodeLine{00067     \textcolor{keywordflow}{do} \{}
+\DoxyCodeLine{00068         entry = av\_dict\_get(dict, \textcolor{stringliteral}{"{}"{}}, entry, AV\_DICT\_IGNORE\_SUFFIX);}
+\DoxyCodeLine{00069         \textcolor{keywordflow}{if} (entry) map.insert(\{entry-\/>key, entry-\/>value\});}
+\DoxyCodeLine{00070     \} \textcolor{keywordflow}{while} (entry);}
+\DoxyCodeLine{00071     \textcolor{keywordflow}{return} map;}
+\DoxyCodeLine{00072 \}}
+
+\end{DoxyCode}
+\mbox{\Hypertarget{namespaceav_adcd7031d3c0148269ef170c6e4b73003}\label{namespaceav_adcd7031d3c0148269ef170c6e4b73003}} 
+\index{av@{av}!map2dict@{map2dict}}
+\index{map2dict@{map2dict}!av@{av}}
+\doxysubsubsection{\texorpdfstring{map2dict()}{map2dict()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{namespaceav_ac63df59361f71f9e13346a67da3f46d3}{Dictionary\+UPtr}} av\+::map2dict (\begin{DoxyParamCaption}\item[{const std\+::map$<$ std\+::string, std\+::string $>$ \&}]{map }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Definition at line \mbox{\hyperlink{common_8h_source_l00053}{53}} of file \mbox{\hyperlink{common_8h_source}{common.\+h}}.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00053                                                                         \{}
+\DoxyCodeLine{00054     AVDictionary *dict = \textcolor{keyword}{nullptr};}
+\DoxyCodeLine{00055     \textcolor{keywordflow}{for} (\textcolor{keyword}{const} \textcolor{keyword}{auto} \&[key, val] : map) \{}
+\DoxyCodeLine{00056         \textcolor{keywordflow}{if} (av\_dict\_set(\&dict, key.c\_str(), val.c\_str(), 0) < 0) \{}
+\DoxyCodeLine{00057             \textcolor{keywordflow}{if} (dict) av\_dict\_free(\&dict);}
+\DoxyCodeLine{00058             \textcolor{keywordflow}{throw} std::runtime\_error(\textcolor{stringliteral}{"{}Cannot set "{}} + key + \textcolor{stringliteral}{"{}in dictionary"{}});}
+\DoxyCodeLine{00059         \}}
+\DoxyCodeLine{00060     \}}
+\DoxyCodeLine{00061     \textcolor{keywordflow}{return} \mbox{\hyperlink{namespaceav_ac63df59361f71f9e13346a67da3f46d3}{DictionaryUPtr}}(dict);}
+\DoxyCodeLine{00062 \}}
+
+\end{DoxyCode}
+\mbox{\Hypertarget{namespaceav_a231ef2ae2e10e69b5a79a64ac5453ed8}\label{namespaceav_a231ef2ae2e10e69b5a79a64ac5453ed8}} 
+\index{av@{av}!validMediaType@{validMediaType}}
+\index{validMediaType@{validMediaType}!av@{av}}
+\doxysubsubsection{\texorpdfstring{validMediaType()}{validMediaType()}}
+{\footnotesize\ttfamily constexpr bool av\+::valid\+Media\+Type (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{namespaceav_ae2953b761e9eb4d9a8be80a224fd26bb}{Media\+Type}}}]{type }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [constexpr]}}
+
+Whether the given type is valid 
+\begin{DoxyParams}{Parameters}
+{\em type} & the data type to check \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+whether the data type is a valid one 
+\end{DoxyReturn}
+
+
+Definition at line \mbox{\hyperlink{common_8h_source_l00042}{42}} of file \mbox{\hyperlink{common_8h_source}{common.\+h}}.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00042 \{ \textcolor{keywordflow}{return} (type > \mbox{\hyperlink{namespaceav_ae2953b761e9eb4d9a8be80a224fd26bbad4f2e84fb09232323dd1559e6e8fc5cb}{MediaType::None}} \&\& type < \mbox{\hyperlink{namespaceav_ae2953b761e9eb4d9a8be80a224fd26bba4ba3ba29e0bf744e3b78a3a07e063149}{MediaType::NumTypes}}); \}}
+
+\end{DoxyCode}
+
+
+\doxysubsection{Variable Documentation}
+\mbox{\Hypertarget{namespaceav_a8c2d213cd1b3461b2ae369f83d00c1c5}\label{namespaceav_a8c2d213cd1b3461b2ae369f83d00c1c5}} 
+\index{av@{av}!validMediaTypes@{validMediaTypes}}
+\index{validMediaTypes@{validMediaTypes}!av@{av}}
+\doxysubsubsection{\texorpdfstring{validMediaTypes}{validMediaTypes}}
+{\footnotesize\ttfamily constexpr std\+::array$<$\mbox{\hyperlink{namespaceav_ae2953b761e9eb4d9a8be80a224fd26bb}{Media\+Type}}, Media\+Type\+::\+Num\+Types$>$ av\+::valid\+Media\+Types = \{Media\+Type\+::\+Video, Media\+Type\+::\+Audio\}\hspace{0.3cm}{\ttfamily [constexpr]}}
+
+Array of media types valid as indices 
+
+Definition at line \mbox{\hyperlink{common_8h_source_l00035}{35}} of file \mbox{\hyperlink{common_8h_source}{common.\+h}}.
+

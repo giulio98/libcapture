@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.9.4"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>screen-recorder: Encoder Class Reference</title>
+<title>libcapture: Encoder Class Reference</title>
 <link href="../../tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="../../jquery.js"></script>
 <script type="text/javascript" src="../../dynsections.js"></script>
@@ -21,9 +21,9 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">screen-recorder<span id="projectnumber">&#160;0.1</span>
+   <div id="projectname">libcapture<span id="projectnumber">&#160;0.1</span>
    </div>
-   <div id="projectbrief">screen-recorder is a multiplatform C++ library that allows to capture your screen and optionally microphone audio, build with FFmpeg</div>
+   <div id="projectbrief">libcapture is a multiplatform c++ library that allows to capture the display and the microphone audio.</div>
   </td>
  </tr>
  </tbody>
@@ -70,6 +70,8 @@ $(function() {
   <div class="headertitle"><div class="title">Encoder Class Reference</div></div>
 </div><!--header-->
 <div class="contents">
+
+<p><code>#include &lt;<a class="el" href="../../d1/d79/encoder_8h_source.html">encoder.h</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
@@ -79,16 +81,17 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a469ec925c331a574fe05c55972ee9675"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a94b724152efb9215eae86025efc5c730"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d0/d3b/classEncoder.html#a94b724152efb9215eae86025efc5c730">Encoder</a> (AVCodecID codec_id, int width, int height, AVPixelFormat pix_fmt, AVRational time_base, int global_header_flags, const std::map&lt; std::string, std::string &gt; &amp;options)</td></tr>
 <tr class="separator:a94b724152efb9215eae86025efc5c730"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a688baf7b0b1247cfb8425117c6bed01b"><td class="memItemLeft" align="right" valign="top"><a id="a688baf7b0b1247cfb8425117c6bed01b" name="a688baf7b0b1247cfb8425117c6bed01b"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>Encoder</b> (const <a class="el" href="../../d0/d3b/classEncoder.html">Encoder</a> &amp;)=delete</td></tr>
+<tr class="memitem:a688baf7b0b1247cfb8425117c6bed01b"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d0/d3b/classEncoder.html#a688baf7b0b1247cfb8425117c6bed01b">Encoder</a> (const <a class="el" href="../../d0/d3b/classEncoder.html">Encoder</a> &amp;)=delete</td></tr>
 <tr class="separator:a688baf7b0b1247cfb8425117c6bed01b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a551c435055bf42c0ce361438c7084aee"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d0/d3b/classEncoder.html#a551c435055bf42c0ce361438c7084aee">Encoder</a> (<a class="el" href="../../d0/d3b/classEncoder.html">Encoder</a> &amp;&amp;other)</td></tr>
-<tr class="separator:a551c435055bf42c0ce361438c7084aee"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a32159c132c80ccb7478c918e21114aa4"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d0/d3b/classEncoder.html#a32159c132c80ccb7478c918e21114aa4">Encoder</a> (<a class="el" href="../../d0/d3b/classEncoder.html">Encoder</a> &amp;&amp;other) noexcept</td></tr>
+<tr class="separator:a32159c132c80ccb7478c918e21114aa4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a005a93060a725d8dbba1957dbbb6abec"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d0/d3b/classEncoder.html#a005a93060a725d8dbba1957dbbb6abec">~Encoder</a> ()=default</td></tr>
+<tr class="separator:a005a93060a725d8dbba1957dbbb6abec"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5023deb71e3a34712c18b22a44f1ddb1"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d0/d3b/classEncoder.html">Encoder</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d0/d3b/classEncoder.html#a5023deb71e3a34712c18b22a44f1ddb1">operator=</a> (<a class="el" href="../../d0/d3b/classEncoder.html">Encoder</a> other)</td></tr>
 <tr class="separator:a5023deb71e3a34712c18b22a44f1ddb1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad2ebcbb8d7563591b970f5b36e66d219"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d0/d3b/classEncoder.html#ad2ebcbb8d7563591b970f5b36e66d219">sendFrame</a> (const AVFrame *frame)</td></tr>
 <tr class="separator:ad2ebcbb8d7563591b970f5b36e66d219"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae2928eeba00c04d53bd5bdcccd372d31"><td class="memItemLeft" align="right" valign="top">av::PacketUPtr&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d0/d3b/classEncoder.html#ae2928eeba00c04d53bd5bdcccd372d31">getPacket</a> ()</td></tr>
+<tr class="memitem:ae2928eeba00c04d53bd5bdcccd372d31"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d8/d0d/namespaceav.html#a84641b7a446e1183f8722c998db8be0c">av::PacketUPtr</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d0/d3b/classEncoder.html#ae2928eeba00c04d53bd5bdcccd372d31">getPacket</a> ()</td></tr>
 <tr class="separator:ae2928eeba00c04d53bd5bdcccd372d31"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab23d5e384fb8c29c2f9f0cf06bf41c33"><td class="memItemLeft" align="right" valign="top">const AVCodecContext *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d0/d3b/classEncoder.html#ab23d5e384fb8c29c2f9f0cf06bf41c33">getContext</a> () const</td></tr>
 <tr class="separator:ab23d5e384fb8c29c2f9f0cf06bf41c33"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -105,7 +108,7 @@ Friends</h2></td></tr>
 <p class="definition">Definition at line <a class="el" href="../../d1/d79/encoder_8h_source.html#l00008">8</a> of file <a class="el" href="../../d1/d79/encoder_8h_source.html">encoder.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a1517231ea520edcfe81a75ca6f3923ff" name="a1517231ea520edcfe81a75ca6f3923ff"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1517231ea520edcfe81a75ca6f3923ff">&#9670;&nbsp;</a></span>Encoder() <span class="overload">[1/4]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a1517231ea520edcfe81a75ca6f3923ff">&#9670;&nbsp;</a></span>Encoder() <span class="overload">[1/5]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -131,7 +134,7 @@ Friends</h2></td></tr>
 </div>
 </div>
 <a id="a469ec925c331a574fe05c55972ee9675" name="a469ec925c331a574fe05c55972ee9675"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a469ec925c331a574fe05c55972ee9675">&#9670;&nbsp;</a></span>Encoder() <span class="overload">[2/4]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a469ec925c331a574fe05c55972ee9675">&#9670;&nbsp;</a></span>Encoder() <span class="overload">[2/5]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -184,27 +187,27 @@ Friends</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="../../db/dbc/encoder_8cpp_source.html#l00034">34</a> of file <a class="el" href="../../db/dbc/encoder_8cpp_source.html">encoder.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   36</span>    : <a class="code hl_function" href="../../d0/d3b/classEncoder.html#a1517231ea520edcfe81a75ca6f3923ff">Encoder</a>(codec_id) {</div>
-<div class="line"><span class="lineno">   37</span>    <span class="keywordflow">if</span> (codec_-&gt;type != AVMEDIA_TYPE_AUDIO)</div>
-<div class="line"><span class="lineno">   38</span>        throwError(<span class="stringliteral">&quot;failed to create audio encoder (received codec ID is not of type audio)&quot;</span>);</div>
-<div class="line"><span class="lineno">   39</span> </div>
-<div class="line"><span class="lineno">   40</span>    codec_ctx_-&gt;sample_rate = sample_rate;</div>
-<div class="line"><span class="lineno">   41</span>    codec_ctx_-&gt;channel_layout = channel_layout;</div>
-<div class="line"><span class="lineno">   42</span>    codec_ctx_-&gt;channels = av_get_channel_layout_nb_channels(codec_ctx_-&gt;channel_layout);</div>
-<div class="line"><span class="lineno">   43</span>    <span class="keywordflow">if</span> (codec_-&gt;sample_fmts) codec_ctx_-&gt;sample_fmt = codec_-&gt;sample_fmts[0];</div>
-<div class="line"><span class="lineno">   44</span>    <span class="comment">/* for audio, the time base will be automatically set by init() */</span></div>
-<div class="line"><span class="lineno">   45</span>    <span class="comment">// codec_ctx_-&gt;time_base.num = 1;</span></div>
-<div class="line"><span class="lineno">   46</span>    <span class="comment">// codec_ctx_-&gt;time_base.den = codec_ctx_-&gt;sample_rate;</span></div>
-<div class="line"><span class="lineno">   47</span> </div>
-<div class="line"><span class="lineno">   48</span>    init(global_header_flags, options);</div>
-<div class="line"><span class="lineno">   49</span>}</div>
+<p class="definition">Definition at line <a class="el" href="../../db/dbc/encoder_8cpp_source.html#l00035">35</a> of file <a class="el" href="../../db/dbc/encoder_8cpp_source.html">encoder.cpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   37</span>    : <a class="code hl_function" href="../../d0/d3b/classEncoder.html#a1517231ea520edcfe81a75ca6f3923ff">Encoder</a>(codec_id) {</div>
+<div class="line"><span class="lineno">   38</span>    <span class="keywordflow">if</span> (codec_-&gt;type != AVMEDIA_TYPE_AUDIO)</div>
+<div class="line"><span class="lineno">   39</span>        throwRuntimeError(<span class="stringliteral">&quot;failed to create audio encoder (received codec ID is not of type audio)&quot;</span>);</div>
+<div class="line"><span class="lineno">   40</span> </div>
+<div class="line"><span class="lineno">   41</span>    codec_ctx_-&gt;sample_rate = sample_rate;</div>
+<div class="line"><span class="lineno">   42</span>    codec_ctx_-&gt;channel_layout = channel_layout;</div>
+<div class="line"><span class="lineno">   43</span>    codec_ctx_-&gt;channels = av_get_channel_layout_nb_channels(codec_ctx_-&gt;channel_layout);</div>
+<div class="line"><span class="lineno">   44</span>    <span class="keywordflow">if</span> (codec_-&gt;sample_fmts) codec_ctx_-&gt;sample_fmt = codec_-&gt;sample_fmts[0];</div>
+<div class="line"><span class="lineno">   45</span>    <span class="comment">/* for audio, the time base will be automatically set by init() */</span></div>
+<div class="line"><span class="lineno">   46</span>    <span class="comment">// codec_ctx_-&gt;time_base.num = 1;</span></div>
+<div class="line"><span class="lineno">   47</span>    <span class="comment">// codec_ctx_-&gt;time_base.den = codec_ctx_-&gt;sample_rate;</span></div>
+<div class="line"><span class="lineno">   48</span> </div>
+<div class="line"><span class="lineno">   49</span>    init(global_header_flags, options);</div>
+<div class="line"><span class="lineno">   50</span>}</div>
 <div class="ttc" id="aclassEncoder_html_a1517231ea520edcfe81a75ca6f3923ff"><div class="ttname"><a href="../../d0/d3b/classEncoder.html#a1517231ea520edcfe81a75ca6f3923ff">Encoder::Encoder</a></div><div class="ttdeci">Encoder()=default</div></div>
 </div><!-- fragment -->
 </div>
 </div>
 <a id="a94b724152efb9215eae86025efc5c730" name="a94b724152efb9215eae86025efc5c730"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a94b724152efb9215eae86025efc5c730">&#9670;&nbsp;</a></span>Encoder() <span class="overload">[3/4]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a94b724152efb9215eae86025efc5c730">&#9670;&nbsp;</a></span>Encoder() <span class="overload">[3/5]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -271,26 +274,55 @@ Friends</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="../../db/dbc/encoder_8cpp_source.html#l00051">51</a> of file <a class="el" href="../../db/dbc/encoder_8cpp_source.html">encoder.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   53</span>    : <a class="code hl_function" href="../../d0/d3b/classEncoder.html#a1517231ea520edcfe81a75ca6f3923ff">Encoder</a>(codec_id) {</div>
-<div class="line"><span class="lineno">   54</span>    <span class="keywordflow">if</span> (codec_-&gt;type != AVMEDIA_TYPE_VIDEO)</div>
-<div class="line"><span class="lineno">   55</span>        throwError(<span class="stringliteral">&quot;failed to create video encoder (received codec ID is not of type video)&quot;</span>);</div>
-<div class="line"><span class="lineno">   56</span> </div>
-<div class="line"><span class="lineno">   57</span>    codec_ctx_-&gt;width = width;</div>
-<div class="line"><span class="lineno">   58</span>    codec_ctx_-&gt;height = height;</div>
-<div class="line"><span class="lineno">   59</span>    codec_ctx_-&gt;pix_fmt = pix_fmt;</div>
-<div class="line"><span class="lineno">   60</span>    codec_ctx_-&gt;time_base = time_base;</div>
-<div class="line"><span class="lineno">   61</span> </div>
-<div class="line"><span class="lineno">   62</span>    init(global_header_flags, options);</div>
-<div class="line"><span class="lineno">   63</span>}</div>
+<p class="definition">Definition at line <a class="el" href="../../db/dbc/encoder_8cpp_source.html#l00052">52</a> of file <a class="el" href="../../db/dbc/encoder_8cpp_source.html">encoder.cpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   54</span>    : <a class="code hl_function" href="../../d0/d3b/classEncoder.html#a1517231ea520edcfe81a75ca6f3923ff">Encoder</a>(codec_id) {</div>
+<div class="line"><span class="lineno">   55</span>    <span class="keywordflow">if</span> (codec_-&gt;type != AVMEDIA_TYPE_VIDEO)</div>
+<div class="line"><span class="lineno">   56</span>        throwRuntimeError(<span class="stringliteral">&quot;failed to create video encoder (received codec ID is not of type video)&quot;</span>);</div>
+<div class="line"><span class="lineno">   57</span> </div>
+<div class="line"><span class="lineno">   58</span>    codec_ctx_-&gt;width = width;</div>
+<div class="line"><span class="lineno">   59</span>    codec_ctx_-&gt;height = height;</div>
+<div class="line"><span class="lineno">   60</span>    codec_ctx_-&gt;pix_fmt = pix_fmt;</div>
+<div class="line"><span class="lineno">   61</span>    codec_ctx_-&gt;time_base = time_base;</div>
+<div class="line"><span class="lineno">   62</span> </div>
+<div class="line"><span class="lineno">   63</span>    init(global_header_flags, options);</div>
+<div class="line"><span class="lineno">   64</span>}</div>
 </div><!-- fragment -->
 </div>
 </div>
-<a id="a551c435055bf42c0ce361438c7084aee" name="a551c435055bf42c0ce361438c7084aee"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a551c435055bf42c0ce361438c7084aee">&#9670;&nbsp;</a></span>Encoder() <span class="overload">[4/4]</span></h2>
+<a id="a688baf7b0b1247cfb8425117c6bed01b" name="a688baf7b0b1247cfb8425117c6bed01b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a688baf7b0b1247cfb8425117c6bed01b">&#9670;&nbsp;</a></span>Encoder() <span class="overload">[4/5]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">Encoder::Encoder </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="../../d0/d3b/classEncoder.html">Encoder</a> &amp;&#160;</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">delete</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a32159c132c80ccb7478c918e21114aa4" name="a32159c132c80ccb7478c918e21114aa4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a32159c132c80ccb7478c918e21114aa4">&#9670;&nbsp;</a></span>Encoder() <span class="overload">[5/5]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">Encoder::Encoder </td>
@@ -300,11 +332,42 @@ Friends</h2></td></tr>
           <td></td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../db/dbc/encoder_8cpp_source.html#l00065">65</a> of file <a class="el" href="../../db/dbc/encoder_8cpp_source.html">encoder.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   65</span>: <a class="code hl_function" href="../../d0/d3b/classEncoder.html#a1517231ea520edcfe81a75ca6f3923ff">Encoder</a>() { swap(*<span class="keyword">this</span>, other); }</div>
+<p class="definition">Definition at line <a class="el" href="../../db/dbc/encoder_8cpp_source.html#l00066">66</a> of file <a class="el" href="../../db/dbc/encoder_8cpp_source.html">encoder.cpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   66</span>: <a class="code hl_function" href="../../d0/d3b/classEncoder.html#a1517231ea520edcfe81a75ca6f3923ff">Encoder</a>() { <a class="code hl_friend" href="../../d0/d3b/classEncoder.html#af49bf3f4b00e69e9e48c146ea4626b95">swap</a>(*<span class="keyword">this</span>, other); }</div>
+<div class="ttc" id="aclassEncoder_html_af49bf3f4b00e69e9e48c146ea4626b95"><div class="ttname"><a href="../../d0/d3b/classEncoder.html#af49bf3f4b00e69e9e48c146ea4626b95">Encoder::swap</a></div><div class="ttdeci">friend void swap(Encoder &amp;lhs, Encoder &amp;rhs)</div><div class="ttdef"><b>Definition:</b> <a href="../../db/dbc/encoder_8cpp_source.html#l00011">encoder.cpp:11</a></div></div>
 </div><!-- fragment -->
+</div>
+</div>
+<a id="a005a93060a725d8dbba1957dbbb6abec" name="a005a93060a725d8dbba1957dbbb6abec"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a005a93060a725d8dbba1957dbbb6abec">&#9670;&nbsp;</a></span>~Encoder()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">Encoder::~Encoder </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">default</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
@@ -324,8 +387,8 @@ Friends</h2></td></tr>
 </div><div class="memdoc">
 <p >Access the internal codec context </p><dl class="section return"><dt>Returns</dt><dd>an observer pointer to access the codec context </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="../../db/dbc/encoder_8cpp_source.html#l00115">115</a> of file <a class="el" href="../../db/dbc/encoder_8cpp_source.html">encoder.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  115</span>{ <span class="keywordflow">return</span> codec_ctx_.get(); }</div>
+<p class="definition">Definition at line <a class="el" href="../../db/dbc/encoder_8cpp_source.html#l00116">116</a> of file <a class="el" href="../../db/dbc/encoder_8cpp_source.html">encoder.cpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  116</span>{ <span class="keywordflow">return</span> codec_ctx_.get(); }</div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -345,11 +408,11 @@ Friends</h2></td></tr>
 </div><div class="memdoc">
 <p >Get the encoder name </p><dl class="section return"><dt>Returns</dt><dd>the encoder name </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="../../db/dbc/encoder_8cpp_source.html#l00117">117</a> of file <a class="el" href="../../db/dbc/encoder_8cpp_source.html">encoder.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  117</span>                                 {</div>
-<div class="line"><span class="lineno">  118</span>    <span class="keywordflow">if</span> (codec_) <span class="keywordflow">return</span> codec_-&gt;long_name;</div>
-<div class="line"><span class="lineno">  119</span>    <span class="keywordflow">return</span> std::string{};</div>
-<div class="line"><span class="lineno">  120</span>}</div>
+<p class="definition">Definition at line <a class="el" href="../../db/dbc/encoder_8cpp_source.html#l00118">118</a> of file <a class="el" href="../../db/dbc/encoder_8cpp_source.html">encoder.cpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  118</span>                                 {</div>
+<div class="line"><span class="lineno">  119</span>    <span class="keywordflow">if</span> (codec_) <span class="keywordflow">return</span> codec_-&gt;long_name;</div>
+<div class="line"><span class="lineno">  120</span>    <span class="keywordflow">return</span> std::string{};</div>
+<div class="line"><span class="lineno">  121</span>}</div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -360,7 +423,7 @@ Friends</h2></td></tr>
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">av::PacketUPtr Encoder::getPacket </td>
+          <td class="memname"><a class="el" href="../../d8/d0d/namespaceav.html#a84641b7a446e1183f8722c998db8be0c">av::PacketUPtr</a> Encoder::getPacket </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td></td>
@@ -369,21 +432,22 @@ Friends</h2></td></tr>
 </div><div class="memdoc">
 <p >Get a converted packet from the encoder </p><dl class="section return"><dt>Returns</dt><dd>a packet if it was possible to get it, nullptr if the encoder had nothing to write because it is empty or flushed </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="../../db/dbc/encoder_8cpp_source.html#l00100">100</a> of file <a class="el" href="../../db/dbc/encoder_8cpp_source.html">encoder.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  100</span>                                {</div>
-<div class="line"><span class="lineno">  101</span>    <span class="keywordflow">if</span> (!codec_ctx_) throwError(<span class="stringliteral">&quot;encoder was not initialized yet&quot;</span>);</div>
-<div class="line"><span class="lineno">  102</span> </div>
-<div class="line"><span class="lineno">  103</span>    <span class="keywordflow">if</span> (!packet_) {</div>
-<div class="line"><span class="lineno">  104</span>        packet_ = av::PacketUPtr(av_packet_alloc());</div>
-<div class="line"><span class="lineno">  105</span>        <span class="keywordflow">if</span> (!packet_) throwError(<span class="stringliteral">&quot;failed to allocate packet&quot;</span>);</div>
-<div class="line"><span class="lineno">  106</span>    }</div>
-<div class="line"><span class="lineno">  107</span> </div>
-<div class="line"><span class="lineno">  108</span>    <span class="keywordtype">int</span> ret = avcodec_receive_packet(codec_ctx_.get(), packet_.get());</div>
-<div class="line"><span class="lineno">  109</span>    <span class="keywordflow">if</span> (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) <span class="keywordflow">return</span> <span class="keyword">nullptr</span>;</div>
-<div class="line"><span class="lineno">  110</span>    <span class="keywordflow">if</span> (ret &lt; 0) throwError(<span class="stringliteral">&quot;failed to receive frame from decoder&quot;</span>);</div>
-<div class="line"><span class="lineno">  111</span> </div>
-<div class="line"><span class="lineno">  112</span>    <span class="keywordflow">return</span> std::move(packet_);</div>
-<div class="line"><span class="lineno">  113</span>}</div>
+<p class="definition">Definition at line <a class="el" href="../../db/dbc/encoder_8cpp_source.html#l00101">101</a> of file <a class="el" href="../../db/dbc/encoder_8cpp_source.html">encoder.cpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  101</span>                                {</div>
+<div class="line"><span class="lineno">  102</span>    <span class="keywordflow">if</span> (!codec_ctx_) throwRuntimeError(<span class="stringliteral">&quot;encoder was not initialized yet&quot;</span>);</div>
+<div class="line"><span class="lineno">  103</span> </div>
+<div class="line"><span class="lineno">  104</span>    <span class="keywordflow">if</span> (!packet_) {</div>
+<div class="line"><span class="lineno">  105</span>        packet_ = <a class="code hl_typedef" href="../../d8/d0d/namespaceav.html#a84641b7a446e1183f8722c998db8be0c">av::PacketUPtr</a>(av_packet_alloc());</div>
+<div class="line"><span class="lineno">  106</span>        <span class="keywordflow">if</span> (!packet_) throwRuntimeError(<span class="stringliteral">&quot;failed to allocate packet&quot;</span>);</div>
+<div class="line"><span class="lineno">  107</span>    }</div>
+<div class="line"><span class="lineno">  108</span> </div>
+<div class="line"><span class="lineno">  109</span>    <span class="keywordtype">int</span> ret = avcodec_receive_packet(codec_ctx_.get(), packet_.get());</div>
+<div class="line"><span class="lineno">  110</span>    <span class="keywordflow">if</span> (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) <span class="keywordflow">return</span> <span class="keyword">nullptr</span>;</div>
+<div class="line"><span class="lineno">  111</span>    <span class="keywordflow">if</span> (ret &lt; 0) throwRuntimeError(<span class="stringliteral">&quot;failed to receive frame from decoder&quot;</span>);</div>
+<div class="line"><span class="lineno">  112</span> </div>
+<div class="line"><span class="lineno">  113</span>    <span class="keywordflow">return</span> std::move(packet_);</div>
+<div class="line"><span class="lineno">  114</span>}</div>
+<div class="ttc" id="anamespaceav_html_a84641b7a446e1183f8722c998db8be0c"><div class="ttname"><a href="../../d8/d0d/namespaceav.html#a84641b7a446e1183f8722c998db8be0c">av::PacketUPtr</a></div><div class="ttdeci">std::unique_ptr&lt; AVPacket, DeleterPP&lt; av_packet_free &gt; &gt; PacketUPtr</div><div class="ttdef"><b>Definition:</b> <a href="../../dc/d54/common_8h_source.html#l00044">common.h:44</a></div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -403,11 +467,11 @@ Friends</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../db/dbc/encoder_8cpp_source.html#l00067">67</a> of file <a class="el" href="../../db/dbc/encoder_8cpp_source.html">encoder.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   67</span>                                         {</div>
-<div class="line"><span class="lineno">   68</span>    swap(*<span class="keyword">this</span>, other);</div>
-<div class="line"><span class="lineno">   69</span>    <span class="keywordflow">return</span> *<span class="keyword">this</span>;</div>
-<div class="line"><span class="lineno">   70</span>}</div>
+<p class="definition">Definition at line <a class="el" href="../../db/dbc/encoder_8cpp_source.html#l00068">68</a> of file <a class="el" href="../../db/dbc/encoder_8cpp_source.html">encoder.cpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   68</span>                                         {</div>
+<div class="line"><span class="lineno">   69</span>    <a class="code hl_friend" href="../../d0/d3b/classEncoder.html#af49bf3f4b00e69e9e48c146ea4626b95">swap</a>(*<span class="keyword">this</span>, other);</div>
+<div class="line"><span class="lineno">   70</span>    <span class="keywordflow">return</span> *<span class="keyword">this</span>;</div>
+<div class="line"><span class="lineno">   71</span>}</div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -434,15 +498,15 @@ Friends</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>true if the frame has been correctly sent, false if the encoder could not receive it </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="../../db/dbc/encoder_8cpp_source.html#l00091">91</a> of file <a class="el" href="../../db/dbc/encoder_8cpp_source.html">encoder.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   91</span>                                            {</div>
-<div class="line"><span class="lineno">   92</span>    <span class="keywordflow">if</span> (!codec_ctx_) throwError(<span class="stringliteral">&quot;encoder was not initialized yet&quot;</span>);</div>
-<div class="line"><span class="lineno">   93</span>    <span class="keywordtype">int</span> ret = avcodec_send_frame(codec_ctx_.get(), frame);</div>
-<div class="line"><span class="lineno">   94</span>    <span class="keywordflow">if</span> (ret == AVERROR(EAGAIN)) <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
-<div class="line"><span class="lineno">   95</span>    <span class="keywordflow">if</span> (ret == AVERROR_EOF) throwError(<span class="stringliteral">&quot;has already been flushed&quot;</span>);</div>
-<div class="line"><span class="lineno">   96</span>    <span class="keywordflow">if</span> (ret &lt; 0) throwError(<span class="stringliteral">&quot;failed to send frame to encoder&quot;</span>);</div>
-<div class="line"><span class="lineno">   97</span>    <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
-<div class="line"><span class="lineno">   98</span>}</div>
+<p class="definition">Definition at line <a class="el" href="../../db/dbc/encoder_8cpp_source.html#l00092">92</a> of file <a class="el" href="../../db/dbc/encoder_8cpp_source.html">encoder.cpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   92</span>                                            {</div>
+<div class="line"><span class="lineno">   93</span>    <span class="keywordflow">if</span> (!codec_ctx_) throwRuntimeError(<span class="stringliteral">&quot;encoder was not initialized yet&quot;</span>);</div>
+<div class="line"><span class="lineno">   94</span>    <span class="keywordtype">int</span> ret = avcodec_send_frame(codec_ctx_.get(), frame);</div>
+<div class="line"><span class="lineno">   95</span>    <span class="keywordflow">if</span> (ret == AVERROR(EAGAIN)) <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><span class="lineno">   96</span>    <span class="keywordflow">if</span> (ret == AVERROR_EOF) throwRuntimeError(<span class="stringliteral">&quot;has already been flushed&quot;</span>);</div>
+<div class="line"><span class="lineno">   97</span>    <span class="keywordflow">if</span> (ret &lt; 0) throwRuntimeError(<span class="stringliteral">&quot;failed to send frame to encoder&quot;</span>);</div>
+<div class="line"><span class="lineno">   98</span>    <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><span class="lineno">   99</span>}</div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -481,12 +545,13 @@ Friends</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../db/dbc/encoder_8cpp_source.html#l00010">10</a> of file <a class="el" href="../../db/dbc/encoder_8cpp_source.html">encoder.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   10</span>                                      {</div>
-<div class="line"><span class="lineno">   11</span>    std::swap(lhs.codec_, rhs.codec_);</div>
-<div class="line"><span class="lineno">   12</span>    std::swap(lhs.codec_ctx_, rhs.codec_ctx_);</div>
-<div class="line"><span class="lineno">   13</span>    std::swap(lhs.packet_, rhs.packet_);</div>
-<div class="line"><span class="lineno">   14</span>}</div>
+<p class="definition">Definition at line <a class="el" href="../../db/dbc/encoder_8cpp_source.html#l00011">11</a> of file <a class="el" href="../../db/dbc/encoder_8cpp_source.html">encoder.cpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   11</span>                                      {</div>
+<div class="line"><span class="lineno">   12</span>    <a class="code hl_function" href="../../db/dbc/encoder_8cpp.html#af49bf3f4b00e69e9e48c146ea4626b95">std::swap</a>(lhs.codec_, rhs.codec_);</div>
+<div class="line"><span class="lineno">   13</span>    <a class="code hl_function" href="../../db/dbc/encoder_8cpp.html#af49bf3f4b00e69e9e48c146ea4626b95">std::swap</a>(lhs.codec_ctx_, rhs.codec_ctx_);</div>
+<div class="line"><span class="lineno">   14</span>    <a class="code hl_function" href="../../db/dbc/encoder_8cpp.html#af49bf3f4b00e69e9e48c146ea4626b95">std::swap</a>(lhs.packet_, rhs.packet_);</div>
+<div class="line"><span class="lineno">   15</span>}</div>
+<div class="ttc" id="aencoder_8cpp_html_af49bf3f4b00e69e9e48c146ea4626b95"><div class="ttname"><a href="../../db/dbc/encoder_8cpp.html#af49bf3f4b00e69e9e48c146ea4626b95">swap</a></div><div class="ttdeci">void swap(Encoder &amp;lhs, Encoder &amp;rhs)</div><div class="ttdef"><b>Definition:</b> <a href="../../db/dbc/encoder_8cpp_source.html#l00011">encoder.cpp:11</a></div></div>
 </div><!-- fragment -->
 </div>
 </div>

@@ -1,0 +1,380 @@
+\hypertarget{capturer_8cpp_source}{}\doxysection{capturer.\+cpp}
+\label{capturer_8cpp_source}\index{src/capture/capturer.cpp@{src/capture/capturer.cpp}}
+\mbox{\hyperlink{capturer_8cpp}{Go to the documentation of this file.}}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00001}00001 \textcolor{preprocessor}{\#include "{}\mbox{\hyperlink{capturer_8h}{capturer.h}}"{}}}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00002}00002 }
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00003}00003 \textcolor{preprocessor}{\#ifdef WINDOWS}}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00004}00004 \textcolor{preprocessor}{\#include <windows.h>}}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00005}00005 \textcolor{preprocessor}{\#include <winreg.h>}}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00006}00006 \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00007}00007 }
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00008}00008 \textcolor{preprocessor}{\#include <chrono>}}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00009}00009 \textcolor{preprocessor}{\#include <cstdlib>}}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00010}00010 \textcolor{preprocessor}{\#include <iostream>}}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00011}00011 \textcolor{preprocessor}{\#include <optional>}}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00012}00012 \textcolor{preprocessor}{\#include <sstream>}}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00013}00013 \textcolor{preprocessor}{\#include <stdexcept>}}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00014}00014 }
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00015}00015 \textcolor{preprocessor}{\#include "{}\mbox{\hyperlink{demuxer_8h}{format/demuxer.h}}"{}}}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00016}00016 \textcolor{preprocessor}{\#include "{}\mbox{\hyperlink{muxer_8h}{format/muxer.h}}"{}}}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00017}00017 \textcolor{preprocessor}{\#include "{}\mbox{\hyperlink{pipeline_8h}{process/pipeline.h}}"{}}}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00018}00018 \textcolor{preprocessor}{\#include "{}\mbox{\hyperlink{log__level__setter_8h}{utils/log\_level\_setter.h}}"{}}}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00019}00019 \textcolor{preprocessor}{\#include "{}\mbox{\hyperlink{thread__guard_8h}{utils/thread\_guard.h}}"{}}}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00020}00020 }
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00021}\mbox{\hyperlink{capturer_8cpp_a1f41420b47bdb4ae3b7286dad96caf4a}{00021}} \textcolor{preprocessor}{\#define THROW\_TEST\_EXCEPTION 0  }\textcolor{comment}{// TO-\/DO: remove}}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00022}00022 }
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00023}00023 \textcolor{keyword}{static} \textcolor{keywordtype}{void} makeAvVerbose(\textcolor{keywordtype}{bool} verbose) \{}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00024}00024     \textcolor{keywordflow}{if} (verbose) \{}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00025}00025         av\_log\_set\_level(AV\_LOG\_VERBOSE);}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00026}00026         \textcolor{comment}{// av\_log\_set\_level(AV\_LOG\_DEBUG);}}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00027}00027     \} \textcolor{keywordflow}{else} \{}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00028}00028         av\_log\_set\_level(AV\_LOG\_ERROR);}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00029}00029     \}}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00030}00030 \}}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00031}00031 }
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00032}00032 \textcolor{keyword}{static} std::string getInputFormatName(\textcolor{keywordtype}{bool} audio = \textcolor{keyword}{false}) \{}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00033}00033 \textcolor{preprocessor}{\#if defined(LINUX)}}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00034}00034     \textcolor{keywordflow}{if} (audio) \{}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00035}00035         \textcolor{keywordflow}{return} \textcolor{stringliteral}{"{}alsa"{}};}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00036}00036     \} \textcolor{keywordflow}{else} \{}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00037}00037         \textcolor{keywordflow}{return} \textcolor{stringliteral}{"{}x11grab"{}};}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00038}00038     \}}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00039}00039 \textcolor{preprocessor}{\#elif defined(WINDOWS)}}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00040}00040     \textcolor{keywordflow}{return} \textcolor{stringliteral}{"{}dshow"{}};}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00041}00041 \textcolor{preprocessor}{\#else  }\textcolor{comment}{// macOS}}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00042}00042     \textcolor{keywordflow}{return} \textcolor{stringliteral}{"{}avfoundation"{}};}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00043}00043 \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00044}00044 \}}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00045}00045 }
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00046}00046 \textcolor{keyword}{static} std::string generateInputDeviceName(\textcolor{keyword}{const} std::string \&video\_device, \textcolor{keyword}{const} std::string \&audio\_device,}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00047}00047                                            \textcolor{keyword}{const} \mbox{\hyperlink{classVideoParameters}{VideoParameters}} \&video\_params) \{}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00048}00048     std::stringstream device\_name\_ss;}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00049}00049 \textcolor{preprocessor}{\#if defined(WINDOWS)}}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00050}00050     \textcolor{keywordflow}{if} (!audio\_device.empty()) device\_name\_ss << \textcolor{stringliteral}{"{}audio="{}} << audio\_device << \textcolor{stringliteral}{"{}:"{}};}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00051}00051     device\_name\_ss << \textcolor{stringliteral}{"{}video="{}} << video\_device;}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00052}00052 \textcolor{preprocessor}{\#elif defined(LINUX)}}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00053}00053     \textcolor{keywordflow}{if} (!video\_device.empty()) \{}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00054}00054         device\_name\_ss << video\_device;}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00055}00055         \textcolor{keyword}{auto} [offset\_x, offset\_y] = video\_params.\mbox{\hyperlink{classVideoParameters_a4338d07a117bcbea757824253fd55ee0}{getVideoOffset}}();}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00056}00056         \textcolor{keywordflow}{if} (offset\_x || offset\_y) \{}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00057}00057             device\_name\_ss << \textcolor{stringliteral}{"{}+"{}} << offset\_x << \textcolor{stringliteral}{"{},"{}} << offset\_y;}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00058}00058         \}}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00059}00059     \} \textcolor{keywordflow}{else} \{}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00060}00060         device\_name\_ss << audio\_device;}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00061}00061     \}}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00062}00062 \textcolor{preprocessor}{\#else  }\textcolor{comment}{// macOS}}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00063}00063     device\_name\_ss << video\_device << \textcolor{stringliteral}{"{}:"{}} << audio\_device;}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00064}00064 \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00065}00065     \textcolor{keywordflow}{return} device\_name\_ss.str();}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00066}00066 \}}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00067}00067 }
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00068}00068 \textcolor{preprocessor}{\#ifdef WINDOWS}}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00069}00069 \textcolor{keyword}{static} \textcolor{keywordtype}{void} setDisplayResolution(\textcolor{keywordtype}{int} framerate) \{}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00070}00070     \textcolor{keywordtype}{int} x1, y1, x2, y2, resolution\_width, resolution\_height;}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00071}00071     x1 = GetSystemMetrics(SM\_XVIRTUALSCREEN);}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00072}00072     y1 = GetSystemMetrics(SM\_YVIRTUALSCREEN);}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00073}00073     x2 = GetSystemMetrics(SM\_CXVIRTUALSCREEN);}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00074}00074     y2 = GetSystemMetrics(SM\_CYVIRTUALSCREEN);}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00075}00075     resolution\_width = x2 -\/ x1;}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00076}00076     resolution\_height = y2 -\/ y1;}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00077}00077     HKEY hkey;}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00078}00078     DWORD dwDisposition;}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00079}00079     \textcolor{keywordflow}{if} (RegCreateKeyEx(HKEY\_CURRENT\_USER, TEXT(\textcolor{stringliteral}{"{}Software\(\backslash\)\(\backslash\)screen-\/capture-\/recorder"{}}), 0, \textcolor{keyword}{nullptr}, 0, KEY\_WRITE, \textcolor{keyword}{nullptr},}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00080}00080                        \&hkey, \&dwDisposition) == ERROR\_SUCCESS) \{}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00081}00081         DWORD dwType, dwSize;}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00082}00082         dwType = REG\_DWORD;}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00083}00083         dwSize = \textcolor{keyword}{sizeof}(DWORD);}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00084}00084         DWORD rofl = framerate;}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00085}00085         RegSetValueEx(hkey, TEXT(\textcolor{stringliteral}{"{}default\_max\_fps"{}}), 0, dwType, (PBYTE)\&rofl, dwSize);}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00086}00086         rofl = resolution\_width;}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00087}00087         RegSetValueEx(hkey, TEXT(\textcolor{stringliteral}{"{}capture\_width"{}}), 0, dwType, (PBYTE)\&rofl, dwSize);}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00088}00088         rofl = resolution\_height;}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00089}00089         RegSetValueEx(hkey, TEXT(\textcolor{stringliteral}{"{}capture\_height"{}}), 0, dwType, (PBYTE)\&rofl, dwSize);}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00090}00090         rofl = 0;}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00091}00091         RegSetValueEx(hkey, TEXT(\textcolor{stringliteral}{"{}start\_x"{}}), 0, dwType, (PBYTE)\&rofl, dwSize);}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00092}00092         rofl = 0;}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00093}00093         RegSetValueEx(hkey, TEXT(\textcolor{stringliteral}{"{}start\_y"{}}), 0, dwType, (PBYTE)\&rofl, dwSize);}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00094}00094         RegCloseKey(hkey);}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00095}00095     \} \textcolor{keywordflow}{else} \{}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00096}00096         \textcolor{keywordflow}{throw} std::runtime\_error(\textcolor{stringliteral}{"{}Error opening key when setting display resolution"{}});}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00097}00097     \}}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00098}00098 \}}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00099}00099 \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00100}00100 }
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00101}00101 \textcolor{keyword}{static} std::map<std::string, std::string> generateDemuxerOptions(\textcolor{keyword}{const} \mbox{\hyperlink{classVideoParameters}{VideoParameters}} \&video\_params) \{}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00102}00102     std::map<std::string, std::string> demuxer\_options;}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00103}00103 \textcolor{preprocessor}{\#ifdef WINDOWS}}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00104}00104     setDisplayResolution(video\_params.\mbox{\hyperlink{classVideoParameters_ad698f89ad5b99356ab4988e8ca50df6e}{getFramerate}}());}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00105}00105     demuxer\_options.insert(\{\textcolor{stringliteral}{"{}rtbufsize"{}}, \textcolor{stringliteral}{"{}1024M"{}}\});}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00106}00106 \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00107}00107     \{}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00108}00108         std::stringstream framerate\_ss;}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00109}00109         framerate\_ss << video\_params.\mbox{\hyperlink{classVideoParameters_ad698f89ad5b99356ab4988e8ca50df6e}{getFramerate}}();}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00110}00110         demuxer\_options.insert(\{\textcolor{stringliteral}{"{}framerate"{}}, framerate\_ss.str()\});}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00111}00111     \}}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00112}00112 \textcolor{preprocessor}{\#ifdef LINUX}}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00113}00113     \textcolor{keyword}{auto} [width, height] = video\_params.\mbox{\hyperlink{classVideoParameters_afaf0987244f9961fd6cbb5468ac16c18}{getVideoSize}}();}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00114}00114     \textcolor{keywordflow}{if} (width \&\& height) \{}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00115}00115         std::stringstream video\_size\_ss;}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00116}00116         video\_size\_ss << width << \textcolor{stringliteral}{"{}x"{}} << height;}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00117}00117         demuxer\_options.insert(\{\textcolor{stringliteral}{"{}video\_size"{}}, video\_size\_ss.str()\});}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00118}00118     \}}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00119}00119     demuxer\_options.insert(\{\textcolor{stringliteral}{"{}show\_region"{}}, \textcolor{stringliteral}{"{}0"{}}\});}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00120}00120 \textcolor{preprocessor}{\#else  }\textcolor{comment}{// macOS}}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00121}00121     demuxer\_options.insert(\{\textcolor{stringliteral}{"{}pixel\_format"{}}, \textcolor{stringliteral}{"{}uyvy422"{}}\});}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00122}00122     demuxer\_options.insert(\{\textcolor{stringliteral}{"{}capture\_cursor"{}}, \textcolor{stringliteral}{"{}0"{}}\});}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00123}00123 \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00124}00124 \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00125}00125     \textcolor{keywordflow}{return} demuxer\_options;}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00126}00126 \}}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00127}00127 }
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00128}\mbox{\hyperlink{classCapturer_a3426c95b3e3b23fa8e0afcad763c0839}{00128}} \mbox{\hyperlink{classCapturer_a3426c95b3e3b23fa8e0afcad763c0839}{Capturer::Capturer}}(\textcolor{keywordtype}{bool} verbose) : verbose\_(verbose) \{}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00129}00129     makeAvVerbose(verbose\_);}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00130}00130     avdevice\_register\_all();}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00131}00131 \}}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00132}00132 }
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00133}\mbox{\hyperlink{classCapturer_ad425e168d79bcf6ea3c1b85fc7f472bb}{00133}} \mbox{\hyperlink{classCapturer_ad425e168d79bcf6ea3c1b85fc7f472bb}{Capturer::\string~Capturer}}() \{}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00134}00134     stopCapture();}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00135}00135     \textcolor{keywordflow}{if} (capturer\_.joinable()) capturer\_.join();}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00136}00136 \}}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00137}00137 }
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00138}00138 \textcolor{keywordtype}{bool} Capturer::stopCapture() \{}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00139}00139     \{}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00140}00140         std::unique\_lock ul\{m\_\};}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00141}00141         \textcolor{keywordflow}{if} (stopped\_) \textcolor{keywordflow}{return} \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00142}00142         stopped\_ = \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00143}00143         cv\_.notify\_all();}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00144}00144     \}}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00145}00145     \textcolor{keywordflow}{return} \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00146}00146 \}}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00147}00147 }
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00148}\mbox{\hyperlink{classCapturer_a603d8210404b68dd782a7d2f89bae552}{00148}} std::future<void> \mbox{\hyperlink{classCapturer_a603d8210404b68dd782a7d2f89bae552}{Capturer::start}}(\textcolor{keyword}{const} std::string \&video\_device, \textcolor{keyword}{const} std::string \&audio\_device,}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00149}00149                                   \textcolor{keyword}{const} std::string \&output\_file, \mbox{\hyperlink{classVideoParameters}{VideoParameters}} video\_params) \{}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00150}00150     \textcolor{keywordflow}{if} (!stopped\_) \textcolor{keywordflow}{throw} std::runtime\_error(\textcolor{stringliteral}{"{}Recording already in progress"{}});}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00151}00151 }
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00152}00152     \textcolor{keywordflow}{if} (video\_device.empty()) \textcolor{keywordflow}{throw} std::runtime\_error(\textcolor{stringliteral}{"{}Video device not specified"{}});}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00153}00153     \textcolor{keywordflow}{if} (output\_file.empty()) \textcolor{keywordflow}{throw} std::runtime\_error(\textcolor{stringliteral}{"{}Output file not specified"{}});}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00154}00154 }
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00155}00155     \textcolor{keywordtype}{bool} capture\_audio = !audio\_device.empty();}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00156}00156 }
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00157}00157     AVPixelFormat video\_pix\_fmt = AV\_PIX\_FMT\_YUV420P;}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00158}00158     AVCodecID video\_codec\_id = AV\_CODEC\_ID\_H264;}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00159}00159     AVCodecID audio\_codec\_id = AV\_CODEC\_ID\_AAC;}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00160}00160 }
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00161}00161     \mbox{\hyperlink{classDemuxer}{Demuxer}} demuxer;}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00162}00162     std::optional<Demuxer> audio\_demuxer;  \textcolor{comment}{// Linux only}}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00163}00163 }
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00164}00164     \textcolor{comment}{/* init Muxer */}}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00165}00165     muxer\_ = std::make\_shared<Muxer>(output\_file);}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00166}00166 }
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00167}00167     \{ \textcolor{comment}{/* init Demuxer */}}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00168}00168         \textcolor{keyword}{const} std::string device\_name = generateInputDeviceName(video\_device, audio\_device, video\_params);}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00169}00169         \textcolor{keyword}{const} std::map<std::string, std::string> demuxer\_options = generateDemuxerOptions(video\_params);}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00170}00170         demuxer = \mbox{\hyperlink{classDemuxer}{Demuxer}}(getInputFormatName(), device\_name, demuxer\_options);}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00171}00171         demuxer.\mbox{\hyperlink{classDemuxer_adb7d8df640f876555025a6ca7d7b2cdb}{openInput}}();}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00172}00172     \}}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00173}00173 }
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00174}00174     \{ \textcolor{comment}{/* init Pipeline */}}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00175}00175         \textcolor{keywordtype}{bool} async;}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00176}00176 \textcolor{preprocessor}{\#ifdef LINUX}}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00177}00177         video\_params.\mbox{\hyperlink{classVideoParameters_ae5d9d23da28e0cdcdf22d7802d928620}{setVideoOffset}}(0, 0);  \textcolor{comment}{// No cropping is performed on Linux}}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00178}00178         async = \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00179}00179 \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00180}00180         async = \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00181}00181 \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00182}00182         \textcolor{comment}{/* init Pipeline */}}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00183}00183         pipeline\_ = std::make\_unique<Pipeline>(muxer\_, async);}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00184}00184     \}}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00185}00185 }
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00186}00186     pipeline\_-\/>initVideo(demuxer, video\_codec\_id, video\_pix\_fmt, video\_params);}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00187}00187 }
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00188}00188     \textcolor{comment}{/* init audio structures, if necessary */}}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00189}00189     \textcolor{keywordflow}{if} (capture\_audio) \{}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00190}00190 \textcolor{preprocessor}{\#ifdef LINUX}}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00191}00191         \textcolor{comment}{/* init audio demuxer and pipeline */}}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00192}00192         \textcolor{keyword}{const} std::string audio\_device\_name = generateInputDeviceName(\textcolor{stringliteral}{"{}"{}}, audio\_device, video\_params);}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00193}00193         audio\_demuxer = \mbox{\hyperlink{classDemuxer}{Demuxer}}(getInputFormatName(\textcolor{keyword}{true}), audio\_device\_name, std::map<std::string, std::string>());}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00194}00194         audio\_demuxer-\/>openInput();}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00195}00195         pipeline\_-\/>initAudio(*audio\_demuxer, audio\_codec\_id);}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00196}00196 \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00197}00197         pipeline\_-\/>initAudio(demuxer, audio\_codec\_id);}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00198}00198 \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00199}00199     \}}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00200}00200 }
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00201}00201     \textcolor{comment}{/* Open output file */}}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00202}00202     muxer\_-\/>openFile();}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00203}00203 }
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00204}00204     \textcolor{comment}{/* Print info about structures (if verbose) */}}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00205}00205     \textcolor{keywordflow}{if} (verbose\_) \{}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00206}00206         std::cout << std::endl;}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00207}00207         demuxer.\mbox{\hyperlink{classDemuxer_a85f970c6ef269fd10729fea1995a130d}{printInfo}}();}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00208}00208 \textcolor{preprocessor}{\#ifdef LINUX}}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00209}00209         \textcolor{keywordflow}{if} (capture\_audio) audio\_demuxer.value().printInfo(1);}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00210}00210 \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00211}00211         muxer\_-\/>printInfo();}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00212}00212         pipeline\_-\/>printInfo();}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00213}00213         std::cout << std::endl;}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00214}00214     \}}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00215}00215 }
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00216}00216     std::promise<void> p;}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00217}00217     \textcolor{keyword}{auto} f = p.get\_future();}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00218}00218 }
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00219}00219     \{}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00220}00220         std::unique\_lock ul\{m\_\};}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00221}00221 }
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00222}00222         capturer\_ = std::thread(}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00223}00223             [\textcolor{keyword}{this}](\mbox{\hyperlink{classDemuxer}{Demuxer}} demuxer, std::optional<Demuxer> audio\_demuxer, std::promise<void> p) \{}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00224}00224                 \textcolor{keywordflow}{try} \{}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00225}00225                     \textcolor{keywordflow}{if} (audio\_demuxer) \{}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00226}00226                         capture(demuxer, *audio\_demuxer);}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00227}00227                     \} \textcolor{keywordflow}{else} \{}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00228}00228                         capture(demuxer);}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00229}00229                     \}}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00230}00230                     p.set\_value();}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00231}00231                 \} \textcolor{keywordflow}{catch} (...) \{}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00232}00232                     p.set\_exception(std::current\_exception());}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00233}00233                 \}}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00234}00234             \},}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00235}00235             std::move(demuxer), std::move(audio\_demuxer), std::move(p));}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00236}00236         \textcolor{comment}{/* note that if audio\_demuxer contained a value, it still contains a (now "{}empty"{}) demuxer now */}}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00237}00237 }
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00238}00238         paused\_ = \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00239}00239         stopped\_ = \textcolor{keyword}{false};  \textcolor{comment}{// set stopped\_ to false only when everything is properly set-\/up}}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00240}00240     \}}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00241}00241 }
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00242}00242     \textcolor{keywordflow}{return} f;}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00243}00243 \}}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00244}00244 }
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00245}\mbox{\hyperlink{classCapturer_a3690f81aa60bc388f73f8e92c05d9d08}{00245}} \textcolor{keywordtype}{void} \mbox{\hyperlink{classCapturer_a3690f81aa60bc388f73f8e92c05d9d08}{Capturer::stop}}() \{}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00246}00246     \textcolor{keywordflow}{if} (!stopCapture()) \textcolor{keywordflow}{return};}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00247}00247     \textcolor{keywordflow}{if} (capturer\_.joinable()) capturer\_.join();}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00248}00248     pipeline\_-\/>flush();}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00249}00249     muxer\_-\/>closeFile();}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00250}00250     pipeline\_.reset();}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00251}00251     muxer\_.reset();}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00252}00252 \}}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00253}00253 }
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00254}\mbox{\hyperlink{classCapturer_ae01ca2c78faa1e7c4fdf5b1c36562ff0}{00254}} \textcolor{keywordtype}{void} \mbox{\hyperlink{classCapturer_ae01ca2c78faa1e7c4fdf5b1c36562ff0}{Capturer::pause}}() \{}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00255}00255     std::unique\_lock<std::mutex> ul\{m\_\};}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00256}00256     \textcolor{keywordflow}{if} (paused\_ || stopped\_) \textcolor{keywordflow}{return};}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00257}00257     paused\_ = \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00258}00258     cv\_.notify\_all();}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00259}00259 \}}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00260}00260 }
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00261}\mbox{\hyperlink{classCapturer_addc2bab7c74562e447ce8a8f1fe16013}{00261}} \textcolor{keywordtype}{void} \mbox{\hyperlink{classCapturer_addc2bab7c74562e447ce8a8f1fe16013}{Capturer::resume}}() \{}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00262}00262     std::unique\_lock<std::mutex> ul\{m\_\};}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00263}00263     \textcolor{keywordflow}{if} (!paused\_ || stopped\_) \textcolor{keywordflow}{return};}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00264}00264     paused\_ = \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00265}00265     cv\_.notify\_all();}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00266}00266 \}}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00267}00267 }
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00268}00268 \textcolor{keywordtype}{void} Capturer::capture(\mbox{\hyperlink{classDemuxer}{Demuxer}} \&video\_demuxer, \mbox{\hyperlink{classDemuxer}{Demuxer}} \&audio\_demuxer) \{}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00269}00269     std::thread audio\_capturer;}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00270}00270     std::exception\_ptr e\_ptr;}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00271}00271 }
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00272}00272     \{}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00273}00273         \mbox{\hyperlink{classThreadGuard}{ThreadGuard}} tg(audio\_capturer);}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00274}00274 }
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00275}00275         audio\_capturer = std::thread(}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00276}00276             [\textcolor{keyword}{this}, \&e\_ptr](\mbox{\hyperlink{classDemuxer}{Demuxer}} \&audio\_demuxer) \{}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00277}00277                 \textcolor{keywordflow}{try} \{}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00278}00278                     capture(audio\_demuxer);}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00279}00279                 \} \textcolor{keywordflow}{catch} (...) \{}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00280}00280                     stopCapture();}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00281}00281                     e\_ptr = std::current\_exception();}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00282}00282                 \}}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00283}00283             \},}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00284}00284             std::ref(audio\_demuxer));}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00285}00285 }
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00286}00286         \textcolor{keywordflow}{try} \{}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00287}00287             capture(video\_demuxer);}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00288}00288         \} \textcolor{keywordflow}{catch} (...) \{}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00289}00289             stopCapture();}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00290}00290             \textcolor{keywordflow}{throw};}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00291}00291         \}}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00292}00292     \}  \textcolor{comment}{// join audio\_capturer in any case}}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00293}00293 }
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00294}00294     \textcolor{keywordflow}{if} (e\_ptr) std::rethrow\_exception(e\_ptr);}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00295}00295 \}}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00296}00296 }
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00297}00297 \textcolor{keywordtype}{void} Capturer::capture(\mbox{\hyperlink{classDemuxer}{Demuxer}} \&demuxer) \{}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00298}00298     \textcolor{keywordtype}{bool} after\_pause;}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00299}00299     int64\_t last\_pts = 0;}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00300}00300     int64\_t pts\_offset = 0;}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00301}00301     \textcolor{keywordtype}{bool} adjust\_pts\_offset = \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00302}00302     std::chrono::milliseconds sleep\_interval(1);}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00303}00303 }
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00304}00304 \textcolor{preprocessor}{\#if THROW\_TEST\_EXCEPTION}}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00305}00305     \textcolor{keywordtype}{int} counter = 0;}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00306}00306 \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00307}00307 }
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00308}00308     \textcolor{keywordflow}{while} (\textcolor{keyword}{true}) \{}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00309}00309         \{}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00310}00310             std::unique\_lock<std::mutex> ul\{m\_\};}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00311}00311             after\_pause = paused\_;}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00312}00312 \textcolor{preprocessor}{\#ifndef MACOS}}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00313}00313             \textcolor{keywordflow}{if} (paused\_) demuxer.\mbox{\hyperlink{classDemuxer_a1e344d76a4d8f3770d5673c04a9792cb}{closeInput}}();}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00314}00314 \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00315}00315             cv\_.wait(ul, [\textcolor{keyword}{this}]() \{ \textcolor{keywordflow}{return} (!paused\_ || stopped\_); \});}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00316}00316             \textcolor{keywordflow}{if} (stopped\_) \textcolor{keywordflow}{break};}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00317}00317         \}}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00318}00318 }
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00319}00319         \textcolor{keywordflow}{if} (after\_pause) \{}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00320}00320             adjust\_pts\_offset = \textcolor{keyword}{true};}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00321}00321 \textcolor{preprocessor}{\#ifdef MACOS}}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00322}00322             demuxer.\mbox{\hyperlink{classDemuxer_ac5c00fad73efc9fd745fd6c484e1555b}{flush}}();}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00323}00323 \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00324}00324             demuxer.\mbox{\hyperlink{classDemuxer_adb7d8df640f876555025a6ca7d7b2cdb}{openInput}}();}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00325}00325 \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00326}00326         \}}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00327}00327 }
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00328}00328         \textcolor{keyword}{auto} [packet, packet\_type] = demuxer.\mbox{\hyperlink{classDemuxer_aef8feef99ec38bd3cc579e3339a18aec}{readPacket}}();}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00329}00329         \textcolor{keywordflow}{if} (!packet) \{}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00330}00330             std::this\_thread::sleep\_for(sleep\_interval);}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00331}00331             \textcolor{keywordflow}{continue};}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00332}00332         \}}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00333}00333         \textcolor{keywordflow}{if} (!\mbox{\hyperlink{namespaceav_a231ef2ae2e10e69b5a79a64ac5453ed8}{av::validMediaType}}(packet\_type)) \textcolor{keywordflow}{throw} std::runtime\_error(\textcolor{stringliteral}{"{}Invalid packet type received from demuxer"{}});}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00334}00334 }
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00335}00335         \textcolor{keywordflow}{if} (adjust\_pts\_offset) pts\_offset += (packet-\/>pts -\/ last\_pts);}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00336}00336         last\_pts = packet-\/>pts;}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00337}00337         \textcolor{keywordflow}{if} (adjust\_pts\_offset) \{}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00338}00338             adjust\_pts\_offset = \textcolor{keyword}{false};}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00339}00339         \} \textcolor{keywordflow}{else} \{}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00340}00340             packet-\/>pts -\/= pts\_offset;}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00341}00341             pipeline\_-\/>feed(std::move(packet), packet\_type);}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00342}00342         \}}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00343}00343 }
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00344}00344 \textcolor{preprocessor}{\#if THROW\_TEST\_EXCEPTION}}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00345}00345         \textcolor{keywordflow}{if} (++counter == 300) \textcolor{keywordflow}{throw} std::runtime\_error(\textcolor{stringliteral}{"{}UGLY ERROR"{}});}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00346}00346 \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00347}00347     \}}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00348}00348 \}}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00349}00349 }
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00350}\mbox{\hyperlink{classCapturer_a1fcc9b714f0ca9273ab8af371b0d1b8a}{00350}} \textcolor{keywordtype}{void} \mbox{\hyperlink{classCapturer_a1fcc9b714f0ca9273ab8af371b0d1b8a}{Capturer::setVerbose}}(\textcolor{keywordtype}{bool} verbose) \{}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00351}00351     verbose\_ = verbose;}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00352}00352     makeAvVerbose(verbose\_);}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00353}00353 \}}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00354}00354 }
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00355}\mbox{\hyperlink{classCapturer_a450ca730b6f94989accb0e615951437a}{00355}} \textcolor{keywordtype}{void} \mbox{\hyperlink{classCapturer_a450ca730b6f94989accb0e615951437a}{Capturer::listAvailableDevices}}()\textcolor{keyword}{ const }\{}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00356}00356     std::string dummy\_device\_name;}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00357}00357     std::map<std::string, std::string> options;}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00358}00358     options.insert(\{\textcolor{stringliteral}{"{}list\_devices"{}}, \textcolor{stringliteral}{"{}true"{}}\});}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00359}00359 }
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00360}00360 \textcolor{preprocessor}{\#ifdef WINDOWS}}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00361}00361     dummy\_device\_name = \textcolor{stringliteral}{"{}dummy"{}};}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00362}00362 \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00363}00363 }
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00364}00364     \mbox{\hyperlink{classDemuxer}{Demuxer}} demuxer(getInputFormatName(), dummy\_device\_name, options);}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00365}00365     std::cout << \textcolor{stringliteral}{"{}\#\#\#\#\# Available Devices \#\#\#\#\#"{}} << std::endl;}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00366}00366     \{}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00367}00367         \mbox{\hyperlink{classLogLevelSetter}{LogLevelSetter}} lls(AV\_LOG\_INFO);}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00368}00368         \textcolor{keywordflow}{try} \{}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00369}00369             demuxer.\mbox{\hyperlink{classDemuxer_adb7d8df640f876555025a6ca7d7b2cdb}{openInput}}();}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00370}00370         \} \textcolor{keywordflow}{catch} (...) \{}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00371}00371         \}}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00372}00372     \}}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00373}00373     std::cout << std::endl;}
+\DoxyCodeLine{\Hypertarget{capturer_8cpp_source_l00374}00374 \}}
+
+\end{DoxyCode}

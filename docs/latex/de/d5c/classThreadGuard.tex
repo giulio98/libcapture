@@ -1,22 +1,26 @@
 \hypertarget{classThreadGuard}{}\doxysection{Thread\+Guard Class Reference}
 \label{classThreadGuard}\index{ThreadGuard@{ThreadGuard}}
+
+
+{\ttfamily \#include $<$thread\+\_\+guard.\+h$>$}
+
 \doxysubsection*{Public Member Functions}
 \begin{DoxyCompactItemize}
 \item 
 \mbox{\hyperlink{classThreadGuard_a972b7bfb6d28e91b747730ce3dca81fa}{Thread\+Guard}} (std\+::thread \&t)
 \item 
-\mbox{\Hypertarget{classThreadGuard_a8b09e6f2c0e1df4966d8da5e05c85b09}\label{classThreadGuard_a8b09e6f2c0e1df4966d8da5e05c85b09}} 
-{\bfseries Thread\+Guard} (const \mbox{\hyperlink{classThreadGuard}{Thread\+Guard}} \&)=delete
+\mbox{\hyperlink{classThreadGuard_a3aaab3088727bd38b6b1f4f733c5af11}{$\sim$\+Thread\+Guard}} ()
 \item 
-\mbox{\Hypertarget{classThreadGuard_ac12dc8aa3305cdb9b4e071ab54999663}\label{classThreadGuard_ac12dc8aa3305cdb9b4e071ab54999663}} 
-\mbox{\hyperlink{classThreadGuard}{Thread\+Guard}} \& {\bfseries operator=} (const \mbox{\hyperlink{classThreadGuard}{Thread\+Guard}} \&)=delete
+\mbox{\hyperlink{classThreadGuard_a8b09e6f2c0e1df4966d8da5e05c85b09}{Thread\+Guard}} (const \mbox{\hyperlink{classThreadGuard}{Thread\+Guard}} \&)=delete
+\item 
+\mbox{\hyperlink{classThreadGuard}{Thread\+Guard}} \& \mbox{\hyperlink{classThreadGuard_ac12dc8aa3305cdb9b4e071ab54999663}{operator=}} (const \mbox{\hyperlink{classThreadGuard}{Thread\+Guard}} \&)=delete
 \end{DoxyCompactItemize}
 
 
 \doxysubsection{Detailed Description}
 
 
-Definition at line \mbox{\hyperlink{thread__guard_8h_source_l00003}{3}} of file \mbox{\hyperlink{thread__guard_8h_source}{thread\+\_\+guard.\+h}}.
+Definition at line \mbox{\hyperlink{thread__guard_8h_source_l00005}{5}} of file \mbox{\hyperlink{thread__guard_8h_source}{thread\+\_\+guard.\+h}}.
 
 
 
@@ -24,16 +28,16 @@ Definition at line \mbox{\hyperlink{thread__guard_8h_source_l00003}{3}} of file 
 \mbox{\Hypertarget{classThreadGuard_a972b7bfb6d28e91b747730ce3dca81fa}\label{classThreadGuard_a972b7bfb6d28e91b747730ce3dca81fa}} 
 \index{ThreadGuard@{ThreadGuard}!ThreadGuard@{ThreadGuard}}
 \index{ThreadGuard@{ThreadGuard}!ThreadGuard@{ThreadGuard}}
-\doxysubsubsection{\texorpdfstring{ThreadGuard()}{ThreadGuard()}}
+\doxysubsubsection{\texorpdfstring{ThreadGuard()}{ThreadGuard()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
 {\footnotesize\ttfamily Thread\+Guard\+::\+Thread\+Guard (\begin{DoxyParamCaption}\item[{std\+::thread \&}]{t }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
 
 
 
-Definition at line \mbox{\hyperlink{thread__guard_8h_source_l00007}{7}} of file \mbox{\hyperlink{thread__guard_8h_source}{thread\+\_\+guard.\+h}}.
+Definition at line \mbox{\hyperlink{thread__guard_8h_source_l00009}{9}} of file \mbox{\hyperlink{thread__guard_8h_source}{thread\+\_\+guard.\+h}}.
 
 
 \begin{DoxyCode}{0}
-\DoxyCodeLine{00007 : t\_(t) \{\}}
+\DoxyCodeLine{00009 : t\_(t) \{\}}
 
 \end{DoxyCode}
 \mbox{\Hypertarget{classThreadGuard_a3aaab3088727bd38b6b1f4f733c5af11}\label{classThreadGuard_a3aaab3088727bd38b6b1f4f733c5af11}} 
@@ -44,17 +48,32 @@ Definition at line \mbox{\hyperlink{thread__guard_8h_source_l00007}{7}} of file 
 
 
 
-Definition at line \mbox{\hyperlink{thread__guard_8h_source_l00009}{9}} of file \mbox{\hyperlink{thread__guard_8h_source}{thread\+\_\+guard.\+h}}.
+Definition at line \mbox{\hyperlink{thread__guard_8h_source_l00011}{11}} of file \mbox{\hyperlink{thread__guard_8h_source}{thread\+\_\+guard.\+h}}.
 
 
 \begin{DoxyCode}{0}
-\DoxyCodeLine{00009                    \{}
-\DoxyCodeLine{00010         \textcolor{keywordflow}{if} (t\_.joinable()) t\_.join();}
-\DoxyCodeLine{00011     \}}
+\DoxyCodeLine{00011                    \{}
+\DoxyCodeLine{00012         \textcolor{keywordflow}{if} (t\_.joinable()) t\_.join();}
+\DoxyCodeLine{00013     \}}
 
 \end{DoxyCode}
+\mbox{\Hypertarget{classThreadGuard_a8b09e6f2c0e1df4966d8da5e05c85b09}\label{classThreadGuard_a8b09e6f2c0e1df4966d8da5e05c85b09}} 
+\index{ThreadGuard@{ThreadGuard}!ThreadGuard@{ThreadGuard}}
+\index{ThreadGuard@{ThreadGuard}!ThreadGuard@{ThreadGuard}}
+\doxysubsubsection{\texorpdfstring{ThreadGuard()}{ThreadGuard()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily Thread\+Guard\+::\+Thread\+Guard (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{classThreadGuard}{Thread\+Guard}} \&}]{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [delete]}}
+
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classThreadGuard_ac12dc8aa3305cdb9b4e071ab54999663}\label{classThreadGuard_ac12dc8aa3305cdb9b4e071ab54999663}} 
+\index{ThreadGuard@{ThreadGuard}!operator=@{operator=}}
+\index{operator=@{operator=}!ThreadGuard@{ThreadGuard}}
+\doxysubsubsection{\texorpdfstring{operator=()}{operator=()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{classThreadGuard}{Thread\+Guard}} \& Thread\+Guard\+::operator= (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{classThreadGuard}{Thread\+Guard}} \&}]{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [delete]}}
+
 
 
 The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
 \item 
-src/utils/thread\+\_\+guard.\+h\end{DoxyCompactItemize}
+src/utils/\mbox{\hyperlink{thread__guard_8h}{thread\+\_\+guard.\+h}}\end{DoxyCompactItemize}

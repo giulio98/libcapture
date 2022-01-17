@@ -1,0 +1,54 @@
+\hypertarget{demuxer_8cpp}{}\doxysection{src/format/demuxer.cpp File Reference}
+\label{demuxer_8cpp}\index{src/format/demuxer.cpp@{src/format/demuxer.cpp}}
+{\ttfamily \#include \char`\"{}demuxer.\+h\char`\"{}}\newline
+{\ttfamily \#include $<$iostream$>$}\newline
+{\ttfamily \#include $<$stdexcept$>$}\newline
+\doxysubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define \mbox{\hyperlink{demuxer_8cpp_a42f8c497a1968074f38bf5055c650dca}{VERBOSE}}~0
+\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \mbox{\hyperlink{demuxer_8cpp_a82a17238c6f18f81e88eda961b10436f}{swap}} (\mbox{\hyperlink{classDemuxer}{Demuxer}} \&lhs, \mbox{\hyperlink{classDemuxer}{Demuxer}} \&rhs)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Macro Definition Documentation}
+\mbox{\Hypertarget{demuxer_8cpp_a42f8c497a1968074f38bf5055c650dca}\label{demuxer_8cpp_a42f8c497a1968074f38bf5055c650dca}} 
+\index{demuxer.cpp@{demuxer.cpp}!VERBOSE@{VERBOSE}}
+\index{VERBOSE@{VERBOSE}!demuxer.cpp@{demuxer.cpp}}
+\doxysubsubsection{\texorpdfstring{VERBOSE}{VERBOSE}}
+{\footnotesize\ttfamily \#define VERBOSE~0}
+
+
+
+Definition at line \mbox{\hyperlink{demuxer_8cpp_source_l00006}{6}} of file \mbox{\hyperlink{demuxer_8cpp_source}{demuxer.\+cpp}}.
+
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{demuxer_8cpp_a82a17238c6f18f81e88eda961b10436f}\label{demuxer_8cpp_a82a17238c6f18f81e88eda961b10436f}} 
+\index{demuxer.cpp@{demuxer.cpp}!swap@{swap}}
+\index{swap@{swap}!demuxer.cpp@{demuxer.cpp}}
+\doxysubsubsection{\texorpdfstring{swap()}{swap()}}
+{\footnotesize\ttfamily void swap (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classDemuxer}{Demuxer}} \&}]{lhs,  }\item[{\mbox{\hyperlink{classDemuxer}{Demuxer}} \&}]{rhs }\end{DoxyParamCaption})}
+
+
+
+Definition at line \mbox{\hyperlink{demuxer_8cpp_source_l00010}{10}} of file \mbox{\hyperlink{demuxer_8cpp_source}{demuxer.\+cpp}}.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00010                                       \{}
+\DoxyCodeLine{00011     \mbox{\hyperlink{demuxer_8cpp_a82a17238c6f18f81e88eda961b10436f}{std::swap}}(lhs.fmt\_ctx\_, rhs.fmt\_ctx\_);}
+\DoxyCodeLine{00012     \mbox{\hyperlink{demuxer_8cpp_a82a17238c6f18f81e88eda961b10436f}{std::swap}}(lhs.fmt\_, rhs.fmt\_);}
+\DoxyCodeLine{00013     \mbox{\hyperlink{demuxer_8cpp_a82a17238c6f18f81e88eda961b10436f}{std::swap}}(lhs.device\_name\_, rhs.device\_name\_);}
+\DoxyCodeLine{00014     \mbox{\hyperlink{demuxer_8cpp_a82a17238c6f18f81e88eda961b10436f}{std::swap}}(lhs.options\_, rhs.options\_);}
+\DoxyCodeLine{00015     \mbox{\hyperlink{demuxer_8cpp_a82a17238c6f18f81e88eda961b10436f}{std::swap}}(lhs.streams\_[\mbox{\hyperlink{namespaceav_ae2953b761e9eb4d9a8be80a224fd26bba99b90951926ac80c982650c5e579f93b}{av::MediaType::Audio}}], rhs.streams\_[\mbox{\hyperlink{namespaceav_ae2953b761e9eb4d9a8be80a224fd26bba99b90951926ac80c982650c5e579f93b}{av::MediaType::Audio}}]);}
+\DoxyCodeLine{00016     \mbox{\hyperlink{demuxer_8cpp_a82a17238c6f18f81e88eda961b10436f}{std::swap}}(lhs.streams\_[\mbox{\hyperlink{namespaceav_ae2953b761e9eb4d9a8be80a224fd26bba6ec05a98ec3161d8877fadd84fdec43d}{av::MediaType::Video}}], rhs.streams\_[\mbox{\hyperlink{namespaceav_ae2953b761e9eb4d9a8be80a224fd26bba6ec05a98ec3161d8877fadd84fdec43d}{av::MediaType::Video}}]);}
+\DoxyCodeLine{00017     \mbox{\hyperlink{demuxer_8cpp_a82a17238c6f18f81e88eda961b10436f}{std::swap}}(lhs.packet\_, rhs.packet\_);}
+\DoxyCodeLine{00018 \}}
+
+\end{DoxyCode}

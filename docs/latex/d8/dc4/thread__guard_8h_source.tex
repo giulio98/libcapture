@@ -1,22 +1,24 @@
 \hypertarget{thread__guard_8h_source}{}\doxysection{thread\+\_\+guard.\+h}
 \label{thread__guard_8h_source}\index{src/utils/thread\_guard.h@{src/utils/thread\_guard.h}}
-
+\mbox{\hyperlink{thread__guard_8h}{Go to the documentation of this file.}}
 \begin{DoxyCode}{0}
-\DoxyCodeLine{\Hypertarget{thread__guard_8h_source_l00001}00001 \textcolor{preprocessor}{\#include <thread>}}
+\DoxyCodeLine{\Hypertarget{thread__guard_8h_source_l00001}00001 \textcolor{preprocessor}{\#pragma once}}
 \DoxyCodeLine{\Hypertarget{thread__guard_8h_source_l00002}00002 }
-\DoxyCodeLine{\Hypertarget{thread__guard_8h_source_l00003}\mbox{\hyperlink{classThreadGuard}{00003}} \textcolor{keyword}{class }\mbox{\hyperlink{classThreadGuard}{ThreadGuard}} \{}
-\DoxyCodeLine{\Hypertarget{thread__guard_8h_source_l00004}00004     std::thread \&t\_;}
-\DoxyCodeLine{\Hypertarget{thread__guard_8h_source_l00005}00005 }
-\DoxyCodeLine{\Hypertarget{thread__guard_8h_source_l00006}00006 \textcolor{keyword}{public}:}
-\DoxyCodeLine{\Hypertarget{thread__guard_8h_source_l00007}00007     \mbox{\hyperlink{classThreadGuard}{ThreadGuard}}(std::thread \&t) : t\_(t) \{\}}
-\DoxyCodeLine{\Hypertarget{thread__guard_8h_source_l00008}00008 }
-\DoxyCodeLine{\Hypertarget{thread__guard_8h_source_l00009}00009     \mbox{\hyperlink{classThreadGuard}{\string~ThreadGuard}}() \{}
-\DoxyCodeLine{\Hypertarget{thread__guard_8h_source_l00010}00010         \textcolor{keywordflow}{if} (t\_.joinable()) t\_.join();}
-\DoxyCodeLine{\Hypertarget{thread__guard_8h_source_l00011}00011     \}}
-\DoxyCodeLine{\Hypertarget{thread__guard_8h_source_l00012}00012 }
-\DoxyCodeLine{\Hypertarget{thread__guard_8h_source_l00013}00013     \mbox{\hyperlink{classThreadGuard}{ThreadGuard}}(\textcolor{keyword}{const} \mbox{\hyperlink{classThreadGuard}{ThreadGuard}} \&) = \textcolor{keyword}{delete};}
+\DoxyCodeLine{\Hypertarget{thread__guard_8h_source_l00003}00003 \textcolor{preprocessor}{\#include <thread>}}
+\DoxyCodeLine{\Hypertarget{thread__guard_8h_source_l00004}00004 }
+\DoxyCodeLine{\Hypertarget{thread__guard_8h_source_l00005}\mbox{\hyperlink{classThreadGuard}{00005}} \textcolor{keyword}{class }\mbox{\hyperlink{classThreadGuard}{ThreadGuard}} \{}
+\DoxyCodeLine{\Hypertarget{thread__guard_8h_source_l00006}00006     std::thread \&t\_;}
+\DoxyCodeLine{\Hypertarget{thread__guard_8h_source_l00007}00007 }
+\DoxyCodeLine{\Hypertarget{thread__guard_8h_source_l00008}00008 \textcolor{keyword}{public}:}
+\DoxyCodeLine{\Hypertarget{thread__guard_8h_source_l00009}\mbox{\hyperlink{classThreadGuard_a972b7bfb6d28e91b747730ce3dca81fa}{00009}}     \mbox{\hyperlink{classThreadGuard_a972b7bfb6d28e91b747730ce3dca81fa}{ThreadGuard}}(std::thread \&t) : t\_(t) \{\}}
+\DoxyCodeLine{\Hypertarget{thread__guard_8h_source_l00010}00010 }
+\DoxyCodeLine{\Hypertarget{thread__guard_8h_source_l00011}\mbox{\hyperlink{classThreadGuard_a3aaab3088727bd38b6b1f4f733c5af11}{00011}}     \mbox{\hyperlink{classThreadGuard_a3aaab3088727bd38b6b1f4f733c5af11}{\string~ThreadGuard}}() \{}
+\DoxyCodeLine{\Hypertarget{thread__guard_8h_source_l00012}00012         \textcolor{keywordflow}{if} (t\_.joinable()) t\_.join();}
+\DoxyCodeLine{\Hypertarget{thread__guard_8h_source_l00013}00013     \}}
 \DoxyCodeLine{\Hypertarget{thread__guard_8h_source_l00014}00014 }
-\DoxyCodeLine{\Hypertarget{thread__guard_8h_source_l00015}00015     \mbox{\hyperlink{classThreadGuard}{ThreadGuard}} \&operator=(\textcolor{keyword}{const} \mbox{\hyperlink{classThreadGuard}{ThreadGuard}} \&) = \textcolor{keyword}{delete};}
-\DoxyCodeLine{\Hypertarget{thread__guard_8h_source_l00016}00016 \};}
+\DoxyCodeLine{\Hypertarget{thread__guard_8h_source_l00015}\mbox{\hyperlink{classThreadGuard_a8b09e6f2c0e1df4966d8da5e05c85b09}{00015}}     \mbox{\hyperlink{classThreadGuard_a8b09e6f2c0e1df4966d8da5e05c85b09}{ThreadGuard}}(\textcolor{keyword}{const} \mbox{\hyperlink{classThreadGuard}{ThreadGuard}} \&) = \textcolor{keyword}{delete};}
+\DoxyCodeLine{\Hypertarget{thread__guard_8h_source_l00016}00016 }
+\DoxyCodeLine{\Hypertarget{thread__guard_8h_source_l00017}\mbox{\hyperlink{classThreadGuard_ac12dc8aa3305cdb9b4e071ab54999663}{00017}}     \mbox{\hyperlink{classThreadGuard}{ThreadGuard}} \&\mbox{\hyperlink{classThreadGuard_ac12dc8aa3305cdb9b4e071ab54999663}{operator=}}(\textcolor{keyword}{const} \mbox{\hyperlink{classThreadGuard}{ThreadGuard}} \&) = \textcolor{keyword}{delete};}
+\DoxyCodeLine{\Hypertarget{thread__guard_8h_source_l00018}00018 \};}
 
 \end{DoxyCode}

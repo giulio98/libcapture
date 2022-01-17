@@ -1,0 +1,343 @@
+\hypertarget{classCapturer}{}\doxysection{Capturer Class Reference}
+\label{classCapturer}\index{Capturer@{Capturer}}
+
+
+{\ttfamily \#include $<$capturer.\+h$>$}
+
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{classCapturer_a3426c95b3e3b23fa8e0afcad763c0839}{Capturer}} (bool verbose=false)
+\item 
+\mbox{\hyperlink{classCapturer_a221e4b7b73ed55b7cea7fa3e0476e847}{Capturer}} (const \mbox{\hyperlink{classCapturer}{Capturer}} \&)=delete
+\item 
+\mbox{\hyperlink{classCapturer_ad425e168d79bcf6ea3c1b85fc7f472bb}{$\sim$\+Capturer}} ()
+\item 
+\mbox{\hyperlink{classCapturer}{Capturer}} \& \mbox{\hyperlink{classCapturer_a5940ee9072f93e9fa6e3c80b6f42bde1}{operator=}} (const \mbox{\hyperlink{classCapturer}{Capturer}} \&)=delete
+\item 
+std\+::future$<$ void $>$ \mbox{\hyperlink{classCapturer_a603d8210404b68dd782a7d2f89bae552}{start}} (const std\+::string \&video\+\_\+device, const std\+::string \&audio\+\_\+device, const std\+::string \&output\+\_\+file, \mbox{\hyperlink{classVideoParameters}{Video\+Parameters}} video\+\_\+params)
+\item 
+void \mbox{\hyperlink{classCapturer_a3690f81aa60bc388f73f8e92c05d9d08}{stop}} ()
+\item 
+void \mbox{\hyperlink{classCapturer_ae01ca2c78faa1e7c4fdf5b1c36562ff0}{pause}} ()
+\item 
+void \mbox{\hyperlink{classCapturer_addc2bab7c74562e447ce8a8f1fe16013}{resume}} ()
+\item 
+void \mbox{\hyperlink{classCapturer_a1fcc9b714f0ca9273ab8af371b0d1b8a}{set\+Verbose}} (bool verbose)
+\item 
+void \mbox{\hyperlink{classCapturer_a450ca730b6f94989accb0e615951437a}{list\+Available\+Devices}} () const
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+
+
+Definition at line \mbox{\hyperlink{capturer_8h_source_l00017}{17}} of file \mbox{\hyperlink{capturer_8h_source}{capturer.\+h}}.
+
+
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classCapturer_a3426c95b3e3b23fa8e0afcad763c0839}\label{classCapturer_a3426c95b3e3b23fa8e0afcad763c0839}} 
+\index{Capturer@{Capturer}!Capturer@{Capturer}}
+\index{Capturer@{Capturer}!Capturer@{Capturer}}
+\doxysubsubsection{\texorpdfstring{Capturer()}{Capturer()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily Capturer\+::\+Capturer (\begin{DoxyParamCaption}\item[{bool}]{verbose = {\ttfamily false} }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [explicit]}}
+
+Create a new Screen Recorder 
+\begin{DoxyParams}{Parameters}
+{\em verbose} & true to make the recorder verbose, false to use the default verbosity \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line \mbox{\hyperlink{capturer_8cpp_source_l00128}{128}} of file \mbox{\hyperlink{capturer_8cpp_source}{capturer.\+cpp}}.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00128                                : verbose\_(verbose) \{}
+\DoxyCodeLine{00129     makeAvVerbose(verbose\_);}
+\DoxyCodeLine{00130     avdevice\_register\_all();}
+\DoxyCodeLine{00131 \}}
+
+\end{DoxyCode}
+\mbox{\Hypertarget{classCapturer_a221e4b7b73ed55b7cea7fa3e0476e847}\label{classCapturer_a221e4b7b73ed55b7cea7fa3e0476e847}} 
+\index{Capturer@{Capturer}!Capturer@{Capturer}}
+\index{Capturer@{Capturer}!Capturer@{Capturer}}
+\doxysubsubsection{\texorpdfstring{Capturer()}{Capturer()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily Capturer\+::\+Capturer (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{classCapturer}{Capturer}} \&}]{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [delete]}}
+
+\mbox{\Hypertarget{classCapturer_ad425e168d79bcf6ea3c1b85fc7f472bb}\label{classCapturer_ad425e168d79bcf6ea3c1b85fc7f472bb}} 
+\index{Capturer@{Capturer}!````~Capturer@{$\sim$Capturer}}
+\index{````~Capturer@{$\sim$Capturer}!Capturer@{Capturer}}
+\doxysubsubsection{\texorpdfstring{$\sim$Capturer()}{~Capturer()}}
+{\footnotesize\ttfamily Capturer\+::$\sim$\+Capturer (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+Definition at line \mbox{\hyperlink{capturer_8cpp_source_l00133}{133}} of file \mbox{\hyperlink{capturer_8cpp_source}{capturer.\+cpp}}.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00133                     \{}
+\DoxyCodeLine{00134     stopCapture();}
+\DoxyCodeLine{00135     \textcolor{keywordflow}{if} (capturer\_.joinable()) capturer\_.join();}
+\DoxyCodeLine{00136 \}}
+
+\end{DoxyCode}
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classCapturer_a450ca730b6f94989accb0e615951437a}\label{classCapturer_a450ca730b6f94989accb0e615951437a}} 
+\index{Capturer@{Capturer}!listAvailableDevices@{listAvailableDevices}}
+\index{listAvailableDevices@{listAvailableDevices}!Capturer@{Capturer}}
+\doxysubsubsection{\texorpdfstring{listAvailableDevices()}{listAvailableDevices()}}
+{\footnotesize\ttfamily void Capturer\+::list\+Available\+Devices (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const}
+
+Print a list of the devices available for capturing 
+
+Definition at line \mbox{\hyperlink{capturer_8cpp_source_l00355}{355}} of file \mbox{\hyperlink{capturer_8cpp_source}{capturer.\+cpp}}.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00355                                           \{}
+\DoxyCodeLine{00356     std::string dummy\_device\_name;}
+\DoxyCodeLine{00357     std::map<std::string, std::string> options;}
+\DoxyCodeLine{00358     options.insert(\{\textcolor{stringliteral}{"{}list\_devices"{}}, \textcolor{stringliteral}{"{}true"{}}\});}
+\DoxyCodeLine{00359 }
+\DoxyCodeLine{00360 \textcolor{preprocessor}{\#ifdef WINDOWS}}
+\DoxyCodeLine{00361     dummy\_device\_name = \textcolor{stringliteral}{"{}dummy"{}};}
+\DoxyCodeLine{00362 \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00363 }
+\DoxyCodeLine{00364     \mbox{\hyperlink{classDemuxer}{Demuxer}} demuxer(getInputFormatName(), dummy\_device\_name, options);}
+\DoxyCodeLine{00365     std::cout << \textcolor{stringliteral}{"{}\#\#\#\#\# Available Devices \#\#\#\#\#"{}} << std::endl;}
+\DoxyCodeLine{00366     \{}
+\DoxyCodeLine{00367         \mbox{\hyperlink{classLogLevelSetter}{LogLevelSetter}} lls(AV\_LOG\_INFO);}
+\DoxyCodeLine{00368         \textcolor{keywordflow}{try} \{}
+\DoxyCodeLine{00369             demuxer.openInput();}
+\DoxyCodeLine{00370         \} \textcolor{keywordflow}{catch} (...) \{}
+\DoxyCodeLine{00371         \}}
+\DoxyCodeLine{00372     \}}
+\DoxyCodeLine{00373     std::cout << std::endl;}
+\DoxyCodeLine{00374 \}}
+
+\end{DoxyCode}
+\mbox{\Hypertarget{classCapturer_a5940ee9072f93e9fa6e3c80b6f42bde1}\label{classCapturer_a5940ee9072f93e9fa6e3c80b6f42bde1}} 
+\index{Capturer@{Capturer}!operator=@{operator=}}
+\index{operator=@{operator=}!Capturer@{Capturer}}
+\doxysubsubsection{\texorpdfstring{operator=()}{operator=()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{classCapturer}{Capturer}} \& Capturer\+::operator= (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{classCapturer}{Capturer}} \&}]{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [delete]}}
+
+\mbox{\Hypertarget{classCapturer_ae01ca2c78faa1e7c4fdf5b1c36562ff0}\label{classCapturer_ae01ca2c78faa1e7c4fdf5b1c36562ff0}} 
+\index{Capturer@{Capturer}!pause@{pause}}
+\index{pause@{pause}!Capturer@{Capturer}}
+\doxysubsubsection{\texorpdfstring{pause()}{pause()}}
+{\footnotesize\ttfamily void Capturer\+::pause (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+Pause the recording (if the recording is already paused/stopped, nothing will be done) 
+
+Definition at line \mbox{\hyperlink{capturer_8cpp_source_l00254}{254}} of file \mbox{\hyperlink{capturer_8cpp_source}{capturer.\+cpp}}.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00254                      \{}
+\DoxyCodeLine{00255     std::unique\_lock<std::mutex> ul\{m\_\};}
+\DoxyCodeLine{00256     \textcolor{keywordflow}{if} (paused\_ || stopped\_) \textcolor{keywordflow}{return};}
+\DoxyCodeLine{00257     paused\_ = \textcolor{keyword}{true};}
+\DoxyCodeLine{00258     cv\_.notify\_all();}
+\DoxyCodeLine{00259 \}}
+
+\end{DoxyCode}
+\mbox{\Hypertarget{classCapturer_addc2bab7c74562e447ce8a8f1fe16013}\label{classCapturer_addc2bab7c74562e447ce8a8f1fe16013}} 
+\index{Capturer@{Capturer}!resume@{resume}}
+\index{resume@{resume}!Capturer@{Capturer}}
+\doxysubsubsection{\texorpdfstring{resume()}{resume()}}
+{\footnotesize\ttfamily void Capturer\+::resume (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+Resume the recording (if the recording is already proceeding/stopped, nothing will be done) 
+
+Definition at line \mbox{\hyperlink{capturer_8cpp_source_l00261}{261}} of file \mbox{\hyperlink{capturer_8cpp_source}{capturer.\+cpp}}.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00261                       \{}
+\DoxyCodeLine{00262     std::unique\_lock<std::mutex> ul\{m\_\};}
+\DoxyCodeLine{00263     \textcolor{keywordflow}{if} (!paused\_ || stopped\_) \textcolor{keywordflow}{return};}
+\DoxyCodeLine{00264     paused\_ = \textcolor{keyword}{false};}
+\DoxyCodeLine{00265     cv\_.notify\_all();}
+\DoxyCodeLine{00266 \}}
+
+\end{DoxyCode}
+\mbox{\Hypertarget{classCapturer_a1fcc9b714f0ca9273ab8af371b0d1b8a}\label{classCapturer_a1fcc9b714f0ca9273ab8af371b0d1b8a}} 
+\index{Capturer@{Capturer}!setVerbose@{setVerbose}}
+\index{setVerbose@{setVerbose}!Capturer@{Capturer}}
+\doxysubsubsection{\texorpdfstring{setVerbose()}{setVerbose()}}
+{\footnotesize\ttfamily void Capturer\+::set\+Verbose (\begin{DoxyParamCaption}\item[{bool}]{verbose }\end{DoxyParamCaption})}
+
+Set the verbosity of the screen recorder 
+\begin{DoxyParams}{Parameters}
+{\em verbose} & true to make the recorder verbose, false to use the default verbosity \\
+\hline
+\end{DoxyParams}
+
+
+Definition at line \mbox{\hyperlink{capturer_8cpp_source_l00350}{350}} of file \mbox{\hyperlink{capturer_8cpp_source}{capturer.\+cpp}}.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00350                                       \{}
+\DoxyCodeLine{00351     verbose\_ = verbose;}
+\DoxyCodeLine{00352     makeAvVerbose(verbose\_);}
+\DoxyCodeLine{00353 \}}
+
+\end{DoxyCode}
+\mbox{\Hypertarget{classCapturer_a603d8210404b68dd782a7d2f89bae552}\label{classCapturer_a603d8210404b68dd782a7d2f89bae552}} 
+\index{Capturer@{Capturer}!start@{start}}
+\index{start@{start}!Capturer@{Capturer}}
+\doxysubsubsection{\texorpdfstring{start()}{start()}}
+{\footnotesize\ttfamily std\+::future$<$ void $>$ Capturer\+::start (\begin{DoxyParamCaption}\item[{const std\+::string \&}]{video\+\_\+device,  }\item[{const std\+::string \&}]{audio\+\_\+device,  }\item[{const std\+::string \&}]{output\+\_\+file,  }\item[{\mbox{\hyperlink{classVideoParameters}{Video\+Parameters}}}]{video\+\_\+params }\end{DoxyParamCaption})}
+
+Start the video \mbox{[}and audio\mbox{]} recording. When this function returns, the capturer internal state will be fully initialized and the recording will be in progress. The video stream will be encoded as H.\+264, with pixel format YUV420, while the audio stream will be encoded as AAC. WARNING\+: if there is already a recording in progress, calling this function will throw an exception. If the specified output file already exists, this function will simply overwrite it without performing any check 
+\begin{DoxyParams}{Parameters}
+{\em video\+\_\+device} & the name of the video device to use (must be non-\/empty) \\
+\hline
+{\em audio\+\_\+device} & the name of the audio device to use (if empty, audio won\textquotesingle{}t be recorded) \\
+\hline
+{\em output\+\_\+file} & the name of the output file to use to save the recording (must be non-\/empty) \\
+\hline
+{\em video\+\_\+params} & the video dimensions (NOTE\+: if the width/height is set to 0, the whole display dimension will be considered) \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+a future that can be used to check for exceptions occurring in the recording thread 
+\end{DoxyReturn}
+
+
+Definition at line \mbox{\hyperlink{capturer_8cpp_source_l00148}{148}} of file \mbox{\hyperlink{capturer_8cpp_source}{capturer.\+cpp}}.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00149                                                                                               \{}
+\DoxyCodeLine{00150     \textcolor{keywordflow}{if} (!stopped\_) \textcolor{keywordflow}{throw} std::runtime\_error(\textcolor{stringliteral}{"{}Recording already in progress"{}});}
+\DoxyCodeLine{00151 }
+\DoxyCodeLine{00152     \textcolor{keywordflow}{if} (video\_device.empty()) \textcolor{keywordflow}{throw} std::runtime\_error(\textcolor{stringliteral}{"{}Video device not specified"{}});}
+\DoxyCodeLine{00153     \textcolor{keywordflow}{if} (output\_file.empty()) \textcolor{keywordflow}{throw} std::runtime\_error(\textcolor{stringliteral}{"{}Output file not specified"{}});}
+\DoxyCodeLine{00154 }
+\DoxyCodeLine{00155     \textcolor{keywordtype}{bool} capture\_audio = !audio\_device.empty();}
+\DoxyCodeLine{00156 }
+\DoxyCodeLine{00157     AVPixelFormat video\_pix\_fmt = AV\_PIX\_FMT\_YUV420P;}
+\DoxyCodeLine{00158     AVCodecID video\_codec\_id = AV\_CODEC\_ID\_H264;}
+\DoxyCodeLine{00159     AVCodecID audio\_codec\_id = AV\_CODEC\_ID\_AAC;}
+\DoxyCodeLine{00160 }
+\DoxyCodeLine{00161     \mbox{\hyperlink{classDemuxer}{Demuxer}} demuxer;}
+\DoxyCodeLine{00162     std::optional<Demuxer> audio\_demuxer;  \textcolor{comment}{// Linux only}}
+\DoxyCodeLine{00163 }
+\DoxyCodeLine{00164     \textcolor{comment}{/* init Muxer */}}
+\DoxyCodeLine{00165     muxer\_ = std::make\_shared<Muxer>(output\_file);}
+\DoxyCodeLine{00166 }
+\DoxyCodeLine{00167     \{ \textcolor{comment}{/* init Demuxer */}}
+\DoxyCodeLine{00168         \textcolor{keyword}{const} std::string device\_name = generateInputDeviceName(video\_device, audio\_device, video\_params);}
+\DoxyCodeLine{00169         \textcolor{keyword}{const} std::map<std::string, std::string> demuxer\_options = generateDemuxerOptions(video\_params);}
+\DoxyCodeLine{00170         demuxer = \mbox{\hyperlink{classDemuxer}{Demuxer}}(getInputFormatName(), device\_name, demuxer\_options);}
+\DoxyCodeLine{00171         demuxer.\mbox{\hyperlink{classDemuxer_adb7d8df640f876555025a6ca7d7b2cdb}{openInput}}();}
+\DoxyCodeLine{00172     \}}
+\DoxyCodeLine{00173 }
+\DoxyCodeLine{00174     \{ \textcolor{comment}{/* init Pipeline */}}
+\DoxyCodeLine{00175         \textcolor{keywordtype}{bool} async;}
+\DoxyCodeLine{00176 \textcolor{preprocessor}{\#ifdef LINUX}}
+\DoxyCodeLine{00177         video\_params.\mbox{\hyperlink{classVideoParameters_ae5d9d23da28e0cdcdf22d7802d928620}{setVideoOffset}}(0, 0);  \textcolor{comment}{// No cropping is performed on Linux}}
+\DoxyCodeLine{00178         async = \textcolor{keyword}{false};}
+\DoxyCodeLine{00179 \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00180         async = \textcolor{keyword}{true};}
+\DoxyCodeLine{00181 \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00182         \textcolor{comment}{/* init Pipeline */}}
+\DoxyCodeLine{00183         pipeline\_ = std::make\_unique<Pipeline>(muxer\_, async);}
+\DoxyCodeLine{00184     \}}
+\DoxyCodeLine{00185 }
+\DoxyCodeLine{00186     pipeline\_-\/>initVideo(demuxer, video\_codec\_id, video\_pix\_fmt, video\_params);}
+\DoxyCodeLine{00187 }
+\DoxyCodeLine{00188     \textcolor{comment}{/* init audio structures, if necessary */}}
+\DoxyCodeLine{00189     \textcolor{keywordflow}{if} (capture\_audio) \{}
+\DoxyCodeLine{00190 \textcolor{preprocessor}{\#ifdef LINUX}}
+\DoxyCodeLine{00191         \textcolor{comment}{/* init audio demuxer and pipeline */}}
+\DoxyCodeLine{00192         \textcolor{keyword}{const} std::string audio\_device\_name = generateInputDeviceName(\textcolor{stringliteral}{"{}"{}}, audio\_device, video\_params);}
+\DoxyCodeLine{00193         audio\_demuxer = \mbox{\hyperlink{classDemuxer}{Demuxer}}(getInputFormatName(\textcolor{keyword}{true}), audio\_device\_name, std::map<std::string, std::string>());}
+\DoxyCodeLine{00194         audio\_demuxer-\/>openInput();}
+\DoxyCodeLine{00195         pipeline\_-\/>initAudio(*audio\_demuxer, audio\_codec\_id);}
+\DoxyCodeLine{00196 \textcolor{preprocessor}{\#else}}
+\DoxyCodeLine{00197         pipeline\_-\/>initAudio(demuxer, audio\_codec\_id);}
+\DoxyCodeLine{00198 \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00199     \}}
+\DoxyCodeLine{00200 }
+\DoxyCodeLine{00201     \textcolor{comment}{/* Open output file */}}
+\DoxyCodeLine{00202     muxer\_-\/>openFile();}
+\DoxyCodeLine{00203 }
+\DoxyCodeLine{00204     \textcolor{comment}{/* Print info about structures (if verbose) */}}
+\DoxyCodeLine{00205     \textcolor{keywordflow}{if} (verbose\_) \{}
+\DoxyCodeLine{00206         std::cout << std::endl;}
+\DoxyCodeLine{00207         demuxer.\mbox{\hyperlink{classDemuxer_a85f970c6ef269fd10729fea1995a130d}{printInfo}}();}
+\DoxyCodeLine{00208 \textcolor{preprocessor}{\#ifdef LINUX}}
+\DoxyCodeLine{00209         \textcolor{keywordflow}{if} (capture\_audio) audio\_demuxer.value().printInfo(1);}
+\DoxyCodeLine{00210 \textcolor{preprocessor}{\#endif}}
+\DoxyCodeLine{00211         muxer\_-\/>printInfo();}
+\DoxyCodeLine{00212         pipeline\_-\/>printInfo();}
+\DoxyCodeLine{00213         std::cout << std::endl;}
+\DoxyCodeLine{00214     \}}
+\DoxyCodeLine{00215 }
+\DoxyCodeLine{00216     std::promise<void> p;}
+\DoxyCodeLine{00217     \textcolor{keyword}{auto} f = p.get\_future();}
+\DoxyCodeLine{00218 }
+\DoxyCodeLine{00219     \{}
+\DoxyCodeLine{00220         std::unique\_lock ul\{m\_\};}
+\DoxyCodeLine{00221 }
+\DoxyCodeLine{00222         capturer\_ = std::thread(}
+\DoxyCodeLine{00223             [\textcolor{keyword}{this}](\mbox{\hyperlink{classDemuxer}{Demuxer}} demuxer, std::optional<Demuxer> audio\_demuxer, std::promise<void> p) \{}
+\DoxyCodeLine{00224                 \textcolor{keywordflow}{try} \{}
+\DoxyCodeLine{00225                     \textcolor{keywordflow}{if} (audio\_demuxer) \{}
+\DoxyCodeLine{00226                         capture(demuxer, *audio\_demuxer);}
+\DoxyCodeLine{00227                     \} \textcolor{keywordflow}{else} \{}
+\DoxyCodeLine{00228                         capture(demuxer);}
+\DoxyCodeLine{00229                     \}}
+\DoxyCodeLine{00230                     p.set\_value();}
+\DoxyCodeLine{00231                 \} \textcolor{keywordflow}{catch} (...) \{}
+\DoxyCodeLine{00232                     p.set\_exception(std::current\_exception());}
+\DoxyCodeLine{00233                 \}}
+\DoxyCodeLine{00234             \},}
+\DoxyCodeLine{00235             std::move(demuxer), std::move(audio\_demuxer), std::move(p));}
+\DoxyCodeLine{00236         \textcolor{comment}{/* note that if audio\_demuxer contained a value, it still contains a (now "{}empty"{}) demuxer now */}}
+\DoxyCodeLine{00237 }
+\DoxyCodeLine{00238         paused\_ = \textcolor{keyword}{false};}
+\DoxyCodeLine{00239         stopped\_ = \textcolor{keyword}{false};  \textcolor{comment}{// set stopped\_ to false only when everything is properly set-\/up}}
+\DoxyCodeLine{00240     \}}
+\DoxyCodeLine{00241 }
+\DoxyCodeLine{00242     \textcolor{keywordflow}{return} f;}
+\DoxyCodeLine{00243 \}}
+
+\end{DoxyCode}
+\mbox{\Hypertarget{classCapturer_a3690f81aa60bc388f73f8e92c05d9d08}\label{classCapturer_a3690f81aa60bc388f73f8e92c05d9d08}} 
+\index{Capturer@{Capturer}!stop@{stop}}
+\index{stop@{stop}!Capturer@{Capturer}}
+\doxysubsubsection{\texorpdfstring{stop()}{stop()}}
+{\footnotesize\ttfamily void Capturer\+::stop (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+Stop the recording (if the recording is already stopped, nothing will be done). When this function returns, the recorder internal state is guaranteed to be complemetely cleaned up (including all processing threads) 
+
+Definition at line \mbox{\hyperlink{capturer_8cpp_source_l00245}{245}} of file \mbox{\hyperlink{capturer_8cpp_source}{capturer.\+cpp}}.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00245                     \{}
+\DoxyCodeLine{00246     \textcolor{keywordflow}{if} (!stopCapture()) \textcolor{keywordflow}{return};}
+\DoxyCodeLine{00247     \textcolor{keywordflow}{if} (capturer\_.joinable()) capturer\_.join();}
+\DoxyCodeLine{00248     pipeline\_-\/>flush();}
+\DoxyCodeLine{00249     muxer\_-\/>closeFile();}
+\DoxyCodeLine{00250     pipeline\_.reset();}
+\DoxyCodeLine{00251     muxer\_.reset();}
+\DoxyCodeLine{00252 \}}
+
+\end{DoxyCode}
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+include/libcapture/\mbox{\hyperlink{capturer_8h}{capturer.\+h}}\item 
+src/capture/\mbox{\hyperlink{capturer_8cpp}{capturer.\+cpp}}\end{DoxyCompactItemize}

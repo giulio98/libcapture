@@ -1,0 +1,62 @@
+\hypertarget{common_8h}{}\doxysection{src/common/common.h File Reference}
+\label{common_8h}\index{src/common/common.h@{src/common/common.h}}
+{\ttfamily \#include $<$libavcodec/avcodec.\+h$>$}\newline
+{\ttfamily \#include $<$libavdevice/avdevice.\+h$>$}\newline
+{\ttfamily \#include $<$libavfilter/avfilter.\+h$>$}\newline
+{\ttfamily \#include $<$libavfilter/buffersink.\+h$>$}\newline
+{\ttfamily \#include $<$libavfilter/buffersrc.\+h$>$}\newline
+{\ttfamily \#include $<$libavformat/avformat.\+h$>$}\newline
+{\ttfamily \#include $<$libavutil/time.\+h$>$}\newline
+{\ttfamily \#include $<$array$>$}\newline
+{\ttfamily \#include $<$map$>$}\newline
+{\ttfamily \#include $<$memory$>$}\newline
+{\ttfamily \#include $<$stdexcept$>$}\newline
+{\ttfamily \#include $<$string$>$}\newline
+{\ttfamily \#include \char`\"{}deleter.\+h\char`\"{}}\newline
+\doxysubsection*{Namespaces}
+\begin{DoxyCompactItemize}
+\item 
+namespace \mbox{\hyperlink{namespaceav}{av}}
+\end{DoxyCompactItemize}
+\doxysubsection*{Typedefs}
+\begin{DoxyCompactItemize}
+\item 
+using \mbox{\hyperlink{namespaceav_a84641b7a446e1183f8722c998db8be0c}{av\+::\+Packet\+UPtr}} = std\+::unique\+\_\+ptr$<$ AVPacket, \mbox{\hyperlink{structDeleterPP}{Deleter\+PP}}$<$ av\+\_\+packet\+\_\+free $>$ $>$
+\item 
+using \mbox{\hyperlink{namespaceav_abcf8febb01b83a6bf7671fc1793f23f0}{av\+::\+Frame\+UPtr}} = std\+::unique\+\_\+ptr$<$ AVFrame, \mbox{\hyperlink{structDeleterPP}{Deleter\+PP}}$<$ av\+\_\+frame\+\_\+free $>$ $>$
+\item 
+using \mbox{\hyperlink{namespaceav_a8bbddc2f529c1b2befec508337f0254b}{av\+::\+In\+Format\+Context\+UPtr}} = std\+::unique\+\_\+ptr$<$ AVFormat\+Context, \mbox{\hyperlink{structDeleterPP}{Deleter\+PP}}$<$ avformat\+\_\+close\+\_\+input $>$ $>$
+\item 
+using \mbox{\hyperlink{namespaceav_ac85764c248c4228f6457d9ed75711c9c}{av\+::\+Format\+Context\+UPtr}} = std\+::unique\+\_\+ptr$<$ AVFormat\+Context, \mbox{\hyperlink{structDeleterP}{DeleterP}}$<$ avformat\+\_\+free\+\_\+context $>$ $>$
+\item 
+using \mbox{\hyperlink{namespaceav_a626540c7621a1e06ba5b9d2206006904}{av\+::\+Codec\+Context\+UPtr}} = std\+::unique\+\_\+ptr$<$ AVCodec\+Context, \mbox{\hyperlink{structDeleterPP}{Deleter\+PP}}$<$ avcodec\+\_\+free\+\_\+context $>$ $>$
+\item 
+using \mbox{\hyperlink{namespaceav_aeda5767965662437c209ec63893a1fa6}{av\+::\+Filter\+Graph\+UPtr}} = std\+::unique\+\_\+ptr$<$ AVFilter\+Graph, \mbox{\hyperlink{structDeleterPP}{Deleter\+PP}}$<$ avfilter\+\_\+graph\+\_\+free $>$ $>$
+\item 
+using \mbox{\hyperlink{namespaceav_a2081378bc912e5d177d0eac7120a056a}{av\+::\+Filter\+In\+Out\+UPtr}} = std\+::unique\+\_\+ptr$<$ AVFilter\+In\+Out, \mbox{\hyperlink{structDeleterPP}{Deleter\+PP}}$<$ avfilter\+\_\+inout\+\_\+free $>$ $>$
+\item 
+using \mbox{\hyperlink{namespaceav_ac63df59361f71f9e13346a67da3f46d3}{av\+::\+Dictionary\+UPtr}} = std\+::unique\+\_\+ptr$<$ AVDictionary, \mbox{\hyperlink{structDeleterPP}{Deleter\+PP}}$<$ av\+\_\+dict\+\_\+free $>$ $>$
+\end{DoxyCompactItemize}
+\doxysubsection*{Enumerations}
+\begin{DoxyCompactItemize}
+\item 
+enum \mbox{\hyperlink{namespaceav_ae2953b761e9eb4d9a8be80a224fd26bb}{av\+::\+Media\+Type}} \{ \mbox{\hyperlink{namespaceav_ae2953b761e9eb4d9a8be80a224fd26bbad4f2e84fb09232323dd1559e6e8fc5cb}{av\+::\+None}} = -\/1
+, \mbox{\hyperlink{namespaceav_ae2953b761e9eb4d9a8be80a224fd26bba6ec05a98ec3161d8877fadd84fdec43d}{av\+::\+Video}}
+, \mbox{\hyperlink{namespaceav_ae2953b761e9eb4d9a8be80a224fd26bba99b90951926ac80c982650c5e579f93b}{av\+::\+Audio}}
+, \mbox{\hyperlink{namespaceav_ae2953b761e9eb4d9a8be80a224fd26bba4ba3ba29e0bf744e3b78a3a07e063149}{av\+::\+Num\+Types}}
+ \}
+\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+constexpr bool \mbox{\hyperlink{namespaceav_a231ef2ae2e10e69b5a79a64ac5453ed8}{av\+::valid\+Media\+Type}} (Media\+Type type)
+\item 
+Dictionary\+UPtr \mbox{\hyperlink{namespaceav_adcd7031d3c0148269ef170c6e4b73003}{av\+::map2dict}} (const std\+::map$<$ std\+::string, std\+::string $>$ \&map)
+\item 
+std\+::map$<$ std\+::string, std\+::string $>$ \mbox{\hyperlink{namespaceav_a2289910715bb0ea43c6a0db11672ace0}{av\+::dict2map}} (const AVDictionary $\ast$dict)
+\end{DoxyCompactItemize}
+\doxysubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+constexpr std\+::array$<$ Media\+Type, Media\+Type\+::\+Num\+Types $>$ \mbox{\hyperlink{namespaceav_a8c2d213cd1b3461b2ae369f83d00c1c5}{av\+::valid\+Media\+Types}} = \{Media\+Type\+::\+Video, Media\+Type\+::\+Audio\}
+\end{DoxyCompactItemize}

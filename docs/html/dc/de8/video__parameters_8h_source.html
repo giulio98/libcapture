@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.9.4"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>screen-recorder: include/screen-recorder/video_parameters.h Source File</title>
+<title>libcapture: include/libcapture/video_parameters.h Source File</title>
 <link href="../../tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="../../jquery.js"></script>
 <script type="text/javascript" src="../../dynsections.js"></script>
@@ -21,9 +21,9 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">screen-recorder<span id="projectnumber">&#160;0.1</span>
+   <div id="projectname">libcapture<span id="projectnumber">&#160;0.1</span>
    </div>
-   <div id="projectbrief">screen-recorder is a multiplatform C++ library that allows to capture your screen and optionally microphone audio, build with FFmpeg</div>
+   <div id="projectbrief">libcapture is a multiplatform c++ library that allows to capture the display and the microphone audio.</div>
   </td>
  </tr>
  </tbody>
@@ -63,14 +63,14 @@ $(function() {
 
 <div id="nav-path" class="navpath">
   <ul>
-<li class="navelem"><a class="el" href="../../dir_d44c64559bbebec7f509842c48db8b23.html">include</a></li><li class="navelem"><a class="el" href="../../dir_49777ccd8b1c17fde88f440c7e602b0d.html">screen-recorder</a></li>  </ul>
+<li class="navelem"><a class="el" href="../../dir_d44c64559bbebec7f509842c48db8b23.html">include</a></li><li class="navelem"><a class="el" href="../../dir_88dada6f0de8a394c3907f223196feb8.html">libcapture</a></li>  </ul>
 </div>
 </div><!-- top -->
 <div class="header">
   <div class="headertitle"><div class="title">video_parameters.h</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="preprocessor">#pragma once</span></div>
+<a href="../../dc/de8/video__parameters_8h.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="preprocessor">#pragma once</span></div>
 <div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span> </div>
 <div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span><span class="preprocessor">#include &lt;string&gt;</span></div>
 <div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span> </div>
@@ -81,24 +81,24 @@ $(function() {
 <div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span>    <span class="keywordtype">int</span> offset_y_ = 0;</div>
 <div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span>    <span class="keywordtype">int</span> framerate_ = 0;</div>
 <div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span> </div>
-<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span>    <span class="keywordtype">void</span> checkGE(<span class="keyword">const</span> std::string &amp;name, <span class="keyword">const</span> <span class="keywordtype">int</span> val, <span class="keyword">const</span> <span class="keywordtype">int</span> bound) {</div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span>    <span class="keyword">static</span> <span class="keywordtype">void</span> checkGE(<span class="keyword">const</span> std::string &amp;name, <span class="keyword">const</span> <span class="keywordtype">int</span> val, <span class="keyword">const</span> <span class="keywordtype">int</span> bound) {</div>
 <div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span>        <span class="keywordflow">if</span> (val &lt; bound) <span class="keywordflow">throw</span> std::runtime_error(name + <span class="stringliteral">&quot; must be &gt;= &quot;</span> + std::to_string(bound));</div>
 <div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span>    }</div>
 <div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span> </div>
-<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span>    <span class="keywordtype">void</span> checkEven(<span class="keyword">const</span> std::string &amp;name, <span class="keyword">const</span> <span class="keywordtype">int</span> val) {</div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span>    <span class="keyword">static</span> <span class="keywordtype">void</span> checkEven(<span class="keyword">const</span> std::string &amp;name, <span class="keyword">const</span> <span class="keywordtype">int</span> val) {</div>
 <div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span>        <span class="keywordflow">if</span> (val % 2) <span class="keywordflow">throw</span> std::runtime_error(name + <span class="stringliteral">&quot; must be divisible by 2&quot;</span>);</div>
 <div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span>    }</div>
 <div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span> </div>
 <div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="keyword">public</span>:</div>
-<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span>    <a class="code hl_class" href="../../da/d57/classVideoParameters.html">VideoParameters</a>() = <span class="keywordflow">default</span>;</div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno"><a class="line" href="../../da/d57/classVideoParameters.html#a6fe18526bb39ee380515ff34fbf2f4b7">   21</a></span>    <a class="code hl_function" href="../../da/d57/classVideoParameters.html#a6fe18526bb39ee380515ff34fbf2f4b7">VideoParameters</a>() = <span class="keywordflow">default</span>;</div>
 <div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span> </div>
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span>    <a class="code hl_class" href="../../da/d57/classVideoParameters.html">VideoParameters</a>(<span class="keywordtype">int</span> width, <span class="keywordtype">int</span> height, <span class="keywordtype">int</span> offset_x, <span class="keywordtype">int</span> offset_y, <span class="keywordtype">int</span> framerate) {</div>
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span>        setVideoSize(width, height);</div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span>        setVideoOffset(offset_x, offset_y);</div>
-<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>        setFramerate(framerate);</div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno"><a class="line" href="../../da/d57/classVideoParameters.html#a8cb923ce57061005323814f9d3ce0372">   23</a></span>    <a class="code hl_function" href="../../da/d57/classVideoParameters.html#a8cb923ce57061005323814f9d3ce0372">VideoParameters</a>(<span class="keywordtype">int</span> width, <span class="keywordtype">int</span> height, <span class="keywordtype">int</span> offset_x, <span class="keywordtype">int</span> offset_y, <span class="keywordtype">int</span> framerate) {</div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span>        <a class="code hl_function" href="../../da/d57/classVideoParameters.html#ab89fab0001e049e77f8876ff7832dd15">setVideoSize</a>(width, height);</div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span>        <a class="code hl_function" href="../../da/d57/classVideoParameters.html#ae5d9d23da28e0cdcdf22d7802d928620">setVideoOffset</a>(offset_x, offset_y);</div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span>        <a class="code hl_function" href="../../da/d57/classVideoParameters.html#abb38fa11fbf493488c78efee2c10f9f8">setFramerate</a>(framerate);</div>
 <div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span>    }</div>
 <div class="line"><a id="l00028" name="l00028"></a><span class="lineno">   28</span> </div>
-<div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span>    <span class="keywordtype">void</span> setVideoSize(<span class="keywordtype">int</span> width, <span class="keywordtype">int</span> height) {</div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno"><a class="line" href="../../da/d57/classVideoParameters.html#ab89fab0001e049e77f8876ff7832dd15">   29</a></span>    <span class="keywordtype">void</span> <a class="code hl_function" href="../../da/d57/classVideoParameters.html#ab89fab0001e049e77f8876ff7832dd15">setVideoSize</a>(<span class="keywordtype">int</span> width, <span class="keywordtype">int</span> height) {</div>
 <div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span>        checkGE(<span class="stringliteral">&quot;width&quot;</span>, width, 0);</div>
 <div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>        checkGE(<span class="stringliteral">&quot;width&quot;</span>, height, 0);</div>
 <div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span>        checkEven(<span class="stringliteral">&quot;width&quot;</span>, width);</div>
@@ -107,25 +107,33 @@ $(function() {
 <div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span>        height_ = height;</div>
 <div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>    }</div>
 <div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span> </div>
-<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>    <span class="keywordtype">void</span> setVideoOffset(<span class="keywordtype">int</span> offset_x, <span class="keywordtype">int</span> offset_y) {</div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno"><a class="line" href="../../da/d57/classVideoParameters.html#ae5d9d23da28e0cdcdf22d7802d928620">   38</a></span>    <span class="keywordtype">void</span> <a class="code hl_function" href="../../da/d57/classVideoParameters.html#ae5d9d23da28e0cdcdf22d7802d928620">setVideoOffset</a>(<span class="keywordtype">int</span> offset_x, <span class="keywordtype">int</span> offset_y) {</div>
 <div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>        checkGE(<span class="stringliteral">&quot;offset x&quot;</span>, offset_x, 0);</div>
 <div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>        checkGE(<span class="stringliteral">&quot;offset y&quot;</span>, offset_y, 0);</div>
 <div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>        offset_x_ = offset_x;</div>
 <div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>        offset_y_ = offset_y;</div>
 <div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>    }</div>
 <div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span> </div>
-<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>    <span class="keywordtype">void</span> setFramerate(<span class="keywordtype">int</span> framerate) {</div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno"><a class="line" href="../../da/d57/classVideoParameters.html#abb38fa11fbf493488c78efee2c10f9f8">   45</a></span>    <span class="keywordtype">void</span> <a class="code hl_function" href="../../da/d57/classVideoParameters.html#abb38fa11fbf493488c78efee2c10f9f8">setFramerate</a>(<span class="keywordtype">int</span> framerate) {</div>
 <div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>        checkGE(<span class="stringliteral">&quot;framerate&quot;</span>, framerate, 1);</div>
 <div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>        framerate_ = framerate;</div>
 <div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>    }</div>
 <div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span> </div>
-<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>    [[nodiscard]] std::pair&lt;int, int&gt; getVideoSize()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> std::make_pair(width_, height_); }</div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno"><a class="line" href="../../da/d57/classVideoParameters.html#afaf0987244f9961fd6cbb5468ac16c18">   50</a></span>    [[nodiscard]] std::pair&lt;int, int&gt; <a class="code hl_function" href="../../da/d57/classVideoParameters.html#afaf0987244f9961fd6cbb5468ac16c18">getVideoSize</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> std::make_pair(width_, height_); }</div>
 <div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span> </div>
-<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>    [[nodiscard]] std::pair&lt;int, int&gt; getVideoOffset()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> std::make_pair(offset_x_, offset_y_); }</div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno"><a class="line" href="../../da/d57/classVideoParameters.html#a4338d07a117bcbea757824253fd55ee0">   52</a></span>    [[nodiscard]] std::pair&lt;int, int&gt; <a class="code hl_function" href="../../da/d57/classVideoParameters.html#a4338d07a117bcbea757824253fd55ee0">getVideoOffset</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> std::make_pair(offset_x_, offset_y_); }</div>
 <div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span> </div>
-<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>    [[nodiscard]] <span class="keywordtype">int</span> getFramerate()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> framerate_; }</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno"><a class="line" href="../../da/d57/classVideoParameters.html#ad698f89ad5b99356ab4988e8ca50df6e">   54</a></span>    [[nodiscard]] <span class="keywordtype">int</span> <a class="code hl_function" href="../../da/d57/classVideoParameters.html#ad698f89ad5b99356ab4988e8ca50df6e">getFramerate</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> framerate_; }</div>
 <div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>};</div>
 <div class="ttc" id="aclassVideoParameters_html"><div class="ttname"><a href="../../da/d57/classVideoParameters.html">VideoParameters</a></div><div class="ttdef"><b>Definition:</b> <a href="../../dc/de8/video__parameters_8h_source.html#l00005">video_parameters.h:5</a></div></div>
+<div class="ttc" id="aclassVideoParameters_html_a4338d07a117bcbea757824253fd55ee0"><div class="ttname"><a href="../../da/d57/classVideoParameters.html#a4338d07a117bcbea757824253fd55ee0">VideoParameters::getVideoOffset</a></div><div class="ttdeci">std::pair&lt; int, int &gt; getVideoOffset() const</div><div class="ttdef"><b>Definition:</b> <a href="../../dc/de8/video__parameters_8h_source.html#l00052">video_parameters.h:52</a></div></div>
+<div class="ttc" id="aclassVideoParameters_html_a6fe18526bb39ee380515ff34fbf2f4b7"><div class="ttname"><a href="../../da/d57/classVideoParameters.html#a6fe18526bb39ee380515ff34fbf2f4b7">VideoParameters::VideoParameters</a></div><div class="ttdeci">VideoParameters()=default</div></div>
+<div class="ttc" id="aclassVideoParameters_html_a8cb923ce57061005323814f9d3ce0372"><div class="ttname"><a href="../../da/d57/classVideoParameters.html#a8cb923ce57061005323814f9d3ce0372">VideoParameters::VideoParameters</a></div><div class="ttdeci">VideoParameters(int width, int height, int offset_x, int offset_y, int framerate)</div><div class="ttdef"><b>Definition:</b> <a href="../../dc/de8/video__parameters_8h_source.html#l00023">video_parameters.h:23</a></div></div>
+<div class="ttc" id="aclassVideoParameters_html_ab89fab0001e049e77f8876ff7832dd15"><div class="ttname"><a href="../../da/d57/classVideoParameters.html#ab89fab0001e049e77f8876ff7832dd15">VideoParameters::setVideoSize</a></div><div class="ttdeci">void setVideoSize(int width, int height)</div><div class="ttdef"><b>Definition:</b> <a href="../../dc/de8/video__parameters_8h_source.html#l00029">video_parameters.h:29</a></div></div>
+<div class="ttc" id="aclassVideoParameters_html_abb38fa11fbf493488c78efee2c10f9f8"><div class="ttname"><a href="../../da/d57/classVideoParameters.html#abb38fa11fbf493488c78efee2c10f9f8">VideoParameters::setFramerate</a></div><div class="ttdeci">void setFramerate(int framerate)</div><div class="ttdef"><b>Definition:</b> <a href="../../dc/de8/video__parameters_8h_source.html#l00045">video_parameters.h:45</a></div></div>
+<div class="ttc" id="aclassVideoParameters_html_ad698f89ad5b99356ab4988e8ca50df6e"><div class="ttname"><a href="../../da/d57/classVideoParameters.html#ad698f89ad5b99356ab4988e8ca50df6e">VideoParameters::getFramerate</a></div><div class="ttdeci">int getFramerate() const</div><div class="ttdef"><b>Definition:</b> <a href="../../dc/de8/video__parameters_8h_source.html#l00054">video_parameters.h:54</a></div></div>
+<div class="ttc" id="aclassVideoParameters_html_ae5d9d23da28e0cdcdf22d7802d928620"><div class="ttname"><a href="../../da/d57/classVideoParameters.html#ae5d9d23da28e0cdcdf22d7802d928620">VideoParameters::setVideoOffset</a></div><div class="ttdeci">void setVideoOffset(int offset_x, int offset_y)</div><div class="ttdef"><b>Definition:</b> <a href="../../dc/de8/video__parameters_8h_source.html#l00038">video_parameters.h:38</a></div></div>
+<div class="ttc" id="aclassVideoParameters_html_afaf0987244f9961fd6cbb5468ac16c18"><div class="ttname"><a href="../../da/d57/classVideoParameters.html#afaf0987244f9961fd6cbb5468ac16c18">VideoParameters::getVideoSize</a></div><div class="ttdeci">std::pair&lt; int, int &gt; getVideoSize() const</div><div class="ttdef"><b>Definition:</b> <a href="../../dc/de8/video__parameters_8h_source.html#l00050">video_parameters.h:50</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>

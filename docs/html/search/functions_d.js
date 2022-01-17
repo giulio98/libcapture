@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['writepacket_0',['writePacket',['../d6/d3f/classMuxer.html#a0cf18ee009cfebeab6d024ab157c9c85',1,'Muxer']]]
+  ['threadguard_0',['ThreadGuard',['../de/d5c/classThreadGuard.html#a972b7bfb6d28e91b747730ce3dca81fa',1,'ThreadGuard::ThreadGuard(std::thread &amp;t)'],['../de/d5c/classThreadGuard.html#a8b09e6f2c0e1df4966d8da5e05c85b09',1,'ThreadGuard::ThreadGuard(const ThreadGuard &amp;)=delete']]]
 ];

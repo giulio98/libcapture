@@ -1,16 +1,22 @@
 \hypertarget{classLogLevelSetter}{}\doxysection{Log\+Level\+Setter Class Reference}
 \label{classLogLevelSetter}\index{LogLevelSetter@{LogLevelSetter}}
+
+
+{\ttfamily \#include $<$log\+\_\+level\+\_\+setter.\+h$>$}
+
 \doxysubsection*{Public Member Functions}
 \begin{DoxyCompactItemize}
 \item 
 \mbox{\hyperlink{classLogLevelSetter_af652768695bd05143aa9dc6f42fd9a9b}{Log\+Level\+Setter}} (int log\+\_\+level)
+\item 
+\mbox{\hyperlink{classLogLevelSetter_afda88139d4fa36bdc52118f13f6d3326}{$\sim$\+Log\+Level\+Setter}} ()
 \end{DoxyCompactItemize}
 
 
 \doxysubsection{Detailed Description}
 
 
-Definition at line \mbox{\hyperlink{log__level__setter_8h_source_l00003}{3}} of file \mbox{\hyperlink{log__level__setter_8h_source}{log\+\_\+level\+\_\+setter.\+h}}.
+Definition at line \mbox{\hyperlink{log__level__setter_8h_source_l00005}{5}} of file \mbox{\hyperlink{log__level__setter_8h_source}{log\+\_\+level\+\_\+setter.\+h}}.
 
 
 
@@ -19,18 +25,18 @@ Definition at line \mbox{\hyperlink{log__level__setter_8h_source_l00003}{3}} of 
 \index{LogLevelSetter@{LogLevelSetter}!LogLevelSetter@{LogLevelSetter}}
 \index{LogLevelSetter@{LogLevelSetter}!LogLevelSetter@{LogLevelSetter}}
 \doxysubsubsection{\texorpdfstring{LogLevelSetter()}{LogLevelSetter()}}
-{\footnotesize\ttfamily Log\+Level\+Setter\+::\+Log\+Level\+Setter (\begin{DoxyParamCaption}\item[{int}]{log\+\_\+level }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+{\footnotesize\ttfamily Log\+Level\+Setter\+::\+Log\+Level\+Setter (\begin{DoxyParamCaption}\item[{int}]{log\+\_\+level }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}, {\ttfamily [explicit]}}
 
 
 
-Definition at line \mbox{\hyperlink{log__level__setter_8h_source_l00007}{7}} of file \mbox{\hyperlink{log__level__setter_8h_source}{log\+\_\+level\+\_\+setter.\+h}}.
+Definition at line \mbox{\hyperlink{log__level__setter_8h_source_l00009}{9}} of file \mbox{\hyperlink{log__level__setter_8h_source}{log\+\_\+level\+\_\+setter.\+h}}.
 
 
 \begin{DoxyCode}{0}
-\DoxyCodeLine{00007                                   \{}
-\DoxyCodeLine{00008         prev\_log\_level\_ = av\_log\_get\_level();}
-\DoxyCodeLine{00009         av\_log\_set\_level(log\_level);}
-\DoxyCodeLine{00010     \}}
+\DoxyCodeLine{00009                                            \{}
+\DoxyCodeLine{00010         prev\_log\_level\_ = av\_log\_get\_level();}
+\DoxyCodeLine{00011         av\_log\_set\_level(log\_level);}
+\DoxyCodeLine{00012     \}}
 
 \end{DoxyCode}
 \mbox{\Hypertarget{classLogLevelSetter_afda88139d4fa36bdc52118f13f6d3326}\label{classLogLevelSetter_afda88139d4fa36bdc52118f13f6d3326}} 
@@ -41,15 +47,15 @@ Definition at line \mbox{\hyperlink{log__level__setter_8h_source_l00007}{7}} of 
 
 
 
-Definition at line \mbox{\hyperlink{log__level__setter_8h_source_l00012}{12}} of file \mbox{\hyperlink{log__level__setter_8h_source}{log\+\_\+level\+\_\+setter.\+h}}.
+Definition at line \mbox{\hyperlink{log__level__setter_8h_source_l00014}{14}} of file \mbox{\hyperlink{log__level__setter_8h_source}{log\+\_\+level\+\_\+setter.\+h}}.
 
 
 \begin{DoxyCode}{0}
-\DoxyCodeLine{00012 \{ av\_log\_set\_level(prev\_log\_level\_); \}}
+\DoxyCodeLine{00014 \{ av\_log\_set\_level(prev\_log\_level\_); \}}
 
 \end{DoxyCode}
 
 
 The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
 \item 
-src/utils/log\+\_\+level\+\_\+setter.\+h\end{DoxyCompactItemize}
+src/utils/\mbox{\hyperlink{log__level__setter_8h}{log\+\_\+level\+\_\+setter.\+h}}\end{DoxyCompactItemize}

@@ -1,0 +1,127 @@
+\label{index_md_README}%
+\Hypertarget{index_md_README}%
+ 
+
+     
+
+libcapture is a multiplatform C++ library that allows to capture your screen and optionally microphone audio, build with \href{https://github.com/FFmpeg/FFmpeg}{\texttt{ FFmpeg}}.\hypertarget{index_autotoc_md1}{}\doxysection{Dependences}\label{index_autotoc_md1}
+
+\begin{DoxyItemize}
+\item cmake \texorpdfstring{$>$}{>}= 2.\+8
+\item ffmpeg \texorpdfstring{$>$}{>}= 4.\+3.\+2
+\item screen-\/capture-\/recorder-\/to-\/video-\/windows-\/free \texorpdfstring{$>$}{>}= 0.\+12.\+11 ({\itshape only for Windows}) 
+\end{DoxyItemize}\hypertarget{index_autotoc_md2}{}\doxysection{Currently supported audio/video formats}\label{index_autotoc_md2}
+\tabulinesep=1mm
+\begin{longtabu}spread 0pt [c]{*{4}{|X[-1]}|}
+\hline
+\PBS\centering \cellcolor{\tableheadbgcolor}\textbf{ Type of Format   }&\PBS\centering \cellcolor{\tableheadbgcolor}\textbf{ Linux   }&\PBS\centering \cellcolor{\tableheadbgcolor}\textbf{ Mac\+OS   }&\PBS\centering \cellcolor{\tableheadbgcolor}\textbf{ Windows    }\\\cline{1-4}
+\endfirsthead
+\hline
+\endfoot
+\hline
+\PBS\centering \cellcolor{\tableheadbgcolor}\textbf{ Type of Format   }&\PBS\centering \cellcolor{\tableheadbgcolor}\textbf{ Linux   }&\PBS\centering \cellcolor{\tableheadbgcolor}\textbf{ Mac\+OS   }&\PBS\centering \cellcolor{\tableheadbgcolor}\textbf{ Windows    }\\\cline{1-4}
+\endhead
+\PBS\centering Video Format   &x11grab   &avfoundation   &dshow    \\\cline{1-4}
+\PBS\centering Audio Format   &alsa   &avfoundation   &dshow   \\\cline{1-4}
+\end{longtabu}
+\hypertarget{index_autotoc_md3}{}\doxysection{Currently supported audio/video devices}\label{index_autotoc_md3}
+\tabulinesep=1mm
+\begin{longtabu}spread 0pt [c]{*{4}{|X[-1]}|}
+\hline
+\PBS\centering \cellcolor{\tableheadbgcolor}\textbf{ Type of Device   }&\PBS\centering \cellcolor{\tableheadbgcolor}\textbf{ Linux   }&\PBS\centering \cellcolor{\tableheadbgcolor}\textbf{ Mac\+OS   }&\PBS\centering \cellcolor{\tableheadbgcolor}\textbf{ Windows    }\\\cline{1-4}
+\endfirsthead
+\hline
+\endfoot
+\hline
+\PBS\centering \cellcolor{\tableheadbgcolor}\textbf{ Type of Device   }&\PBS\centering \cellcolor{\tableheadbgcolor}\textbf{ Linux   }&\PBS\centering \cellcolor{\tableheadbgcolor}\textbf{ Mac\+OS   }&\PBS\centering \cellcolor{\tableheadbgcolor}\textbf{ Windows    }\\\cline{1-4}
+\endhead
+\PBS\centering Video device   &screen   &screen, webcam   &screen, webcam    \\\cline{1-4}
+\PBS\centering Audio device   &microphone   &microphone   &microphone, system audio   \\\cline{1-4}
+\end{longtabu}
+\hypertarget{index_autotoc_md4}{}\doxysection{Install FFmpeg}\label{index_autotoc_md4}
+Under {\bfseries{Windows}}, you can install FFmpeg by clicking \href{https://www.gyan.dev/ffmpeg/builds/packages/ffmpeg-4.3.2-full_build-shared.7z}{\texttt{ here}}. Make sure to add {\ttfamily C\+:\textbackslash{}FFmpeg\textbackslash{}FFmpeg\textbackslash{}bin} on your Path variable. Additionally, to ensure proper operation of screen-\/capture you need to install \href{https://github.com/rdp/screen-capture-recorder-to-video-windows-free/releases}{\texttt{ screen-\/capture-\/recorder-\/to-\/video-\/windows-\/free}}.
+
+Under {\bfseries{Linux}}, you can install FFmpeg by opening your terminal and running the following command 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{sudo apt-\/get -\/yq update \&\& sudo apt-\/get -\/yq install cmake libsdl2-\/dev libavcodec-\/dev libavfilter-\/dev libpostproc-\/dev libavformat-\/dev libavutil-\/dev  libswresample-\/dev libswscale-\/dev libavdevice-\/dev}
+
+\end{DoxyCode}
+
+
+Finally, under {\bfseries{Mac\+OS}}, you can install FFmpeg by opening your terminal and running the following command 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{brew install cmake ffmpeg}
+
+\end{DoxyCode}
+ \hypertarget{index_autotoc_md5}{}\doxysection{Install libcapture}\label{index_autotoc_md5}
+Using the cmake {\ttfamily Fetch\+Content} directives you can directly setup libcapture as follows
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{include(FetchContent)}
+\DoxyCodeLine{}
+\DoxyCodeLine{FetchContent\_Declare(}
+\DoxyCodeLine{        libcapture}
+\DoxyCodeLine{        GIT\_REPOSITORY https://github.com/giulio98/libcapture.git}
+\DoxyCodeLine{)}
+\DoxyCodeLine{FetchContent\_MakeAvailable(libcapture)}
+\DoxyCodeLine{\# create your executable }
+\DoxyCodeLine{\# and whatever you need for}
+\DoxyCodeLine{\# your project ...}
+\DoxyCodeLine{target\_link\_libraries(<your\_executable> libcapture)}
+
+\end{DoxyCode}
+ \hypertarget{index_autotoc_md6}{}\doxysubsection{Windows}\label{index_autotoc_md6}
+Let\textquotesingle{}s see an example on how to install and use libcapture in Windows. After installing ffmpeg, as described in Install FFmpeg, your {\ttfamily CMake\+Lists.\+txt} should look like this 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{cmake\_minimum\_required(VERSION 3.20)}
+\DoxyCodeLine{project(myproject)}
+\DoxyCodeLine{}
+\DoxyCodeLine{set(CMAKE\_CXX\_STANDARD 17)}
+\DoxyCodeLine{}
+\DoxyCodeLine{set(EXECUTABLE\_OUTPUT\_PATH \$\{PROJECT\_SOURCE\_DIR\}/bin)}
+\DoxyCodeLine{}
+\DoxyCodeLine{include(FetchContent)}
+\DoxyCodeLine{}
+\DoxyCodeLine{FetchContent\_Declare(}
+\DoxyCodeLine{        libcapture}
+\DoxyCodeLine{        GIT\_REPOSITORY https://github.com/giulio98/libcapture.git}
+\DoxyCodeLine{)}
+\DoxyCodeLine{FetchContent\_MakeAvailable(libcapture)}
+\DoxyCodeLine{add\_executable(myexe main.cpp)}
+\DoxyCodeLine{target\_link\_libraries(myexe libcapture)}
+
+\end{DoxyCode}
+ As an example {\ttfamily main.\+cpp} can be \href{example/recorder.cpp}{\texttt{ recorder.\+cpp}}.
+
+If your project doesn\textquotesingle{}t compile, probably it\textquotesingle{}s because you are not using a proper compiler, you can use either MSVC or min\+GW64 you can find \href{https://www.msys2.org/}{\texttt{ here}} a guide to install min\+GW64, make sure to add {\ttfamily C\+:\textbackslash{}msys64\textbackslash{}mingw64\textbackslash{}bin} in the path of your environment variable.
+
+At this step you will have under bin your executable.
+
+In order to run your executable you must add the ffmpeg dlls, that you can find under {\ttfamily C\+:\textbackslash{}FFmpeg\textbackslash{}FFmpeg\textbackslash{}bin}, in the same folder of your executable.\hypertarget{index_autotoc_md7}{}\doxysubsection{Linux}\label{index_autotoc_md7}
+Let\textquotesingle{}s see another example on how to install libcapture in Linux. After installing ffmpeg, your {\ttfamily CMake\+Lists.\+txt} should look like this 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{cmake\_minimum\_required(VERSION 3.20)}
+\DoxyCodeLine{project(myproject)}
+\DoxyCodeLine{}
+\DoxyCodeLine{set(CMAKE\_CXX\_STANDARD 20)}
+\DoxyCodeLine{}
+\DoxyCodeLine{set(EXECUTABLE\_OUTPUT\_PATH \$\{PROJECT\_SOURCE\_DIR\}/bin)}
+\DoxyCodeLine{set(CMAKE\_CXX\_FLAGS "{}\$\{CMAKE\_CXX\_FLAGS\} -\/std=c++11 -\/pthread"{})}
+\DoxyCodeLine{include(FetchContent)}
+\DoxyCodeLine{}
+\DoxyCodeLine{FetchContent\_Declare(}
+\DoxyCodeLine{        libcapture}
+\DoxyCodeLine{        GIT\_REPOSITORY https://github.com/giulio98/libcapture.git}
+\DoxyCodeLine{)}
+\DoxyCodeLine{FetchContent\_MakeAvailable(libcapture)}
+\DoxyCodeLine{add\_executable(myexe main.cpp)}
+\DoxyCodeLine{target\_link\_libraries(myexe libcapture)}
+
+\end{DoxyCode}
+ As you can see it\textquotesingle{}s the same for Windows except for the line 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{set(CMAKE\_CXX\_FLAGS "{}\$\{CMAKE\_CXX\_FLAGS\} -\/std=c++11 -\/pthread"{})}
+
+\end{DoxyCode}
+ As before, you can fill {\ttfamily main.\+cpp} with the code provided in \href{example/recorder.cpp}{\texttt{ recorder.\+cpp}}. Then you can run your executable.\hypertarget{index_autotoc_md8}{}\doxysection{Usage}\label{index_autotoc_md8}

@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.9.4"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>screen-recorder: Main Page</title>
+<title>libcapture: libcapture C++ library</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -21,9 +21,9 @@
  <tbody>
  <tr id="projectrow">
   <td id="projectalign">
-   <div id="projectname">screen-recorder<span id="projectnumber">&#160;0.1</span>
+   <div id="projectname">libcapture<span id="projectnumber">&#160;0.1</span>
    </div>
-   <div id="projectbrief">screen-recorder is a multiplatform C++ library that allows to capture your screen and optionally microphone audio, build with FFmpeg</div>
+   <div id="projectbrief">libcapture is a multiplatform c++ library that allows to capture the display and the microphone audio.</div>
   </td>
  </tr>
  </tbody>
@@ -62,10 +62,104 @@ $(function() {
 </iframe>
 </div>
 
-<div class="header">
-  <div class="headertitle"><div class="title">screen-recorder Documentation</div></div>
+<div><div class="header">
+  <div class="headertitle"><div class="title">libcapture C++ library </div></div>
 </div><!--header-->
 <div class="contents">
+<div class="textblock"><p  align="center"><a class="anchor" id="md_README"></a> </p>
+<p ><img src="https://img.shields.io/badge/C++-17-blue.svg?style=flat&amp;logo=c%2B%2B" alt="c++" style="pointer-events: none;" class="inline"/> <img src="https://github.com/giulio98/libcapture/actions/workflows/linux_build.yml/badge.svg" alt="CI build" style="pointer-events: none;" class="inline"/> <img src="https://github.com/giulio98/libcapture/actions/workflows/macos_build.yml/badge.svg" alt="CI build" style="pointer-events: none;" class="inline"/> <img src="https://github.com/giulio98/libcapture/actions/workflows/windows_build.yml/badge.svg" alt="CI build" style="pointer-events: none;" class="inline"/> <img src="https://img.shields.io/github/license/giulio98/libcapture" alt="License" class="inline"/> </p>
+<p >libcapture is a multiplatform C++ library that allows to capture your screen and optionally microphone audio, build with <a href="https://github.com/FFmpeg/FFmpeg">FFmpeg</a>.</p>
+<h1><a class="anchor" id="autotoc_md1"></a>
+Dependences</h1>
+<ul>
+<li>cmake &gt;= 2.8</li>
+<li>ffmpeg &gt;= 4.3.2</li>
+<li>screen-capture-recorder-to-video-windows-free &gt;= 0.12.11 (<em>only for Windows</em>) </li>
+</ul>
+<h1><a class="anchor" id="autotoc_md2"></a>
+Currently supported audio/video formats</h1>
+<table class="markdownTable">
+<tr class="markdownTableHead">
+<th class="markdownTableHeadCenter">Type of Format   </th><th class="markdownTableHeadNone">Linux   </th><th class="markdownTableHeadNone">MacOS   </th><th class="markdownTableHeadNone">Windows    </th></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyCenter">Video Format   </td><td class="markdownTableBodyNone">x11grab   </td><td class="markdownTableBodyNone">avfoundation   </td><td class="markdownTableBodyNone">dshow    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyCenter">Audio Format   </td><td class="markdownTableBodyNone">alsa   </td><td class="markdownTableBodyNone">avfoundation   </td><td class="markdownTableBodyNone">dshow   </td></tr>
+</table>
+<h1><a class="anchor" id="autotoc_md3"></a>
+Currently supported audio/video devices</h1>
+<table class="markdownTable">
+<tr class="markdownTableHead">
+<th class="markdownTableHeadCenter">Type of Device   </th><th class="markdownTableHeadNone">Linux   </th><th class="markdownTableHeadNone">MacOS   </th><th class="markdownTableHeadNone">Windows    </th></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyCenter">Video device   </td><td class="markdownTableBodyNone">screen   </td><td class="markdownTableBodyNone">screen, webcam   </td><td class="markdownTableBodyNone">screen, webcam    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyCenter">Audio device   </td><td class="markdownTableBodyNone">microphone   </td><td class="markdownTableBodyNone">microphone   </td><td class="markdownTableBodyNone">microphone, system audio   </td></tr>
+</table>
+<h1><a class="anchor" id="autotoc_md4"></a>
+Install FFmpeg</h1>
+<p >Under <b>Windows</b>, you can install FFmpeg by clicking <a href="https://www.gyan.dev/ffmpeg/builds/packages/ffmpeg-4.3.2-full_build-shared.7z">here</a>. Make sure to add <code>C:\FFmpeg\FFmpeg\bin</code> on your Path variable. Additionally, to ensure proper operation of screen-capture you need to install <a href="https://github.com/rdp/screen-capture-recorder-to-video-windows-free/releases">screen-capture-recorder-to-video-windows-free</a>.</p>
+<p >Under <b>Linux</b>, you can install FFmpeg by opening your terminal and running the following command </p><div class="fragment"><div class="line">sudo apt-get -yq update &amp;&amp; sudo apt-get -yq install cmake libsdl2-dev libavcodec-dev libavfilter-dev libpostproc-dev libavformat-dev libavutil-dev  libswresample-dev libswscale-dev libavdevice-dev</div>
+</div><!-- fragment --><p >Finally, under <b>MacOS</b>, you can install FFmpeg by opening your terminal and running the following command </p><div class="fragment"><div class="line">brew install cmake ffmpeg</div>
+</div><!-- fragment --> <h1><a class="anchor" id="autotoc_md5"></a>
+Install libcapture</h1>
+<p >Using the cmake <code>FetchContent</code> directives you can directly setup libcapture as follows</p>
+<div class="fragment"><div class="line">include(FetchContent)</div>
+<div class="line"> </div>
+<div class="line">FetchContent_Declare(</div>
+<div class="line">        libcapture</div>
+<div class="line">        GIT_REPOSITORY https://github.com/giulio98/libcapture.git</div>
+<div class="line">)</div>
+<div class="line">FetchContent_MakeAvailable(libcapture)</div>
+<div class="line"># create your executable </div>
+<div class="line"># and whatever you need for</div>
+<div class="line"># your project ...</div>
+<div class="line">target_link_libraries(&lt;your_executable&gt; libcapture)</div>
+</div><!-- fragment --> <h2><a class="anchor" id="autotoc_md6"></a>
+Windows</h2>
+<p >Let's see an example on how to install and use libcapture in Windows. After installing ffmpeg, as described in Install FFmpeg, your <code>CMakeLists.txt</code> should look like this </p><div class="fragment"><div class="line">cmake_minimum_required(VERSION 3.20)</div>
+<div class="line">project(myproject)</div>
+<div class="line"> </div>
+<div class="line">set(CMAKE_CXX_STANDARD 17)</div>
+<div class="line"> </div>
+<div class="line">set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)</div>
+<div class="line"> </div>
+<div class="line">include(FetchContent)</div>
+<div class="line"> </div>
+<div class="line">FetchContent_Declare(</div>
+<div class="line">        libcapture</div>
+<div class="line">        GIT_REPOSITORY https://github.com/giulio98/libcapture.git</div>
+<div class="line">)</div>
+<div class="line">FetchContent_MakeAvailable(libcapture)</div>
+<div class="line">add_executable(myexe main.cpp)</div>
+<div class="line">target_link_libraries(myexe libcapture)</div>
+</div><!-- fragment --><p> As an example <code>main.cpp</code> can be <a href="example/recorder.cpp">recorder.cpp</a>.</p>
+<p >If your project doesn't compile, probably it's because you are not using a proper compiler, you can use either MSVC or minGW64 you can find <a href="https://www.msys2.org/">here</a> a guide to install minGW64, make sure to add <code>C:\msys64\mingw64\bin</code> in the path of your environment variable.</p>
+<p >At this step you will have under bin your executable.</p>
+<p >In order to run your executable you must add the ffmpeg dlls, that you can find under <code>C:\FFmpeg\FFmpeg\bin</code>, in the same folder of your executable.</p>
+<h2><a class="anchor" id="autotoc_md7"></a>
+Linux</h2>
+<p >Let's see another example on how to install libcapture in Linux. After installing ffmpeg, your <code>CMakeLists.txt</code> should look like this </p><div class="fragment"><div class="line">cmake_minimum_required(VERSION 3.20)</div>
+<div class="line">project(myproject)</div>
+<div class="line"> </div>
+<div class="line">set(CMAKE_CXX_STANDARD 20)</div>
+<div class="line"> </div>
+<div class="line">set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)</div>
+<div class="line">set(CMAKE_CXX_FLAGS &quot;${CMAKE_CXX_FLAGS} -std=c++11 -pthread&quot;)</div>
+<div class="line">include(FetchContent)</div>
+<div class="line"> </div>
+<div class="line">FetchContent_Declare(</div>
+<div class="line">        libcapture</div>
+<div class="line">        GIT_REPOSITORY https://github.com/giulio98/libcapture.git</div>
+<div class="line">)</div>
+<div class="line">FetchContent_MakeAvailable(libcapture)</div>
+<div class="line">add_executable(myexe main.cpp)</div>
+<div class="line">target_link_libraries(myexe libcapture)</div>
+</div><!-- fragment --><p> As you can see it's the same for Windows except for the line </p><div class="fragment"><div class="line">set(CMAKE_CXX_FLAGS &quot;${CMAKE_CXX_FLAGS} -std=c++11 -pthread&quot;)</div>
+</div><!-- fragment --><p> As before, you can fill <code>main.cpp</code> with the code provided in <a href="example/recorder.cpp">recorder.cpp</a>. Then you can run your executable.</p>
+<h1><a class="anchor" id="autotoc_md8"></a>
+Usage</h1>
+</div></div><!-- PageDoc -->
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>

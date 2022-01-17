@@ -1,0 +1,31 @@
+\hypertarget{decoder_8cpp}{}\doxysection{src/process/decoder.cpp File Reference}
+\label{decoder_8cpp}\index{src/process/decoder.cpp@{src/process/decoder.cpp}}
+{\ttfamily \#include \char`\"{}decoder.\+h\char`\"{}}\newline
+{\ttfamily \#include $<$stdexcept$>$}\newline
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \mbox{\hyperlink{decoder_8cpp_a3afcf16131999c2fdeddb7d1d483a69d}{swap}} (\mbox{\hyperlink{classDecoder}{Decoder}} \&lhs, \mbox{\hyperlink{classDecoder}{Decoder}} \&rhs)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{decoder_8cpp_a3afcf16131999c2fdeddb7d1d483a69d}\label{decoder_8cpp_a3afcf16131999c2fdeddb7d1d483a69d}} 
+\index{decoder.cpp@{decoder.cpp}!swap@{swap}}
+\index{swap@{swap}!decoder.cpp@{decoder.cpp}}
+\doxysubsubsection{\texorpdfstring{swap()}{swap()}}
+{\footnotesize\ttfamily void swap (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classDecoder}{Decoder}} \&}]{lhs,  }\item[{\mbox{\hyperlink{classDecoder}{Decoder}} \&}]{rhs }\end{DoxyParamCaption})}
+
+
+
+Definition at line \mbox{\hyperlink{decoder_8cpp_source_l00007}{7}} of file \mbox{\hyperlink{decoder_8cpp_source}{decoder.\+cpp}}.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00007                                       \{}
+\DoxyCodeLine{00008     \mbox{\hyperlink{decoder_8cpp_a3afcf16131999c2fdeddb7d1d483a69d}{std::swap}}(lhs.codec\_, rhs.codec\_);}
+\DoxyCodeLine{00009     \mbox{\hyperlink{decoder_8cpp_a3afcf16131999c2fdeddb7d1d483a69d}{std::swap}}(lhs.codec\_ctx\_, rhs.codec\_ctx\_);}
+\DoxyCodeLine{00010     \mbox{\hyperlink{decoder_8cpp_a3afcf16131999c2fdeddb7d1d483a69d}{std::swap}}(lhs.frame\_, rhs.frame\_);}
+\DoxyCodeLine{00011 \}}
+
+\end{DoxyCode}

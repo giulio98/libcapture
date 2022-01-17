@@ -1,0 +1,32 @@
+\hypertarget{converter_8cpp}{}\doxysection{src/process/converter.cpp File Reference}
+\label{converter_8cpp}\index{src/process/converter.cpp@{src/process/converter.cpp}}
+{\ttfamily \#include \char`\"{}converter.\+h\char`\"{}}\newline
+{\ttfamily \#include $<$sstream$>$}\newline
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \mbox{\hyperlink{converter_8cpp_a8baba4be80dc7f525946274eea7ad513}{swap}} (\mbox{\hyperlink{classConverter}{Converter}} \&lhs, \mbox{\hyperlink{classConverter}{Converter}} \&rhs)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{converter_8cpp_a8baba4be80dc7f525946274eea7ad513}\label{converter_8cpp_a8baba4be80dc7f525946274eea7ad513}} 
+\index{converter.cpp@{converter.cpp}!swap@{swap}}
+\index{swap@{swap}!converter.cpp@{converter.cpp}}
+\doxysubsubsection{\texorpdfstring{swap()}{swap()}}
+{\footnotesize\ttfamily void swap (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{classConverter}{Converter}} \&}]{lhs,  }\item[{\mbox{\hyperlink{classConverter}{Converter}} \&}]{rhs }\end{DoxyParamCaption})}
+
+
+
+Definition at line \mbox{\hyperlink{converter_8cpp_source_l00007}{7}} of file \mbox{\hyperlink{converter_8cpp_source}{converter.\+cpp}}.
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{00007                                           \{}
+\DoxyCodeLine{00008     \mbox{\hyperlink{converter_8cpp_a8baba4be80dc7f525946274eea7ad513}{std::swap}}(lhs.filter\_graph\_, rhs.filter\_graph\_);}
+\DoxyCodeLine{00009     \mbox{\hyperlink{converter_8cpp_a8baba4be80dc7f525946274eea7ad513}{std::swap}}(lhs.buffersrc\_ctx\_, rhs.buffersrc\_ctx\_);}
+\DoxyCodeLine{00010     \mbox{\hyperlink{converter_8cpp_a8baba4be80dc7f525946274eea7ad513}{std::swap}}(lhs.buffersink\_ctx\_, rhs.buffersink\_ctx\_);}
+\DoxyCodeLine{00011     \mbox{\hyperlink{converter_8cpp_a8baba4be80dc7f525946274eea7ad513}{std::swap}}(lhs.frame\_, rhs.frame\_);}
+\DoxyCodeLine{00012 \}}
+
+\end{DoxyCode}
