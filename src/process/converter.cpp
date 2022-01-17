@@ -13,9 +13,6 @@ void swap(Converter &lhs, Converter &rhs) {
 
 static std::pair<std::string, std::string> getAudioFilterSpec(const AVCodecContext *dec_ctx,
                                                               const AVCodecContext *enc_ctx, AVRational in_time_base) {
-    // if (!dec_ctx) throwRuntimeError("dec_ctx is NULL"); condition is always false
-    // if (!enc_ctx) throwRuntimeError("enc_ctx is NULL"); condition is always false
-
     std::stringstream src_args_ss;
     src_args_ss << "time_base=" << in_time_base.num << "/" << in_time_base.den;
     src_args_ss << ":sample_rate=" << dec_ctx->sample_rate;
@@ -49,9 +46,6 @@ static std::pair<std::string, std::string> getAudioFilterSpec(const AVCodecConte
 static std::pair<std::string, std::string> getVideoFilterSpec(const AVCodecContext *dec_ctx,
                                                               const AVCodecContext *enc_ctx, AVRational in_time_base,
                                                               int offset_x, int offset_y) {
-    // if (!dec_ctx) throwRuntimeError("dec_ctx is NULL"); condition is always false
-    // if (!enc_ctx) throwRuntimeError("enc_ctx is NULL"); condition is always false
-
     std::stringstream src_args_ss;
     src_args_ss << "video_size=" << dec_ctx->width << "x" << dec_ctx->height;
     src_args_ss << ":pix_fmt=" << dec_ctx->pix_fmt;
