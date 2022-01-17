@@ -33,7 +33,7 @@ public:
 
     Converter(const Converter &) = delete;
 
-    Converter(Converter &&other) noexcept ;
+    Converter(Converter &&other) noexcept;
 
     ~Converter() = default;
 

@@ -1,4 +1,5 @@
 #include "encoder.h"
+
 #include <iostream>
 #include <stdexcept>
 
