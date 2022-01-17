@@ -183,11 +183,11 @@ int main(int argc, char **argv) {
     }
 
     try {
-        Capturer sc(verbose);
+        Capturer capturer(verbose);
 
         if (video_device.empty()) {
             std::cerr << "ERROR: No video device specified" << std::endl << std::endl;
-            sc.listAvailableDevices();
+            capturer.listAvailableDevices();
             return 1;
         }
 
@@ -198,9 +198,9 @@ int main(int argc, char **argv) {
             if (answer != "y" && answer != "Y") return 0;
         }
 
-        auto f = sc.start(video_device, audio_device, output_file, video_params);
+        auto f = capturer.start(video_device, audio_device, output_file, video_params);
 
-        auto listener = std::thread([&sc]() {
+        auto listener = std::thread([&capturer]() {
             bool paused = false;
             bool print_status = true;
 
@@ -213,16 +213,16 @@ int main(int argc, char **argv) {
                 if (input.length() == 1) {
                     char command = std::tolower(input.front());
                     if (command == 'p' && !paused) {
-                        sc.pause();
+                        capturer.pause();
                         paused = true;
                         print_status = true;
                     } else if (command == 'r' && paused) {
-                        sc.resume();
+                        capturer.resume();
                         paused = false;
                         print_status = true;
                     } else if (command == 's') {
                         std::cout << "\nStopping..." << std::flush;
-                        sc.stop();
+                        capturer.stop();
                         std::cout << " done" << std::endl;
                         break;
                     }
