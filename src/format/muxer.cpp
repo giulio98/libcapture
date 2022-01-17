@@ -30,10 +30,9 @@ void Muxer::addStream(const AVCodecContext *enc_ctx) {
     std::unique_lock ul{m_};
 
     if (file_opened_) throwRuntimeError("cannot add a new stream, file has already been opened");
+    if (streams_[type]) throwRuntimeError("stream of specified type already present");
 
-    auto stream = streams_[type];
-    if (stream) throwRuntimeError("stream of specified type already present");
-    stream = avformat_new_stream(fmt_ctx_.get(), nullptr);
+    const AVStream *stream = avformat_new_stream(fmt_ctx_.get(), nullptr);
     if (!stream) throwRuntimeError("failed to create a new stream");
 
     if (avcodec_parameters_from_context(stream->codecpar, enc_ctx) < 0)
