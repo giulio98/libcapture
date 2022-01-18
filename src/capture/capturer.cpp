@@ -177,7 +177,7 @@ std::future<void> Capturer::start(const std::string &video_device, const std::st
         video_params.setVideoOffset(0, 0);  // No cropping is performed on Linux
         async = false;
 #else
-        async = true;
+        async = capture_audio;
 #endif
         /* init Pipeline */
         pipeline_ = std::make_unique<Pipeline>(muxer_, async);
