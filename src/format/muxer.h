@@ -9,10 +9,10 @@
 class Muxer {
     av::FormatContextUPtr fmt_ctx_;
     std::string filename_;
-    std::array<const AVStream *, av::MediaType::NumTypes> streams_ = {nullptr, nullptr};
+    std::array<const AVStream *, av::MediaType::NumTypes> streams_{};
     std::array<AVRational, av::MediaType::NumTypes> encoders_time_bases_{};
-    bool file_opened_ = false;
-    bool file_closed_ = false;
+    bool file_opened_{};
+    bool file_closed_{};
     std::mutex m_;
 
 public:

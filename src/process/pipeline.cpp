@@ -11,7 +11,6 @@ static void throwLogicError(const std::string &msg) { throw std::logic_error("Pi
 
 Pipeline::Pipeline(std::shared_ptr<Muxer> muxer, bool async) : muxer_(std::move(muxer)), async_(async) {
     if (!muxer_) throwRuntimeError("received Muxer is null");
-    if (async_) stopped_ = false;
 }
 
 Pipeline::~Pipeline() {

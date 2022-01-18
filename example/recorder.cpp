@@ -211,7 +211,7 @@ int main(int argc, char **argv) {
                 std::string input;
                 std::getline(std::cin, input);
                 if (input.length() == 1) {
-                    char command = std::tolower(input.front());
+                    int command = std::tolower(input.front());
                     if (command == 'p' && !paused) {
                         capturer.pause();
                         paused = true;

@@ -21,7 +21,7 @@ class Capturer {
     /* Synchronization variables */
 
     bool stopped_ = true;
-    bool paused_ = false;
+    bool paused_{};
     std::mutex m_;
     std::condition_variable cv_;
     std::thread capturer_;

@@ -4,8 +4,8 @@
 
 class Converter {
     av::FilterGraphUPtr filter_graph_;
-    AVFilterContext *buffersrc_ctx_ = nullptr;
-    AVFilterContext *buffersink_ctx_ = nullptr;
+    AVFilterContext *buffersrc_ctx_{};
+    AVFilterContext *buffersink_ctx_{};
     av::FrameUPtr frame_;
 
     friend void swap(Converter &lhs, Converter &rhs);

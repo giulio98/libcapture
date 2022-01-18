@@ -15,7 +15,7 @@ class Demuxer;
 class Muxer;
 
 class Pipeline {
-    std::array<bool, av::MediaType::NumTypes> managed_types_ = {false, false};
+    std::array<bool, av::MediaType::NumTypes> managed_types_{};
     std::shared_ptr<Muxer> muxer_;
     std::array<Decoder, av::MediaType::NumTypes> decoders_;
     std::array<Encoder, av::MediaType::NumTypes> encoders_;
@@ -23,7 +23,7 @@ class Pipeline {
 
     const bool async_;
     std::mutex m_;
-    bool stopped_;
+    bool stopped_{};
     std::array<std::thread, av::MediaType::NumTypes> processors_;
     std::array<av::PacketUPtr, av::MediaType::NumTypes> packets_;
     std::array<std::condition_variable, av::MediaType::NumTypes> packets_cv_;

@@ -8,10 +8,10 @@
 
 class Demuxer {
     av::InFormatContextUPtr fmt_ctx_;
-    AVInputFormat *fmt_ = nullptr;
+    AVInputFormat *fmt_{};
     std::string device_name_;
     std::map<std::string, std::string> options_;
-    std::array<const AVStream *, av::MediaType::NumTypes> streams_ = {nullptr, nullptr};
+    std::array<const AVStream *, av::MediaType::NumTypes> streams_{};
     av::PacketUPtr packet_;
 
     friend void swap(Demuxer &lhs, Demuxer &rhs);
@@ -29,7 +29,7 @@ public:
 
     Demuxer(const Demuxer &) = delete;
 
-    Demuxer(Demuxer &&other) noexcept ;
+    Demuxer(Demuxer &&other) noexcept;
 
     ~Demuxer() = default;
 

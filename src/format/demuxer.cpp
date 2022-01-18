@@ -18,8 +18,7 @@ void swap(Demuxer &lhs, Demuxer &rhs) {
 }
 
 Demuxer::Demuxer(const std::string &fmt_name, std::string device_name, std::map<std::string, std::string> options)
-    : device_name_(std::move(device_name)), options_(std::move(options)) {
-    fmt_ = av_find_input_format(fmt_name.c_str());
+    : fmt_(av_find_input_format(fmt_name.c_str())), device_name_(std::move(device_name)), options_(std::move(options)) {
     if (!fmt_) throwRuntimeError("cannot find input format");
 }
 
