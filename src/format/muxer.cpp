@@ -30,7 +30,7 @@ void Muxer::addStream(const AVCodecContext *enc_ctx) {
     std::unique_lock ul{m_};
 
     if (file_opened_) throwRuntimeError("cannot add a new stream, file has already been opened");
-    if (streams_[type]) throwRuntimeError("stream of specified type already present");
+    if (streams_.at(type)) throwRuntimeError("stream of specified type already present");
 
     const AVStream *stream = avformat_new_stream(fmt_ctx_.get(), nullptr);
     if (!stream) throwRuntimeError("failed to create a new stream");
@@ -38,8 +38,8 @@ void Muxer::addStream(const AVCodecContext *enc_ctx) {
     if (avcodec_parameters_from_context(stream->codecpar, enc_ctx) < 0)
         throwRuntimeError("failed to write video stream parameters");
 
-    streams_[type] = stream;
-    encoders_time_bases_[type] = enc_ctx->time_base;
+    streams_.at(type) = stream;
+    encoders_time_bases_.at(type) = enc_ctx->time_base;
 }
 
 void Muxer::openFile() {
@@ -75,9 +75,9 @@ void Muxer::writePacket(av::PacketUPtr packet, av::MediaType packet_type) {
 
     if (packet) {
         if (!av::validMediaType(packet_type)) throwRuntimeError("received packet of unknown type");
-        auto stream = streams_[packet_type];
+        auto stream = streams_.at(packet_type);
         if (!stream) throwRuntimeError("stream of specified type not present");
-        av_packet_rescale_ts(packet.get(), encoders_time_bases_[packet_type], stream->time_base);
+        av_packet_rescale_ts(packet.get(), encoders_time_bases_.at(packet_type), stream->time_base);
         packet->stream_index = stream->index;
     }
 

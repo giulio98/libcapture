@@ -79,15 +79,15 @@ bool Demuxer::isInputOpen() const { return (fmt_ctx_ != nullptr); }
 const AVCodecParameters *Demuxer::getStreamParams(av::MediaType stream_type) const {
     if (!fmt_ctx_) throwRuntimeError("failed to acess stream (input is not open)");
     if (!av::validMediaType(stream_type)) throwRuntimeError("invalid stream_type received");
-    if (!streams_[stream_type]) throwRuntimeError("specified stream not present");
-    return streams_[stream_type]->codecpar;
+    if (!streams_.at(stream_type)) throwRuntimeError("specified stream not present");
+    return streams_.at(stream_type)->codecpar;
 }
 
 AVRational Demuxer::getStreamTimeBase(av::MediaType stream_type) const {
     if (!fmt_ctx_) throwRuntimeError("failed to acess stream (input is not open)");
     if (!av::validMediaType(stream_type)) throwRuntimeError("invalid stream_type received");
-    if (!streams_[stream_type]) throwRuntimeError("specified stream not present");
-    return streams_[stream_type]->time_base;
+    if (!streams_.at(stream_type)) throwRuntimeError("specified stream not present");
+    return streams_.at(stream_type)->time_base;
 }
 
 std::pair<av::PacketUPtr, av::MediaType> Demuxer::readPacket() {
@@ -105,7 +105,7 @@ std::pair<av::PacketUPtr, av::MediaType> Demuxer::readPacket() {
     if (ret < 0) throwRuntimeError("failed to read a packet");
 
     for (auto type : av::validMediaTypes) {
-        if (streams_[type] && packet_->stream_index == streams_[type]->index) {
+        if (streams_.at(type) && packet_->stream_index == streams_.at(type)->index) {
             packet_type = type;
             break;
         }
