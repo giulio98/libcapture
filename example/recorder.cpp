@@ -17,11 +17,11 @@
 VideoParameters parseVideoSize(const std::string &str) {
     VideoParameters dims;
 
-    auto main_delim_pos = str.find(":");
+    auto main_delim_pos = str.find(':');
 
     {
         std::string video_size = str.substr(0, main_delim_pos);
-        auto delim_pos = video_size.find("x");
+        auto delim_pos = video_size.find('x');
         if (delim_pos == std::string::npos) throw std::runtime_error("Wrong video-size format");
         int width = std::stoi(video_size.substr(0, delim_pos));
         int height = std::stoi(video_size.substr(delim_pos + 1));
@@ -30,7 +30,7 @@ VideoParameters parseVideoSize(const std::string &str) {
 
     if (main_delim_pos != std::string::npos) {
         std::string offsets = str.substr(main_delim_pos + 1);
-        auto delim_pos = offsets.find(",");
+        auto delim_pos = offsets.find(',');
         if (delim_pos == std::string::npos) throw std::runtime_error("Wrong offsets");
         int offset_x = std::stoi(offsets.substr(0, delim_pos));
         int offset_y = std::stoi(offsets.substr(delim_pos + 1));
