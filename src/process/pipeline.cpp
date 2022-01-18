@@ -19,23 +19,23 @@ Pipeline::~Pipeline() {
 
 void Pipeline::startProcessor(av::MediaType type) {
     if (!av::validMediaType(type)) throwLogicError("failed to start processor (invalid media type received)");
-    if (processors_.at(type).joinable()) throwLogicError("processor for specified type was already started");
+    if (processors_[type].joinable()) throwLogicError("processor for specified type was already started");
 
-    processors_.at(type) = std::thread([this, type]() {
+    processors_[type] = std::thread([this, type]() {
         try {
             while (true) {
                 av::PacketUPtr packet;
                 {
                     std::unique_lock ul{m_};
-                    packets_cv_.at(type).wait(ul, [this, type]() { return (packets_.at(type) || stopped_); });
-                    if (!packets_.at(type) && stopped_) break;
-                    packet = std::move(packets_.at(type));
+                    packets_cv_[type].wait(ul, [this, type]() { return (packets_[type] || stopped_); });
+                    if (!packets_[type] && stopped_) break;
+                    packet = std::move(packets_[type]);
                 }
                 processPacket(packet.get(), type);
             }
         } catch (...) {
             std::unique_lock ul{m_};
-            e_ptrs_.at(type) = std::current_exception();
+            e_ptrs_[type] = std::current_exception();
         }
     });
 }
@@ -61,13 +61,13 @@ void Pipeline::initVideo(const Demuxer &demuxer, AVCodecID codec_id, AVPixelForm
                          const VideoParameters &video_params) {
     const auto type = av::MediaType::Video;
 
-    if (managed_types_.at(type)) throwRuntimeError("video pipeline already initialized");
-    managed_types_.at(type) = true;
+    if (managed_types_[type]) throwRuntimeError("video pipeline already initialized");
+    managed_types_[type] = true;
 
     /* Init decoder */
-    decoders_.at(type) = Decoder(demuxer.getStreamParams(type));
+    decoders_[type] = Decoder(demuxer.getStreamParams(type));
 
-    auto dec_ctx = decoders_.at(type).getContext();
+    auto dec_ctx = decoders_[type].getContext();
     auto [width, height] = video_params.getVideoSize();
     auto [offset_x, offset_y] = video_params.getVideoOffset();
     if (!width) width = dec_ctx->width;
@@ -82,14 +82,14 @@ void Pipeline::initVideo(const Demuxer &demuxer, AVCodecID codec_id, AVPixelForm
      * ultrafast -> superfast -> veryfast -> faster -> fast -> medium
      */
     enc_options.insert({"preset", "ultrafast"});
-    encoders_.at(type) = Encoder(codec_id, width, height, pix_fmt, demuxer.getStreamTimeBase(type),
+    encoders_[type] = Encoder(codec_id, width, height, pix_fmt, demuxer.getStreamTimeBase(type),
                                  muxer_->getGlobalHeaderFlags(), enc_options);
 
     /* Init converter */
-    converters_.at(type) = Converter(decoders_.at(type).getContext(), encoders_.at(type).getContext(),
+    converters_[type] = Converter(decoders_[type].getContext(), encoders_[type].getContext(),
                                      demuxer.getStreamTimeBase(type), offset_x, offset_y);
 
-    muxer_->addStream(encoders_.at(type).getContext());
+    muxer_->addStream(encoders_[type].getContext());
 
     if (async_) startProcessor(type);
 }
@@ -97,13 +97,13 @@ void Pipeline::initVideo(const Demuxer &demuxer, AVCodecID codec_id, AVPixelForm
 void Pipeline::initAudio(const Demuxer &demuxer, AVCodecID codec_id) {
     const auto type = av::MediaType::Audio;
 
-    if (managed_types_.at(type)) throwRuntimeError("audio pipeline already initialized");
-    managed_types_.at(type) = true;
+    if (managed_types_[type]) throwRuntimeError("audio pipeline already initialized");
+    managed_types_[type] = true;
 
     /* Init decoder */
-    decoders_.at(type) = Decoder(demuxer.getStreamParams(type));
+    decoders_[type] = Decoder(demuxer.getStreamParams(type));
 
-    auto dec_ctx = decoders_.at(type).getContext();
+    auto dec_ctx = decoders_[type].getContext();
     uint64_t channel_layout;
     if (dec_ctx->channel_layout) {
         channel_layout = dec_ctx->channel_layout;
@@ -112,14 +112,14 @@ void Pipeline::initAudio(const Demuxer &demuxer, AVCodecID codec_id) {
     }
 
     /* Init encoder */
-    encoders_.at(type) = Encoder(codec_id, dec_ctx->sample_rate, channel_layout, muxer_->getGlobalHeaderFlags(),
+    encoders_[type] = Encoder(codec_id, dec_ctx->sample_rate, channel_layout, muxer_->getGlobalHeaderFlags(),
                                  std::map<std::string, std::string>());
 
     /* Init converter */
-    converters_.at(type) =
-        Converter(decoders_.at(type).getContext(), encoders_.at(type).getContext(), demuxer.getStreamTimeBase(type));
+    converters_[type] =
+        Converter(decoders_[type].getContext(), encoders_[type].getContext(), demuxer.getStreamTimeBase(type));
 
-    muxer_->addStream(encoders_.at(type).getContext());
+    muxer_->addStream(encoders_[type].getContext());
 
     if (async_) startProcessor(type);
 }
@@ -127,8 +127,8 @@ void Pipeline::initAudio(const Demuxer &demuxer, AVCodecID codec_id) {
 void Pipeline::processPacket(const AVPacket *packet, av::MediaType type) {
     if (!av::validMediaType(type)) throwLogicError("failed to process packet (media type is invalid)");
 
-    Decoder &decoder = decoders_.at(type);
-    Converter &converter = converters_.at(type);
+    Decoder &decoder = decoders_[type];
+    Converter &converter = converters_[type];
 
     bool decoder_received = false;
     while (!decoder_received) {
@@ -151,7 +151,7 @@ void Pipeline::processPacket(const AVPacket *packet, av::MediaType type) {
 void Pipeline::processConvertedFrame(const AVFrame *frame, av::MediaType type) {
     if (!av::validMediaType(type)) throwLogicError("failed to process frame (media type is invalid)");
 
-    Encoder &encoder = encoders_.at(type);
+    Encoder &encoder = encoders_[type];
 
     bool encoder_received = false;
     while (!encoder_received) {
@@ -168,15 +168,15 @@ void Pipeline::processConvertedFrame(const AVFrame *frame, av::MediaType type) {
 void Pipeline::feed(av::PacketUPtr packet, av::MediaType packet_type) {
     if (!packet) throwRuntimeError("received packet is null");
     if (!av::validMediaType(packet_type)) throwRuntimeError("failed to take packet (media type is invalid)");
-    if (!managed_types_.at(packet_type)) throwRuntimeError("No pipeline corresponding to received packet type");
+    if (!managed_types_[packet_type]) throwRuntimeError("No pipeline corresponding to received packet type");
 
     if (async_) {
         std::unique_lock ul{m_};
         if (stopped_) throwRuntimeError("already stopped");
         checkExceptions();
-        if (!packets_.at(packet_type)) {  // if previous packet has been fully processed
-            packets_.at(packet_type) = std::move(packet);
-            packets_cv_.at(packet_type).notify_all();
+        if (!packets_[packet_type]) {  // if previous packet has been fully processed
+            packets_[packet_type] = std::move(packet);
+            packets_cv_[packet_type].notify_all();
         }
     } else {
         processPacket(packet.get(), packet_type);
@@ -197,15 +197,15 @@ void Pipeline::flush() {
 
     /* flush the pipelines */
     for (auto type : av::validMediaTypes) {
-        if (managed_types_.at(type)) flushPipeline(type);
+        if (managed_types_[type]) flushPipeline(type);
     }
 }
 
 void Pipeline::printInfo() const {
     for (auto type : av::validMediaTypes) {
-        if (managed_types_.at(type)) {
-            std::cout << "Decoder " << type << ": " << decoders_.at(type).getName() << std::endl;
-            std::cout << "Encoder " << type << ": " << encoders_.at(type).getName() << std::endl;
+        if (managed_types_[type]) {
+            std::cout << "Decoder " << type << ": " << decoders_[type].getName() << std::endl;
+            std::cout << "Encoder " << type << ": " << encoders_[type].getName() << std::endl;
         }
     }
 }
