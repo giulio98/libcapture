@@ -25,7 +25,7 @@ Decoder::Decoder(const AVCodecParameters *params) {
     if (avcodec_open2(codec_ctx_.get(), codec_, nullptr) < 0) throwRuntimeError("unable to open the av codec");
 }
 
-Decoder::Decoder(Decoder &&other) noexcept : Decoder() { swap(*this, other); }
+Decoder::Decoder(Decoder &&other) noexcept { swap(*this, other); }
 
 Decoder &Decoder::operator=(Decoder other) {
     swap(*this, other);

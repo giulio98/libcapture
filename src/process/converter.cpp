@@ -135,7 +135,7 @@ Converter::Converter(const AVCodecContext *dec_ctx, const AVCodecContext *enc_ct
         throwRuntimeError("failed to configure the filter graph");
 }
 
-Converter::Converter(Converter &&other) noexcept : Converter() { swap(*this, other); }
+Converter::Converter(Converter &&other) noexcept { swap(*this, other); }
 
 Converter &Converter::operator=(Converter other) {
     swap(*this, other);
