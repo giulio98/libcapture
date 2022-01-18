@@ -126,8 +126,8 @@ Converter::Converter(const AVCodecContext *dec_ctx, const AVCodecContext *enc_ct
         AVFilterInOut *inputs_raw = inputs.release();
         int ret =
             avfilter_graph_parse_ptr(filter_graph_.get(), filter_spec.c_str(), &inputs_raw, &outputs_raw, nullptr);
-        // outputs = av::FilterInOutUPtr(outputs_raw); never used
-        // inputs = av::FilterInOutUPtr(inputs_raw); never used
+        avfilter_inout_free(&outputs_raw);
+        avfilter_inout_free(&inputs_raw);
         if (ret < 0) throwRuntimeError("failed to parse pointers");
     }
 
