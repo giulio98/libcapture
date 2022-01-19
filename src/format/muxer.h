@@ -13,7 +13,7 @@ class Muxer {
     std::array<AVRational, av::MediaType::NumTypes> encoders_time_bases_{};
     bool file_opened_{};
     bool file_closed_{};
-    std::mutex m_;
+    mutable std::mutex m_;
 
 public:
     /**
@@ -58,11 +58,11 @@ public:
     /**
      * Print informations about the streams
      */
-    void printInfo();
+    void printInfo() const;
 
     /**
      * Get the global header flags of the output format
      * @return the global header flags
      */
-    [[nodiscard]] int getGlobalHeaderFlags();
+    [[nodiscard]] int getGlobalHeaderFlags() const;
 };
