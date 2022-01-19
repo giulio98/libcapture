@@ -137,7 +137,7 @@ Capturer::~Capturer() {
 
 bool Capturer::stopCapture() {
     {
-        std::unique_lock ul{m_};
+        std::lock_guard lg(m_);
         if (stopped_) return false;
         stopped_ = true;
         cv_.notify_all();
@@ -217,7 +217,7 @@ std::future<void> Capturer::start(const std::string &video_device, const std::st
     auto f = p.get_future();
 
     {
-        std::unique_lock ul{m_};
+        std::lock_guard lg(m_);
 
         capturer_ = std::thread(
             [this](Demuxer demuxer, std::optional<Demuxer> audio_demuxer, std::promise<void> p) {
@@ -252,14 +252,14 @@ void Capturer::stop() {
 }
 
 void Capturer::pause() {
-    std::unique_lock<std::mutex> ul{m_};
+    std::lock_guard lg(m_);
     if (paused_ || stopped_) return;
     paused_ = true;
     cv_.notify_all();
 }
 
 void Capturer::resume() {
-    std::unique_lock<std::mutex> ul{m_};
+    std::lock_guard lg(m_);
     if (!paused_ || stopped_) return;
     paused_ = false;
     cv_.notify_all();
@@ -307,7 +307,7 @@ void Capturer::capture(Demuxer &demuxer) {
 
     while (true) {
         {
-            std::unique_lock<std::mutex> ul{m_};
+            std::unique_lock ul(m_);
             after_pause = paused_;
 #ifndef MACOS
             if (paused_) demuxer.closeInput();

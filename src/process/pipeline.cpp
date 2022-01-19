@@ -26,7 +26,7 @@ void Pipeline::startProcessor(av::MediaType type) {
             while (true) {
                 av::PacketUPtr packet;
                 {
-                    std::unique_lock ul{m_};
+                    std::unique_lock ul(m_);
                     packets_cv_[type].wait(ul, [this, type]() { return (packets_[type] || stopped_); });
                     if (!packets_[type] && stopped_) break;
                     packet = std::move(packets_[type]);
@@ -34,7 +34,7 @@ void Pipeline::startProcessor(av::MediaType type) {
                 processPacket(packet.get(), type);
             }
         } catch (...) {
-            std::unique_lock ul{m_};
+            std::lock_guard lg(m_);
             e_ptrs_[type] = std::current_exception();
         }
     });
@@ -42,7 +42,7 @@ void Pipeline::startProcessor(av::MediaType type) {
 
 void Pipeline::stopProcessors() {
     {
-        std::unique_lock<std::mutex> ul{m_};
+        std::lock_guard lg(m_);
         stopped_ = true;
         for (auto &cv : packets_cv_) cv.notify_all();
     }
@@ -83,11 +83,11 @@ void Pipeline::initVideo(const Demuxer &demuxer, AVCodecID codec_id, AVPixelForm
      */
     enc_options.insert({"preset", "ultrafast"});
     encoders_[type] = Encoder(codec_id, width, height, pix_fmt, demuxer.getStreamTimeBase(type),
-                                 muxer_->getGlobalHeaderFlags(), enc_options);
+                              muxer_->getGlobalHeaderFlags(), enc_options);
 
     /* Init converter */
     converters_[type] = Converter(decoders_[type].getContext(), encoders_[type].getContext(),
-                                     demuxer.getStreamTimeBase(type), offset_x, offset_y);
+                                  demuxer.getStreamTimeBase(type), offset_x, offset_y);
 
     muxer_->addStream(encoders_[type].getContext());
 
@@ -113,7 +113,7 @@ void Pipeline::initAudio(const Demuxer &demuxer, AVCodecID codec_id) {
 
     /* Init encoder */
     encoders_[type] = Encoder(codec_id, dec_ctx->sample_rate, channel_layout, muxer_->getGlobalHeaderFlags(),
-                                 std::map<std::string, std::string>());
+                              std::map<std::string, std::string>());
 
     /* Init converter */
     converters_[type] =
@@ -168,10 +168,10 @@ void Pipeline::processConvertedFrame(const AVFrame *frame, av::MediaType type) {
 void Pipeline::feed(av::PacketUPtr packet, av::MediaType packet_type) {
     if (!packet) throwRuntimeError("received packet is null");
     if (!av::validMediaType(packet_type)) throwRuntimeError("failed to take packet (media type is invalid)");
-    if (!managed_types_[packet_type]) throwRuntimeError("No pipeline corresponding to received packet type");
+    if (!managed_types_[packet_type]) throwRuntimeError("no pipeline corresponding to received packet type");
 
     if (async_) {
-        std::unique_lock ul{m_};
+        std::lock_guard lg(m_);
         if (stopped_) throwRuntimeError("already stopped");
         checkExceptions();
         if (!packets_[packet_type]) {  // if previous packet has been fully processed
