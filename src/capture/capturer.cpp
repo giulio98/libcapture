@@ -20,7 +20,7 @@
 
 #define THROW_TEST_EXCEPTION 0  // TO-DO: remove
 
-static void makeAvVerbose(bool verbose) {
+static void makeAvVerbose(const bool verbose) {
     if (verbose) {
         av_log_set_level(AV_LOG_VERBOSE);
         // av_log_set_level(AV_LOG_DEBUG);
@@ -125,7 +125,7 @@ static std::map<std::string, std::string> generateDemuxerOptions(const VideoPara
     return demuxer_options;
 }
 
-Capturer::Capturer(bool verbose) : verbose_(verbose) {
+Capturer::Capturer(const bool verbose) : verbose_(verbose) {
     makeAvVerbose(verbose_);
     avdevice_register_all();
 }
@@ -347,7 +347,7 @@ void Capturer::capture(Demuxer &demuxer) {
     }
 }
 
-void Capturer::setVerbose(bool verbose) {
+void Capturer::setVerbose(const bool verbose) {
     verbose_ = verbose;
     makeAvVerbose(verbose_);
 }

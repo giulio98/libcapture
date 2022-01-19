@@ -76,14 +76,14 @@ void Demuxer::flush() {
 
 bool Demuxer::isInputOpen() const { return (fmt_ctx_ != nullptr); }
 
-const AVCodecParameters *Demuxer::getStreamParams(av::MediaType stream_type) const {
+const AVCodecParameters *Demuxer::getStreamParams(const av::MediaType stream_type) const {
     if (!fmt_ctx_) throwRuntimeError("failed to acess stream (input is not open)");
     if (!av::validMediaType(stream_type)) throwRuntimeError("invalid stream_type received");
     if (!streams_[stream_type]) throwRuntimeError("specified stream not present");
     return streams_[stream_type]->codecpar;
 }
 
-AVRational Demuxer::getStreamTimeBase(av::MediaType stream_type) const {
+AVRational Demuxer::getStreamTimeBase(const av::MediaType stream_type) const {
     if (!fmt_ctx_) throwRuntimeError("failed to acess stream (input is not open)");
     if (!av::validMediaType(stream_type)) throwRuntimeError("invalid stream_type received");
     if (!streams_[stream_type]) throwRuntimeError("specified stream not present");
@@ -115,7 +115,7 @@ std::pair<av::PacketUPtr, av::MediaType> Demuxer::readPacket() {
     return std::make_pair(std::move(packet_), packet_type);
 }
 
-void Demuxer::printInfo(int index) const {
+void Demuxer::printInfo(const int index) const {
     if (!fmt_ctx_) throwRuntimeError("failed to print info (input is not open)");
     av_dump_format(fmt_ctx_.get(), index, device_name_.c_str(), 0);
 }

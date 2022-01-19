@@ -12,7 +12,8 @@ void swap(Converter &lhs, Converter &rhs) {
 }
 
 static std::pair<std::string, std::string> getAudioFilterSpec(const AVCodecContext *dec_ctx,
-                                                              const AVCodecContext *enc_ctx, AVRational in_time_base) {
+                                                              const AVCodecContext *enc_ctx,
+                                                              const AVRational in_time_base) {
     std::stringstream src_args_ss;
     src_args_ss << "time_base=" << in_time_base.num << "/" << in_time_base.den;
     src_args_ss << ":sample_rate=" << dec_ctx->sample_rate;
@@ -44,8 +45,9 @@ static std::pair<std::string, std::string> getAudioFilterSpec(const AVCodecConte
 }
 
 static std::pair<std::string, std::string> getVideoFilterSpec(const AVCodecContext *dec_ctx,
-                                                              const AVCodecContext *enc_ctx, AVRational in_time_base,
-                                                              int offset_x, int offset_y) {
+                                                              const AVCodecContext *enc_ctx,
+                                                              const AVRational in_time_base, const int offset_x,
+                                                              const int offset_y) {
     std::stringstream src_args_ss;
     src_args_ss << "video_size=" << dec_ctx->width << "x" << dec_ctx->height;
     src_args_ss << ":pix_fmt=" << dec_ctx->pix_fmt;
@@ -63,8 +65,8 @@ static std::pair<std::string, std::string> getVideoFilterSpec(const AVCodecConte
     return std::make_pair(src_args_ss.str(), filter_spec_ss.str());
 }
 
-Converter::Converter(const AVCodecContext *dec_ctx, const AVCodecContext *enc_ctx, AVRational in_time_base,
-                     int offset_x, int offset_y) {
+Converter::Converter(const AVCodecContext *dec_ctx, const AVCodecContext *enc_ctx, const AVRational in_time_base,
+                     const int offset_x, const int offset_y) {
     if (!dec_ctx) throwRuntimeError("dec_ctx is NULL");
     if (!enc_ctx) throwRuntimeError("enc_ctx is NULL");
 
@@ -142,7 +144,7 @@ Converter &Converter::operator=(Converter other) {
     return *this;
 }
 
-void Converter::sendFrame(av::FrameUPtr frame) {
+void Converter::sendFrame(const av::FrameUPtr frame) {
     if (!buffersrc_ctx_) throwRuntimeError("buffersrc is not allocated");
     if (!frame) throwRuntimeError("sent frame is not allocated");
     if (av_buffersrc_add_frame(buffersrc_ctx_, frame.get())) throwRuntimeError("failed to write frame to filter");

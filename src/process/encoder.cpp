@@ -14,7 +14,7 @@ void swap(Encoder &lhs, Encoder &rhs) {
     std::swap(lhs.packet_, rhs.packet_);
 }
 
-Encoder::Encoder(AVCodecID codec_id) {
+Encoder::Encoder(const AVCodecID codec_id) {
 #ifdef MACOS
     // if (codec_id == AV_CODEC_ID_H264) {
     //     codec_ = avcodec_find_encoder_by_name("h264_videotoolbox");
@@ -32,8 +32,8 @@ Encoder::Encoder(AVCodecID codec_id) {
     if (!codec_ctx_) throwRuntimeError("failed to allocated memory for AVCodecContext");
 }
 
-Encoder::Encoder(AVCodecID codec_id, int sample_rate, uint64_t channel_layout, int global_header_flags,
-                 const std::map<std::string, std::string> &options)
+Encoder::Encoder(const AVCodecID codec_id, const int sample_rate, const uint64_t channel_layout,
+                 const int global_header_flags, const std::map<std::string, std::string> &options)
     : Encoder(codec_id) {
     if (codec_->type != AVMEDIA_TYPE_AUDIO)
         throwRuntimeError("failed to create audio encoder (received codec ID is not of type audio)");
@@ -49,8 +49,9 @@ Encoder::Encoder(AVCodecID codec_id, int sample_rate, uint64_t channel_layout, i
     init(global_header_flags, options);
 }
 
-Encoder::Encoder(AVCodecID codec_id, int width, int height, AVPixelFormat pix_fmt, AVRational time_base,
-                 int global_header_flags, const std::map<std::string, std::string> &options)
+Encoder::Encoder(const AVCodecID codec_id, const int width, const int height, const AVPixelFormat pix_fmt,
+                 const AVRational time_base, const int global_header_flags,
+                 const std::map<std::string, std::string> &options)
     : Encoder(codec_id) {
     if (codec_->type != AVMEDIA_TYPE_VIDEO)
         throwRuntimeError("failed to create video encoder (received codec ID is not of type video)");
@@ -70,7 +71,7 @@ Encoder &Encoder::operator=(Encoder other) {
     return *this;
 }
 
-void Encoder::init(int global_header_flags, const std::map<std::string, std::string> &options) {
+void Encoder::init(const int global_header_flags, const std::map<std::string, std::string> &options) {
     if (!codec_) throwLogicError("initialization failed, internal codec is null");
     if (!codec_ctx_) throwLogicError("initialization failed, internal codec ctx is null");
 

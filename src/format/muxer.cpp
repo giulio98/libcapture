@@ -67,7 +67,7 @@ void Muxer::closeFile() {
     file_closed_ = true;
 }
 
-void Muxer::writePacket(av::PacketUPtr packet, av::MediaType packet_type) {
+void Muxer::writePacket(const av::PacketUPtr packet, const av::MediaType packet_type) {
     std::lock_guard lg(m_);
 
     if (!file_opened_) throwRuntimeError("cannot write packet, file has not been opened");

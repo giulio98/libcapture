@@ -9,7 +9,7 @@
 static void throwRuntimeError(const std::string &msg) { throw std::runtime_error("Pipeline: " + msg); }
 static void throwLogicError(const std::string &msg) { throw std::logic_error("Pipeline: " + msg); }
 
-Pipeline::Pipeline(std::shared_ptr<Muxer> muxer, bool async) : muxer_(std::move(muxer)), async_(async) {
+Pipeline::Pipeline(std::shared_ptr<Muxer> muxer, const bool async) : muxer_(std::move(muxer)), async_(async) {
     if (!muxer_) throwRuntimeError("received Muxer is null");
 }
 
@@ -17,7 +17,7 @@ Pipeline::~Pipeline() {
     if (async_) stopProcessors();
 }
 
-void Pipeline::startProcessor(av::MediaType type) {
+void Pipeline::startProcessor(const av::MediaType type) {
     if (!av::validMediaType(type)) throwLogicError("failed to start processor (invalid media type received)");
     if (processors_[type].joinable()) throwLogicError("processor for specified type was already started");
 
@@ -57,7 +57,7 @@ void Pipeline::checkExceptions() {
     }
 }
 
-void Pipeline::initVideo(const Demuxer &demuxer, AVCodecID codec_id, AVPixelFormat pix_fmt,
+void Pipeline::initVideo(const Demuxer &demuxer, const AVCodecID codec_id, const AVPixelFormat pix_fmt,
                          const VideoParameters &video_params) {
     const auto type = av::MediaType::Video;
 
@@ -94,7 +94,7 @@ void Pipeline::initVideo(const Demuxer &demuxer, AVCodecID codec_id, AVPixelForm
     if (async_) startProcessor(type);
 }
 
-void Pipeline::initAudio(const Demuxer &demuxer, AVCodecID codec_id) {
+void Pipeline::initAudio(const Demuxer &demuxer, const AVCodecID codec_id) {
     const auto type = av::MediaType::Audio;
 
     if (managed_types_[type]) throwRuntimeError("audio pipeline already initialized");
@@ -124,7 +124,7 @@ void Pipeline::initAudio(const Demuxer &demuxer, AVCodecID codec_id) {
     if (async_) startProcessor(type);
 }
 
-void Pipeline::processPacket(const AVPacket *packet, av::MediaType type) {
+void Pipeline::processPacket(const AVPacket *packet, const av::MediaType type) {
     if (!av::validMediaType(type)) throwLogicError("failed to process packet (media type is invalid)");
 
     Decoder &decoder = decoders_[type];
@@ -148,7 +148,7 @@ void Pipeline::processPacket(const AVPacket *packet, av::MediaType type) {
     }
 }
 
-void Pipeline::processConvertedFrame(const AVFrame *frame, av::MediaType type) {
+void Pipeline::processConvertedFrame(const AVFrame *frame, const av::MediaType type) {
     if (!av::validMediaType(type)) throwLogicError("failed to process frame (media type is invalid)");
 
     Encoder &encoder = encoders_[type];
@@ -165,7 +165,7 @@ void Pipeline::processConvertedFrame(const AVFrame *frame, av::MediaType type) {
     }
 }
 
-void Pipeline::feed(av::PacketUPtr packet, av::MediaType packet_type) {
+void Pipeline::feed(av::PacketUPtr packet, const av::MediaType packet_type) {
     if (!packet) throwRuntimeError("received packet is null");
     if (!av::validMediaType(packet_type)) throwRuntimeError("failed to take packet (media type is invalid)");
     if (!managed_types_[packet_type]) throwRuntimeError("no pipeline corresponding to received packet type");
@@ -183,7 +183,7 @@ void Pipeline::feed(av::PacketUPtr packet, av::MediaType packet_type) {
     }
 }
 
-void Pipeline::flushPipeline(av::MediaType type) {
+void Pipeline::flushPipeline(const av::MediaType type) {
     processPacket(nullptr, type);
     processConvertedFrame(nullptr, type);
 }
