@@ -8,6 +8,7 @@
 #include "format/demuxer.h"
 #include "format/muxer.h"
 
+static void throwRuntimeError(const std::string &msg) { throw std::runtime_error("Pipeline: " + msg); }
 static void throwLogicError(const std::string &msg) { throw std::logic_error("Pipeline: " + msg); }
 
 Pipeline::Pipeline(const std::string &output_file, const bool async) : muxer_(output_file), async_(async) {}
@@ -18,6 +19,7 @@ Pipeline::~Pipeline() {
 
 void Pipeline::startProcessor(const av::MediaType type) {
     assert(av::validMediaType(type));
+    assert(managed_types_[type]);
     assert(!processors_[type].joinable());
 
     processors_[type] = std::thread([this, type]() {
@@ -73,8 +75,8 @@ void Pipeline::initVideo(const Demuxer &demuxer, const AVCodecID codec_id, const
     auto [offset_x, offset_y] = video_params.getVideoOffset();
     if (!width) width = dec_ctx->width;
     if (!height) height = dec_ctx->height;
-    if (offset_x + width > dec_ctx->width) throwLogicError("Output video width exceeds input one");
-    if (offset_y + height > dec_ctx->height) throwLogicError("Output video height exceeds input one");
+    if (offset_x + width > dec_ctx->width) throwRuntimeError("Output video width exceeds input one");
+    if (offset_y + height > dec_ctx->height) throwRuntimeError("Output video height exceeds input one");
 
     /* Init encoder */
     std::map<std::string, std::string> enc_options;
@@ -134,6 +136,7 @@ void Pipeline::initOutput() {
 
 void Pipeline::processPacket(const AVPacket *packet, const av::MediaType type) {
     assert(av::validMediaType(type));
+    assert(managed_types_[type]);
 
     Decoder &decoder = decoders_[type];
     Converter &converter = converters_[type];
@@ -158,6 +161,7 @@ void Pipeline::processPacket(const AVPacket *packet, const av::MediaType type) {
 
 void Pipeline::processConvertedFrame(const AVFrame *frame, const av::MediaType type) {
     assert(av::validMediaType(type));
+    assert(managed_types_[type]);
 
     Encoder &encoder = encoders_[type];
 
@@ -177,8 +181,8 @@ void Pipeline::processConvertedFrame(const AVFrame *frame, const av::MediaType t
 void Pipeline::feed(av::PacketUPtr packet, const av::MediaType packet_type) {
     if (!muxer_.isInited()) throwLogicError("the output file hasn't been initialized yet");
     if (!packet) throwLogicError("received packet is null");
-    if (!av::validMediaType(packet_type)) throwLogicError("failed to take packet (media type is invalid)");
-    if (!managed_types_[packet_type]) throwLogicError("no pipeline corresponding to received packet type");
+    if (!av::validMediaType(packet_type)) throwLogicError("received media type is invalid");
+    if (!managed_types_[packet_type]) throwLogicError("received media type is not handled by the pipeline");
 
     if (async_) {
         std::lock_guard lg(processors_m_);
