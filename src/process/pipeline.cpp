@@ -1,5 +1,7 @@
 #include "pipeline.h"
 
+#include <assert.h>
+
 #include <iostream>
 #include <map>
 
@@ -7,26 +9,23 @@
 #include "format/muxer.h"
 
 static void throwRuntimeError(const std::string &msg) { throw std::runtime_error("Pipeline: " + msg); }
-static void throwLogicError(const std::string &msg) { throw std::logic_error("Pipeline: " + msg); }
 
-Pipeline::Pipeline(std::shared_ptr<Muxer> muxer, const bool async) : muxer_(std::move(muxer)), async_(async) {
-    if (!muxer_) throwRuntimeError("received Muxer is null");
-}
+Pipeline::Pipeline(const std::string &output_file, const bool async) : muxer_(output_file), async_(async) {}
 
 Pipeline::~Pipeline() {
     if (async_) stopProcessors();
 }
 
 void Pipeline::startProcessor(const av::MediaType type) {
-    if (!av::validMediaType(type)) throwLogicError("failed to start processor (invalid media type received)");
-    if (processors_[type].joinable()) throwLogicError("processor for specified type was already started");
+    assert(av::validMediaType(type));
+    assert(!processors_[type].joinable());
 
     processors_[type] = std::thread([this, type]() {
         try {
             while (true) {
                 av::PacketUPtr packet;
                 {
-                    std::unique_lock ul(m_);
+                    std::unique_lock ul(processors_m_);
                     packets_cv_[type].wait(ul, [this, type]() { return (packets_[type] || stopped_); });
                     if (!packets_[type] && stopped_) break;
                     packet = std::move(packets_[type]);
@@ -34,7 +33,7 @@ void Pipeline::startProcessor(const av::MediaType type) {
                 processPacket(packet.get(), type);
             }
         } catch (...) {
-            std::lock_guard lg(m_);
+            std::lock_guard lg(processors_m_);
             e_ptrs_[type] = std::current_exception();
         }
     });
@@ -42,7 +41,7 @@ void Pipeline::startProcessor(const av::MediaType type) {
 
 void Pipeline::stopProcessors() {
     {
-        std::lock_guard lg(m_);
+        std::lock_guard lg(processors_m_);
         stopped_ = true;
         for (auto &cv : packets_cv_) cv.notify_all();
     }
@@ -61,7 +60,9 @@ void Pipeline::initVideo(const Demuxer &demuxer, const AVCodecID codec_id, const
                          const VideoParameters &video_params) {
     const auto type = av::MediaType::Video;
 
+    if (muxer_.isInited()) throwRuntimeError("output has already been initialized");
     if (managed_types_[type]) throwRuntimeError("video pipeline already initialized");
+
     managed_types_[type] = true;
 
     /* Init decoder */
@@ -83,13 +84,13 @@ void Pipeline::initVideo(const Demuxer &demuxer, const AVCodecID codec_id, const
      */
     enc_options.insert({"preset", "ultrafast"});
     encoders_[type] = Encoder(codec_id, width, height, pix_fmt, demuxer.getStreamTimeBase(type),
-                              muxer_->getGlobalHeaderFlags(), enc_options);
+                              muxer_.getGlobalHeaderFlags(), enc_options);
 
     /* Init converter */
     converters_[type] = Converter(decoders_[type].getContext(), encoders_[type].getContext(),
                                   demuxer.getStreamTimeBase(type), offset_x, offset_y);
 
-    muxer_->addStream(encoders_[type].getContext());
+    muxer_.addStream(encoders_[type].getContext());
 
     if (async_) startProcessor(type);
 }
@@ -97,7 +98,9 @@ void Pipeline::initVideo(const Demuxer &demuxer, const AVCodecID codec_id, const
 void Pipeline::initAudio(const Demuxer &demuxer, const AVCodecID codec_id) {
     const auto type = av::MediaType::Audio;
 
+    if (muxer_.isInited()) throwRuntimeError("output has already been initialized");
     if (managed_types_[type]) throwRuntimeError("audio pipeline already initialized");
+
     managed_types_[type] = true;
 
     /* Init decoder */
@@ -112,20 +115,25 @@ void Pipeline::initAudio(const Demuxer &demuxer, const AVCodecID codec_id) {
     }
 
     /* Init encoder */
-    encoders_[type] = Encoder(codec_id, dec_ctx->sample_rate, channel_layout, muxer_->getGlobalHeaderFlags(),
+    encoders_[type] = Encoder(codec_id, dec_ctx->sample_rate, channel_layout, muxer_.getGlobalHeaderFlags(),
                               std::map<std::string, std::string>());
 
     /* Init converter */
     converters_[type] =
         Converter(decoders_[type].getContext(), encoders_[type].getContext(), demuxer.getStreamTimeBase(type));
 
-    muxer_->addStream(encoders_[type].getContext());
+    muxer_.addStream(encoders_[type].getContext());
 
     if (async_) startProcessor(type);
 }
 
+void Pipeline::initOutput() {
+    if (muxer_.isInited()) throwRuntimeError("output has already been initialized");
+    muxer_.openFile();
+}
+
 void Pipeline::processPacket(const AVPacket *packet, const av::MediaType type) {
-    if (!av::validMediaType(type)) throwLogicError("failed to process packet (media type is invalid)");
+    assert(av::validMediaType(type));
 
     Decoder &decoder = decoders_[type];
     Converter &converter = converters_[type];
@@ -149,7 +157,7 @@ void Pipeline::processPacket(const AVPacket *packet, const av::MediaType type) {
 }
 
 void Pipeline::processConvertedFrame(const AVFrame *frame, const av::MediaType type) {
-    if (!av::validMediaType(type)) throwLogicError("failed to process frame (media type is invalid)");
+    assert(av::validMediaType(type));
 
     Encoder &encoder = encoders_[type];
 
@@ -160,19 +168,21 @@ void Pipeline::processConvertedFrame(const AVFrame *frame, const av::MediaType t
         while (true) {
             auto packet = encoder.getPacket();
             if (!packet) break;
-            muxer_->writePacket(std::move(packet), type);
+            std::lock_guard lg(muxer_m_);
+            muxer_.writePacket(std::move(packet), type);
         }
     }
 }
 
 void Pipeline::feed(av::PacketUPtr packet, const av::MediaType packet_type) {
+    if (!muxer_.isInited()) throwRuntimeError("the output file hasn't been initialized yet");
     if (!packet) throwRuntimeError("received packet is null");
     if (!av::validMediaType(packet_type)) throwRuntimeError("failed to take packet (media type is invalid)");
     if (!managed_types_[packet_type]) throwRuntimeError("no pipeline corresponding to received packet type");
 
     if (async_) {
-        std::lock_guard lg(m_);
-        if (stopped_) throwRuntimeError("already stopped");
+        std::lock_guard lg(processors_m_);
+        if (stopped_) throwRuntimeError("processors have been stopped");
         checkExceptions();
         if (!packets_[packet_type]) {  // if previous packet has been fully processed
             packets_[packet_type] = std::move(packet);
@@ -189,6 +199,8 @@ void Pipeline::flushPipeline(const av::MediaType type) {
 }
 
 void Pipeline::flush() {
+    // TO-DO: handle exceptions on multiple calls
+
     if (async_) {
         /* stop all threads working on the pipelines */
         stopProcessors();
@@ -199,6 +211,9 @@ void Pipeline::flush() {
     for (auto type : av::validMediaTypes) {
         if (managed_types_[type]) flushPipeline(type);
     }
+
+    muxer_.writePacket(nullptr, av::MediaType::None);
+    muxer_.closeFile();
 }
 
 void Pipeline::printInfo() const {

@@ -161,9 +161,6 @@ std::future<void> Capturer::start(const std::string &video_device, const std::st
     Demuxer demuxer;
     std::optional<Demuxer> audio_demuxer;  // Linux only
 
-    /* init Muxer */
-    muxer_ = std::make_shared<Muxer>(output_file);
-
     { /* init Demuxer */
         const std::string device_name = generateInputDeviceName(video_device, audio_device, video_params);
         const std::map<std::string, std::string> demuxer_options = generateDemuxerOptions(video_params);
@@ -180,7 +177,7 @@ std::future<void> Capturer::start(const std::string &video_device, const std::st
         async = capture_audio;
 #endif
         /* init Pipeline */
-        pipeline_ = std::make_unique<Pipeline>(muxer_, async);
+        pipeline_ = std::make_unique<Pipeline>(output_file, async);
     }
 
     pipeline_->initVideo(demuxer, video_codec_id, video_pix_fmt, video_params);
@@ -198,8 +195,7 @@ std::future<void> Capturer::start(const std::string &video_device, const std::st
 #endif
     }
 
-    /* Open output file */
-    muxer_->openFile();
+    pipeline_->initOutput();
 
     /* Print info about structures (if verbose) */
     if (verbose_) {
@@ -208,7 +204,6 @@ std::future<void> Capturer::start(const std::string &video_device, const std::st
 #ifdef LINUX
         if (capture_audio) audio_demuxer.value().printInfo(1);
 #endif
-        muxer_->printInfo();
         pipeline_->printInfo();
         std::cout << std::endl;
     }
@@ -253,9 +248,7 @@ void Capturer::stop() {
     if (!stopCapture()) return;
     if (capturer_.joinable()) capturer_.join();
     pipeline_->flush();
-    muxer_->closeFile();
     pipeline_.reset();
-    muxer_.reset();
 }
 
 void Capturer::pause() {

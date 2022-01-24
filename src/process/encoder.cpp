@@ -1,12 +1,13 @@
 #include "encoder.h"
 
+#include <assert.h>
+
 #include <iostream>
 #include <stdexcept>
 
 #define VERBOSE 0  // TO-DO: improve
 
 static void throwRuntimeError(const std::string &msg) { throw std::runtime_error("Encoder: " + msg); }
-static void throwLogicError(const std::string &msg) { throw std::logic_error("Encoder: " + msg); }
 
 void swap(Encoder &lhs, Encoder &rhs) {
     std::swap(lhs.codec_, rhs.codec_);
@@ -72,8 +73,8 @@ Encoder &Encoder::operator=(Encoder other) {
 }
 
 void Encoder::init(const int global_header_flags, const std::map<std::string, std::string> &options) {
-    if (!codec_) throwLogicError("initialization failed, internal codec is null");
-    if (!codec_ctx_) throwLogicError("initialization failed, internal codec ctx is null");
+    assert(codec_);
+    assert(codec_ctx_);
 
     if (global_header_flags & AVFMT_GLOBALHEADER) codec_ctx_->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
 

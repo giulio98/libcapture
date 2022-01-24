@@ -9,20 +9,22 @@
 #include "converter.h"
 #include "decoder.h"
 #include "encoder.h"
+#include "format/muxer.h"
 #include "video_parameters.h"
 
 class Demuxer;
-class Muxer;
 
 class Pipeline {
+    const bool async_;
+
     std::array<bool, av::MediaType::NumTypes> managed_types_{};
-    std::shared_ptr<Muxer> muxer_;
     std::array<Decoder, av::MediaType::NumTypes> decoders_;
     std::array<Encoder, av::MediaType::NumTypes> encoders_;
     std::array<Converter, av::MediaType::NumTypes> converters_;
+    Muxer muxer_;
+    std::mutex muxer_m_;
 
-    const bool async_;
-    std::mutex m_;
+    std::mutex processors_m_;
     bool stopped_{};
     std::array<std::thread, av::MediaType::NumTypes> processors_;
     std::array<av::PacketUPtr, av::MediaType::NumTypes> packets_;
@@ -39,12 +41,11 @@ class Pipeline {
 public:
     /**
      * Create a new Pipeline for processing packets
-     * @param muxer the muxer to send the processed packets to (WARNING: the muxer must not be
-     * opened until the Pipeline initialization is complete)
-     * @param async whether the pipeline should use background threads to handle the processing
+     * @param output_file   the name of the output file
+     * @param async         whether the pipeline should use background threads to handle the processing
      * (recommended when a single demuxer will provide both video and audio packets)
      */
-    explicit Pipeline(std::shared_ptr<Muxer> muxer, bool async = false);
+    explicit Pipeline(const std::string &output_file, bool async = false);
 
     Pipeline(const Pipeline &) = delete;
 
@@ -70,6 +71,13 @@ public:
     void initAudio(const Demuxer &demuxer, AVCodecID codec_id);
 
     /**
+     * Initialize the output file.
+     * WARNING: This function must be called after initializing all the desired processing chains
+     * with initVideo() and initAudio()
+     */
+    void initOutput();
+
+    /**
      * Send the packet to the processing chain corresponding to its type.
      * If 'async' was set to true when building the Pipeline,
      * the background threads will handle the packet processing and this function will
@@ -81,12 +89,9 @@ public:
     void feed(av::PacketUPtr packet, av::MediaType packet_type);
 
     /**
-     * Flush the processing pipelines.
+     * Flush the processing pipelines and close the output file.
      * If 'async' was set to true when building the Pipeline,
      * the background threads will be completely stopped before the actual flushing.
-     * WARNING: this function must be called BEFORE closing the output file with Muxer::closeFile,
-     * otherwise some packets/frames will be left in the processing structures and eventual background workers
-     * won't be able to write the packets to he output file, throwing an exception
      */
     void flush();
 

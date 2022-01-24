@@ -11,7 +11,6 @@
 #include "video_parameters.h"
 
 class Demuxer;
-class Muxer;
 class Pipeline;
 
 class Capturer {
@@ -28,9 +27,6 @@ class Capturer {
 
     /* The pipeline used for audio/video processing */
     std::unique_ptr<Pipeline> pipeline_;
-
-    /* The muxer managing the output file */
-    std::shared_ptr<Muxer> muxer_;
 
     /**
      * Read packets from a demuxer and pass them to the processing pipeline

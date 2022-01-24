@@ -13,7 +13,6 @@ class Muxer {
     std::array<AVRational, av::MediaType::NumTypes> encoders_time_bases_{};
     bool file_opened_{};
     bool file_closed_{};
-    mutable std::mutex m_;
 
 public:
     /**
@@ -46,6 +45,12 @@ public:
      * WARNING: After calling this function, it won't be possible to open the file again
      */
     void closeFile();
+
+    /**
+     * Whether the file managed by the muxer has been opened (and hence the muxer cannot be modifed anymore)
+     * @return whether the file managed by the muxer has been opened
+     */
+    [[nodiscard]] bool isInited() const;
 
     /**
      * Write a packet to the output file. This function is thread-safe
