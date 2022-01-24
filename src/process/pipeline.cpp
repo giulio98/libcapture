@@ -8,7 +8,6 @@
 #include "format/demuxer.h"
 #include "format/muxer.h"
 
-static void throwRuntimeError(const std::string &msg) { throw std::runtime_error("Pipeline: " + msg); }
 static void throwLogicError(const std::string &msg) { throw std::logic_error("Pipeline: " + msg); }
 
 Pipeline::Pipeline(const std::string &output_file, const bool async) : muxer_(output_file), async_(async) {}
@@ -75,8 +74,8 @@ void Pipeline::initVideo(const Demuxer &demuxer, const AVCodecID codec_id, const
     auto [offset_x, offset_y] = video_params.getVideoOffset();
     if (!width) width = dec_ctx->width;
     if (!height) height = dec_ctx->height;
-    if (offset_x + width > dec_ctx->width) throwRuntimeError("Output video width exceeds input one");
-    if (offset_y + height > dec_ctx->height) throwRuntimeError("Output video height exceeds input one");
+    if (offset_x + width > dec_ctx->width) throw std::runtime_error("Output video width exceeds input one");
+    if (offset_y + height > dec_ctx->height) throw std::runtime_error("Output video height exceeds input one");
 
     /* Init encoder */
     std::map<std::string, std::string> enc_options;
