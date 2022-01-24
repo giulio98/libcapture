@@ -1,12 +1,8 @@
 #include "pipeline.h"
 
-#include <assert.h>
-
+#include <cassert>
 #include <iostream>
 #include <map>
-
-#include "format/demuxer.h"
-#include "format/muxer.h"
 
 static void throwLogicError(const std::string &msg) { throw std::logic_error("Pipeline: " + msg); }
 

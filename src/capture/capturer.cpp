@@ -13,7 +13,6 @@
 #include <stdexcept>
 
 #include "format/demuxer.h"
-#include "format/muxer.h"
 #include "process/pipeline.h"
 #include "utils/log_level_setter.h"
 #include "utils/thread_guard.h"

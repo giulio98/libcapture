@@ -1,7 +1,6 @@
 #include "encoder.h"
 
-#include <assert.h>
-
+#include <cassert>
 #include <iostream>
 #include <stdexcept>
 

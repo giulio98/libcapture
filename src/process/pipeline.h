@@ -6,13 +6,12 @@
 #include <vector>
 
 #include "common/common.h"
-#include "converter.h"
-#include "decoder.h"
-#include "encoder.h"
+#include "format/demuxer.h"
 #include "format/muxer.h"
+#include "process/converter.h"
+#include "process/decoder.h"
+#include "process/encoder.h"
 #include "video_parameters.h"
-
-class Demuxer;
 
 class Pipeline {
     const bool async_;
