@@ -53,7 +53,7 @@ public:
     [[nodiscard]] bool isInited() const;
 
     /**
-     * Write a packet to the output file. This function is thread-safe
+     * Write a packet to the output file
      * @param packet        the packet to write. If nullptr, the output queue will be flushed
      * @param packet_type   the type of the packet (audio or video). If the packet is nullptr,
      * this parameter is irrelevant
