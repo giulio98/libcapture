@@ -8,7 +8,7 @@
 #include "format/demuxer.h"
 #include "format/muxer.h"
 
-static void throwRuntimeError(const std::string &msg) { throw std::runtime_error("Pipeline: " + msg); }
+static void throwLogicError(const std::string &msg) { throw std::logic_error("Pipeline: " + msg); }
 
 Pipeline::Pipeline(const std::string &output_file, const bool async) : muxer_(output_file), async_(async) {}
 
@@ -60,8 +60,8 @@ void Pipeline::initVideo(const Demuxer &demuxer, const AVCodecID codec_id, const
                          const VideoParameters &video_params) {
     const auto type = av::MediaType::Video;
 
-    if (muxer_.isInited()) throwRuntimeError("output has already been initialized");
-    if (managed_types_[type]) throwRuntimeError("video pipeline already initialized");
+    if (muxer_.isInited()) throwLogicError("output has already been initialized");
+    if (managed_types_[type]) throwLogicError("video pipeline already initialized");
 
     managed_types_[type] = true;
 
@@ -73,8 +73,8 @@ void Pipeline::initVideo(const Demuxer &demuxer, const AVCodecID codec_id, const
     auto [offset_x, offset_y] = video_params.getVideoOffset();
     if (!width) width = dec_ctx->width;
     if (!height) height = dec_ctx->height;
-    if (offset_x + width > dec_ctx->width) throwRuntimeError("Output video width exceeds input one");
-    if (offset_y + height > dec_ctx->height) throwRuntimeError("Output video height exceeds input one");
+    if (offset_x + width > dec_ctx->width) throwLogicError("Output video width exceeds input one");
+    if (offset_y + height > dec_ctx->height) throwLogicError("Output video height exceeds input one");
 
     /* Init encoder */
     std::map<std::string, std::string> enc_options;
@@ -98,8 +98,8 @@ void Pipeline::initVideo(const Demuxer &demuxer, const AVCodecID codec_id, const
 void Pipeline::initAudio(const Demuxer &demuxer, const AVCodecID codec_id) {
     const auto type = av::MediaType::Audio;
 
-    if (muxer_.isInited()) throwRuntimeError("output has already been initialized");
-    if (managed_types_[type]) throwRuntimeError("audio pipeline already initialized");
+    if (muxer_.isInited()) throwLogicError("output has already been initialized");
+    if (managed_types_[type]) throwLogicError("audio pipeline already initialized");
 
     managed_types_[type] = true;
 
@@ -128,7 +128,7 @@ void Pipeline::initAudio(const Demuxer &demuxer, const AVCodecID codec_id) {
 }
 
 void Pipeline::initOutput() {
-    if (muxer_.isInited()) throwRuntimeError("output has already been initialized");
+    if (muxer_.isInited()) throwLogicError("output has already been initialized");
     muxer_.openFile();
 }
 
@@ -175,14 +175,14 @@ void Pipeline::processConvertedFrame(const AVFrame *frame, const av::MediaType t
 }
 
 void Pipeline::feed(av::PacketUPtr packet, const av::MediaType packet_type) {
-    if (!muxer_.isInited()) throwRuntimeError("the output file hasn't been initialized yet");
-    if (!packet) throwRuntimeError("received packet is null");
-    if (!av::validMediaType(packet_type)) throwRuntimeError("failed to take packet (media type is invalid)");
-    if (!managed_types_[packet_type]) throwRuntimeError("no pipeline corresponding to received packet type");
+    if (!muxer_.isInited()) throwLogicError("the output file hasn't been initialized yet");
+    if (!packet) throwLogicError("received packet is null");
+    if (!av::validMediaType(packet_type)) throwLogicError("failed to take packet (media type is invalid)");
+    if (!managed_types_[packet_type]) throwLogicError("no pipeline corresponding to received packet type");
 
     if (async_) {
         std::lock_guard lg(processors_m_);
-        if (stopped_) throwRuntimeError("processors have been stopped");
+        if (stopped_) throwLogicError("processors have been stopped");
         checkExceptions();
         if (!packets_[packet_type]) {  // if previous packet has been fully processed
             packets_[packet_type] = std::move(packet);
