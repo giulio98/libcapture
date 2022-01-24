@@ -217,10 +217,17 @@ std::future<void> Capturer::start(const std::string &video_device, const std::st
     auto f = p.get_future();
 
     {
+        /*
+         * To avoid having the status variable "stopped_" set to false even if the capturer thread fails to start,
+         * update it only once the capturer has been completely and successfully initialized.
+         * To avoid an immediate return from capture(), a lock on the mutex m_ must be acquired
+         */
+
         std::lock_guard lg(m_);
 
+        /* in case of exception when starting the thread, capturer_ will be left untouched ("empty") */
         capturer_ = std::thread(
-            [this](Demuxer demuxer, std::optional<Demuxer> audio_demuxer, std::promise<void> p) {
+            [this, demuxer = std::move(demuxer), audio_demuxer = std::move(audio_demuxer), p = std::move(p)]() mutable {
                 try {
                     if (audio_demuxer) {
                         capture(demuxer, *audio_demuxer);
@@ -231,13 +238,13 @@ std::future<void> Capturer::start(const std::string &video_device, const std::st
                 } catch (...) {
                     p.set_exception(std::current_exception());
                 }
-            },
-            std::move(demuxer), std::move(audio_demuxer), std::move(p));
-        /* note that if audio_demuxer contained a value, it still contains a (now "empty") demuxer now */
+            });
+        /* note that if audio_demuxer was not empty, it still contains a (now "empty") demuxer here */
 
         paused_ = false;
         stopped_ = false;  // set stopped_ to false only when everything is properly set-up
-    }
+
+    }  // release the mutex, now the capturer[s] will enter in the main loop inside capture()
 
     return f;
 }
