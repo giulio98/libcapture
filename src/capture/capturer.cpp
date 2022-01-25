@@ -130,18 +130,16 @@ Capturer::Capturer(const bool verbose) : verbose_(verbose) {
 }
 
 Capturer::~Capturer() {
-    stopCapture();
-    if (capturer_.joinable()) capturer_.join();
+    if (!stopped_) stopCapture();
 }
 
-bool Capturer::stopCapture() {
+void Capturer::stopCapture() {
     {
         std::lock_guard lg(m_);
-        if (stopped_) return false;
         stopped_ = true;
         cv_.notify_all();
     }
-    return true;
+    if (capturer_.joinable()) capturer_.join();
 }
 
 std::future<void> Capturer::start(const std::string &video_device, const std::string &audio_device,
@@ -244,22 +242,22 @@ std::future<void> Capturer::start(const std::string &video_device, const std::st
 }
 
 void Capturer::stop() {
-    if (!stopCapture()) return;
-    if (capturer_.joinable()) capturer_.join();
+    if (stopped_) return;
+    stopCapture();
     pipeline_->terminate();
     pipeline_.reset();
 }
 
 void Capturer::pause() {
-    std::lock_guard lg(m_);
     if (paused_ || stopped_) return;
+    std::lock_guard lg(m_);
     paused_ = true;
     cv_.notify_all();
 }
 
 void Capturer::resume() {
-    std::lock_guard lg(m_);
     if (!paused_ || stopped_) return;
+    std::lock_guard lg(m_);
     paused_ = false;
     cv_.notify_all();
 }
