@@ -31,6 +31,7 @@ class Pipeline {
     std::array<std::condition_variable, av::MediaType::NumTypes> packets_cv_;
     std::array<std::exception_ptr, av::MediaType::NumTypes> e_ptrs_;
     void startProcessor(av::MediaType media_type);
+    /* Stop and join the processor threads */
     void stopProcessors();
     /* Check and eventually re-throw the processors exceptions */
     void checkExceptions();
