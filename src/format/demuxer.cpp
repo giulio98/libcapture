@@ -31,6 +31,7 @@ Demuxer &Demuxer::operator=(Demuxer other) {
 
 void Demuxer::openInput() {
     if (fmt_ctx_) throw std::logic_error(errMsg("failed to open input device (input is already open)"));
+    if (!fmt_) throw std::logic_error(errMsg("input format is not set"));  // if the Demuxer was default-constructed
 
     {
         AVFormatContext *fmt_ctx = nullptr;
