@@ -6,7 +6,7 @@
 
 #define VERBOSE 0  // TO-DO: improve
 
-static std::string errMsg(const std::string &msg) { return std::string("Encoder: " + msg); }
+static std::string errMsg(const std::string &msg) { return ("Encoder: " + msg); }
 
 void swap(Encoder &lhs, Encoder &rhs) {
     std::swap(lhs.codec_, rhs.codec_);

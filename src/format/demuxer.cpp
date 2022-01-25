@@ -5,7 +5,7 @@
 
 #define VERBOSE 0  // TO-DO: improve
 
-static std::string errMsg(const std::string &msg) { return std::string("Demuxer: " + msg); }
+static std::string errMsg(const std::string &msg) { return ("Demuxer: " + msg); }
 
 void swap(Demuxer &lhs, Demuxer &rhs) {
     std::swap(lhs.fmt_ctx_, rhs.fmt_ctx_);

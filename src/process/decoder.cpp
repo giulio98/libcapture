@@ -2,7 +2,7 @@
 
 #include <stdexcept>
 
-static std::string errMsg(const std::string &msg) { return std::string("Decoder: " + msg); }
+static std::string errMsg(const std::string &msg) { return ("Decoder: " + msg); }
 
 void swap(Decoder &lhs, Decoder &rhs) {
     std::swap(lhs.codec_, rhs.codec_);

@@ -2,7 +2,7 @@
 
 #include <stdexcept>
 
-static std::string errMsg(const std::string &msg) { return std::string("Muxer: " + msg); }
+static std::string errMsg(const std::string &msg) { return ("Muxer: " + msg); }
 
 Muxer::Muxer(std::string filename) : filename_(std::move(filename)) {
     AVFormatContext *fmt_ctx = nullptr;

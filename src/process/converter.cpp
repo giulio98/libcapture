@@ -2,7 +2,7 @@
 
 #include <sstream>
 
-static std::string errMsg(const std::string &msg) { return std::string("Converter: " + msg); }
+static std::string errMsg(const std::string &msg) { return ("Converter: " + msg); }
 
 void swap(Converter &lhs, Converter &rhs) {
     std::swap(lhs.filter_graph_, rhs.filter_graph_);
