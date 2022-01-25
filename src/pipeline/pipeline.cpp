@@ -198,6 +198,7 @@ void Pipeline::feed(av::PacketUPtr packet, const av::MediaType packet_type) {
 }
 
 void Pipeline::terminate() {
+    if (!muxer_.isInited()) throw std::logic_error(errMsg("the output file hasn't been initialized yet"));
     if (terminated_) throw std::logic_error(errMsg("already terminated"));
 
     if (async_) {
