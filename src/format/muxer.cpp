@@ -12,7 +12,11 @@ Muxer::Muxer(std::string filename) : filename_(std::move(filename)) {
 }
 
 Muxer::~Muxer() {
-    if (fmt_ctx_->pb) avio_closep(&(fmt_ctx_->pb));
+    if (fmt_ctx_->pb) {  // if file is still open
+        /* try to leave the output file in a valid state in any case */
+        if (file_inited_ && !file_finalized_) av_write_trailer(fmt_ctx_.get());
+        avio_close(fmt_ctx_->pb);  // close file
+    }
 }
 
 void Muxer::addStream(const AVCodecContext *enc_ctx) {
@@ -27,7 +31,7 @@ void Muxer::addStream(const AVCodecContext *enc_ctx) {
         throw std::invalid_argument(errMsg("received encoder context is of unknown media type"));
     }
 
-    if (file_opened_) throw std::logic_error(errMsg("cannot add a new stream, file has already been opened"));
+    if (file_inited_) throw std::logic_error(errMsg("cannot add a new stream, file has already been initialized"));
     if (streams_[type]) throw std::logic_error(errMsg("stream of specified type already present"));
 
     const AVStream *stream = avformat_new_stream(fmt_ctx_.get(), nullptr);
@@ -40,34 +44,32 @@ void Muxer::addStream(const AVCodecContext *enc_ctx) {
     encoders_time_bases_[type] = enc_ctx->time_base;
 }
 
-void Muxer::openFile() {
-    if (file_opened_) throw std::logic_error(errMsg("cannot open file, file has already been opened"));
+void Muxer::initFile() {
+    if (file_inited_) throw std::logic_error(errMsg("cannot init file, file has already been initialized"));
     /* create empty video file */
     if (!(fmt_ctx_->flags & AVFMT_NOFILE)) {
         if (avio_open(&fmt_ctx_->pb, filename_.c_str(), AVIO_FLAG_WRITE) < 0) {
             throw std::runtime_error(errMsg("failed to create the output file"));
         }
     }
-    file_opened_ = true;
     if (avformat_write_header(fmt_ctx_.get(), nullptr) < 0)
         throw std::runtime_error(errMsg("Failed to write file header"));
+    file_inited_ = true;
 }
 
-void Muxer::closeFile() {
-    if (!file_opened_) throw std::logic_error(errMsg("cannot close file, file has not been opened"));
-    if (file_closed_) throw std::logic_error(errMsg("cannot close file, file has already been closed"));
+void Muxer::finalizeFile() {
+    if (!file_inited_) throw std::logic_error(errMsg("cannot finalize file, file has not been initialized"));
+    if (file_finalized_) throw std::logic_error(errMsg("cannot finalize file, file has already been finalized"));
     if (av_write_trailer(fmt_ctx_.get()) < 0) throw std::runtime_error(errMsg("failed to write file trailer"));
-    if (fmt_ctx_->pb) {
-        if (avio_closep(&(fmt_ctx_->pb)) < 0) throw std::runtime_error(errMsg("failed to close file"));
-    }
-    file_closed_ = true;
+    file_finalized_ = true;
+    if (avio_closep(&(fmt_ctx_->pb)) < 0) throw std::runtime_error(errMsg("failed to close file"));
 }
 
-bool Muxer::isInited() const { return file_opened_; }
+bool Muxer::isInited() const { return file_inited_; }
 
 void Muxer::writePacket(const av::PacketUPtr packet, const av::MediaType packet_type) {
-    if (!file_opened_) throw std::logic_error(errMsg("cannot write packet, file has not been opened"));
-    if (file_closed_) throw std::logic_error(errMsg("cannot write packet, file has already been closed"));
+    if (!file_inited_) throw std::logic_error(errMsg("cannot write packet, file has not been initialized"));
+    if (file_finalized_) throw std::logic_error(errMsg("cannot write packet, file has already been finalized"));
 
     if (packet) {
         if (!av::validMediaType(packet_type)) throw std::invalid_argument(errMsg("received packet of unknown type"));

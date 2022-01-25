@@ -201,33 +201,37 @@ int main(int argc, char **argv) {
         auto f = capturer.start(video_device, audio_device, output_file, video_params);
 
         auto listener = std::thread([&capturer]() {
-            bool paused = false;
-            bool print_status = true;
+            try {
+                bool paused = false;
+                bool print_status = true;
 
-            while (true) {
-                if (print_status) printStatus(paused);
-                print_status = false;
-                printMenu(paused);
-                std::string input;
-                std::getline(std::cin, input);
-                if (input.length() == 1) {
-                    int command = std::tolower(input.front());
-                    if (command == 'p' && !paused) {
-                        capturer.pause();
-                        paused = true;
-                        print_status = true;
-                    } else if (command == 'r' && paused) {
-                        capturer.resume();
-                        paused = false;
-                        print_status = true;
-                    } else if (command == 's') {
-                        std::cout << "\nStopping..." << std::flush;
-                        capturer.stop();
-                        std::cout << " done" << std::endl;
-                        break;
+                while (true) {
+                    if (print_status) printStatus(paused);
+                    print_status = false;
+                    printMenu(paused);
+                    std::string input;
+                    std::getline(std::cin, input);
+                    if (input.length() == 1) {
+                        int command = std::tolower(input.front());
+                        if (command == 'p' && !paused) {
+                            capturer.pause();
+                            paused = true;
+                            print_status = true;
+                        } else if (command == 'r' && paused) {
+                            capturer.resume();
+                            paused = false;
+                            print_status = true;
+                        } else if (command == 's') {
+                            std::cout << "\nStopping..." << std::flush;
+                            capturer.stop();
+                            std::cout << " done" << std::endl;
+                            break;
+                        }
                     }
+                    if (!print_status) std::cerr << "Unknown command" << std::endl;
                 }
-                if (!print_status) std::cerr << "Unknown command" << std::endl;
+            } catch (const std::exception &e) {
+                std::cerr << e.what() << std::endl;
             }
         });
 

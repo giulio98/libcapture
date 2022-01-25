@@ -9,7 +9,7 @@ static std::string errMsg(const std::string &msg) { return ("Pipeline: " + msg);
 Pipeline::Pipeline(const std::string &output_file, const bool async) : muxer_(output_file), async_(async) {}
 
 Pipeline::~Pipeline() {
-    if (async_) stopProcessors();
+    if (async_ && !terminated_) stopProcessors();
 }
 
 void Pipeline::startProcessor(const av::MediaType type) {
@@ -130,7 +130,7 @@ void Pipeline::initAudio(const Demuxer &demuxer, const AVCodecID codec_id) {
 void Pipeline::initOutput() {
     if (muxer_.isInited()) throw std::logic_error(errMsg("output has already been initialized"));
     if (terminated_) throw std::logic_error(errMsg("already terminated"));
-    muxer_.openFile();
+    muxer_.initFile();
 }
 
 void Pipeline::processPacket(const AVPacket *packet, const av::MediaType type) {
@@ -202,8 +202,7 @@ void Pipeline::terminate() {
     if (terminated_) throw std::logic_error(errMsg("already terminated"));
 
     if (async_) {
-        /* stop all threads working on the pipelines */
-        stopProcessors();
+        stopProcessors();  // sets terminated_ = true
         checkExceptions();
     } else {
         terminated_ = true;
@@ -218,7 +217,7 @@ void Pipeline::terminate() {
     }
 
     muxer_.writePacket(nullptr, av::MediaType::None);
-    muxer_.closeFile();
+    muxer_.finalizeFile();
 }
 
 void Pipeline::printInfo() const {
