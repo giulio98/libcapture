@@ -49,16 +49,16 @@ void Muxer::openFile() {
         }
     }
     file_opened_ = true;
-    if (avformat_write_header(fmt_ctx_.get(), nullptr) < 0) throw std::runtime_error(errMsg("Failed to write file header"));
+    if (avformat_write_header(fmt_ctx_.get(), nullptr) < 0)
+        throw std::runtime_error(errMsg("Failed to write file header"));
 }
 
 void Muxer::closeFile() {
     if (!file_opened_) throw std::logic_error(errMsg("cannot close file, file has not been opened"));
     if (file_closed_) throw std::logic_error(errMsg("cannot close file, file has already been closed"));
-    if (av_interleaved_write_frame(fmt_ctx_.get(), nullptr)) throw std::runtime_error(errMsg("failed to flush internal packet queue"));
     if (av_write_trailer(fmt_ctx_.get()) < 0) throw std::runtime_error(errMsg("failed to write file trailer"));
     if (fmt_ctx_->pb) {
-            if (avio_closep(&(fmt_ctx_->pb)) < 0) throw std::runtime_error(errMsg("failed to close file"));
+        if (avio_closep(&(fmt_ctx_->pb)) < 0) throw std::runtime_error(errMsg("failed to close file"));
     }
     file_closed_ = true;
 }
