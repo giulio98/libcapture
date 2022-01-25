@@ -6,7 +6,7 @@
 
 #define VERBOSE 0  // TO-DO: improve
 
-static void throwLogicError(const std::string &msg) { throw std::logic_error("Encoder: " + msg); }
+static std::string errMsg(const std::string &msg) { return std::string("Encoder: " + msg); }
 
 void swap(Encoder &lhs, Encoder &rhs) {
     std::swap(lhs.codec_, rhs.codec_);
@@ -25,18 +25,18 @@ Encoder::Encoder(const AVCodecID codec_id) {
 
     if (!codec_) {
         codec_ = avcodec_find_encoder(codec_id);
-        if (!codec_) throwLogicError("cannot find codec");
+        if (!codec_) throw std::runtime_error(errMsg("cannot find encoder"));
     }
 
     codec_ctx_ = av::CodecContextUPtr(avcodec_alloc_context3(codec_));
-    if (!codec_ctx_) throwLogicError("failed to allocated memory for AVCodecContext");
+    if (!codec_ctx_) throw std::runtime_error(errMsg("failed to allocated memory for AVCodecContext"));
 }
 
 Encoder::Encoder(const AVCodecID codec_id, const int sample_rate, const uint64_t channel_layout,
                  const int global_header_flags, const std::map<std::string, std::string> &options)
     : Encoder(codec_id) {
     if (codec_->type != AVMEDIA_TYPE_AUDIO)
-        throwLogicError("failed to create audio encoder (received codec ID is not of type audio)");
+        throw std::invalid_argument(errMsg("failed to create audio encoder (received codec ID is not of type audio)"));
 
     codec_ctx_->sample_rate = sample_rate;
     codec_ctx_->channel_layout = channel_layout;
@@ -54,7 +54,7 @@ Encoder::Encoder(const AVCodecID codec_id, const int width, const int height, co
                  const std::map<std::string, std::string> &options)
     : Encoder(codec_id) {
     if (codec_->type != AVMEDIA_TYPE_VIDEO)
-        throwLogicError("failed to create video encoder (received codec ID is not of type video)");
+        throw std::invalid_argument(errMsg("failed to create video encoder (received codec ID is not of type video)"));
 
     codec_ctx_->width = width;
     codec_ctx_->height = height;
@@ -81,7 +81,7 @@ void Encoder::init(const int global_header_flags, const std::map<std::string, st
     AVDictionary *dict_raw = dict.release();
     int ret = avcodec_open2(codec_ctx_.get(), codec_, dict_raw ? &dict_raw : nullptr);
     dict = av::DictionaryUPtr(dict_raw);
-    if (ret) throwLogicError("failed to initialize Codec Context");
+    if (ret) throw std::logic_error(errMsg("failed to initialize Codec Context"));
 #if VERBOSE
     auto map = av::dict2map(dict.get());
     for (const auto &[key, val] : map) {
@@ -91,25 +91,25 @@ void Encoder::init(const int global_header_flags, const std::map<std::string, st
 }
 
 bool Encoder::sendFrame(const AVFrame *frame) {
-    if (!codec_ctx_) throwLogicError("encoder was not initialized yet");
+    if (!codec_ctx_) throw std::logic_error(errMsg("encoder was not initialized yet"));
     int ret = avcodec_send_frame(codec_ctx_.get(), frame);
     if (ret == AVERROR(EAGAIN)) return false;
-    if (ret == AVERROR_EOF) throwLogicError("has already been flushed");
-    if (ret < 0) throwLogicError("failed to send frame to encoder");
+    if (ret == AVERROR_EOF) throw std::logic_error(errMsg("has already been flushed"));
+    if (ret < 0) throw std::runtime_error(errMsg("failed to send frame to encoder"));
     return true;
 }
 
 av::PacketUPtr Encoder::getPacket() {
-    if (!codec_ctx_) throwLogicError("encoder was not initialized yet");
+    if (!codec_ctx_) throw std::logic_error(errMsg("encoder was not initialized yet"));
 
     if (!packet_) {
         packet_ = av::PacketUPtr(av_packet_alloc());
-        if (!packet_) throwLogicError("failed to allocate packet");
+        if (!packet_) throw std::runtime_error(errMsg("failed to allocate packet"));
     }
 
     int ret = avcodec_receive_packet(codec_ctx_.get(), packet_.get());
     if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) return nullptr;
-    if (ret < 0) throwLogicError("failed to receive frame from decoder");
+    if (ret < 0) throw std::runtime_error(errMsg("failed to receive frame from decoder"));
 
     return std::move(packet_);
 }

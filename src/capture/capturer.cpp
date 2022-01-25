@@ -246,7 +246,7 @@ std::future<void> Capturer::start(const std::string &video_device, const std::st
 void Capturer::stop() {
     if (!stopCapture()) return;
     if (capturer_.joinable()) capturer_.join();
-    pipeline_->flush();
+    pipeline_->terminate();
     pipeline_.reset();
 }
 

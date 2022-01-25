@@ -2,7 +2,7 @@
 
 #include <stdexcept>
 
-static void throwLogicError(const std::string &msg) { throw std::logic_error("Decoder: " + msg); }
+static std::string errMsg(const std::string &msg) { return std::string("Decoder: " + msg); }
 
 void swap(Decoder &lhs, Decoder &rhs) {
     std::swap(lhs.codec_, rhs.codec_);
@@ -11,18 +11,19 @@ void swap(Decoder &lhs, Decoder &rhs) {
 }
 
 Decoder::Decoder(const AVCodecParameters *params) {
-    if (!params) throwLogicError("received stream parameters ptr is null");
+    if (!params) throw std::invalid_argument(errMsg("received stream parameters ptr is null"));
 
     codec_ = avcodec_find_decoder(params->codec_id);
-    if (!codec_) throwLogicError("cannot find codec");
+    if (!codec_) throw std::runtime_error(errMsg("cannot find decoder"));
 
     codec_ctx_ = av::CodecContextUPtr(avcodec_alloc_context3(codec_));
-    if (!codec_ctx_) throwLogicError("failed to allocated memory for AVCodecContext");
+    if (!codec_ctx_) throw std::runtime_error(errMsg("failed to allocated memory for AVCodecContext"));
 
     if (avcodec_parameters_to_context(codec_ctx_.get(), params) < 0)
-        throwLogicError("failed to copy codec params to codec context");
+        throw std::runtime_error(errMsg("failed to copy codec params to codec context"));
 
-    if (avcodec_open2(codec_ctx_.get(), codec_, nullptr) < 0) throwLogicError("unable to open the av codec");
+    if (avcodec_open2(codec_ctx_.get(), codec_, nullptr) < 0)
+        throw std::runtime_error(errMsg("unable to open the av codec"));
 }
 
 Decoder::Decoder(Decoder &&other) noexcept { swap(*this, other); }
@@ -33,25 +34,25 @@ Decoder &Decoder::operator=(Decoder other) {
 }
 
 bool Decoder::sendPacket(const AVPacket *packet) {
-    if (!codec_ctx_) throwLogicError("decoder was not initialized yet");
+    if (!codec_ctx_) throw std::logic_error(errMsg("decoder was not initialized yet"));
     int ret = avcodec_send_packet(codec_ctx_.get(), packet);
     if (ret == AVERROR(EAGAIN)) return false;
-    if (ret == AVERROR_EOF) throwLogicError("has already been flushed");
-    if (ret < 0) throwLogicError("failed to send packet to decoder");
+    if (ret == AVERROR_EOF) throw std::logic_error(errMsg("has already been flushed"));
+    if (ret < 0) throw std::runtime_error(errMsg("failed to send packet to decoder"));
     return true;
 }
 
 av::FrameUPtr Decoder::getFrame() {
-    if (!codec_ctx_) throwLogicError("decoder was not initialized yet");
+    if (!codec_ctx_) throw std::logic_error(errMsg("decoder was not initialized yet"));
 
     if (!frame_) {
         frame_ = av::FrameUPtr(av_frame_alloc());
-        if (!frame_) throwLogicError("failed to allocate frame");
+        if (!frame_) throw std::runtime_error(errMsg("failed to allocate frame"));
     }
 
     int ret = avcodec_receive_frame(codec_ctx_.get(), frame_.get());
     if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) return nullptr;
-    if (ret < 0) throwLogicError("failed to receive frame from decoder");
+    if (ret < 0) throw std::runtime_error(errMsg("failed to receive frame from decoder"));
 
     return std::move(frame_);
 }

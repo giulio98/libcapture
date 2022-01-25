@@ -4,7 +4,7 @@
 #include <iostream>
 #include <map>
 
-static void throwLogicError(const std::string &msg) { throw std::logic_error("Pipeline: " + msg); }
+static std::string errMsg(const std::string &msg) { return std::string("Pipeline: " + msg); }
 
 Pipeline::Pipeline(const std::string &output_file, const bool async) : muxer_(output_file), async_(async) {}
 
@@ -13,6 +13,7 @@ Pipeline::~Pipeline() {
 }
 
 void Pipeline::startProcessor(const av::MediaType type) {
+    assert(!terminated_);
     assert(av::validMediaType(type));
     assert(managed_types_[type]);
     assert(!processors_[type].joinable());
@@ -23,8 +24,8 @@ void Pipeline::startProcessor(const av::MediaType type) {
                 av::PacketUPtr packet;
                 {
                     std::unique_lock ul(processors_m_);
-                    packets_cv_[type].wait(ul, [this, type]() { return (packets_[type] || stopped_); });
-                    if (!packets_[type] && stopped_) break;
+                    packets_cv_[type].wait(ul, [this, type]() { return (packets_[type] || terminated_); });
+                    if (!packets_[type] && terminated_) break;
                     packet = std::move(packets_[type]);
                 }
                 processPacket(packet.get(), type);
@@ -39,7 +40,7 @@ void Pipeline::startProcessor(const av::MediaType type) {
 void Pipeline::stopProcessors() {
     {
         std::lock_guard lg(processors_m_);
-        stopped_ = true;
+        terminated_ = true;
         for (auto &cv : packets_cv_) cv.notify_all();
     }
     for (auto &p : processors_) {
@@ -57,8 +58,9 @@ void Pipeline::initVideo(const Demuxer &demuxer, const AVCodecID codec_id, const
                          const VideoParameters &video_params) {
     const auto type = av::MediaType::Video;
 
-    if (muxer_.isInited()) throwLogicError("output has already been initialized");
-    if (managed_types_[type]) throwLogicError("video pipeline already initialized");
+    if (muxer_.isInited()) throw std::logic_error(errMsg("output has already been initialized"));
+    if (terminated_) throw std::logic_error(errMsg("already terminated"));
+    if (managed_types_[type]) throw std::logic_error(errMsg("video pipeline already initialized"));
 
     managed_types_[type] = true;
 
@@ -95,8 +97,9 @@ void Pipeline::initVideo(const Demuxer &demuxer, const AVCodecID codec_id, const
 void Pipeline::initAudio(const Demuxer &demuxer, const AVCodecID codec_id) {
     const auto type = av::MediaType::Audio;
 
-    if (muxer_.isInited()) throwLogicError("output has already been initialized");
-    if (managed_types_[type]) throwLogicError("audio pipeline already initialized");
+    if (muxer_.isInited()) throw std::logic_error(errMsg("output has already been initialized"));
+    if (terminated_) throw std::logic_error(errMsg("already terminated"));
+    if (managed_types_[type]) throw std::logic_error(errMsg("audio pipeline already initialized"));
 
     managed_types_[type] = true;
 
@@ -125,7 +128,8 @@ void Pipeline::initAudio(const Demuxer &demuxer, const AVCodecID codec_id) {
 }
 
 void Pipeline::initOutput() {
-    if (muxer_.isInited()) throwLogicError("output has already been initialized");
+    if (muxer_.isInited()) throw std::logic_error(errMsg("output has already been initialized"));
+    if (terminated_) throw std::logic_error(errMsg("already terminated"));
     muxer_.openFile();
 }
 
@@ -174,14 +178,15 @@ void Pipeline::processConvertedFrame(const AVFrame *frame, const av::MediaType t
 }
 
 void Pipeline::feed(av::PacketUPtr packet, const av::MediaType packet_type) {
-    if (!muxer_.isInited()) throwLogicError("the output file hasn't been initialized yet");
-    if (!packet) throwLogicError("received packet is null");
-    if (!av::validMediaType(packet_type)) throwLogicError("received media type is invalid");
-    if (!managed_types_[packet_type]) throwLogicError("received media type is not handled by the pipeline");
+    if (!packet) throw std::invalid_argument(errMsg("received packet is null"));
+    if (!av::validMediaType(packet_type)) throw std::invalid_argument(errMsg("received media type is invalid"));
+    if (!muxer_.isInited()) throw std::logic_error(errMsg("the output file hasn't been initialized yet"));
+    if (terminated_) throw std::logic_error(errMsg("has been terminated"));
+    if (!managed_types_[packet_type])
+        throw std::logic_error(errMsg("received media type is not handled by the pipeline"));
 
     if (async_) {
         std::lock_guard lg(processors_m_);
-        if (stopped_) throwLogicError("processors have been stopped");
         checkExceptions();
         if (!packets_[packet_type]) {  // if previous packet has been fully processed
             packets_[packet_type] = std::move(packet);
@@ -192,23 +197,23 @@ void Pipeline::feed(av::PacketUPtr packet, const av::MediaType packet_type) {
     }
 }
 
-void Pipeline::flushPipeline(const av::MediaType type) {
-    processPacket(nullptr, type);
-    processConvertedFrame(nullptr, type);
-}
-
-void Pipeline::flush() {
-    // TO-DO: handle exceptions on multiple calls
+void Pipeline::terminate() {
+    if (terminated_) throw std::logic_error(errMsg("already terminated"));
 
     if (async_) {
         /* stop all threads working on the pipelines */
         stopProcessors();
         checkExceptions();
+    } else {
+        terminated_ = true;
     }
 
     /* flush the pipelines */
     for (auto type : av::validMediaTypes) {
-        if (managed_types_[type]) flushPipeline(type);
+        if (managed_types_[type]) {
+            processPacket(nullptr, type);
+            processConvertedFrame(nullptr, type);
+        }
     }
 
     muxer_.writePacket(nullptr, av::MediaType::None);
@@ -216,6 +221,7 @@ void Pipeline::flush() {
 }
 
 void Pipeline::printInfo() const {
+    muxer_.printInfo();
     for (auto type : av::validMediaTypes) {
         if (managed_types_[type]) {
             std::cout << "Decoder " << type << ": " << decoders_[type].getName() << std::endl;

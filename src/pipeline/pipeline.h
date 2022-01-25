@@ -23,19 +23,21 @@ class Pipeline {
     Muxer muxer_;
     std::mutex muxer_m_;
 
+    bool terminated_{};
+
     std::mutex processors_m_;
-    bool stopped_{};
     std::array<std::thread, av::MediaType::NumTypes> processors_;
     std::array<av::PacketUPtr, av::MediaType::NumTypes> packets_;
     std::array<std::condition_variable, av::MediaType::NumTypes> packets_cv_;
     std::array<std::exception_ptr, av::MediaType::NumTypes> e_ptrs_;
     void startProcessor(av::MediaType media_type);
+    /* Stop and join the processors */
     void stopProcessors();
+    /* Check and eventually re-throw the processors exceptions */
     void checkExceptions();
 
     void processPacket(const AVPacket *packet, av::MediaType type);
     void processConvertedFrame(const AVFrame *frame, av::MediaType type);
-    void flushPipeline(av::MediaType type);
 
 public:
     /**
@@ -89,10 +91,8 @@ public:
 
     /**
      * Flush the processing pipelines and close the output file.
-     * If 'async' was set to true when building the Pipeline,
-     * the background threads will be completely stopped before the actual flushing.
      */
-    void flush();
+    void terminate();
 
     /**
      * Print the informations about the internal demuxer, decoders and encoders
