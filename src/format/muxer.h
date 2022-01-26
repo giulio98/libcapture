@@ -11,9 +11,8 @@ class Muxer {
     std::string filename_;
     std::array<const AVStream *, av::MediaType::NumTypes> streams_{};
     std::array<AVRational, av::MediaType::NumTypes> encoders_time_bases_{};
-    bool file_opened_{};
-    bool file_closed_{};
-    mutable std::mutex m_;
+    bool file_inited_{};
+    bool file_finalized_{};
 
 public:
     /**
@@ -30,25 +29,33 @@ public:
 
     /**
      * Add a stream to the muxer.
-     * WARNING: This function must be called before opening the file with openFile()
+     * WARNING: This function must be called before opening the file with init()
      * @param enc_ctx   the context of the encoder generating the packet stream
      */
     void addStream(const AVCodecContext *enc_ctx);
 
     /**
-     * Open the file and write the header.
+     * Open the output file and write the header.
      * WARNING: After calling this function, it won't be possible to add streams to the muxer
      */
-    void openFile();
+    void initFile();
 
     /**
      * Write the trailer and close the file.
-     * WARNING: After calling this function, it won't be possible to open the file again
+     * WARNING: After calling this function, it won't be possible to send other packets to the muxer
      */
-    void closeFile();
+    void finalizeFile();
 
     /**
-     * Write a packet to the output file. This function is thread-safe
+     * Whether the file managed by the muxer has been initialized (and hence the muxer cannot be modifed anymore)
+     * @return true if the file managed by the muxer has been initialized, false otherwise
+     */
+    [[nodiscard]] bool isInited() const;
+
+    /**
+     * Write a packet to the output file.
+     * WARNING: the muxer must be initialized with init() in order to accept packets, otherwise
+     * an exception will be thrown
      * @param packet        the packet to write. If nullptr, the output queue will be flushed
      * @param packet_type   the type of the packet (audio or video). If the packet is nullptr,
      * this parameter is irrelevant

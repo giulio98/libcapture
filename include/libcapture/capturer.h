@@ -11,7 +11,6 @@
 #include "video_parameters.h"
 
 class Demuxer;
-class Muxer;
 class Pipeline;
 
 class Capturer {
@@ -29,9 +28,6 @@ class Capturer {
     /* The pipeline used for audio/video processing */
     std::unique_ptr<Pipeline> pipeline_;
 
-    /* The muxer managing the output file */
-    std::shared_ptr<Muxer> muxer_;
-
     /**
      * Read packets from a demuxer and pass them to the processing pipeline
      * @param demuxer the demuxer to read the packets from
@@ -46,10 +42,9 @@ class Capturer {
     void capture(Demuxer &video_demuxer, Demuxer &audio_demuxer);
 
     /**
-     * Stop the capturer thread
-     * @return true if the capture was succesfully stopped, false if it was already stopped and no action was performed
+     * Stop and join the capturer thread
      */
-    bool stopCapture();
+    void stopCapture();
 
 public:
     /**
@@ -84,8 +79,6 @@ public:
 
     /**
      * Stop the recording (if the recording is already stopped, nothing will be done).
-     * When this function returns, the recorder internal state is guaranteed to be complemetely cleaned up
-     * (including all processing threads)
      */
     void stop();
 

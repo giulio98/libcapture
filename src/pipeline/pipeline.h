@@ -6,45 +6,47 @@
 #include <vector>
 
 #include "common/common.h"
-#include "converter.h"
-#include "decoder.h"
-#include "encoder.h"
+#include "format/demuxer.h"
+#include "format/muxer.h"
+#include "process/converter.h"
+#include "process/decoder.h"
+#include "process/encoder.h"
 #include "video_parameters.h"
 
-class Demuxer;
-class Muxer;
-
 class Pipeline {
+    const bool async_;
+
     std::array<bool, av::MediaType::NumTypes> managed_types_{};
-    std::shared_ptr<Muxer> muxer_;
     std::array<Decoder, av::MediaType::NumTypes> decoders_;
     std::array<Encoder, av::MediaType::NumTypes> encoders_;
     std::array<Converter, av::MediaType::NumTypes> converters_;
+    Muxer muxer_;
+    std::mutex muxer_m_;
 
-    const bool async_;
-    std::mutex m_;
-    bool stopped_{};
+    bool terminated_{};
+
+    std::mutex processors_m_;
     std::array<std::thread, av::MediaType::NumTypes> processors_;
     std::array<av::PacketUPtr, av::MediaType::NumTypes> packets_;
     std::array<std::condition_variable, av::MediaType::NumTypes> packets_cv_;
     std::array<std::exception_ptr, av::MediaType::NumTypes> e_ptrs_;
     void startProcessor(av::MediaType media_type);
+    /* Stop and join the processor threads */
     void stopProcessors();
+    /* Check and eventually re-throw the processors exceptions */
     void checkExceptions();
 
     void processPacket(const AVPacket *packet, av::MediaType type);
     void processConvertedFrame(const AVFrame *frame, av::MediaType type);
-    void flushPipeline(av::MediaType type);
 
 public:
     /**
      * Create a new Pipeline for processing packets
-     * @param muxer the muxer to send the processed packets to (WARNING: the muxer must not be
-     * opened until the Pipeline initialization is complete)
-     * @param async whether the pipeline should use background threads to handle the processing
+     * @param output_file   the name of the output file
+     * @param async         whether the pipeline should use background threads to handle the processing
      * (recommended when a single demuxer will provide both video and audio packets)
      */
-    explicit Pipeline(std::shared_ptr<Muxer> muxer, bool async = false);
+    explicit Pipeline(const std::string &output_file, bool async = false);
 
     Pipeline(const Pipeline &) = delete;
 
@@ -70,6 +72,13 @@ public:
     void initAudio(const Demuxer &demuxer, AVCodecID codec_id);
 
     /**
+     * Initialize the output file.
+     * WARNING: This function must be called after initializing all the desired processing chains
+     * with initVideo() and initAudio()
+     */
+    void initOutput();
+
+    /**
      * Send the packet to the processing chain corresponding to its type.
      * If 'async' was set to true when building the Pipeline,
      * the background threads will handle the packet processing and this function will
@@ -81,14 +90,9 @@ public:
     void feed(av::PacketUPtr packet, av::MediaType packet_type);
 
     /**
-     * Flush the processing pipelines.
-     * If 'async' was set to true when building the Pipeline,
-     * the background threads will be completely stopped before the actual flushing.
-     * WARNING: this function must be called BEFORE closing the output file with Muxer::closeFile,
-     * otherwise some packets/frames will be left in the processing structures and eventual background workers
-     * won't be able to write the packets to he output file, throwing an exception
+     * Flush the processing pipelines and close the output file.
      */
-    void flush();
+    void terminate();
 
     /**
      * Print the informations about the internal demuxer, decoders and encoders

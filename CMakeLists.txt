@@ -12,7 +12,7 @@ set(SOURCES
     src/process/decoder.cpp
     src/process/encoder.cpp
     src/process/converter.cpp
-    src/process/pipeline.cpp
+    src/pipeline/pipeline.cpp
 )
 
 add_library(${PROJECT_NAME} STATIC ${SOURCES})
