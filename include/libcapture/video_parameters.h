@@ -9,12 +9,25 @@ class VideoParameters {
     int offset_y_ = 0;
     int framerate_ = 0;
 
+    /**
+     * Check if the value is greater or equal to the lower bound.
+     * If this is not the case, throw an exception
+     * @param name  the name of the attribute to check
+     * @param val   the value of the attribute
+     * @param bound the lower bound for the attribute
+     */
     static void checkGE(const std::string &name, const int val, const int bound) {
-        if (val < bound) throw std::runtime_error(name + " must be >= " + std::to_string(bound));
+        if (val < bound) throw std::invalid_argument(name + " must be >= " + std::to_string(bound));
     }
 
+    /**
+     * Check if the value is an even number.
+     * If this is not the case, throw an exception
+     * @param name  the name of the attribute to check
+     * @param val   the value of the attribute
+     */
     static void checkEven(const std::string &name, const int val) {
-        if (val % 2) throw std::runtime_error(name + " must be divisible by 2");
+        if (val % 2) throw std::invalid_argument(name + " must be divisible by 2");
     }
 
 public:
