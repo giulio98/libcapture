@@ -5,7 +5,7 @@
 #include "common/common.h"
 
 class Decoder {
-    AVCodec *codec_{};
+    const AVCodec *codec_{};
     av::CodecContextUPtr codec_ctx_;
     av::FrameUPtr frame_;
 

@@ -7,8 +7,8 @@
 #include "common/common.h"
 
 class Demuxer {
+    const AVInputFormat *fmt_{};
     av::InFormatContextUPtr fmt_ctx_;
-    AVInputFormat *fmt_{};
     std::string device_name_;
     std::map<std::string, std::string> options_;
     std::array<const AVStream *, av::MediaType::NumTypes> streams_{};

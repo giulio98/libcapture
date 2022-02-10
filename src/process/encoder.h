@@ -6,7 +6,7 @@
 #include "common/common.h"
 
 class Encoder {
-    AVCodec *codec_{};
+    const AVCodec *codec_{};
     av::CodecContextUPtr codec_ctx_;
     av::PacketUPtr packet_;
 
