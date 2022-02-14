@@ -233,6 +233,8 @@ int main(int argc, char **argv) {
             }
         });
 
+        // TO-DO: use another thread to read from stdin to correctly
+        // handle exceptions coming from there too
         try {
             f.get();
         } catch (...) {
