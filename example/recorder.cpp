@@ -164,9 +164,7 @@ int main(int argc, char **argv) {
 
     try {
         std::vector<std::string> args;
-        for (int i = 1; i < argc; i++) {
-            args.emplace_back(argv[i]);
-        }
+        for (int i = 1; i < argc; i++) args.emplace_back(argv[i]);
         std::tie(video_device, audio_device, video_params, output_file, verbose) = parseArgs(args);
     } catch (const std::exception &e) {
         std::string msg(e.what());
