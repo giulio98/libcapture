@@ -6,7 +6,11 @@
 #include "common/common.h"
 
 class Encoder {
+#ifdef FFMPEG_5
     const AVCodec *codec_{};
+#else  // FFmpeg 4
+    AVCodec *codec_{};
+#endif
     av::CodecContextUPtr codec_ctx_;
     av::PacketUPtr packet_;
 

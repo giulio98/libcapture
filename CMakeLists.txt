@@ -77,6 +77,7 @@ else()
     if(APPLE)
         message(STATUS "Platform is macOS")
         add_definitions(-DMACOS)
+        add_definitions(-DFFMPEG_5)
     elseif(UNIX)   # LINUX
         set(LINUX TRUE)
         message(STATUS "Platform is Linux")

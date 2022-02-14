@@ -7,7 +7,11 @@
 #include "common/common.h"
 
 class Demuxer {
+#ifdef FFMPEG_5
     const AVInputFormat *fmt_{};
+#else  // FFmpeg 4
+    AVInputFormat *fmt_{};
+#endif
     av::InFormatContextUPtr fmt_ctx_;
     std::string device_name_;
     std::map<std::string, std::string> options_;
