@@ -9,19 +9,19 @@
 </p> 
 
 
-libcapture is a multiplatform C++ library that allows to capture your screen and optionally microphone audio, build with [FFmpeg](https://github.com/FFmpeg/FFmpeg).
+libcapture is a multiplatform C++ library that allows to capture your screen and optionally microphone audio, built with [FFmpeg](https://github.com/FFmpeg/FFmpeg).
 
 ## Dependences
-* cmake >= 2.8
-* ffmpeg >= 4.3.2
+* CMake >= 2.8
+* FFmpeg >= 4.3.2 (>= 5.0 on macOS)
 * screen-capture-recorder-to-video-windows-free >= 0.12.11 (*only for Windows*) 
 ## Currently supported audio/video formats
-|      Type of Format     	     | Linux     	| MacOS             	| Windows        	| 
+|      Type of Format     	     | Linux     	| macOS             	| Windows        	| 
 |:------------------------------:|--------------|-----------------------|-------------------|
 | Video Format       	         |    x11grab   |     avfoundation      |     dshow         |           
 | Audio Format       	         |    alsa      |     avfoundation      |     dshow         |           
 ## Currently supported audio/video devices
-|      Type of Device     	     | Linux     	  | MacOS             	| Windows        	            | 
+|      Type of Device     	     | Linux     	  | macOS             	| Windows        	            | 
 |:------------------------------:|----------------|---------------------|-------------------------------|
 | Video device       	         |    screen      |     screen, webcam  |     screen, webcam            |           
 | Audio device       	         |    microphone  |     microphone      |     microphone, system audio  | 
@@ -35,7 +35,7 @@ Under **Linux**, you can install FFmpeg by opening your terminal and running the
 sudo apt-get -yq update && sudo apt-get -yq install cmake libsdl2-dev libavcodec-dev libavfilter-dev libpostproc-dev libavformat-dev libavutil-dev  libswresample-dev libswscale-dev libavdevice-dev
 ```
 
-Finally, under **MacOS**, you can install FFmpeg by opening your terminal and running the following command
+Finally, under **macOS**, you can install FFmpeg by opening your terminal and running the following command
 ```bash
 brew install cmake ffmpeg
 ```
