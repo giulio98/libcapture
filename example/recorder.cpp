@@ -264,7 +264,7 @@ int main(int argc, char **argv) {
                             stopped = true;
                             std::cout << " done";
                         } else {
-                            if (command == 13) command = ' ';
+                            if (command == '\n') command = ' ';
                             std::cerr << " Invalid command '" << (char)command << "'";
                             print_status = false;
                         }

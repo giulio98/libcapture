@@ -15,7 +15,7 @@ public:
         struct termios new_tio = old_tio_;
 
         /* disable canonical mode (buffered i/o) and local echo */
-        // new_tio_.c_lflag &= (~ICANON & ~ECHO);
+        // new_tio.c_lflag &= (~ICANON & ~ECHO);
 
         /* disable canonical mode (buffered i/o) */
         new_tio.c_lflag &= (~ICANON);
