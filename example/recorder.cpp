@@ -40,6 +40,12 @@ VideoParameters parseVideoSize(const std::string &str) {
     return dims;
 }
 
+/**
+ * Parse arguments
+ * @param args a vector containing the arguments to parse
+ * @return a tuple containing the video device name, audio device name, video parameters, output file and verboseness,
+ * in this order
+ */
 std::tuple<std::string, std::string, VideoParameters, std::string, bool> parseArgs(std::vector<std::string> args) {
     VideoParameters video_params;
     int framerate = 30;
