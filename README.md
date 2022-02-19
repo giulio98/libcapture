@@ -13,7 +13,7 @@ libcapture is a multiplatform C++ library that allows to capture your screen and
 
 ## Dependences
 * CMake >= 2.8
-* FFmpeg >= 4.3.2 (>= 5.0 on macOS)
+* FFmpeg >= 4.4.1 (>= 5.0 on macOS)
 * screen-capture-recorder-to-video-windows-free >= 0.12.11 (*only for Windows*) 
 ## Currently supported audio/video formats
 |      Type of Format     	     | Linux     	| macOS             	| Windows        	| 
@@ -26,7 +26,7 @@ libcapture is a multiplatform C++ library that allows to capture your screen and
 | Video device       	         |    screen      |     screen, webcam  |     screen, webcam            |           
 | Audio device       	         |    microphone  |     microphone      |     microphone, system audio  | 
 ## Install FFmpeg
-Under **Windows**, you can install FFmpeg by clicking [here](https://www.gyan.dev/ffmpeg/builds/packages/ffmpeg-4.3.2-full_build-shared.7z).
+Under **Windows**, you can install FFmpeg by clicking [here](https://www.gyan.dev/ffmpeg/builds/packages/ffmpeg-4.4.1-full_build-shared.7z).
 Make sure to add `C:\FFmpeg\FFmpeg\bin` on your Path variable.
 Additionally, to ensure proper operation of screen-capture you need to install [screen-capture-recorder-to-video-windows-free](https://github.com/rdp/screen-capture-recorder-to-video-windows-free/releases).
 
