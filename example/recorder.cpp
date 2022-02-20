@@ -285,7 +285,7 @@ int main(int argc, char **argv) {
         if (e_ptr) std::rethrow_exception(e_ptr);
 
     } catch (const std::exception &e) {
-        std::cerr << e.what() << ", terminating..." << std::endl;
+        std::cerr << "\nERROR: " << e.what() << ", terminating..." << std::endl;
         return 1;
     }
 
