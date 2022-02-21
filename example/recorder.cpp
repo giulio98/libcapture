@@ -2,15 +2,30 @@
 #include <X11/Xlib.h>
 #include <X11/cursorfont.h>
 #endif
+#ifdef WINDOWS
+#include "conio.h"
+#endif
 
 #include <libcapture/capturer.h>
 #include <libcapture/video_parameters.h>
+#ifndef WINDOWS
+#include <poll.h>
+#endif
+#include <unistd.h>
 
+#include <chrono>
+#include <cstdio>
 #include <filesystem>
 #include <iostream>
 #include <stdexcept>
 #include <string>
+#include <thread>
 #include <vector>
+
+#ifndef WINDOWS
+#include "console_setter.h"
+#endif
+#include "thread_guard.h"
 
 #define DEFAULT_DEVICES 0
 
@@ -202,56 +217,91 @@ int main(int argc, char **argv) {
             if (answer != "y" && answer != "Y") return 0;
         }
 
-        auto f = capturer.start(video_device, audio_device, output_file, video_params);
+        std::atomic<bool> stopped = false;
+        std::exception_ptr e_ptr;
+        std::thread future_waiter;
 
-        auto listener = std::thread([&capturer]() {
+        {  // ThreadGuard scope
+            ThreadGuard tg(future_waiter);
+            std::chrono::milliseconds poll_interval(50);
+
+            auto f = capturer.start(video_device, audio_device, output_file, video_params);
+            future_waiter = std::thread([f = std::move(f), &stopped, &e_ptr, poll_interval]() mutable {
+                try {
+                    while (!stopped) {
+                        if (f.wait_for(poll_interval) == std::future_status::ready) {
+                            f.get();
+                            break;
+                        };
+                    }
+                } catch (...) {
+                    e_ptr = std::current_exception();
+                    stopped = true;
+                }
+            });
+
+            /* Poll STDIN to read commands */
             try {
+#ifndef WINDOWS
+                ConsoleSetter cs;
+                struct pollfd stdin_poll = {.fd = STDIN_FILENO, .events = POLLIN};
+#endif
                 bool paused = false;
                 bool print_status = true;
+                bool print_menu = true;
 
-                while (true) {
+                while (!stopped) {
                     if (print_status) printStatus(paused);
+                    if (print_menu) printMenu(paused);
                     print_status = false;
-                    printMenu(paused);
-                    std::string input;
-                    std::getline(std::cin, input);
-                    if (input.length() == 1) {
-                        int command = std::tolower(input.front());
+                    print_menu = false;
+#ifndef WINDOWS
+                    int poll_ret = poll(&stdin_poll, 1, 0);
+#else
+                    int poll_ret = _kbhit();
+#endif
+                    if (poll_ret > 0) {  // there's something to read
+                        print_status = true;
+                        print_menu = true;
+#ifndef WINDOWS
+                        int command = std::tolower(getchar());
+#else
+                        int command = std::tolower(getch());
+#endif
                         if (command == 'p' && !paused) {
                             capturer.pause();
                             paused = true;
-                            print_status = true;
                         } else if (command == 'r' && paused) {
                             capturer.resume();
                             paused = false;
-                            print_status = true;
                         } else if (command == 's') {
-                            std::cout << "\nStopping..." << std::flush;
+                            std::cout << "\n\nStopping..." << std::flush;
                             capturer.stop();
-                            std::cout << " done" << std::endl;
-                            break;
+                            stopped = true;
+                            std::cout << " done";
+                        } else {
+                            if (command == '\n') command = ' ';
+                            std::cerr << " Invalid command '" << (char)command << "'";
+                            print_status = false;
                         }
+                        std::cout << std::endl;
+                    } else if (poll_ret == 0) {  // nothing to read, sleep...
+                        std::this_thread::sleep_for(poll_interval);
+                    } else {  // error
+                        throw std::runtime_error("Failed to poll stdin");
                     }
-                    if (!print_status) std::cerr << "Unknown command" << std::endl;
                 }
-            } catch (const std::exception &e) {
-                std::cerr << e.what() << std::endl;
+            } catch (...) {
+                stopped = true;  // tell future_waiter to stop
+                throw;
             }
-        });
 
-        // TO-DO: use another thread to read from stdin to correctly
-        // handle exceptions coming from there too
-        try {
-            f.get();
-        } catch (...) {
-            listener.detach();
-            throw;
-        }
+        }  // end ThreadGuard scope: join future_waiter in any case
 
-        if (listener.joinable()) listener.join();
+        if (e_ptr) std::rethrow_exception(e_ptr);
 
     } catch (const std::exception &e) {
-        std::cerr << e.what() << ", terminating..." << std::endl;
+        std::cerr << "\nERROR: " << e.what() << ", terminating..." << std::endl;
         return 1;
     }
 
