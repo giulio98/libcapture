@@ -2,10 +2,15 @@
 #include <X11/Xlib.h>
 #include <X11/cursorfont.h>
 #endif
+#ifdef WINDOWS
+#include "conio.h"
+#endif
 
 #include <libcapture/capturer.h>
 #include <libcapture/video_parameters.h>
+#ifndef WINDOWS
 #include <poll.h>
+#endif
 #include <unistd.h>
 
 #include <chrono>
@@ -17,7 +22,9 @@
 #include <thread>
 #include <vector>
 
+#ifndef WINDOWS
 #include "console_setter.h"
+#endif
 #include "thread_guard.h"
 
 #define DEFAULT_DEVICES 0
@@ -235,8 +242,10 @@ int main(int argc, char **argv) {
 
             /* Poll STDIN to read commands */
             try {
+#ifndef WINDOWS
                 ConsoleSetter cs;
                 struct pollfd stdin_poll = {.fd = STDIN_FILENO, .events = POLLIN};
+#endif
                 bool paused = false;
                 bool print_status = true;
                 bool print_menu = true;
@@ -246,12 +255,19 @@ int main(int argc, char **argv) {
                     if (print_menu) printMenu(paused);
                     print_status = false;
                     print_menu = false;
-
+#ifndef WINDOWS
                     int poll_ret = poll(&stdin_poll, 1, 0);
+#else
+                    int poll_ret = _kbhit();
+#endif
                     if (poll_ret > 0) {  // there's something to read
                         print_status = true;
                         print_menu = true;
+#ifndef WINDOWS
                         int command = std::tolower(getchar());
+#else
+                        int command = std::tolower(getch());
+#endif
                         if (command == 'p' && !paused) {
                             capturer.pause();
                             paused = true;
