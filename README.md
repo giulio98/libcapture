@@ -62,7 +62,7 @@ After installing ffmpeg, as described in [Install FFmpeg](#install-ffmpeg), your
 ```cmake
 cmake_minimum_required(VERSION 3.20)
 project(myproject)
-
+add_definitions(-DWINDOWS)
 set(CMAKE_CXX_STANDARD 17)
 
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
@@ -93,8 +93,8 @@ After installing ffmpeg, your `CMakeLists.txt` should look like this
 ```cmake
 cmake_minimum_required(VERSION 3.20)
 project(myproject)
-
-set(CMAKE_CXX_STANDARD 20)
+add_definitions(-DLINUX)
+set(CMAKE_CXX_STANDARD 17)
 
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -pthread")
@@ -107,10 +107,6 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(libcapture)
 add_executable(myexe main.cpp)
 target_link_libraries(myexe libcapture)
-```
-As you can see it's the same for Windows except for the line
-```cmake
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -pthread")
 ```
 As before, you can fill `main.cpp` with the code provided in [recorder.cpp](example/recorder.cpp).
 Then you can run your executable.
