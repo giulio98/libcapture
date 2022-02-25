@@ -113,3 +113,30 @@ Then you can run your executable.
 
 # Usage
 
+```cpp
+// Create your capturer
+Capturer capturer();
+
+// Set video parameters (by default, record whole screen)
+VideoParameters params;
+// Set the framerate
+params.setFramerate(30);
+
+// Start recording (macOS)
+std::string video_device = "1";
+std::string audio_device = "0";
+std::string output_file = "output.mp4";
+std::future<void> f = capturer.start(video_device, audio_device, output_file);
+
+// Wait on the future for exceptions in another thread...
+// f.get();
+
+// Pause
+capturer.pause();
+
+// Resume
+capturer.resume();
+
+// Stop
+capturer.stop();
+```
