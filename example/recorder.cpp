@@ -13,6 +13,7 @@
 #endif
 #include <unistd.h>
 
+#include <cassert>
 #include <chrono>
 #include <cstdio>
 #include <filesystem>
@@ -21,7 +22,6 @@
 #include <string>
 #include <thread>
 #include <vector>
-#include <assert.h>
 
 #ifndef WINDOWS
 #include "console_setter.h"
