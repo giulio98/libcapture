@@ -159,8 +159,8 @@ std::future<void> Capturer::start(const std::string &video_device, const std::st
     std::optional<Demuxer> audio_demuxer;  // Linux only
 
     { /* init Demuxer */
-        const std::string device_name = generateInputDeviceName(video_device, audio_device, video_params);
-        const std::map<std::string, std::string> demuxer_options = generateDemuxerOptions(video_params);
+        std::string device_name = generateInputDeviceName(video_device, audio_device, video_params);
+        std::map<std::string, std::string> demuxer_options = generateDemuxerOptions(video_params);
         demuxer = Demuxer(getInputFormatName(), std::move(device_name), std::move(demuxer_options));
         demuxer.openInput();
     }
@@ -183,8 +183,9 @@ std::future<void> Capturer::start(const std::string &video_device, const std::st
     if (capture_audio) {
 #ifdef LINUX
         /* init audio demuxer and pipeline */
-        const std::string audio_device_name = generateInputDeviceName("", audio_device, video_params);
-        audio_demuxer = Demuxer(getInputFormatName(true), std::move(audio_device_name), std::map<std::string, std::string>());
+        std::string audio_device_name = generateInputDeviceName("", audio_device, video_params);
+        audio_demuxer =
+            Demuxer(getInputFormatName(true), std::move(audio_device_name), std::map<std::string, std::string>());
         audio_demuxer->openInput();
         pipeline_->initAudio(*audio_demuxer, audio_codec_id);
 #else
