@@ -21,6 +21,7 @@
 #include <string>
 #include <thread>
 #include <vector>
+#include <assert.h>
 
 #ifndef WINDOWS
 #include "console_setter.h"
@@ -231,6 +232,7 @@ int main(int argc, char **argv) {
                     while (!stopped) {
                         if (f.wait_for(poll_interval) == std::future_status::ready) {
                             f.get();
+                            assert(stopped);
                             break;
                         };
                     }
@@ -276,8 +278,9 @@ int main(int argc, char **argv) {
                             paused = false;
                         } else if (command == 's') {
                             std::cout << "\n\nStopping..." << std::flush;
-                            capturer.stop();
                             stopped = true;
+                            capturer.stop();
+
                             std::cout << " done";
                         } else {
                             if (command == '\n') command = ' ';

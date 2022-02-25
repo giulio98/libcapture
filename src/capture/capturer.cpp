@@ -161,7 +161,7 @@ std::future<void> Capturer::start(const std::string &video_device, const std::st
     { /* init Demuxer */
         const std::string device_name = generateInputDeviceName(video_device, audio_device, video_params);
         const std::map<std::string, std::string> demuxer_options = generateDemuxerOptions(video_params);
-        demuxer = Demuxer(getInputFormatName(), device_name, demuxer_options);
+        demuxer = Demuxer(getInputFormatName(), std::move(device_name), std::move(demuxer_options));
         demuxer.openInput();
     }
 
@@ -184,7 +184,7 @@ std::future<void> Capturer::start(const std::string &video_device, const std::st
 #ifdef LINUX
         /* init audio demuxer and pipeline */
         const std::string audio_device_name = generateInputDeviceName("", audio_device, video_params);
-        audio_demuxer = Demuxer(getInputFormatName(true), audio_device_name, std::map<std::string, std::string>());
+        audio_demuxer = Demuxer(getInputFormatName(true), std::move(audio_device_name), std::map<std::string, std::string>());
         audio_demuxer->openInput();
         pipeline_->initAudio(*audio_demuxer, audio_codec_id);
 #else
@@ -242,21 +242,23 @@ std::future<void> Capturer::start(const std::string &video_device, const std::st
 }
 
 void Capturer::stop() {
-    if (stopped_) return;
+    if (stopped_) throw std::runtime_error("Capturer already stopped");
     stopCapture();
     pipeline_->terminate();
     pipeline_.reset();
 }
 
 void Capturer::pause() {
-    if (paused_ || stopped_) return;
+    if(paused_) throw std::runtime_error("Capturer already paused");
+    if (stopped_) throw std::runtime_error("Capturer already stopped");
     std::lock_guard lg(m_);
     paused_ = true;
     cv_.notify_all();
 }
 
 void Capturer::resume() {
-    if (!paused_ || stopped_) return;
+    if(!paused_) throw std::runtime_error("Capturer already running");
+    if(stopped_) throw std::runtime_error("Capturer already stopped");
     std::lock_guard lg(m_);
     paused_ = false;
     cv_.notify_all();
