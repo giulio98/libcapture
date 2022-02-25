@@ -249,16 +249,16 @@ void Capturer::stop() {
 }
 
 void Capturer::pause() {
-    if(paused_) throw std::runtime_error("Capturer already paused");
-    if (stopped_) throw std::runtime_error("Capturer already stopped");
+    if (stopped_) throw std::runtime_error("Capturer is stopped");
+    if (paused_) throw std::runtime_error("Capturer already paused");
     std::lock_guard lg(m_);
     paused_ = true;
     cv_.notify_all();
 }
 
 void Capturer::resume() {
-    if(!paused_) throw std::runtime_error("Capturer already running");
-    if(stopped_) throw std::runtime_error("Capturer already stopped");
+    if (stopped_) throw std::runtime_error("Capturer is stopped");
+    if (!paused_) throw std::runtime_error("Capturer already running");
     std::lock_guard lg(m_);
     paused_ = false;
     cv_.notify_all();
