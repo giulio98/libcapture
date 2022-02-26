@@ -25,15 +25,14 @@ namespace av {
 /**
  * Data types (Audio or Video).
  * WARNING: NumTypes is NOT a valid data type and it's only used to properly size data structures
- * in order to use Video and Audio as indices
- * (DO NOT change the order)
+ * in order to use Video and Audio as indices (DO NOT change the order)
  */
 enum MediaType { None = -1, Video, Audio, NumTypes };
 
 /**
  * Array of media types valid as indices
  */
-constexpr std::array<MediaType, MediaType::NumTypes> validMediaTypes = {MediaType::Video, MediaType::Audio};
+const std::array<MediaType, MediaType::NumTypes> validMediaTypes = {MediaType::Video, MediaType::Audio};
 
 /**
  * Whether the given type is valid
