@@ -280,7 +280,6 @@ int main(int argc, char **argv) {
                             std::cout << "\n\nStopping..." << std::flush;
                             stopped = true;
                             capturer.stop();
-
                             std::cout << " done";
                         } else {
                             if (command == '\n') command = ' ';
