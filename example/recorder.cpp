@@ -232,7 +232,7 @@ int main(int argc, char **argv) {
                     while (!stopped) {
                         if (f.wait_for(poll_interval) == std::future_status::ready) {
                             f.get();
-                            assert(stopped);  // if we arrived here, no exception wa thrown by get()
+                            assert(stopped);  // if we arrived here, no exception was thrown by get()
                             break;
                         };
                     }
