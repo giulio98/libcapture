@@ -42,7 +42,7 @@ class Capturer {
     void capture(Demuxer &video_demuxer, Demuxer &audio_demuxer);
 
     /**
-     * Stop and join the capturer thread
+     * Stop the capturing
      */
     void stopCapture();
 

@@ -131,15 +131,13 @@ Capturer::Capturer(const bool verbose) : verbose_(verbose) {
 
 Capturer::~Capturer() {
     if (!stopped_) stopCapture();
+    if (capturer_.joinable()) capturer_.join();
 }
 
 void Capturer::stopCapture() {
-    {
-        std::lock_guard lg(m_);
-        stopped_ = true;
-        cv_.notify_all();
-    }
-    if (capturer_.joinable()) capturer_.join();
+    std::lock_guard lg(m_);
+    stopped_ = true;
+    cv_.notify_all();
 }
 
 std::future<void> Capturer::start(const std::string &video_device, const std::string &audio_device,
@@ -244,6 +242,7 @@ std::future<void> Capturer::start(const std::string &video_device, const std::st
 void Capturer::stop() {
     if (stopped_) throw std::runtime_error("Failed to stop the recording: capturer already stopped");
     stopCapture();
+    if (capturer_.joinable()) capturer_.join();
     pipeline_->terminate();
     pipeline_.reset();
 }
