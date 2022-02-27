@@ -72,8 +72,11 @@ void Pipeline::initVideo(const Demuxer &demuxer, const AVCodecID codec_id, const
     auto [offset_x, offset_y] = video_params.getVideoOffset();
     if (!width) width = dec_ctx->width;
     if (!height) height = dec_ctx->height;
-    if (offset_x + width > dec_ctx->width) throw std::runtime_error("Output video width exceeds input one");
-    if (offset_y + height > dec_ctx->height) throw std::runtime_error("Output video height exceeds input one");
+
+    if (width > dec_ctx->width) throw std::runtime_error("Specified width exceeds the display one");
+    if (height > dec_ctx->height) throw std::runtime_error("Specified height exceeds the display one");
+    if (offset_x + width > dec_ctx->width) throw std::runtime_error("Specified horizontal offset is too high");
+    if (offset_y + height > dec_ctx->height) throw std::runtime_error("Specified veritcal offset is too high");
 
     /* Init encoder */
     std::map<std::string, std::string> enc_options;
