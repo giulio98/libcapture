@@ -96,7 +96,7 @@ Converter::Converter(const AVCodecContext *dec_ctx, const AVCodecContext *enc_ct
 
     { /* buffer src set-up*/
         const AVFilter *filter = avfilter_get_by_name(src_filter_name.c_str());
-        if (!filter) throw std::runtime_error(errMsg("failed to find src filter definition"));
+        if (!filter) throw std::logic_error(errMsg("failed to find src filter definition"));
         if (avfilter_graph_create_filter(&buffersrc_ctx_, filter, "in", src_args.c_str(), nullptr,
                                          filter_graph_.get()) < 0)
             throw std::runtime_error(errMsg("failed to create src filter"));
@@ -104,7 +104,7 @@ Converter::Converter(const AVCodecContext *dec_ctx, const AVCodecContext *enc_ct
 
     { /* buffer sink set-up*/
         const AVFilter *filter = avfilter_get_by_name(sink_filter_name.c_str());
-        if (!filter) throw std::runtime_error(errMsg("failed to find sink filter definition"));
+        if (!filter) throw std::logic_error(errMsg("failed to find sink filter definition"));
         if (avfilter_graph_create_filter(&buffersink_ctx_, filter, "out", nullptr, nullptr, filter_graph_.get()) < 0)
             throw std::runtime_error(errMsg("failed to create src filter"));
     }
