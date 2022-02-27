@@ -78,17 +78,17 @@ public:
                             const std::string &output_file, VideoParameters video_params);
 
     /**
-     * Stop the recording (if the recording is already stopped, nothing will be done).
+     * Stop the recording (if the recording is already stopped, an exception will be thrown).
      */
     void stop();
 
     /**
-     * Pause the recording (if the recording is already paused/stopped, nothing will be done)
+     * Pause the recording (if the recording is already paused/stopped, an exception will be thrown)
      */
     void pause();
 
     /**
-     * Resume the recording (if the recording is already proceeding/stopped, nothing will be done)
+     * Resume the recording (if the recording is already proceeding/stopped, an exception will be thrown)
      */
     void resume();
 

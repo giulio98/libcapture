@@ -243,23 +243,23 @@ std::future<void> Capturer::start(const std::string &video_device, const std::st
 }
 
 void Capturer::stop() {
-    if (stopped_) throw std::runtime_error("Capturer already stopped");
+    if (stopped_) throw std::runtime_error("Failed to stop the recording: capturer already stopped");
     stopCapture();
     pipeline_->terminate();
     pipeline_.reset();
 }
 
 void Capturer::pause() {
-    if (stopped_) throw std::runtime_error("Capturer is stopped");
-    if (paused_) throw std::runtime_error("Capturer already paused");
+    if (stopped_) throw std::runtime_error("Failed to pause the recording: capturer is stopped");
+    if (paused_) throw std::runtime_error("Failed to pause the recording: capturer already paused");
     std::lock_guard lg(m_);
     paused_ = true;
     cv_.notify_all();
 }
 
 void Capturer::resume() {
-    if (stopped_) throw std::runtime_error("Capturer is stopped");
-    if (!paused_) throw std::runtime_error("Capturer already running");
+    if (stopped_) throw std::runtime_error("Failed to resume the recording: capturer is stopped");
+    if (!paused_) throw std::runtime_error("Failed to resume the recording: capturer already running");
     std::lock_guard lg(m_);
     paused_ = false;
     cv_.notify_all();
