@@ -42,8 +42,10 @@ public:
     /**
      * Open the input device
      * WARNING: calling this function when the input is already open will throw an exception
+     * @param listing_devices   if true, return immediately after trying to open the input device without
+     * performing any check on the outcome of the operation
      */
-    void openInput();
+    void openInput(bool listing_devices = false);
 
     /**
      * Close the input device

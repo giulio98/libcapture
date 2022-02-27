@@ -365,10 +365,7 @@ void Capturer::listAvailableDevices() const {
     std::cout << "##### Available Devices #####" << std::endl;
     {
         LogLevelSetter lls(AV_LOG_INFO);
-        try {
-            demuxer.openInput();
-        } catch (...) {
-        }
+        demuxer.openInput(true);
     }
     std::cout << std::endl;
 }

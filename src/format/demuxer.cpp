@@ -29,7 +29,7 @@ Demuxer &Demuxer::operator=(Demuxer other) {
     return *this;
 }
 
-void Demuxer::openInput() {
+void Demuxer::openInput(const bool listing_devices) {
     if (fmt_ctx_) throw std::logic_error(errMsg("failed to open input device (input is already open)"));
     if (!fmt_) throw std::logic_error(errMsg("input format is not set"));  // if the Demuxer was default-constructed
 
@@ -40,6 +40,9 @@ void Demuxer::openInput() {
         int ret = avformat_open_input(&fmt_ctx, device_name_.c_str(), fmt_, dict_raw ? &dict_raw : nullptr);
         dict = av::DictionaryUPtr(dict_raw);
         fmt_ctx_ = av::InFormatContextUPtr(fmt_ctx);
+        /* If we're only listing the available devices, return without any check */
+        if (listing_devices) return;
+        /* Otherwise, check the outcome */
         if (ret) throw std::runtime_error(errMsg("failed to open the input device '" + device_name_ + "'"));
 #if VERBOSE
         auto map = av::dict2map(dict.get());
