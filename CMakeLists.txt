@@ -103,4 +103,5 @@ else()
 
 endif()
 
+# uncomment the line below to build the example
 # add_subdirectory("example")
