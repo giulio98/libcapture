@@ -218,7 +218,6 @@ std::future<void> Capturer::start(const std::string &video_device, const std::st
 
         std::lock_guard lg(m_);
 
-        /* in case of exception when starting the thread, capturer_ will be left untouched ("empty") */
         capturer_ = std::thread(
             [this, demuxer = std::move(demuxer), audio_demuxer = std::move(audio_demuxer), p = std::move(p)]() mutable {
                 try {
