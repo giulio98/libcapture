@@ -41,7 +41,7 @@ public:
 
     void setVideoSize(int width, int height) {
         checkGE("width", width, 0);
-        checkGE("width", height, 0);
+        checkGE("height", height, 0);
         checkEven("width", width);
         checkEven("height", height);
         width_ = width;
@@ -49,8 +49,8 @@ public:
     }
 
     void setVideoOffset(int offset_x, int offset_y) {
-        checkGE("offset x", offset_x, 0);
-        checkGE("offset y", offset_y, 0);
+        checkGE("horizontal offset", offset_x, 0);
+        checkGE("vertical offset", offset_y, 0);
         offset_x_ = offset_x;
         offset_y_ = offset_y;
     }
