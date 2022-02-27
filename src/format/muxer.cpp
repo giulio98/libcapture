@@ -46,6 +46,7 @@ void Muxer::addStream(const AVCodecContext *enc_ctx) {
 
 void Muxer::initFile() {
     if (file_inited_) throw std::logic_error(errMsg("cannot init file, file has already been initialized"));
+    if (fmt_ctx_->pb) throw std::logic_error(errMsg("cannot create file, file has already been created"));
     /* create empty video file */
     if (!(fmt_ctx_->flags & AVFMT_NOFILE)) {
         if (avio_open(&fmt_ctx_->pb, filename_.c_str(), AVIO_FLAG_WRITE) < 0) {
@@ -62,7 +63,7 @@ void Muxer::finalizeFile() {
     if (file_finalized_) throw std::logic_error(errMsg("cannot finalize file, file has already been finalized"));
     if (av_write_trailer(fmt_ctx_.get()) < 0) throw std::runtime_error(errMsg("failed to write file trailer"));
     file_finalized_ = true;
-    if (avio_closep(&(fmt_ctx_->pb)) < 0) throw std::runtime_error(errMsg("failed to close file"));
+    if (avio_closep(&fmt_ctx_->pb) < 0) throw std::runtime_error(errMsg("failed to close file"));
 }
 
 bool Muxer::isInited() const { return file_inited_; }

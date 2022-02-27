@@ -28,8 +28,9 @@ public:
     Muxer &operator=(const Muxer &) = delete;
 
     /**
-     * Add a stream to the muxer.
-     * WARNING: This function must be called before opening the file with init()
+     * Add a stream to the muxer. It's only possible to add a single audio stream and video stream:
+     * if this condition is violated, an exception will be thrown.
+     * WARNING: This function must be called before opening the file with initFile()
      * @param enc_ctx   the context of the encoder generating the packet stream
      */
     void addStream(const AVCodecContext *enc_ctx);
