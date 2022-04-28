@@ -115,7 +115,7 @@ Then you can run your executable.
 
 ```cpp
 // Create your capturer
-Capturer capturer();
+Capturer capturer;
 
 // Set video parameters (by default, record whole screen)
 VideoParameters params;
@@ -126,7 +126,7 @@ params.setFramerate(30);
 std::string video_device = "1";
 std::string audio_device = "0";
 std::string output_file = "output.mp4";
-std::future<void> f = capturer.start(video_device, audio_device, output_file);
+std::future<void> f = capturer.start(video_device, audio_device, output_file, params);
 
 // Wait on the future for exceptions in another thread...
 // f.get();
