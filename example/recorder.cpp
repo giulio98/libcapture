@@ -36,20 +36,20 @@ VideoParameters parseVideoSize(const std::string &str) {
     auto main_delim_pos = str.find(':');
 
     {
-        std::string video_size = str.substr(0, main_delim_pos);
+        const std::string video_size = str.substr(0, main_delim_pos);
         auto delim_pos = video_size.find('x');
         if (delim_pos == std::string::npos) throw std::runtime_error("Wrong video-size format");
-        int width = std::stoi(video_size.substr(0, delim_pos));
-        int height = std::stoi(video_size.substr(delim_pos + 1));
+        const int width = std::stoi(video_size.substr(0, delim_pos));
+        const int height = std::stoi(video_size.substr(delim_pos + 1));
         dims.setVideoSize(width, height);
     }
 
     if (main_delim_pos != std::string::npos) {
-        std::string offsets = str.substr(main_delim_pos + 1);
+        const std::string offsets = str.substr(main_delim_pos + 1);
         auto delim_pos = offsets.find(',');
         if (delim_pos == std::string::npos) throw std::runtime_error("Wrong offsets");
-        int offset_x = std::stoi(offsets.substr(0, delim_pos));
-        int offset_y = std::stoi(offsets.substr(delim_pos + 1));
+        const int offset_x = std::stoi(offsets.substr(0, delim_pos));
+        const int offset_y = std::stoi(offsets.substr(delim_pos + 1));
         dims.setVideoOffset(offset_x, offset_y);
     }
 
@@ -92,32 +92,32 @@ std::tuple<std::string, std::string, VideoParameters, std::string, bool> parseAr
     bool framerate_set = false;
     bool output_set = false;
     bool verbose = false;
-    std::string wrong_args_msg("Wrong arguments");
+    const std::string wrong_args_msg("Wrong arguments");
 
     for (auto it = args.begin(); it != args.end(); it++) {
-        if (*it == "-h") {
+        if (*it == "--help" || *it == "-h") {
             throw std::runtime_error("");
-        } else if (*it == "-video_device") {
+        } else if (*it == "--video_device" || *it == "-i") {
             if (video_device_set || ++it == args.end()) throw std::runtime_error(wrong_args_msg);
             video_device = *it;
             video_device_set = true;
-        } else if (*it == "-audio_device") {
+        } else if (*it == "--audio_device" || *it == "-a") {
             if (audio_device_set || ++it == args.end()) throw std::runtime_error(wrong_args_msg);
             audio_device = *it;
             audio_device_set = true;
-        } else if (*it == "-video_size") {
+        } else if (*it == "--video_size" || *it == "-s") {
             if (video_size_set || ++it == args.end()) throw std::runtime_error(wrong_args_msg);
             video_params = parseVideoSize(*it);
             video_size_set = true;
-        } else if (*it == "-framerate") {
+        } else if (*it == "--framerate" || *it == "-f") {
             if (framerate_set || ++it == args.end()) throw std::runtime_error(wrong_args_msg);
             framerate = std::stoi(*it);
             framerate_set = true;
-        } else if (*it == "-o") {
+        } else if (*it == "--output" || *it == "-o") {
             if (output_set || ++it == args.end()) throw std::runtime_error(wrong_args_msg);
             output_file = *it;
             output_set = true;
-        } else if (*it == "-v") {
+        } else if (*it == "--verbose" || *it == "-v") {
             verbose = true;
         } else {
             throw std::runtime_error("Unknown arg: " + *it);
@@ -189,16 +189,16 @@ int main(int argc, char **argv) {
         for (int i = 1; i < argc; i++) args.emplace_back(argv[i]);
         std::tie(video_device, audio_device, video_params, output_file, verbose) = parseArgs(args);
     } catch (const std::exception &e) {
-        std::string msg(e.what());
+        const std::string msg(e.what());
         if (msg != "") std::cerr << "ERROR: " << msg << std::endl;
-        std::cerr << "Usage: " << argv[0] << std::endl;
-        std::cerr << "\t[-h]" << std::endl;
-        std::cerr << "\t[-video_device <device_name>]" << std::endl;
-        std::cerr << "\t[-audio_device <device_name>]" << std::endl;
-        std::cerr << "\t[-video_size <width>x<height>:<offset_x>,<offset_y>]" << std::endl;
-        std::cerr << "\t[-framerate <framerate>]" << std::endl;
-        std::cerr << "\t[-o <output_file>]" << std::endl;
-        std::cerr << "\t[-v]" << std::endl;
+        std::cerr << "Usage: " << argv[0];
+        std::cerr << " --video_device | -i <device_name>" << std::endl;
+        std::cerr << "\t[--audio_device | -a <device_name>]" << std::endl;
+        std::cerr << "\t[--video_size | -s <width>x<height>:<offset_x>,<offset_y>]" << std::endl;
+        std::cerr << "\t[--framerate | -f <framerate>]" << std::endl;
+        std::cerr << "\t[--output | -o <output_file>]" << std::endl;
+        std::cerr << "\t[--verbose | -v]" << std::endl;
+        std::cerr << "\t[--help | -h]" << std::endl;
         return 1;
     }
 
@@ -224,7 +224,7 @@ int main(int argc, char **argv) {
 
         {  // ThreadGuard scope
             ThreadGuard tg(future_waiter);
-            std::chrono::milliseconds poll_interval(50);
+            const std::chrono::milliseconds poll_interval(50);
 
             auto f = capturer.start(video_device, audio_device, output_file, video_params);
             future_waiter = std::thread([f = std::move(f), &stopped, &e_ptr, poll_interval]() mutable {
@@ -258,7 +258,7 @@ int main(int argc, char **argv) {
                     print_status = false;
                     print_menu = false;
 #ifndef WINDOWS
-                    int poll_ret = poll(&stdin_poll, 1, 0);
+                    const int poll_ret = poll(&stdin_poll, 1, 0);
 #else
                     int poll_ret = _kbhit();
 #endif
