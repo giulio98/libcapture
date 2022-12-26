@@ -37,6 +37,7 @@ Encoder::Encoder(const AVCodecID codec_id, const int sample_rate, const AVChanne
     : Encoder(codec_id) {
     if (codec_->type != AVMEDIA_TYPE_AUDIO)
         throw std::invalid_argument(errMsg("failed to create audio encoder (received codec ID is not of type audio)"));
+    if (!channel_layout) throw std::invalid_argument(errMsg("received channel_layout is NULL"));
 
     codec_ctx_->sample_rate = sample_rate;
     if (channel_layout->order == AV_CHANNEL_ORDER_UNSPEC) {
