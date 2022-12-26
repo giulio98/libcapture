@@ -147,11 +147,11 @@ std::future<void> Capturer::start(const std::string &video_device, const std::st
     if (video_device.empty()) throw std::runtime_error("Video device not specified");
     if (output_file.empty()) throw std::runtime_error("Output file not specified");
 
-    bool capture_audio = !audio_device.empty();
+    const bool capture_audio = !audio_device.empty();
 
-    AVPixelFormat video_pix_fmt = AV_PIX_FMT_YUV420P;
-    AVCodecID video_codec_id = AV_CODEC_ID_H264;
-    AVCodecID audio_codec_id = AV_CODEC_ID_AAC;
+    const AVPixelFormat video_pix_fmt = AV_PIX_FMT_YUV420P;
+    const AVCodecID video_codec_id = AV_CODEC_ID_H264;
+    const AVCodecID audio_codec_id = AV_CODEC_ID_AAC;
 
     Demuxer demuxer;
     std::optional<Demuxer> audio_demuxer;  // Linux only
@@ -297,7 +297,7 @@ void Capturer::capture(Demuxer &demuxer) {
     int64_t last_pts = 0;
     int64_t pts_offset = 0;
     bool adjust_pts_offset = false;
-    std::chrono::milliseconds sleep_interval(1);
+    const std::chrono::milliseconds sleep_interval(1);
 
 #if THROW_TEST_EXCEPTION
     int counter = 0;

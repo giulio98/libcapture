@@ -6,7 +6,7 @@ static std::string errMsg(const std::string &msg) { return ("Converter: " + msg)
 
 static std::string getChLayoutDescription(const AVChannelLayout *channel_layout) {
     char buf[64];
-    int ret = av_channel_layout_describe(channel_layout, buf, sizeof(buf));
+    const int ret = av_channel_layout_describe(channel_layout, buf, sizeof(buf));
     if (ret < 0) throw std::runtime_error(errMsg("Error obtaining ch_layout description"));
     if (ret > sizeof(buf)) throw std::logic_error(errMsg("Buf was too small"));
     return buf;
@@ -136,7 +136,7 @@ Converter::Converter(const AVCodecContext *dec_ctx, const AVCodecContext *enc_ct
 
         AVFilterInOut *outputs_raw = outputs.release();
         AVFilterInOut *inputs_raw = inputs.release();
-        int ret =
+        const int ret =
             avfilter_graph_parse_ptr(filter_graph_.get(), filter_spec.c_str(), &inputs_raw, &outputs_raw, nullptr);
         avfilter_inout_free(&outputs_raw);
         avfilter_inout_free(&inputs_raw);
@@ -169,7 +169,7 @@ av::FrameUPtr Converter::getFrame() {
         if (!frame_) throw std::runtime_error(errMsg("failed to allocate frame"));
     }
 
-    int ret = av_buffersink_get_frame(buffersink_ctx_, frame_.get());
+    const int ret = av_buffersink_get_frame(buffersink_ctx_, frame_.get());
     if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) return nullptr;
     if (ret < 0) throw std::runtime_error(errMsg("failed to receive frame from filter"));
 

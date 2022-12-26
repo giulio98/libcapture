@@ -35,7 +35,7 @@ Decoder &Decoder::operator=(Decoder other) {
 
 bool Decoder::sendPacket(const AVPacket *packet) {
     if (!codec_ctx_) throw std::logic_error(errMsg("decoder was not initialized yet"));
-    int ret = avcodec_send_packet(codec_ctx_.get(), packet);
+    const int ret = avcodec_send_packet(codec_ctx_.get(), packet);
     if (ret == AVERROR(EAGAIN)) return false;
     if (ret == AVERROR_EOF) throw std::logic_error(errMsg("has already been flushed"));
     if (ret < 0) throw std::runtime_error(errMsg("failed to send packet to decoder"));
@@ -50,7 +50,7 @@ av::FrameUPtr Decoder::getFrame() {
         if (!frame_) throw std::runtime_error(errMsg("failed to allocate frame"));
     }
 
-    int ret = avcodec_receive_frame(codec_ctx_.get(), frame_.get());
+    const int ret = avcodec_receive_frame(codec_ctx_.get(), frame_.get());
     if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) return nullptr;
     if (ret < 0) throw std::runtime_error(errMsg("failed to receive frame from decoder"));
 

@@ -42,7 +42,7 @@ Encoder::Encoder(const AVCodecID codec_id, const int sample_rate, const AVChanne
     if (channel_layout->order == AV_CHANNEL_ORDER_UNSPEC) {
         av_channel_layout_default(&codec_ctx_->ch_layout, channel_layout->nb_channels);
     } else {
-        int ret = av_channel_layout_copy(&codec_ctx_->ch_layout, channel_layout);
+        const int ret = av_channel_layout_copy(&codec_ctx_->ch_layout, channel_layout);
         if (ret < 0) throw std::runtime_error(errMsg("Failed to copy channel layout"));
     }
     if (codec_->sample_fmts) codec_ctx_->sample_fmt = codec_->sample_fmts[0];
@@ -84,7 +84,7 @@ void Encoder::init(const int global_header_flags, const std::map<std::string, st
 
     av::DictionaryUPtr dict = av::map2dict(options);
     AVDictionary *dict_raw = dict.release();
-    int ret = avcodec_open2(codec_ctx_.get(), codec_, dict_raw ? &dict_raw : nullptr);
+    const int ret = avcodec_open2(codec_ctx_.get(), codec_, dict_raw ? &dict_raw : nullptr);
     dict = av::DictionaryUPtr(dict_raw);
     if (ret) throw std::logic_error(errMsg("failed to initialize Codec Context"));
 #if VERBOSE
@@ -97,7 +97,7 @@ void Encoder::init(const int global_header_flags, const std::map<std::string, st
 
 bool Encoder::sendFrame(const AVFrame *frame) {
     if (!codec_ctx_) throw std::logic_error(errMsg("encoder was not initialized yet"));
-    int ret = avcodec_send_frame(codec_ctx_.get(), frame);
+    const int ret = avcodec_send_frame(codec_ctx_.get(), frame);
     if (ret == AVERROR(EAGAIN)) return false;
     if (ret == AVERROR_EOF) throw std::logic_error(errMsg("has already been flushed"));
     if (ret < 0) throw std::runtime_error(errMsg("failed to send frame to encoder"));
@@ -112,7 +112,7 @@ av::PacketUPtr Encoder::getPacket() {
         if (!packet_) throw std::runtime_error(errMsg("failed to allocate packet"));
     }
 
-    int ret = avcodec_receive_packet(codec_ctx_.get(), packet_.get());
+    const int ret = avcodec_receive_packet(codec_ctx_.get(), packet_.get());
     if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) return nullptr;
     if (ret < 0) throw std::runtime_error(errMsg("failed to receive frame from decoder"));
 
