@@ -42,7 +42,7 @@ static std::pair<std::string, std::string> getAudioFilterSpec(const AVCodecConte
      */
     filter_spec_ss << ",aresample=" << enc_ctx->sample_rate << ":async=1"
                    << ":out_sample_fmt=" << enc_ctx->sample_fmt
-                   << ":out_channel_layout=" << getChLayoutDescription(&enc_ctx->ch_layout);
+                   << ":out_chlayout=" << getChLayoutDescription(&enc_ctx->ch_layout);
     /* ensure correct number of samples for output frames (even with injected silence) */
     filter_spec_ss << ",asetnsamples=n=" << enc_ctx->frame_size;
 
