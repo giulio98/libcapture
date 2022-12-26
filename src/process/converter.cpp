@@ -26,11 +26,7 @@ static std::pair<std::string, std::string> getAudioFilterSpec(const AVCodecConte
     src_args_ss << "time_base=" << in_time_base.num << "/" << in_time_base.den;
     src_args_ss << ":sample_rate=" << dec_ctx->sample_rate;
     src_args_ss << ":sample_fmt=" << dec_ctx->sample_fmt;
-    if (dec_ctx->ch_layout.order == AV_CHANNEL_ORDER_UNSPEC) {
-        src_args_ss << ":channels=" << dec_ctx->ch_layout.nb_channels;
-    } else {
-        src_args_ss << ":channel_layout=" << getChLayoutDescription(&dec_ctx->ch_layout);
-    }
+    src_args_ss << ":channel_layout=" << getChLayoutDescription(&dec_ctx->ch_layout);
 
     std::stringstream filter_spec_ss;
     /* set PTS */
