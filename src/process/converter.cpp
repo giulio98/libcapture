@@ -4,6 +4,16 @@
 
 static std::string errMsg(const std::string &msg) { return ("Converter: " + msg); }
 
+#ifdef FFMPEG_5
+static std::string getChLayoutDescription(const AVChannelLayout *channel_layout) {
+    char buf[64];
+    const int ret = av_channel_layout_describe(channel_layout, buf, sizeof(buf));
+    if (ret < 0) throw std::runtime_error(errMsg("Error obtaining ch_layout description"));
+    if (ret > sizeof(buf)) throw std::logic_error(errMsg("Buf was too small"));
+    return buf;
+}
+#endif
+
 void swap(Converter &lhs, Converter &rhs) {
     std::swap(lhs.filter_graph_, rhs.filter_graph_);
     std::swap(lhs.buffersrc_ctx_, rhs.buffersrc_ctx_);
@@ -18,11 +28,15 @@ static std::pair<std::string, std::string> getAudioFilterSpec(const AVCodecConte
     src_args_ss << "time_base=" << in_time_base.num << "/" << in_time_base.den;
     src_args_ss << ":sample_rate=" << dec_ctx->sample_rate;
     src_args_ss << ":sample_fmt=" << dec_ctx->sample_fmt;
+#ifdef FFMPEG_5
+    src_args_ss << ":channel_layout=" << getChLayoutDescription(&dec_ctx->ch_layout);
+#else
     if (dec_ctx->channel_layout) { /* if a specific channel layout is known to the decoder, use it */
         src_args_ss << ":channel_layout=" << dec_ctx->channel_layout;
     } else { /* otherwise, just set the number of channels */
         src_args_ss << ":channels=" << dec_ctx->channels;
     }
+#endif
 
     std::stringstream filter_spec_ss;
     /* set PTS */
@@ -33,7 +47,12 @@ static std::pair<std::string, std::string> getAudioFilterSpec(const AVCodecConte
      * to ensure that the timestamps are correct
      */
     filter_spec_ss << ",aresample=" << enc_ctx->sample_rate << ":async=1"
-                   << ":out_sample_fmt=" << enc_ctx->sample_fmt << ":out_channel_layout=" << enc_ctx->channel_layout;
+                   << ":out_sample_fmt=" << enc_ctx->sample_fmt
+#ifdef FFMPEG_5
+                   << ":out_chlayout=" << getChLayoutDescription(&enc_ctx->ch_layout);
+#else
+                   << ":out_channel_layout=" << enc_ctx->channel_layout;
+#endif
     /* ensure correct number of samples for output frames (even with injected silence) */
     filter_spec_ss << ",asetnsamples=n=" << enc_ctx->frame_size;
 
@@ -127,7 +146,7 @@ Converter::Converter(const AVCodecContext *dec_ctx, const AVCodecContext *enc_ct
 
         AVFilterInOut *outputs_raw = outputs.release();
         AVFilterInOut *inputs_raw = inputs.release();
-        int ret =
+        const int ret =
             avfilter_graph_parse_ptr(filter_graph_.get(), filter_spec.c_str(), &inputs_raw, &outputs_raw, nullptr);
         avfilter_inout_free(&outputs_raw);
         avfilter_inout_free(&inputs_raw);
@@ -160,7 +179,7 @@ av::FrameUPtr Converter::getFrame() {
         if (!frame_) throw std::runtime_error(errMsg("failed to allocate frame"));
     }
 
-    int ret = av_buffersink_get_frame(buffersink_ctx_, frame_.get());
+    const int ret = av_buffersink_get_frame(buffersink_ctx_, frame_.get());
     if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) return nullptr;
     if (ret < 0) throw std::runtime_error(errMsg("failed to receive frame from filter"));
 

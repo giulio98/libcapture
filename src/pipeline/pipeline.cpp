@@ -110,12 +110,13 @@ void Pipeline::initAudio(const Demuxer &demuxer, const AVCodecID codec_id) {
     decoders_[type] = Decoder(demuxer.getStreamParams(type));
 
     auto dec_ctx = decoders_[type].getContext();
-    uint64_t channel_layout;
-    if (dec_ctx->channel_layout) {
-        channel_layout = dec_ctx->channel_layout;
-    } else {
-        channel_layout = av_get_default_channel_layout(dec_ctx->channels);
-    }
+
+#ifdef FFMPEG_5
+    const AVChannelLayout *channel_layout = &dec_ctx->ch_layout;
+#else
+    const uint64_t channel_layout = dec_ctx->channel_layout ?
+        dec_ctx->channel_layout : av_get_default_channel_layout(dec_ctx->channels);
+#endif
 
     /* Init encoder */
     encoders_[type] = Encoder(codec_id, dec_ctx->sample_rate, channel_layout, muxer_.getGlobalHeaderFlags(),

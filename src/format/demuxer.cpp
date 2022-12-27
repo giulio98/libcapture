@@ -37,7 +37,7 @@ void Demuxer::openInput(const bool listing_devices) {
         AVFormatContext *fmt_ctx = nullptr;
         av::DictionaryUPtr dict = av::map2dict(options_);
         AVDictionary *dict_raw = dict.release();
-        int ret = avformat_open_input(&fmt_ctx, device_name_.c_str(), fmt_, dict_raw ? &dict_raw : nullptr);
+        const int ret = avformat_open_input(&fmt_ctx, device_name_.c_str(), fmt_, dict_raw ? &dict_raw : nullptr);
         dict = av::DictionaryUPtr(dict_raw);
         fmt_ctx_ = av::InFormatContextUPtr(fmt_ctx);
         /* If we're only listing the available devices, return without any check */
@@ -104,7 +104,7 @@ std::pair<av::PacketUPtr, av::MediaType> Demuxer::readPacket() {
 
     auto packet_type = av::MediaType::None;
 
-    int ret = av_read_frame(fmt_ctx_.get(), packet_.get());
+    const int ret = av_read_frame(fmt_ctx_.get(), packet_.get());
     if (ret == AVERROR(EAGAIN)) return std::make_pair(nullptr, packet_type);
     if (ret < 0) throw std::runtime_error(errMsg("failed to read a packet"));
 
