@@ -32,20 +32,31 @@ Encoder::Encoder(const AVCodecID codec_id) {
     if (!codec_ctx_) throw std::runtime_error(errMsg("failed to allocated memory for AVCodecContext"));
 }
 
+#ifdef FFMPEG_5
 Encoder::Encoder(const AVCodecID codec_id, const int sample_rate, const AVChannelLayout *channel_layout,
                  const int global_header_flags, const std::map<std::string, std::string> &options)
+#else
+Encoder::Encoder(const AVCodecID codec_id, const int sample_rate, const uint64_t channel_layout,
+                 const int global_header_flags, const std::map<std::string, std::string> &options)
+#endif
     : Encoder(codec_id) {
     if (codec_->type != AVMEDIA_TYPE_AUDIO)
         throw std::invalid_argument(errMsg("failed to create audio encoder (received codec ID is not of type audio)"));
-    if (!channel_layout) throw std::invalid_argument(errMsg("received channel_layout is NULL"));
 
-    codec_ctx_->sample_rate = sample_rate;
+#ifdef FFMPEG_5
+    if (!channel_layout) throw std::invalid_argument(errMsg("received channel_layout is NULL"));
     if (channel_layout->order == AV_CHANNEL_ORDER_UNSPEC) {
         av_channel_layout_default(&codec_ctx_->ch_layout, channel_layout->nb_channels);
     } else {
         const int ret = av_channel_layout_copy(&codec_ctx_->ch_layout, channel_layout);
         if (ret < 0) throw std::runtime_error(errMsg("Failed to copy channel layout"));
     }
+#else
+    codec_ctx_->channel_layout = channel_layout;
+    codec_ctx_->channels = av_get_channel_layout_nb_channels(channel_layout);
+#endif
+
+    codec_ctx_->sample_rate = sample_rate;
     if (codec_->sample_fmts) codec_ctx_->sample_fmt = codec_->sample_fmts[0];
 
     /* for audio, the time base will be automatically set by init() */
